@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #19 - 删除链表的倒数第 N 个结点</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --primary-light: #818cf8;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --surface-light: #334155;
+      --text: #f1f5f9; 
+      --text-secondary: #94a3b8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.6;
+    }
+    h1 { 
+      font-size: 2rem; 
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      margin-bottom: 24px;
+    }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px;
+      border: 1px solid var(--surface-light);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .difficulty {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .difficulty.easy { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+    .difficulty.medium { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+    .difficulty.hard { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 20px; 
+      overflow-x: auto;
+      margin: 0;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 2px 8px; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+      margin-left: -3px;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.3); 
+      border-left-color: var(--primary);
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 40px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 768px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    .viz-steps { 
+      max-height: 400px; 
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+    .viz-steps::-webkit-scrollbar {
+      width: 6px;
+    }
+    .viz-steps::-webkit-scrollbar-track {
+      background: var(--surface-light);
+      border-radius: 3px;
+    }
+    .viz-steps::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 3px;
+    }
+    .viz-step { 
+      padding: 16px; 
+      margin: 12px 0; 
+      border-radius: 12px; 
+      background: var(--surface-light); 
+      cursor: pointer; 
+      border: 2px solid transparent; 
+      transition: all 0.2s;
+    }
+    .viz-step:hover {
+      border-color: var(--primary-light);
+      transform: translateX(4px);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.2);
+    }
+    .viz-step h4 {
+      margin: 0 0 8px 0;
+      color: var(--text);
+      font-size: 1rem;
+    }
+    .viz-step p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    .viz-step .state {
+      margin-top: 8px;
+      padding: 8px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 20px; 
+      border: 1px solid var(--surface-light); 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block;
+      cursor: pointer;
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+    }
+    .problem-card h4 {
+      margin: 0 0 8px 0;
+      color: var(--primary-light);
+    }
+    .problem-card p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    .keyword { color: #ff7b72; } 
+    .function { color: #d2a8ff; } 
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; } 
+    .comment { color: #8b949e; } 
+    .class { color: #ffa657; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--surface-light);
+    }
+    th {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .example {
+      background: var(--bg);
+      padding: 16px;
+      border-radius: 8px;
+      margin: 12px 0;
+      border-left: 4px solid var(--primary);
+    }
+    .example-title {
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+    code {
+      background: rgba(99, 102, 241, 0.2);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'SF Mono', monospace;
+      font-size: 0.9em;
+    }
+    .algo-flow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 16px;
+      background: var(--bg);
+      border-radius: 8px;
+      margin: 12px 0;
+      flex-wrap: wrap;
+    }
+    .flow-step {
+      background: var(--surface-light);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+    .flow-arrow {
+      color: var(--primary);
+      font-size: 1.2rem;
+    }
+    .highlight-box {
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid var(--primary);
+      border-radius: 8px;
+      padding: 16px;
+      margin: 16px 0;
+    }
+    .tips {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .tip-card {
+      background: var(--bg);
+      padding: 16px;
+      border-radius: 8px;
+      border-left: 4px solid var(--success);
+    }
+    .tip-card h4 {
+      margin: 0 0 8px 0;
+      color: var(--success);
+    }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #19 - 删除链表的倒数第 N 个结点</h1>
+  <p class="subtitle">
+    <span class="difficulty medium">Medium</span>
+    双指针法 | 链表操作 | 快慢指针
+  </p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给你一个链表，删除链表的<strong>倒数第 n 个结点</strong>，并且返回链表的头结点。</p>
+    
+    <div class="example">
+      <div class="example-title">示例 1：</div>
+      <p><strong>输入：</strong>head = [1,2,3,4,5], n = 2</p>
+      <p><strong>输出：</strong>[1,2,3,5]</p>
+      <p>解释：删除倒数第2个结点（值为4的结点），链表变为 [1,2,3,5]</p>
+    </div>
+    
+    <div class="example">
+      <div class="example-title">示例 2：</div>
+      <p><strong>输入：</strong>head = [1], n = 1</p>
+      <p><strong>输出：</strong>[]</p>
+    </div>
+    
+    <div class="example">
+      <div class="example-title">示例 3：</div>
+      <p><strong>输入：</strong>head = [1,2], n = 1</p>
+      <p><strong>输出：</strong>[1]</p>
+    </div>
+    
+    <p><strong>进阶：</strong>你能尝试使用一趟扫描实现吗？</p>
+    
+    <div class="highlight-box">
+      <strong>💡 核心思路：</strong>使用快慢指针，让快指针先走 n 步，然后快慢指针一起走，当快指针到达末尾时，慢指针正好在倒数第 n+1 个结点（即要删除结点的前一个结点）。
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+    
+    <div class="algo-flow">
+      <div class="flow-step">创建虚拟头结点</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">快指针先走 n 步</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">双指针同步移动</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">快指针到末尾</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">删除目标结点</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">返回新头</div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table>
+      <tr>
+        <th>指标</th>
+        <th>值</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>时间复杂度</td>
+        <td><code>O(L)</code></td>
+        <td>只需遍历链表一次，L 为链表长度</td>
+      </tr>
+      <tr>
+        <td>空间复杂度</td>
+        <td><code>O(1)</code></td>
+        <td>只使用常数额外空间（几个指针）</td>
+      </tr>
+      <tr>
+        <td>遍历次数</td>
+        <td>1 次</td>
+        <td>满足进阶要求的一趟扫描</td>
+      </tr>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>🎯 关键要点</h2>
+    <div class="tips">
+      <div class="tip-card">
+        <h4>🎭 虚拟头结点</h4>
+        <p>使用 dummy 结点可以统一处理删除头结点的边界情况，避免特殊判断。</p>
+      </div>
+      <div class="tip-card">
+        <h4>🚀 快慢指针</h4>
+        <p>快指针先走 n+1 步，保证慢指针最终停在待删除结点的前一个位置。</p>
+      </div>
+      <div class="tip-card">
+        <h4>⚠️ 边界处理</h4>
+        <p>考虑 n 等于链表长度（删除头结点）和链表只有一个结点的情况。</p>
+      </div>
+      <div class="tip-card">
+        <h4>🔄 内存释放</h4>
+        <p>Python 有垃圾回收，C++需要手动 delete；Java 交给 GC 即可。</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转 LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/middle-of-the-linked-list/" class="problem-card" target="_blank">
+        <h4>876. 链表的中间结点</h4>
+        <p>快慢指针基础应用，快指针走两步慢指针走一步</p>
+      </a>
+      <a href="https://leetcode.cn/problems/linked-list-cycle/" class="problem-card" target="_blank">
+        <h4>141. 环形链表</h4>
+        <p>快慢指针判环，经典 Floyd 判圈算法</p>
+      </a>
+      <a href="https://leetcode.cn/problems/linked-list-cycle-ii/" class="problem-card" target="_blank">
+        <h4>142. 环形链表 II</h4>
+        <p>快慢指针找环入口，数学推导经典题</p>
+      </a>
+      <a href="https://leetcode.cn/problems/reverse-linked-list/" class="problem-card" target="_blank">
+        <h4>206. 反转链表</h4>
+        <p>链表操作基础，迭代与递归双解法</p>
+      </a>
+      <a href="https://leetcode.cn/problems/swap-nodes-in-pairs/" class="problem-card" target="_blank">
+        <h4>24. 两两交换链表中的节点</h4>
+        <p>链表结点交换，注意指针更新顺序</p>
+      </a>
+      <a href="https://leetcode.cn/problems/merge-two-sorted-lists/" class="problem-card" target="_blank">
+        <h4>21. 合并两个有序链表</h4>
+        <p>链表合并基础，递归与迭代两种思路</p>
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // Python 代码
+    const pythonCode = `<span class="comment"># Definition for singly-linked list.</span>
+<span class="keyword">class</span> <span class="class">ListNode</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, val=<span class="number">0</span>, next=<span class="keyword">None</span>):
+        self.val = val
+        self.next = next
+
+<span class="keyword">class</span> <span class="class">Solution</span>:
+    <span class="keyword">def</span> <span class="function">removeNthFromEnd</span>(self, head: ListNode, n: <span class="keyword">int</span>) -> ListNode:
+        <span class="comment"># 创建虚拟头结点，统一处理边界</span>
+        dummy = ListNode(<span class="number">0</span>)
+        dummy.next = head
+        
+        <span class="comment"># 初始化快慢指针</span>
+        fast = dummy
+        slow = dummy
+        
+        <span class="comment"># 快指针先走 n+1 步</span>
+        <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="function">range</span>(n + <span class="number">1</span>):
+            fast = fast.next
+        
+        <span class="comment"># 快慢指针同步移动</span>
+        <span class="keyword">while</span> fast:
+            fast = fast.next
+            slow = slow.next
+        
+        <span class="comment"># 删除倒数第 n 个结点</span>
+        slow.next = slow.next.next
+        
+        <span class="comment"># 返回新头结点</span>
+        <span class="keyword">return</span> dummy.next`;
+
+    // 步骤与代码行映射
+    const steps = [
+      {
+        title: "步骤 1：创建虚拟头结点",
+        desc: "初始化 dummy 结点，next 指向 head。这样即使删除头结点也能统一处理。",
+        line: 8,
+        state: "dummy → [0] → [1] → [2] → [3] → [4] → [5]"
+      },
+      {
+        title: "步骤 2：初始化双指针",
+        desc: "fast 和 slow 都指向 dummy，从同一位置开始。",
+        line: 11,
+        state: "fast → [0], slow → [0]"
+      },
+      {
+        title: "步骤 3：快指针先走 n+1 步",
+        desc: "快指针先向前移动 n+1 步（这里是3步，n=2），拉开与慢指针的距离。",
+        line: 14,
+        state: "n=2, fast → [2], slow → [0]"
+      },
+      {
+        title: "步骤 4：同步移动双指针",
+        desc: "快慢指针一起走，直到快指针到达链表末尾（None）。",
+        line: 17,
+        state: "fast → [3], slow → [1]"
+      },
+      {
+        title: "步骤 5：快指针到达末尾",
+        desc: "fast 移动到 None，此时 slow 正好在倒数第 n+1 个结点（值为3的结点）。",
+        line: 18,
+        state: "fast → None, slow → [3]"
+      },
+      {
+        title: "步骤 6：执行删除操作",
+        desc: "修改 slow.next 跳过待删除结点（值为4），直接指向 slow.next.next。",
+        line: 21,
+        state: "slow.next 从 [4] 变为 [5]"
+      },
+      {
+        title: "步骤 7：返回结果",
+        desc: "返回 dummy.next，即新的链表头结点。",
+        line: 24,
+        state: "结果: [1] → [2] → [3] → [5]"
+      }
+    ];
+
+    // 渲染代码
+    function renderCode() {
+      const lines = pythonCode.split('\n');
+      const codeBlock = document.getElementById('codeBlock');
+      codeBlock.innerHTML = lines.map((line, i) => 
+        `<div class="code-line" data-line="${i + 1}">
+          <span class="line-number">${i + 1}</span>
+          <span class="line-content">${line || ' '}</span>
+        </div>`
+      ).join('');
+    }
+
+    // 渲染步骤
+    function renderSteps() {
+      const vizSteps = document.getElementById('vizSteps');
+      vizSteps.innerHTML = steps.map((step, i) => `
+        <div class="viz-step" data-step="${i}" data-line="${step.line}">
+          <h4>${step.title}</h4>
+          <p>${step.desc}</p>
+          <div class="state">${step.state}</div>
+        </div>
+      `).join('');
+    }
+
+    // 高亮对应关系
+    function highlightLine(lineNum) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      
+      const lineEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+      const stepEl = document.querySelector(`.viz-step[data-line="${lineNum}"]`);
+      
+      if (lineEl) {
+        lineEl.classList.add('active');
+        lineEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      if (stepEl) {
+        stepEl.classList.add('active');
+        stepEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    function highlightStep(stepIdx) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      
+      const stepEl = document.querySelector(`.viz-step[data-step="${stepIdx}"]`);
+      const lineNum = steps[stepIdx].line;
+      const lineEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+      
+      if (stepEl) stepEl.classList.add('active');
+      if (lineEl) {
+        lineEl.classList.add('active');
+        lineEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    // 绑定事件
+    function bindEvents() {
+      document.querySelectorAll('.code-line').forEach(el => {
+        el.addEventListener('click', () => {
+          const lineNum = parseInt(el.dataset.line);
+          highlightLine(lineNum);
+        });
+      });
+
+      document.querySelectorAll('.viz-step').forEach(el => {
+        el.addEventListener('click', () => {
+          const stepIdx = parseInt(el.dataset.step);
+          highlightStep(stepIdx);
+        });
+      });
+    }
+
+    // 初始化
+    renderCode();
+    renderSteps();
+    bindEvents();
+  </script>
+</body>
+</html>

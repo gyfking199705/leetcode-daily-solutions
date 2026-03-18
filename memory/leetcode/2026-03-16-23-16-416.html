@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>LeetCode #416 - 分割等和子集</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --primary-dark: #4f46e5;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --surface-light: #334155;
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+    body { 
+      font-family: 'Segoe UI', system-ui, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1100px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.7;
+    }
+    h1 { 
+      text-align: center; 
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--primary), #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle {
+      text-align: center;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px;
+      border: 1px solid rgba(99, 102, 241, 0.1);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .difficulty {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-left: 12px;
+    }
+    .difficulty-medium { background: var(--warning); color: #000; }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 20px; 
+      overflow-x: auto;
+      border: 1px solid #30363d;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 3px 0; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+      margin-left: -3px;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.25); 
+      border-left-color: var(--primary);
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 40px; 
+      text-align: right; 
+      padding-right: 16px;
+      user-select: none;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+    }
+    .code-content {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      white-space: pre;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1.2fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 768px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    .viz-steps { 
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .viz-step { 
+      padding: 16px; 
+      border-radius: 12px; 
+      background: var(--surface-light); 
+      cursor: pointer; 
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .viz-step:hover { 
+      background: #475569;
+      transform: translateX(4px);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.2);
+    }
+    .viz-step h4 {
+      margin: 0 0 6px 0;
+      color: var(--primary);
+      font-size: 14px;
+    }
+    .viz-step p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .dp-table {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 4px;
+      margin: 16px 0;
+      padding: 16px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+    }
+    .dp-cell {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    .dp-cell.true { background: var(--success); color: #000; }
+    .dp-cell.false { background: #374151; color: #9ca3af; }
+    .dp-cell.target { 
+      background: var(--warning); 
+      color: #000;
+      box-shadow: 0 0 10px var(--warning);
+    }
+    .dp-cell.current {
+      border: 2px solid var(--primary);
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+      50% { box-shadow: 0 0 0 8px rgba(99, 102, 241, 0); }
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 20px; 
+      border: 1px solid #475569; 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block; 
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+    }
+    .problem-card h4 {
+      margin: 0 0 8px 0;
+      color: var(--primary);
+    }
+    .problem-card p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      background: rgba(99, 102, 241, 0.2);
+      color: var(--primary);
+      margin-right: 6px;
+      margin-top: 8px;
+    }
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    .complexity-table th, .complexity-table td {
+      padding: 14px 20px;
+      text-align: left;
+      border-bottom: 1px solid var(--surface-light);
+    }
+    .complexity-table th {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .complexity-table tr:last-child td {
+      border-bottom: none;
+    }
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; }
+    .class { color: #ffa657; }
+    .param { color: #ffa657; }
+    .example-box {
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 16px 0;
+    }
+    .example-box h4 {
+      margin: 0 0 12px 0;
+      color: var(--primary);
+    }
+    .example-content {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+    }
+    .state-display {
+      background: rgba(99, 102, 241, 0.1);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 16px;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+    .state-display h4 {
+      margin: 0 0 12px 0;
+      color: var(--primary);
+      font-size: 13px;
+    }
+    .state-vars {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .state-var {
+      background: var(--surface);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 13px;
+    }
+    .state-var span { color: var(--text-muted); }
+    .key-insight {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15));
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .key-insight h3 {
+      margin: 0 0 12px 0;
+      color: var(--primary);
+      font-size: 16px;
+    }
+    .key-insight ul {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--text-muted);
+    }
+    .key-insight li {
+      margin: 8px 0;
+    }
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #416 - 分割等和子集</h1>
+  <p class="subtitle">Partition Equal Subset Sum <span class="difficulty difficulty-medium">MEDIUM</span></p>
+
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给定一个只包含正整数的非空数组 <code>nums</code> 。请判断是否可以将这个数组分割成两个子集，使得两个子集的元素和相等。</p>
+    
+    <div class="example-box">
+      <h4>📝 示例</h4>
+      <div class="example-content">
+        <p><strong>输入：</strong>nums = [1, 5, 11, 5]</p>
+        <p><strong>输出：</strong>true</p>
+        <p><strong>解释：</strong>数组可以分割成 [1, 5, 5] 和 [11]，两者和都是 11</p>
+      </div>
+    </div>
+
+    <div class="key-insight">
+      <h3>💡 核心思路</h3>
+      <ul>
+        <li>如果数组总和 <code>sum</code> 为奇数，直接返回 <code>false</code></li>
+        <li>问题转化为：能否从数组中选出若干个数，使其和等于 <code>sum / 2</code></li>
+        <li>这是经典的 <strong>01背包问题</strong>：背包容量为 <code>sum/2</code>，物品重量和价值都是 <code>nums[i]</code></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行互相高亮）</h2>
+    <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 16px;">
+      <span style="color: var(--success);">■</span> 绿色表示该和可以被组成 &nbsp; 
+      <span style="color: var(--warning);">■</span> 黄色表示目标和
+    </p>
+    
+    <div class="dp-table" id="dpTable">
+      <!-- DP表格由JS生成 -->
+    </div>
+
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3 style="margin-top: 0;">Python 实现</h3>
+        <pre><code id="codeBlock">
+<span class="code-line" data-line="1"><span class="line-number">1</span><span class="code-content"><span class="keyword">class</span> <span class="class">Solution</span>:</span></span>
+<span class="code-line" data-line="2"><span class="line-number">2</span><span class="code-content">    <span class="keyword">def</span> <span class="function">canPartition</span>(<span class="param">self</span>, nums: List[<span class="keyword">int</span>]) -> <span class="keyword">bool</span>:</span></span>
+<span class="code-line" data-line="3"><span class="line-number">3</span><span class="code-content">        total = <span class="function">sum</span>(nums)</span></span>
+<span class="code-line" data-line="4"><span class="line-number">4</span><span class="code-content">        <span class="comment"># 总和为奇数，无法平分</span></span></span>
+<span class="code-line" data-line="5"><span class="line-number">5</span><span class="code-content">        <span class="keyword">if</span> total % <span class="number">2</span> != <span class="number">0</span>:</span></span>
+<span class="code-line" data-line="6"><span class="line-number">6</span><span class="code-content">            <span class="keyword">return</span> <span class="keyword">False</span></span></span>
+<span class="code-line" data-line="7"><span class="line-number">7</span><span class="code-content">        </span></span>
+<span class="code-line" data-line="8"><span class="line-number">8</span><span class="code-content">        target = total // <span class="number">2</span></span></span>
+<span class="code-line" data-line="9"><span class="line-number">9</span><span class="code-content">        n = <span class="function">len</span>(nums)</span></span>
+<span class="code-line" data-line="10"><span class="line-number">10</span><span class="code-content">        </span></span>
+<span class="code-line" data-line="11"><span class="line-number">11</span><span class="code-content">        <span class="comment"># dp[i] 表示和为 i 是否可以被组成</span></span></span>
+<span class="code-line" data-line="12"><span class="line-number">12</span><span class="code-content">        dp = [<span class="keyword">False</span>] * (target + <span class="number">1</span>)</span></span>
+<span class="code-line" data-line="13"><span class="line-number">13</span><span class="code-content">        dp[<span class="number">0</span>] = <span class="keyword">True</span>  <span class="comment"># 和为0总是可以被组成（不选任何数）</span></span></span>
+<span class="code-line" data-line="14"><span class="line-number">14</span><span class="code-content">        </span></span>
+<span class="code-line" data-line="15"><span class="line-number">15</span><span class="code-content">        <span class="keyword">for</span> num <span class="keyword">in</span> nums:</span></span>
+<span class="code-line" data-line="16"><span class="line-number">16</span><span class="code-content">            <span class="comment"># 倒序遍历，避免重复使用同一个数</span></span></span>
+<span class="code-line" data-line="17"><span class="line-number">17</span><span class="code-content">            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="function">range</span>(target, num - <span class="number">1</span>, -<span class="number">1</span>):</span></span>
+<span class="code-line" data-line="18"><span class="line-number">18</span><span class="code-content">                <span class="keyword">if</span> dp[j - num]:</span></span>
+<span class="code-line" data-line="19"><span class="line-number">19</span><span class="code-content">                    dp[j] = <span class="keyword">True</span></span></span>
+<span class="code-line" data-line="20"><span class="line-number">20</span><span class="code-content">                    <span class="keyword">if</span> j == target:  <span class="comment"># 提前退出</span></span></span>
+<span class="code-line" data-line="21"><span class="line-number">21</span><span class="code-content">                        <span class="keyword">return</span> <span class="keyword">True</span></span></span>
+<span class="code-line" data-line="22"><span class="line-number">22</span><span class="code-content">        </span></span>
+<span class="code-line" data-line="23"><span class="line-number">23</span><span class="code-content">        <span class="keyword">return</span> dp[target]</span></span>
+        </code></pre>
+      </div>
+    </div>
+
+    <div class="state-display" id="stateDisplay" style="display: none;">
+      <h4>📊 当前状态</h4>
+      <div class="state-vars" id="stateVars">
+        <!-- 状态变量由JS更新 -->
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <tr>
+        <th>维度</th>
+        <th>值</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>时间复杂度</td>
+        <td><code>O(n × target)</code></td>
+        <td>target = sum/2，需要遍历每个数字和每个可能的和</td>
+      </tr>
+      <tr>
+        <td>空间复杂度</td>
+        <td><code>O(target)</code></td>
+        <td>一维DP数组，通过倒序遍历实现空间优化</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>🔍 关键点解析</h2>
+    <div class="key-insight">
+      <h3>为什么要「倒序遍历」？</h3>
+      <p style="margin: 0; color: var(--text-muted);">
+        01背包问题的核心是每个物品只能使用一次。如果正序遍历，当我们更新 <code>dp[j]</code> 时，
+        可能会用到本轮已经更新过的 <code>dp[j-num]</code>，导致同一个数字被重复使用。
+        倒序遍历确保每个数字只被使用一次。
+      </p>
+    </div>
+    <div class="key-insight">
+      <h3>空间优化原理</h3>
+      <p style="margin: 0; color: var(--text-muted);">
+        二维DP <code>dp[i][j]</code> 表示前i个数字能否组成和j。但实际上，每一行只依赖上一行的值，
+        因此可以压缩为一维，通过倒序更新避免覆盖还需要使用的旧值。
+      </p>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/last-stone-weight-ii/" class="problem-card" target="_blank">
+        <h4>#1049 最后一块石头的重量 II</h4>
+        <p>同样是01背包问题，目标是将石头分成两堆使差值最小</p>
+        <span class="tag">01背包</span>
+        <span class="tag">动态规划</span>
+      </a>
+      <a href="https://leetcode.cn/problems/target-sum/" class="problem-card" target="_blank">
+        <h4>#494 目标和</h4>
+        <p>给数字添加正负号使其和等于target，本质是分割等和子集的变种</p>
+        <span class="tag">01背包</span>
+        <span class="tag">数学转换</span>
+      </a>
+      <a href="https://leetcode.cn/problems/coin-change/" class="problem-card" target="_blank">
+        <h4>#322 零钱兑换</h4>
+        <p>完全背包问题的经典题目，物品可以无限使用</p>
+        <span class="tag">完全背包</span>
+        <span class="tag">动态规划</span>
+      </a>
+      <a href="https://leetcode.cn/problems/coin-change-ii/" class="problem-card" target="_blank">
+        <h4>#518 零钱兑换 II</h4>
+        <p>完全背包求方案数，与本题互补</p>
+        <span class="tag">完全背包</span>
+        <span class="tag">组合计数</span>
+      </a>
+      <a href="https://leetcode.cn/problems/combination-sum-iv/" class="problem-card" target="_blank">
+        <h4>#377 组合总和 Ⅳ</h4>
+        <p>求组合数，注意内外循环顺序对结果的影响</p>
+        <span class="tag">完全背包</span>
+        <span class="tag">排列</span>
+      </a>
+      <a href="https://leetcode.cn/problems/ones-and-zeroes/" class="problem-card" target="_blank">
+        <h4>#474 一和零</h4>
+        <p>二维费用的01背包问题，每个字符串消耗0和1的配额</p>
+        <span class="tag">二维背包</span>
+        <span class="tag">动态规划</span>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    // 算法步骤定义
+    const steps = [
+      {title: "初始化", desc: "计算数组总和，检查是否为奇数", line: 3, state: {nums: "[1,5,11,5]", total: 22, target: 11}},
+      {title: "奇偶性检查", desc: "总和22为偶数，有可能分割，继续执行", line: 5, state: {total: 22, result: "继续"}},
+      {title: "确定目标", desc: "目标是找到和为11的子集", line: 8, state: {target: 11}},
+      {title: "初始化DP数组", desc: "dp[0]=True，和为0可以被组成（不选任何数）", line: 12, state: {dp: "[T,F,F,F,F,F,F,F,F,F,F,F]"}},
+      {title: "处理数字 1", desc: "可以组成的和：0, 1", line: 15, state: {num: 1, dp: "[T,T,F,F,F,F,F,F,F,F,F,F]"}},
+      {title: "处理数字 5", desc: "可以组成的和：0, 1, 5, 6", line: 15, state: {num: 5, dp: "[T,T,F,F,F,T,T,F,F,F,F,F]"}},
+      {title: "处理数字 11", desc: "11等于target！找到解，返回True", line: 20, state: {num: 11, found: true}},
+      {title: "返回结果", desc: "成功分割，两个子集和都为11", line: 21, state: {result: "True"}}
+    ];
+
+    // 生成DP表格可视化
+    function generateDPTable() {
+      const table = document.getElementById('dpTable');
+      const target = 11;
+      
+      // 表头
+      let headerHTML = '<div class="dp-cell" style="background:transparent;">和</div>';
+      for (let i = 0; i <= target; i++) {
+        headerHTML += `<div class="dp-cell" style="background:transparent;font-size:10px;">${i}</div>`;
+      }
+      
+      // 初始状态行
+      let rowHTML = '<div class="dp-cell" style="background:transparent;font-size:10px;">初始</div>';
+      const initialState = [true, false, false, false, false, false, false, false, false, false, false, false];
+      for (let i = 0; i <= target; i++) {
+        const cellClass = initialState[i] ? 'true' : 'false';
+        const extraClass = i === target ? 'target' : '';
+        rowHTML += `<div class="dp-cell ${cellClass} ${extraClass}" data-step="3">${initialState[i] ? 'T' : 'F'}</div>`;
+      }
+      
+      // 处理1后
+      let row1HTML = '<div class="dp-cell" style="background:transparent;font-size:10px;">选1</div>';
+      const state1 = [true, true, false, false, false, false, false, false, false, false, false, false];
+      for (let i = 0; i <= target; i++) {
+        const cellClass = state1[i] ? 'true' : 'false';
+        const extraClass = i === target ? 'target' : '';
+        row1HTML += `<div class="dp-cell ${cellClass} ${extraClass}" data-step="4">${state1[i] ? 'T' : 'F'}</div>`;
+      }
+      
+      // 处理5后
+      let row5HTML = '<div class="dp-cell" style="background:transparent;font-size:10px;">选5</div>';
+      const state5 = [true, true, false, false, false, true, true, false, false, false, false, false];
+      for (let i = 0; i <= target; i++) {
+        const cellClass = state5[i] ? 'true' : 'false';
+        const extraClass = i === target ? 'target' : '';
+        row5HTML += `<div class="dp-cell ${cellClass} ${extraClass}" data-step="5">${state5[i] ? 'T' : 'F'}</div>`;
+      }
+      
+      // 处理11后
+      let row11HTML = '<div class="dp-cell" style="background:transparent;font-size:10px;">选11✓</div>';
+      const state11 = [true, true, false, false, false, true, true, false, false, false, false, true];
+      for (let i = 0; i <= target; i++) {
+        const cellClass = state11[i] ? 'true' : 'false';
+        const extraClass = i === target ? 'target current' : '';
+        row11HTML += `<div class="dp-cell ${cellClass} ${extraClass}" data-step="6">${state11[i] ? 'T' : 'F'}</div>`;
+      }
+      
+      table.innerHTML = headerHTML + rowHTML + row1HTML + row5HTML + row11HTML;
+    }
+
+    // 生成步骤列表
+    function generateSteps() {
+      const container = document.getElementById('vizSteps');
+      container.innerHTML = steps.map((step, idx) => `
+        <div class="viz-step" data-step="${idx}" data-line="${step.line}">
+          <h4>步骤 ${idx + 1}: ${step.title}</h4>
+          <p>${step.desc}</p>
+        </div>
+      `).join('');
+    }
+
+    // 更新状态显示
+    function updateStateDisplay(stepIdx) {
+      const display = document.getElementById('stateDisplay');
+      const vars = document.getElementById('stateVars');
+      const step = steps[stepIdx];
+      
+      if (!step.state) {
+        display.style.display = 'none';
+        return;
+      }
+      
+      display.style.display = 'block';
+      vars.innerHTML = Object.entries(step.state).map(([key, val]) => `
+        <div class="state-var"><span>${key}:</span> ${val}</div>
+      `).join('');
+    }
+
+    // 交互逻辑
+    function setupInteractions() {
+      const codeLines = document.querySelectorAll('.code-line');
+      const vizSteps = document.querySelectorAll('.viz-step');
+      const dpCells = document.querySelectorAll('.dp-cell[data-step]');
+      
+      // 点击代码行
+      codeLines.forEach(line => {
+        line.addEventListener('click', () => {
+          const lineNum = parseInt(line.dataset.line);
+          
+          // 清除所有高亮
+          codeLines.forEach(l => l.classList.remove('active'));
+          vizSteps.forEach(s => s.classList.remove('active'));
+          
+          // 高亮当前行
+          line.classList.add('active');
+          
+          // 找到对应的步骤
+          const stepIdx = steps.findIndex(s => s.line === lineNum);
+          if (stepIdx >= 0) {
+            vizSteps[stepIdx].classList.add('active');
+            vizSteps[stepIdx].scrollIntoView({behavior: 'smooth', block: 'nearest'});
+            updateStateDisplay(stepIdx);
+          }
+        });
+      });
+      
+      // 点击步骤
+      vizSteps.forEach((step, idx) => {
+        step.addEventListener('click', () => {
+          const lineNum = parseInt(step.dataset.line);
+          
+          // 清除所有高亮
+          codeLines.forEach(l => l.classList.remove('active'));
+          vizSteps.forEach(s => s.classList.remove('active'));
+          
+          // 高亮当前步骤
+          step.classList.add('active');
+          
+          // 高亮对应代码行
+          const codeLine = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+          if (codeLine) {
+            codeLine.classList.add('active');
+            codeLine.scrollIntoView({behavior: 'smooth', block: 'center'});
+          }
+          
+          // 高亮DP表格对应行
+          dpCells.forEach(cell => {
+            cell.classList.remove('current');
+            if (parseInt(cell.dataset.step) === idx) {
+              cell.classList.add('current');
+            }
+          });
+          
+          updateStateDisplay(idx);
+        });
+      });
+    }
+
+    // 初始化
+    generateDPTable();
+    generateSteps();
+    setupInteractions();
+  </script>
+</body>
+</html>

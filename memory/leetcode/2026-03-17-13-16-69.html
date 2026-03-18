@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #69 - x 的平方根</title>
+  <style>
+    :root { --primary: #6366f1; --primary-light: #818cf8; --bg: #0f172a; --surface: #1e293b; --surface-light: #334155; --text: #f1f5f9; --text-secondary: #94a3b8; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+    h1 { font-size: 2.5rem; margin-bottom: 8px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .subtitle { color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 30px; }
+    .section { background: var(--surface); border-radius: 16px; padding: 28px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .section h2 { color: var(--primary); margin-bottom: 16px; font-size: 1.4rem; display: flex; align-items: center; gap: 10px; }
+    .problem-desc { font-size: 1.1rem; color: var(--text); line-height: 1.8; }
+    .example-box { background: var(--bg); border-radius: 12px; padding: 16px; margin: 16px 0; border-left: 4px solid var(--primary); }
+    .example-box h4 { color: var(--primary-light); margin-bottom: 8px; }
+    .example-box code { background: rgba(99, 102, 241, 0.2); padding: 2px 8px; border-radius: 4px; font-family: 'Fira Code', monospace; }
+    pre { background: #0d1117; border-radius: 12px; padding: 20px; overflow-x: auto; margin: 20px 0; border: 1px solid #30363d; }
+    .code-line { display: flex; padding: 3px 0; cursor: pointer; transition: all 0.2s; font-family: 'Fira Code', monospace; font-size: 0.95rem; }
+    .code-line:hover { background: rgba(255,255,255,0.05); }
+    .code-line.active { background: rgba(99, 102, 241, 0.3); border-left: 3px solid #6366f1; margin-left: -3px; padding-left: 17px; }
+    .line-number { color: #484f58; min-width: 40px; text-align: right; padding-right: 16px; user-select: none; }
+    .code-content { flex: 1; }
+    .viz-container { display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; margin: 20px 0; }
+    @media (max-width: 768px) { .viz-container { grid-template-columns: 1fr; } }
+    .viz-steps { max-height: 400px; overflow-y: auto; }
+    .viz-step { padding: 14px; margin: 10px 0; border-radius: 10px; background: var(--surface-light); cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+    .viz-step:hover { border-color: var(--primary-light); transform: translateX(4px); }
+    .viz-step.active { border-color: var(--primary); background: rgba(99, 102, 241, 0.2); }
+    .viz-step h4 { color: var(--primary); margin-bottom: 6px; font-size: 0.95rem; }
+    .viz-step p { color: var(--text-secondary); font-size: 0.9rem; }
+    .viz-step .state { margin-top: 8px; padding: 8px; background: var(--bg); border-radius: 6px; font-family: monospace; font-size: 0.85rem; }
+    .state-var { color: #79c0ff; }
+    .state-val { color: #a5d6ff; }
+    .complexity-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
+    @media (max-width: 600px) { .complexity-grid { grid-template-columns: 1fr; } }
+    .complexity-card { background: var(--bg); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid var(--surface-light); }
+    .complexity-card h4 { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 8px; }
+    .complexity-card .value { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
+    .problem-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 16px; }
+    @media (max-width: 600px) { .problem-grid { grid-template-columns: 1fr; } }
+    .problem-card { background: var(--bg); border-radius: 12px; padding: 20px; border: 1px solid var(--surface-light); transition: all 0.3s; text-decoration: none; color: inherit; display: block; }
+    .problem-card:hover { border-color: var(--primary); transform: translateY(-4px); box-shadow: 0 8px 25px rgba(99, 102, 241, 0.2); }
+    .problem-card .num { color: var(--primary); font-weight: bold; font-size: 0.9rem; }
+    .problem-card h4 { margin: 8px 0; font-size: 1.1rem; }
+    .problem-card .tag { display: inline-block; background: rgba(99, 102, 241, 0.2); color: var(--primary-light); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; margin-top: 8px; }
+    .insight-box { background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(129, 140, 248, 0.1)); border: 1px solid var(--primary); border-radius: 12px; padding: 20px; margin: 20px 0; }
+    .insight-box h3 { color: var(--primary); margin-bottom: 10px; }
+    .keyword { color: #ff7b72; } .function { color: #d2a8ff; } .string { color: #a5d6ff; }
+    .number { color: #79c0ff; } .comment { color: #8b949e; } .class { color: #ffa657; }
+    .operator { color: #ff7b72; } .builtin { color: #d2a8ff; }
+    .algo-flow { display: flex; justify-content: space-between; align-items: center; margin: 20px 0; flex-wrap: wrap; gap: 10px; }
+    .flow-step { background: var(--bg); padding: 12px 20px; border-radius: 8px; border: 1px solid var(--surface-light); text-align: center; }
+    .flow-step.active { border-color: var(--primary); background: rgba(99, 102, 241, 0.1); }
+    .flow-arrow { color: var(--primary); font-size: 1.5rem; }
+    .binary-viz { display: flex; justify-content: center; align-items: center; gap: 20px; margin: 24px 0; padding: 20px; background: var(--bg); border-radius: 12px; }
+    .range-box { padding: 16px 24px; border-radius: 8px; text-align: center; font-family: monospace; }
+    .range-left { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; }
+    .range-mid { background: rgba(99, 102, 241, 0.3); border: 2px solid var(--primary); transform: scale(1.1); }
+    .range-right { background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; }
+    .range-label { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px; }
+    .range-val { font-size: 1.2rem; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>LeetCode #69 - x 的平方根</h1>
+    <p class="subtitle">实现 int sqrt(int x) 计算并返回 x 的平方根，结果只保留整数部分</p>
+    
+    <div class="section">
+      <h2>📋 题目描述</h2>
+      <div class="problem-desc">
+        <p>给你一个非负整数 <code>x</code>，计算并返回 <code>x</code> 的<strong>算术平方根</strong>。</p>
+        <p>由于返回类型是整数，结果只保留<strong>整数部分</strong>，小数部分将被舍去。</p>
+        <p><strong>注意：</strong>不允许使用任何内置指数函数和算符，例如 <code>pow(x, 0.5)</code> 或者 <code>x ** 0.5</code>。</p>
+      </div>
+      
+      <div class="example-box">
+        <h4>示例 1</h4>
+        <p>输入: <code>x = 4</code></p>
+        <p>输出: <code>2</code></p>
+      </div>
+      
+      <div class="example-box">
+        <h4>示例 2</h4>
+        <p>输入: <code>x = 8</code></p>
+        <p>输出: <code>2</code></p>
+        <p>解释: 8 的算术平方根是 2.82842...，由于返回类型是整数，小数部分将被舍去。</p>
+      </div>
+      
+      <div class="example-box">
+        <h4>示例 3</h4>
+        <p>输入: <code>x = 2147395599</code></p>
+        <p>输出: <code>46339</code></p>
+        <p>解释: 46339² = 2147392921 ≤ x < 46340² = 2147485600</p>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2>💡 核心思路</h2>
+      <div class="insight-box">
+        <h3>关键洞察</h3>
+        <p>寻找满足 <code>k² ≤ x</code> 的最大整数 <code>k</code>。</p>
+        <p>这个性质具有单调性：如果 <code>k² ≤ x</code>，那么所有小于 <code>k</code> 的数都满足；如果 <code>k² > x</code>，那么所有大于 <code>k</code> 的数都不满足。因此可以用<strong>二分查找</strong>！</p>
+      </div>
+      
+      <div class="algo-flow">
+        <div class="flow-step">初始化<br>left=0, right=x</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">取中点<br>mid = (left+right)//2</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">比较<br>mid² 与 x</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">缩小区间<br>调整 left/right</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">返回结果<br>right</div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+      
+      <div class="binary-viz" id="binaryViz">
+        <div class="range-box range-left">
+          <div class="range-label">left</div>
+          <div class="range-val" id="vizLeft">0</div>
+        </div>
+        <div class="range-box range-mid">
+          <div class="range-label">mid</div>
+          <div class="range-val" id="vizMid">4</div>
+        </div>
+        <div class="range-box range-right">
+          <div class="range-label">right</div>
+          <div class="range-val" id="vizRight">8</div>
+        </div>
+      </div>
+      
+      <div class="viz-container">
+        <div class="viz-steps" id="vizSteps">
+          <!-- 步骤由JS生成 -->
+        </div>
+        <div class="code-container">
+          <h3 style="margin-bottom: 12px; color: var(--text-secondary);">Python 实现</h3>
+          <pre><code id="codeBlock"></code></pre>
+        </div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2>📊 复杂度分析</h2>
+      <div class="complexity-grid">
+        <div class="complexity-card">
+          <h4>时间复杂度</h4>
+          <div class="value">O(log x)</div>
+        </div>
+        <div class="complexity-card">
+          <h4>空间复杂度</h4>
+          <div class="value">O(1)</div>
+        </div>
+        <div class="complexity-card">
+          <h4>二分次数</h4>
+          <div class="value">≤ 32</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2>🎯 边界情况与注意事项</h2>
+      <ul style="padding-left: 20px; line-height: 2;">
+        <li><strong>x = 0 或 x = 1</strong>：直接返回 x，因为平方根就是自身</li>
+        <li><strong>整数溢出</strong>：mid * mid 可能溢出，应使用 mid <= x // mid</li>
+        <li><strong>循环终止条件</strong>：left <= right，最终 right 就是答案</li>
+        <li><strong>最终结果</strong>：返回 right，因为要找的是最后一个满足 k² ≤ x 的数</li>
+      </ul>
+    </div>
+    
+    <div class="section">
+      <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+      <div class="problem-grid">
+        <a href="https://leetcode.cn/problems/sqrtx/" class="problem-card" target="_blank">
+          <div class="num">LeetCode #69</div>
+          <h4>x 的平方根</h4>
+          <span class="tag">二分查找</span>
+        </a>
+        <a href="https://leetcode.cn/problems/search-insert-position/" class="problem-card" target="_blank">
+          <div class="num">LeetCode #35</div>
+          <h4>搜索插入位置</h4>
+          <span class="tag">二分查找</span>
+        </a>
+        <a href="https://leetcode.cn/problems/find-minimum-in-rotated-sorted-array/" class="problem-card" target="_blank">
+          <div class="num">LeetCode #153</div>
+          <h4>寻找旋转排序数组中的最小值</h4>
+          <span class="tag">二分查找变体</span>
+        </a>
+        <a href="https://leetcode.cn/problems/guess-number-higher-or-lower/" class="problem-card" target="_blank">
+          <div class="num">LeetCode #374</div>
+          <h4>猜数字大小</h4>
+          <span class="tag">二分查找</span>
+        </a>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Python 代码（带行号）
+    const pythonCode = [
+      { line: 0, content: '<span class="keyword">class</span> <span class="class">Solution</span>:' },
+      { line: 1, content: '    <span class="keyword">def</span> <span class="function">mySqrt</span>(<span class="builtin">self</span>, x: <span class="builtin">int</span>) -> <span class="builtin">int</span>:' },
+      { line: 2, content: '        <span class="comment"># 边界情况：0 或 1 的平方根就是自身</span>' },
+      { line: 3, content: '        <span class="keyword">if</span> x <span class="operator">&lt;=</span> <span class="number">1</span>:' },
+      { line: 4, content: '            <span class="keyword">return</span> x' },
+      { line: 5, content: '' },
+      { line: 6, content: '        <span class="comment"># 二分查找范围：[0, x]</span>' },
+      { line: 7, content: '        left, right <span class="operator">=</span> <span class="number">0</span>, x' },
+      { line: 8, content: '' },
+      { line: 9, content: '        <span class="keyword">while</span> left <span class="operator">&lt;=</span> right:' },
+      { line: 10, content: '            mid <span class="operator">=</span> (left <span class="operator">+</span> right) <span class="operator">//</span> <span class="number">2</span>' },
+      { line: 11, content: '            mid_squared <span class="operator">=</span> mid <span class="operator">*</span> mid' },
+      { line: 12, content: '' },
+      { line: 13, content: '            <span class="keyword">if</span> mid_squared <span class="operator">==</span> x:' },
+      { line: 14, content: '                <span class="comment"># 正好相等，找到精确平方根</span>' },
+      { line: 15, content: '                <span class="keyword">return</span> mid' },
+      { line: 16, content: '            <span class="keyword">elif</span> mid_squared <span class="operator">&lt;</span> x:' },
+      { line: 17, content: '                <span class="comment"># mid 偏小，向右查找</span>' },
+      { line: 18, content: '                left <span class="operator">=</span> mid <span class="operator">+</span> <span class="number">1</span>' },
+      { line: 19, content: '            <span class="keyword">else</span>:' },
+      { line: 20, content: '                <span class="comment"># mid 偏大，向左查找</span>' },
+      { line: 21, content: '                right <span class="operator">=</span> mid <span class="operator">-</span> <span class="number">1</span>' },
+      { line: 22, content: '' },
+      { line: 23, content: '        <span class="comment"># 循环结束时，right 是最后一个满足 k^2 <= x 的数</span>' },
+      { line: 24, content: '        <span class="keyword">return</span> right' },
+    ];
+
+    // 步骤与代码行映射（针对 x = 8 的示例）
+    const steps = [
+      { title: "初始化", desc: "处理边界情况 x=8，大于1，进入二分查找", line: 7, state: { x: 8, left: 0, right: 8, mid: "-" }, viz: { left: 0, mid: 4, right: 8 } },
+      { title: "第1轮二分", desc: "mid = 4, 4² = 16 > 8，所以 right = 3", line: 10, state: { x: 8, left: 0, right: 3, mid: 4, "mid²": 16, compare: "> x" }, viz: { left: 0, mid: 1, right: 3 } },
+      { title: "第1轮 - 调整右边界", desc: "mid² > x，说明 mid 太大，向左查找", line: 21, state: { x: 8, left: 0, right: 3, result: "right = 3" }, viz: { left: 0, mid: 1, right: 3 } },
+      { title: "第2轮二分", desc: "mid = 1, 1² = 1 < 8，所以 left = 2", line: 10, state: { x: 8, left: 0, right: 3, mid: 1, "mid²": 1, compare: "< x" }, viz: { left: 0, mid: 1, right: 3 } },
+      { title: "第2轮 - 调整左边界", desc: "mid² < x，说明 mid 可能还有提升空间，向右查找", line: 18, state: { x: 8, left: 2, right: 3, result: "left = 2" }, viz: { left: 2, mid: 2, right: 3 } },
+      { title: "第3轮二分", desc: "mid = 2, 2² = 4 < 8，所以 left = 3", line: 10, state: { x: 8, left: 2, right: 3, mid: 2, "mid²": 4, compare: "< x" }, viz: { left: 2, mid: 2, right: 3 } },
+      { title: "第3轮 - 调整左边界", desc: "mid² < x，继续向右查找", line: 18, state: { x: 8, left: 3, right: 3, result: "left = 3" }, viz: { left: 3, mid: 3, right: 3 } },
+      { title: "第4轮二分", desc: "mid = 3, 3² = 9 > 8，所以 right = 2", line: 10, state: { x: 8, left: 3, right: 3, mid: 3, "mid²": 9, compare: "> x" }, viz: { left: 3, mid: 3, right: 3 } },
+      { title: "第4轮 - 调整右边界", desc: "mid² > x，向左查找", line: 21, state: { x: 8, left: 3, right: 2, result: "right = 2" }, viz: { left: 3, mid: 3, right: 2 } },
+      { title: "循环结束", desc: "left > right，循环终止", line: 9, state: { x: 8, left: 3, right: 2, loop: "left > right, exit" }, viz: { left: 3, mid: 3, right: 2 } },
+      { title: "返回结果", desc: "right = 2，即 floor(√8) = 2", line: 24, state: { answer: 2, verification: "2²=4 ≤ 8 < 3²=9 ✓" }, viz: { left: 3, mid: 2, right: 2 } },
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    pythonCode.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'code-line';
+      div.dataset.line = item.line;
+      div.innerHTML = `<span class="line-number">${item.line}</span><span class="code-content">${item.content}</span>`;
+      div.onclick = () => selectLine(item.line);
+      codeBlock.appendChild(div);
+    });
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const div = document.createElement('div');
+      div.className = 'viz-step';
+      div.dataset.step = idx;
+      div.dataset.line = step.line;
+      
+      let stateHtml = '';
+      for (const [k, v] of Object.entries(step.state)) {
+        stateHtml += `<span class="state-var">${k}</span>=<span class="state-val">${v}</span> `;
+      }
+      
+      div.innerHTML = `
+        <h4>${step.title}</h4>
+        <p>${step.desc}</p>
+        <div class="state">${stateHtml}</div>
+      `;
+      div.onclick = () => selectStep(idx);
+      vizSteps.appendChild(div);
+    });
+
+    let currentStep = -1;
+    let currentLine = -1;
+
+    function selectStep(idx) {
+      currentStep = idx;
+      const step = steps[idx];
+      currentLine = step.line;
+      
+      // 更新步骤高亮
+      document.querySelectorAll('.viz-step').forEach((el, i) => {
+        el.classList.toggle('active', i === idx);
+      });
+      
+      // 更新代码行高亮
+      document.querySelectorAll('.code-line').forEach(el => {
+        el.classList.toggle('active', parseInt(el.dataset.line) === step.line);
+      });
+      
+      // 更新可视化
+      updateViz(step.viz);
+      
+      // 滚动到视图
+      const activeLine = document.querySelector(`.code-line[data-line="${step.line}"]`);
+      if (activeLine) activeLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function selectLine(line) {
+      currentLine = line;
+      
+      // 找到对应的步骤
+      const stepIdx = steps.findIndex(s => s.line === line);
+      if (stepIdx !== -1) {
+        currentStep = stepIdx;
+        selectStep(stepIdx);
+        return;
+      }
+      
+      // 只高亮代码行
+      document.querySelectorAll('.code-line').forEach(el => {
+        el.classList.toggle('active', parseInt(el.dataset.line) === line);
+      });
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+    }
+
+    function updateViz(viz) {
+      if (viz.left !== undefined) document.getElementById('vizLeft').textContent = viz.left;
+      if (viz.mid !== undefined) document.getElementById('vizMid').textContent = viz.mid;
+      if (viz.right !== undefined) document.getElementById('vizRight').textContent = viz.right;
+    }
+
+    // 默认选中第一个步骤
+    selectStep(0);
+  </script>
+</body>
+</html>

@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #234 - 回文链表</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --secondary: #8b5cf6;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+    body { 
+      font-family: 'Segoe UI', system-ui, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 40px 20px;
+      line-height: 1.7;
+    }
+    h1 { 
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.1em;
+      margin-bottom: 32px;
+    }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px;
+      border: 1px solid rgba(99, 102, 241, 0.1);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .difficulty {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: 600;
+    }
+    .difficulty.medium {
+      background: rgba(245, 158, 11, 0.2);
+      color: var(--warning);
+    }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 0;
+      overflow-x: auto;
+      border: 1px solid #30363d;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 4px 20px;
+      cursor: pointer; 
+      transition: all 0.2s;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 14px;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.3); 
+      border-left: 3px solid #6366f1; 
+      padding-left: 17px;
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 40px; 
+      text-align: right; 
+      padding-right: 16px;
+      user-select: none;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1.2fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 768px) {
+      .viz-container {
+        grid-template-columns: 1fr;
+      }
+    }
+    .viz-steps { 
+      background: rgba(0,0,0,0.2);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .viz-step { 
+      padding: 14px 16px; 
+      margin: 10px 0; 
+      border-radius: 10px; 
+      background: rgba(51, 65, 85, 0.5); 
+      cursor: pointer; 
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .viz-step:hover {
+      background: rgba(51, 65, 85, 0.8);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.2);
+    }
+    .viz-step h4 {
+      margin: 0 0 6px 0;
+      color: var(--primary);
+      font-size: 0.95em;
+    }
+    .viz-step p {
+      margin: 0;
+      font-size: 0.9em;
+      color: var(--text-muted);
+    }
+    .state-display {
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 10px;
+      font-family: monospace;
+      font-size: 0.85em;
+    }
+    .state-display .var {
+      color: var(--success);
+    }
+    .state-display .val {
+      color: var(--secondary);
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 18px; 
+      border: 1px solid #475569; 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block;
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.15);
+    }
+    .problem-card h4 {
+      margin: 0 0 8px 0;
+      color: var(--primary);
+    }
+    .problem-card p {
+      margin: 0;
+      font-size: 0.9em;
+      color: var(--text-muted);
+    }
+    .problem-card .tag {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 0.75em;
+      margin-top: 10px;
+      background: rgba(99, 102, 241, 0.2);
+    }
+    .keyword { color: #ff7b72; } 
+    .function { color: #d2a8ff; } 
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; } 
+    .comment { color: #8b949e; } 
+    .class { color: #ffa657; }
+    .return { color: #ff7b72; }
+    .operator { color: #ff7b72; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    th {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .complexity-good {
+      color: var(--success);
+      font-weight: 600;
+    }
+    .algo-steps {
+      background: rgba(99, 102, 241, 0.05);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 16px;
+    }
+    .algo-steps ol {
+      margin: 0;
+      padding-left: 20px;
+    }
+    .algo-steps li {
+      margin: 10px 0;
+      color: var(--text-muted);
+    }
+    .algo-steps li strong {
+      color: var(--text);
+    }
+    .highlight-box {
+      background: rgba(99, 102, 241, 0.1);
+      border-left: 4px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 12px 12px 0;
+      margin: 16px 0;
+    }
+    .link-node {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      line-height: 40px;
+      text-align: center;
+      background: var(--surface);
+      border: 2px solid var(--primary);
+      border-radius: 50%;
+      margin: 0 4px;
+      font-weight: 600;
+    }
+    .link-arrow {
+      color: var(--primary);
+      font-size: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #234 - 回文链表</h1>
+  <p class="subtitle">快慢指针找中点 + 链表反转的经典组合题</p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给你一个单链表的头节点 <code>head</code> ，请你判断该链表是否为回文链表。如果是，返回 <code>true</code>；否则，返回 <code>false</code>。</p>
+    
+    <div class="highlight-box">
+      <strong>示例 1：</strong><br>
+      输入：head = [1,2,2,1]<br>
+      输出：true<br><br>
+      <strong>示例 2：</strong><br>
+      输入：head = [1,2]<br>
+      输出：false
+    </div>
+    
+    <p><span class="difficulty medium">中等</span></p>
+    
+    <div class="algo-steps">
+      <strong>💡 核心思路（O(1)空间解法）：</strong>
+      <ol>
+        <li><strong>找中点：</strong>使用快慢指针找到链表的中点（慢指针走一步，快指针走两步）</li>
+        <li><strong>反转后半段：</strong>将链表的后半部分进行反转</li>
+        <li><strong>比较：</strong>将前半段和反转后的后半段逐一比较</li>
+        <li><strong>恢复（可选）：</strong>再次反转后半段，恢复原链表结构</li>
+      </ol>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3 style="color: var(--primary); margin-top: 0;">Python 实现</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table>
+      <tr>
+        <th>指标</th>
+        <th>复杂度</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>时间复杂度</td>
+        <td class="complexity-good">O(n)</td>
+        <td>需要遍历链表三次：找中点、反转、比较</td>
+      </tr>
+      <tr>
+        <td>空间复杂度</td>
+        <td class="complexity-good">O(1)</td>
+        <td>只使用了几个指针，没有使用额外数据结构</td>
+      </tr>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>🎯 关键技巧总结</h2>
+    <div class="algo-steps">
+      <ol>
+        <li><strong>快慢指针技巧：</strong>快指针走两步、慢指针走一步，当快指针到达末尾时，慢指针正好在中间</li>
+        <li><strong>链表反转技巧：</strong>使用三个指针（prev, curr, next）迭代完成反转</li>
+        <li><strong>奇偶节点处理：</strong>对于奇数长度的链表，慢指针会停在中点，需要额外向前一步</li>
+        <li><strong>边界情况：</strong>空链表和单节点链表天然是回文</li>
+      </ol>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/reverse-linked-list/" class="problem-card" target="_blank">
+        <h4>#206 反转链表</h4>
+        <p>链表反转的基础题，必须熟练掌握</p>
+        <span class="tag">链表</span>
+      </a>
+      <a href="https://leetcode.cn/problems/middle-of-the-linked-list/" class="problem-card" target="_blank">
+        <h4>#876 链表的中间结点</h4>
+        <p>快慢指针找中点的经典应用</p>
+        <span class="tag">双指针</span>
+      </a>
+      <a href="https://leetcode.cn/problems/remove-nth-node-from-end-of-list/" class="problem-card" target="_blank">
+        <h4>#19 删除链表的倒数第 N 个结点</h4>
+        <p>快慢指针的另一种经典用法</p>
+        <span class="tag">双指针</span>
+      </a>
+      <a href="https://leetcode.cn/problems/reorder-list/" class="problem-card" target="_blank">
+        <h4>#143 重排链表</h4>
+        <p>找中点 + 反转 + 合并的组合技</p>
+        <span class="tag">链表</span>
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // 代码行数据
+    const codeLines = [
+      { num: 1, content: '<span class="keyword">class</span> <span class="class">Solution</span>:' },
+      { num: 2, content: '    <span class="keyword">def</span> <span class="function">isPalindrome</span>(<span class="keyword">self</span>, head: ListNode) -> <span class="keyword">bool</span>:' },
+      { num: 3, content: '        <span class="comment"># 边界情况：空链表或单节点</span>' },
+      { num: 4, content: '        <span class="keyword">if</span> <span class="keyword">not</span> head <span class="keyword">or</span> <span class="keyword">not</span> head.next:' },
+      { num: 5, content: '            <span class="return">return</span> <span class="keyword">True</span>' },
+      { num: 6, content: '        ' },
+      { num: 7, content: '        <span class="comment"># Step 1: 快慢指针找中点</span>' },
+      { num: 8, content: '        slow, fast = head, head' },
+      { num: 9, content: '        <span class="keyword">while</span> fast <span class="keyword">and</span> fast.next:' },
+      { num: 10, content: '            slow = slow.next' },
+      { num: 11, content: '            fast = fast.next.next' },
+      { num: 12, content: '        ' },
+      { num: 13, content: '        <span class="comment"># Step 2: 反转后半段链表</span>' },
+      { num: 14, content: '        prev = <span class="keyword">None</span>' },
+      { num: 15, content: '        <span class="keyword">while</span> slow:' },
+      { num: 16, content: '            next_temp = slow.next' },
+      { num: 17, content: '            slow.next = prev' },
+      { num: 18, content: '            prev = slow' },
+      { num: 19, content: '            slow = next_temp' },
+      { num: 20, content: '        ' },
+      { num: 21, content: '        <span class="comment"># Step 3: 比较前半段和反转后的后半段</span>' },
+      { num: 22, content: '        left, right = head, prev' },
+      { num: 23, content: '        <span class="keyword">while</span> right:' },
+      { num: 24, content: '            <span class="keyword">if</span> left.val != right.val:' },
+      { num: 25, content: '                <span class="return">return</span> <span class="keyword">False</span>' },
+      { num: 26, content: '            left = left.next' },
+      { num: 27, content: '            right = right.next' },
+      { num: 28, content: '        ' },
+      { num: 29, content: '        <span class="return">return</span> <span class="keyword">True</span>' },
+    ];
+
+    // 步骤与代码行映射
+    const steps = [
+      { 
+        title: "初始化与边界检查", 
+        desc: "处理空链表和单节点链表的边界情况", 
+        line: 4,
+        state: { head: "1->2->2->1", 返回值: "继续执行" }
+      },
+      { 
+        title: "快慢指针初始化", 
+        desc: "slow和fast指针都指向head", 
+        line: 8,
+        state: { slow: "指向1", fast: "指向1" }
+      },
+      { 
+        title: "找中点 - 第1轮", 
+        desc: "fast走2步到节点2，slow走1步到节点2", 
+        line: 10,
+        state: { slow: "指向2(第2个)", fast: "指向2(第3个)" }
+      },
+      { 
+        title: "找中点 - 第2轮", 
+        desc: "fast到达末尾null，slow到达中点", 
+        line: 11,
+        state: { slow: "指向2(第3个)", fast: "null" }
+      },
+      { 
+        title: "开始反转后半段", 
+        desc: "初始化prev为None，从slow开始反转", 
+        line: 14,
+        state: { prev: "None", slow: "指向2(第3个)" }
+      },
+      { 
+        title: "反转第1个节点", 
+        desc: "将slow指向的节点(2)的next指向prev(None)", 
+        line: 17,
+        state: { prev: "2", slow: "指向1(第4个)" }
+      },
+      { 
+        title: "反转第2个节点", 
+        desc: "将slow指向的节点(1)的next指向prev(2)", 
+        line: 17,
+        state: { prev: "1->2", slow: "null" }
+      },
+      { 
+        title: "开始比较", 
+        desc: "left指向head，right指向prev(反转后的后半段)", 
+        line: 22,
+        state: { left: "1->2->...", right: "1->2" }
+      },
+      { 
+        title: "比较第1对节点", 
+        desc: "left.val=1, right.val1, 相等继续", 
+        line: 24,
+        state: { left.val: "1", right.val: "1", 结果: "相等" }
+      },
+      { 
+        title: "比较第2对节点", 
+        desc: "left.val=2, right.val=2, 相等继续", 
+        line: 24,
+        state: { left.val: "2", right.val: "2", 结果: "相等" }
+      },
+      { 
+        title: "比较完成", 
+        desc: "right为null，所有节点都匹配，是回文链表", 
+        line: 29,
+        state: { right: "null", 返回值: "True" }
+      },
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach(line => {
+      const div = document.createElement('div');
+      div.className = 'code-line';
+      div.dataset.line = line.num;
+      div.innerHTML = `<span class="line-number">${line.num}</span><span>${line.content}</span>`;
+      div.addEventListener('click', () => highlightStepByLine(line.num));
+      codeBlock.appendChild(div);
+    });
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const div = document.createElement('div');
+      div.className = 'viz-step';
+      div.dataset.step = idx;
+      div.dataset.line = step.line;
+      
+      let stateHtml = '';
+      if (step.state) {
+        stateHtml = '<div class="state-display">';
+        for (let [k, v] of Object.entries(step.state)) {
+          stateHtml += `<span class="var">${k}</span>: <span class="val">${v}</span><br>`;
+        }
+        stateHtml += '</div>';
+      }
+      
+      div.innerHTML = `
+        <h4>${idx + 1}. ${step.title}</h4>
+        <p>${step.desc}</p>
+        ${stateHtml}
+      `;
+      div.addEventListener('click', () => highlightStep(idx));
+      vizSteps.appendChild(div);
+    });
+
+    // 高亮函数
+    function highlightStep(stepIdx) {
+      // 清除所有高亮
+      document.querySelectorAll('.viz-step').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+      
+      // 高亮步骤
+      const stepEl = document.querySelector(`.viz-step[data-step="${stepIdx}"]`);
+      if (stepEl) {
+        stepEl.classList.add('active');
+        stepEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      
+      // 高亮对应代码行
+      const lineNum = steps[stepIdx].line;
+      const lineEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+      if (lineEl) {
+        lineEl.classList.add('active');
+        lineEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    function highlightStepByLine(lineNum) {
+      // 清除所有高亮
+      document.querySelectorAll('.viz-step').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+      
+      // 高亮代码行
+      const lineEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+      if (lineEl) {
+        lineEl.classList.add('active');
+      }
+      
+      // 找到并高亮对应的步骤（取第一个匹配的）
+      const stepIdx = steps.findIndex(s => s.line === lineNum);
+      if (stepIdx !== -1) {
+        const stepEl = document.querySelector(`.viz-step[data-step="${stepIdx}"]`);
+        if (stepEl) {
+          stepEl.classList.add('active');
+          stepEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    }
+
+    // 默认高亮第一步
+    highlightStep(0);
+  </script>
+</body>
+</html>

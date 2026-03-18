@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #236 - 二叉树的最近公共祖先</title>
+  <style>
+    :root { --primary: #6366f1; --bg: #0f172a; --surface: #1e293b; --text: #f1f5f9; --accent: #f59e0b; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); max-width: 1000px; margin: 0 auto; padding: 40px 20px; line-height: 1.8; }
+    h1 { font-size: 2.2rem; margin-bottom: 8px; background: linear-gradient(135deg, #6366f1, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .subtitle { color: #94a3b8; margin-bottom: 32px; }
+    .section { background: var(--surface); border-radius: 16px; padding: 28px; margin-bottom: 24px; border: 1px solid #334155; }
+    .section h2 { color: var(--primary); margin-top: 0; font-size: 1.4rem; display: flex; align-items: center; gap: 10px; }
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+    .badge-medium { background: rgba(245, 158, 11, 0.2); color: var(--accent); }
+    .badge-tag { background: rgba(99, 102, 241, 0.2); color: #a5b4fc; margin-right: 6px; }
+    .complexity-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    .complexity-table th, .complexity-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #334155; }
+    .complexity-table th { color: #94a3b8; font-weight: 500; }
+    .complexity-table td code { background: rgba(99, 102, 241, 0.1); padding: 4px 8px; border-radius: 4px; color: #a5b4fc; }
+    
+    pre { background: #0d1117; border-radius: 12px; padding: 20px; overflow-x: auto; border: 1px solid #21262d; margin: 0; }
+    .code-line { display: flex; padding: 3px 0; cursor: pointer; transition: all 0.2s; }
+    .code-line:hover { background: rgba(255,255,255,0.03); }
+    .code-line.active { background: rgba(99, 102, 241, 0.25); border-left: 3px solid #6366f1; margin-left: -3px; }
+    .line-number { color: #484f58; min-width: 40px; text-align: right; padding-right: 16px; font-family: 'SF Mono', monospace; font-size: 0.85rem; }
+    .line-content { font-family: 'SF Mono', monospace; font-size: 0.9rem; }
+    
+    .viz-container { display: grid; grid-template-columns: 1fr 1.3fr; gap: 24px; margin: 20px 0; }
+    @media (max-width: 768px) { .viz-container { grid-template-columns: 1fr; } }
+    .viz-steps { max-height: 400px; overflow-y: auto; }
+    .viz-step { padding: 14px; margin: 10px 0; border-radius: 10px; background: #334155; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+    .viz-step:hover { border-color: #475569; }
+    .viz-step.active { border-color: var(--primary); background: rgba(99, 102, 241, 0.2); }
+    .viz-step-title { font-weight: 600; color: #e2e8f0; margin-bottom: 4px; }
+    .viz-step-desc { font-size: 0.85rem; color: #94a3b8; }
+    .viz-state { margin-top: 8px; padding: 8px; background: rgba(0,0,0,0.2); border-radius: 6px; font-size: 0.8rem; font-family: monospace; }
+    
+    .problem-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 20px; }
+    .problem-card { background: var(--bg); border-radius: 12px; padding: 20px; border: 1px solid #475569; transition: all 0.2s; text-decoration: none; color: inherit; display: block; }
+    .problem-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 10px 40px rgba(99, 102, 241, 0.15); }
+    .problem-card h4 { margin: 0 0 8px 0; color: #e2e8f0; }
+    .problem-card p { margin: 0; font-size: 0.9rem; color: #94a3b8; }
+    
+    .tree-viz { text-align: center; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-bottom: 16px; font-family: monospace; line-height: 2; }
+    .tree-node { display: inline-block; width: 32px; height: 32px; line-height: 32px; border-radius: 50%; margin: 0 8px; font-size: 0.85rem; }
+    .tree-node.root { background: var(--primary); color: white; }
+    .tree-node.normal { background: #475569; color: #e2e8f0; }
+    .tree-node.target { background: var(--accent); color: #0f172a; }
+    .tree-node.lca { background: #22c55e; color: #0f172a; }
+    
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; }
+    .class { color: #ffa657; }
+    .self { color: #ff7b72; }
+    .bool { color: #79c0ff; }
+    .return { color: #ff7b72; }
+    .if { color: #ff7b72; }
+    
+    .highlight-box { background: rgba(99, 102, 241, 0.1); border-left: 4px solid var(--primary); padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+    .insight-box { background: rgba(245, 158, 11, 0.1); border-left: 4px solid var(--accent); padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #236 - 二叉树的最近公共祖先</h1>
+  <p class="subtitle">
+    <span class="badge badge-medium">Medium</span>
+    <span style="margin-left: 12px;">树 | 递归 | 分治</span>
+  </p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给定一个二叉树，找到该树中两个指定节点的<strong>最近公共祖先</strong>（Lowest Common Ancestor, LCA）。</p>
+    <p>对于两个节点 p 和 q，其最近公共祖先是指：在二叉树中，p 和 q 的最近公共祖先节点 x 满足 <strong>x 是 p 和 q 的祖先，且 x 的深度尽可能大</strong>（一个节点也可以是它自己的祖先）。</p>
+    <div class="highlight-box">
+      <strong>关键性质：</strong>所有节点的值都是唯一的；p、q 为不同节点且均存在于二叉树中。
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🎯 核心思路：递归分治</h2>
+    <p>最近公共祖先有以下<strong>三种情况</strong>：</p>
+    <ol>
+      <li>p 和 q 分别位于当前节点的<strong>左右子树</strong>中 → 当前节点就是 LCA</li>
+      <li>p 和 q 都在当前节点的<strong>左子树</strong>中 → LCA 在左子树</li>
+      <li>p 和 q 都在当前节点的<strong>右子树</strong>中 → LCA 在右子树</li>
+    </ol>
+    <div class="insight-box">
+      <strong>递归终止条件：</strong>如果当前节点是 null，或是 p，或是 q，直接返回当前节点。
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    
+    <div class="tree-viz" id="treeViz">
+      <div>假设 p=7, q=4，查找过程如下：</div>
+      <div style="margin-top: 12px;">
+        <span class="tree-node root" id="node3">3</span><br>
+        <span class="tree-node normal" id="node5">5</span> <span class="tree-node normal" id="node1">1</span><br>
+        <span class="tree-node normal" id="node6">6</span> <span class="tree-node target" id="node2">2</span> <span class="tree-node normal" id="node0">0</span> <span class="tree-node normal" id="node8">8</span><br>
+        <span style="margin-left: 60px;"><span class="tree-node target" id="node7">7</span> <span class="tree-node target" id="node4">4</span></span>
+      </div>
+      <div style="margin-top: 12px; font-size: 0.85rem; color: #94a3b8;">
+        <span style="color: #f59e0b;">●</span> 目标节点(p,q) &nbsp; 
+        <span style="color: #22c55e;">●</span> LCA结果 &nbsp;
+        <span style="color: #6366f1;">●</span> 当前遍历节点
+      </div>
+    </div>
+    
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre><code id="codeBlock">
+        </code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <tr>
+        <th>指标</th>
+        <th>复杂度</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>时间复杂度</td>
+        <td><code>O(N)</code></td>
+        <td>最坏情况下需要遍历所有节点（树退化为链表）</td>
+      </tr>
+      <tr>
+        <td>空间复杂度</td>
+        <td><code>O(H)</code></td>
+        <td>递归栈深度，H 为树高，最坏 O(N)，平均 O(logN)</td>
+      </tr>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>🔍 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/lowest-common-ancestor-of-a-binary-search-tree/" class="problem-card" target="_blank">
+        <h4>#235 二叉搜索树的最近公共祖先</h4>
+        <p>利用BST性质，比本题更简单</p>
+      </a>
+      <a href="https://leetcode.cn/problems/er-cha-shu-de-zui-jin-gong-gong-zu-xian-lcof/" class="problem-card" target="_blank">
+        <h4>剑指 Offer 68 - II</h4>
+        <p>与本题完全相同（面试常考）</p>
+      </a>
+      <a href="https://leetcode.cn/problems/lowest-common-ancestor-of-deepest-leaves/" class="problem-card" target="_blank">
+        <h4>#1123 最深叶节点的最近公共祖先</h4>
+        <p>LCA的扩展应用</p>
+      </a>
+      <a href="https://leetcode.cn/problems/smallest-subtree-with-all-the-deepest-nodes/" class="problem-card" target="_blank">
+        <h4>#865 具有所有最深节点的最小子树</h4>
+        <p>深度与LCA结合的变体</p>
+      </a>
+      <a href="https://leetcode.cn/problems/find-distance-in-a-binary-tree/" class="problem-card" target="_blank">
+        <h4>#2096 从二叉树一个节点到另一个节点每一步的方向</h4>
+        <p>LCA + 路径记录</p>
+      </a>
+      <a href="https://leetcode.cn/problems/step-by-step-directions-from-a-binary-tree-node-to-another/" class="problem-card" target="_blank">
+        <h4>#2096 方向步数</h4>
+        <p>基于LCA求路径方向</p>
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // Python代码，按行分割
+    const pythonCode = [
+      {line: 1, code: '<span class="keyword">class</span> <span class="class">Solution</span>:'},
+      {line: 2, code: '    <span class="keyword">def</span> <span class="function">lowestCommonAncestor</span>(<span class="self">self</span>, root, p, q):'}, 
+      {line: 3, code: '        <span class="comment"># 递归终止条件：空节点或找到目标</span>'},
+      {line: 4, code: '        <span class="if">if</span> <span class="keyword">not</span> root <span class="keyword">or</span> root == p <span class="keyword">or</span> root == q:'},
+      {line: 5, code: '            <span class="return">return</span> root'},
+      {line: 6, code: '        '},
+      {line: 7, code: '        <span class="comment"># 在左子树中查找</span>'},
+      {line: 8, code: '        left = <span class="self">self</span>.lowestCommonAncestor(root.left, p, q)'},
+      {line: 9, code: '        '},
+      {line: 10, code: '        <span class="comment"># 在右子树中查找</span>'},
+      {line: 11, code: '        right = <span class="self">self</span>.lowestCommonAncestor(root.right, p, q)'},
+      {line: 12, code: '        '},
+      {line: 13, code: '        <span class="comment"># 情况1：左右子树各找到一个 → 当前节点是LCA</span>'},
+      {line: 14, code: '        <span class="if">if</span> left <span class="keyword">and</span> right:'},
+      {line: 15, code: '            <span class="return">return</span> root'},
+      {line: 16, code: '        '},
+      {line: 17, code: '        <span class="comment"># 情况2/3：只在一边找到 → LCA在那一边</span>'},
+      {line: 18, code: '        <span class="return">return</span> left <span class="keyword">if</span> left <span class="keyword">else</span> right'}
+    ];
+
+    // 步骤与代码行映射
+    const steps = [
+      {title: "初始调用", desc: "从根节点 3 开始查找 p=7, q=4", line: 2, state: "root=3, p=7, q=4"},
+      {title: "检查根节点", desc: "3 不是空，也不是 p 或 q，继续", line: 4, state: "root=3 ≠ p, ≠ q"},
+      {title: "递归左子树", desc: "在节点 5 的左子树中查找", line: 8, state: "进入左子树 root=5"},
+      {title: "继续深入左子树", desc: "节点 6，未找到目标，返回 None", line: 8, state: "root=6, 左右都返回 None → 返回 None"},
+      {title: "递归右子树", desc: "在节点 5 的右子树(节点 2)中查找", line: 11, state: "root=2, 继续查找"},
+      {title: "找到节点 7", desc: "节点 7 = p，触发终止条件返回 7", line: 4, state: "root=7 == p, 返回 7"},
+      {title: "左子树返回 7", desc: "节点 2 的左子树找到 7，left=7", line: 8, state: "left=7, 继续查找 right"},
+      {title: "找到节点 4", desc: "节点 4 = q，触发终止条件返回 4", line: 4, state: "root=4 == q, 返回 4"},
+      {title: "左右都找到", desc: "节点 2: left=7, right=4，都在子树中！", line: 14, state: "left=7, right=4, 条件成立"},
+      {title: "找到 LCA！", desc: "返回当前节点 2，作为 LCA 结果", line: 15, state: "返回 root=2"},
+      {title: "右子树返回 2", desc: "节点 5: left=None, right=2，只在一侧找到", line: 18, state: "返回 right=2"},
+      {title: "最终返回", desc: "节点 3: left=2, right=None，返回 2", line: 18, state: "最终结果 LCA = 2"}
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    pythonCode.forEach(({line, code}) => {
+      const div = document.createElement('div');
+      div.className = 'code-line';
+      div.dataset.line = line;
+      div.innerHTML = `<span class="line-number">${line}</span><span class="line-content">${code}</span>`;
+      div.onclick = () => highlightStepByLine(line);
+      codeBlock.appendChild(div);
+    });
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const div = document.createElement('div');
+      div.className = 'viz-step';
+      div.dataset.step = idx;
+      div.dataset.line = step.line;
+      div.innerHTML = `
+        <div class="viz-step-title">步骤 ${idx + 1}: ${step.title}</div>
+        <div class="viz-step-desc">${step.desc}</div>
+        <div class="viz-state">→ 第 ${step.line} 行 | ${step.state}</div>
+      `;
+      div.onclick = () => highlightStep(idx);
+      vizSteps.appendChild(div);
+    });
+
+    let activeStep = -1;
+
+    function highlightStep(stepIdx) {
+      activeStep = stepIdx;
+      const step = steps[stepIdx];
+      
+      // 高亮步骤
+      document.querySelectorAll('.viz-step').forEach((el, i) => {
+        el.classList.toggle('active', i === stepIdx);
+      });
+      
+      // 高亮代码行
+      document.querySelectorAll('.code-line').forEach(el => {
+        el.classList.toggle('active', parseInt(el.dataset.line) === step.line);
+      });
+      
+      // 滚动到视图
+      const activeLine = document.querySelector(`.code-line[data-line="${step.line}"]`);
+      if (activeLine) activeLine.scrollIntoView({behavior: 'smooth', block: 'center'});
+      
+      // 高亮树节点
+      updateTreeViz(step);
+    }
+
+    function highlightStepByLine(lineNum) {
+      const stepIdx = steps.findIndex(s => s.line === lineNum);
+      if (stepIdx !== -1) highlightStep(stepIdx);
+    }
+
+    function updateTreeViz(step) {
+      // 重置所有节点
+      document.querySelectorAll('.tree-node').forEach(n => {
+        n.className = n.className.replace(' lca', '').replace(' root', ' normal');
+      });
+      
+      // 根据步骤高亮
+      const title = step.title;
+      if (title.includes('找到 LCA')) {
+        document.getElementById('node2').className = 'tree-node lca';
+      } else if (title.includes('初始') || title.includes('根')) {
+        document.getElementById('node3').className = 'tree-node root';
+      } else if (title.includes('7')) {
+        document.getElementById('node7').className = 'tree-node target';
+      } else if (title.includes('4')) {
+        document.getElementById('node4').className = 'tree-node target';
+      }
+    }
+
+    // 默认高亮第一步
+    highlightStep(0);
+  </script>
+</body>
+</html>

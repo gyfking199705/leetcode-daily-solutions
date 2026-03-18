@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #1143 - 最长公共子序列</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --secondary: #8b5cf6;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.6;
+    }
+    h1 { 
+      font-size: 2.2rem; 
+      margin-bottom: 8px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin-bottom: 32px;
+    }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px; 
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .tag {
+      display: inline-block;
+      background: rgba(99, 102, 241, 0.2);
+      color: var(--primary);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-right: 8px;
+    }
+    .tag.medium { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+    .tag.easy { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 20px; 
+      overflow-x: auto;
+      margin: 16px 0;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 3px 0; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+      margin-left: -3px;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+      border-left-color: var(--text-muted);
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.3); 
+      border-left-color: var(--primary); 
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 40px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    .code-content {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.9rem;
+      white-space: pre;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 768px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    .viz-steps { 
+      max-height: 450px; 
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+    .viz-steps::-webkit-scrollbar { width: 6px; }
+    .viz-steps::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
+    .viz-step { 
+      padding: 14px 16px; 
+      margin: 10px 0; 
+      border-radius: 12px; 
+      background: #334155; 
+      cursor: pointer; 
+      border: 2px solid transparent; 
+      transition: all 0.2s;
+    }
+    .viz-step:hover {
+      transform: translateX(4px);
+      border-color: var(--text-muted);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.3);
+      transform: translateX(8px);
+    }
+    .step-title {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .step-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .step-state {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      font-size: 0.85rem;
+      font-family: 'SF Mono', monospace;
+      color: var(--secondary);
+    }
+    .dp-table {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin: 16px 0;
+      font-family: 'SF Mono', monospace;
+      font-size: 0.85rem;
+    }
+    .dp-cell {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #334155;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+    .dp-cell.header {
+      background: var(--primary);
+      color: white;
+    }
+    .dp-cell.active {
+      background: var(--secondary);
+      box-shadow: 0 0 10px var(--secondary);
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 20px; 
+      border: 1px solid #475569; 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block; 
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.2);
+    }
+    .problem-card h4 {
+      margin: 0 0 8px 0;
+      color: var(--primary);
+    }
+    .problem-card p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    .complexity-table th,
+    .complexity-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #334155;
+    }
+    .complexity-table th {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .complexity-table tr:last-child td {
+      border-bottom: none;
+    }
+    .formula {
+      background: rgba(99, 102, 241, 0.1);
+      padding: 16px;
+      border-radius: 8px;
+      border-left: 4px solid var(--primary);
+      font-family: 'SF Mono', monospace;
+      margin: 16px 0;
+    }
+    .keyword { color: #ff7b72; } 
+    .function { color: #d2a8ff; } 
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; } 
+    .comment { color: #8b949e; } 
+    .class { color: #ffa657; }
+    .builtin { color: #7ee787; }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #1143 - 最长公共子序列</h1>
+  <p class="subtitle">
+    <span class="tag medium">Medium</span>
+    动态规划 | 经典二维DP | 字符串匹配
+  </p>
+
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给定两个字符串 <code>text1</code> 和 <code>text2</code>，返回这两个字符串的<strong>最长公共子序列</strong>的长度。</p>
+    <br>
+    <p><strong>子序列定义：</strong>一个字符串的子序列是指这样一个新的字符串：它是由原字符串在不改变字符的相对顺序的情况下删除某些字符（也可以不删除任何字符）后组成的新字符串。</p>
+    <br>
+    <p><strong>示例 1：</strong></p>
+    <pre>输入：text1 = "abcde", text2 = "ace"
+输出：3
+解释：最长公共子序列是 "ace"，它的长度为 3。</pre>
+    <p><strong>示例 2：</strong></p>
+    <pre>输入：text1 = "abc", text2 = "abc"
+输出：3</pre>
+    <p><strong>示例 3：</strong></p>
+    <pre>输入：text1 = "abc", text2 = "def"
+输出：0</pre>
+  </div>
+
+  <div class="section">
+    <h2>🧠 解题思路</h2>
+    <h3>状态定义</h3>
+    <p>设 <code>dp[i][j]</code> 表示 <code>text1[0..i-1]</code> 和 <code>text2[0..j-1]</code> 的最长公共子序列的长度。</p>
+    
+    <h3>状态转移方程</h3>
+    <div class="formula">
+      if text1[i-1] == text2[j-1]:<br>
+      &nbsp;&nbsp;dp[i][j] = dp[i-1][j-1] + 1<br>
+      else:<br>
+      &nbsp;&nbsp;dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+    </div>
+    
+    <h3>核心思想</h3>
+    <ul>
+      <li><strong>匹配时：</strong>当前字符相同，LCS长度+1，两个串都前移</li>
+      <li><strong>不匹配时：</strong>取「text1前移」或「text2前移」的最大值</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <p><strong>示例：</strong>text1 = "abcde", text2 = "ace"</p>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+    
+    <h3>DP表格可视化（最终状态）</h3>
+    <div class="dp-table" id="dpTable">
+      <!-- DP表格由JS生成 -->
+    </div>
+    <p style="color: var(--text-muted); font-size: 0.85rem;">
+      行：text1("abcde"), 列：text2("ace")，紫色高亮显示最终答案位置
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <tr>
+        <th>维度</th>
+        <th>复杂度</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>时间复杂度</td>
+        <td><code>O(m × n)</code></td>
+        <td>需要填充 m×n 的DP表格，每个状态计算O(1)</td>
+      </tr>
+      <tr>
+        <td>空间复杂度</td>
+        <td><code>O(m × n)</code></td>
+        <td>二维DP数组存储所有状态</td>
+      </tr>
+      <tr>
+        <td>优化空间</td>
+        <td><code>O(min(m, n))</code></td>
+        <td>滚动数组优化，只保留上一行</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/edit-distance/" class="problem-card" target="_blank">
+        <h4>#72 编辑距离</h4>
+        <p>经典二维DP，涉及插入/删除/替换操作</p>
+      </a>
+      <a href="https://leetcode.cn/problems/longest-palindromic-subsequence/" class="problem-card" target="_blank">
+        <h4>#516 最长回文子序列</h4>
+        <p>LCS变体，求字符串与其反转的LCS</p>
+      </a>
+      <a href="https://leetcode.cn/problems/uncrossed-lines/" class="problem-card" target="_blank">
+        <h4>#1035 不相交的线</h4>
+        <p>LCS的另一种表述方式</p>
+      </a>
+      <a href="https://leetcode.cn/problems/maximum-length-of-repeated-subarray/" class="problem-card" target="_blank">
+        <h4>#718 最长重复子数组</h4>
+        <p>要求连续子数组，转移方程略有不同</p>
+      </a>
+      <a href="https://leetcode.cn/problems/distinct-subsequences/" class="problem-card" target="_blank">
+        <h4>#115 不同的子序列</h4>
+        <p>统计出现次数的DP问题</p>
+      </a>
+      <a href="https://leetcode.cn/problems/shortest-common-supersequence/" class="problem-card" target="_blank">
+        <h4>#1092 最短公共超序列</h4>
+        <p>LCS的逆向思维应用</p>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>💡 总结与要点</h2>
+    <ul>
+      <li><strong>核心考点：</strong>二维动态规划的状态定义与转移</li>
+      <li><strong>易错点：</strong>dp数组下标与字符串索引的对应关系（通常+1偏移）</li>
+      <li><strong>空间优化：</strong>观察转移方程只依赖上一行，可压缩至O(n)</li>
+      <li><strong>扩展应用：</strong>LCS是很多字符串问题的基础，如diff算法、基因序列比对</li>
+    </ul>
+  </div>
+
+  <script>
+    // Python代码，每行内容
+    const codeLines = [
+      {line: 1, content: '<span class="keyword">class</span> <span class="class">Solution</span>:'},
+      {line: 2, content: '    <span class="keyword">def</span> <span class="function">longestCommonSubsequence</span>(<span class="builtin">self</span>, text1: <span class="builtin">str</span>, text2: <span class="builtin">str</span>) -> <span class="builtin">int</span>:'},
+      {line: 3, content: '        m, n = <span class="function">len</span>(text1), <span class="function">len</span>(text2)'},
+      {line: 4, content: '        '},
+      {line: 5, content: '        <span class="comment"># 创建 (m+1) x (n+1) 的DP表格</span>'},
+      {line: 6, content: '        dp = [[<span class="number">0</span>] * (n + <span class="number">1</span>) <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="function">range</span>(m + <span class="number">1</span>)]'},
+      {line: 7, content: '        '},
+      {line: 8, content: '        <span class="comment"># 填充DP表格</span>'},
+      {line: 9, content: '        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="number">1</span>, m + <span class="number">1</span>):'},
+      {line: 10, content: '            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="function">range</span>(<span class="number">1</span>, n + <span class="number">1</span>):'},
+      {line: 11, content: '                <span class="keyword">if</span> text1[i - <span class="number">1</span>] == text2[j - <span class="number">1</span>]:'},
+      {line: 12, content: '                    <span class="comment"># 字符匹配：左上角值 + 1</span>'},
+      {line: 13, content: '                    dp[i][j] = dp[i - <span class="number">1</span>][j - <span class="number">1</span>] + <span class="number">1</span>'},
+      {line: 14, content: '                <span class="keyword">else</span>:'},
+      {line: 15, content: '                    <span class="comment"># 字符不匹配：取上方或左方的最大值</span>'},
+      {line: 16, content: '                    dp[i][j] = <span class="function">max</span>(dp[i - <span class="number">1</span>][j], dp[i][j - <span class="number">1</span>])'},
+      {line: 17, content: '        '},
+      {line: 18, content: '        <span class="keyword">return</span> dp[m][n]'},
+    ];
+
+    // 步骤与代码行映射
+    const steps = [
+      {title: "初始化变量", desc: "获取两个字符串的长度 m 和 n", line: 3, state: "m=5, n=3"},
+      {title: "创建DP表格", desc: "初始化 (m+1) × (n+1) 的全零矩阵", line: 6, state: "dp[6][4] = 全0矩阵"},
+      {title: "开始外层循环", desc: "遍历 text1 的每个字符", line: 9, state: "i = 1, 当前字符: 'a'"},
+      {title: "开始内层循环", desc: "遍历 text2 的每个字符", line: 10, state: "j = 1, 当前字符: 'a'"},
+      {title: "字符匹配判断", desc: "text1[0]='a' 等于 text2[0]='a'", line: 11, state: "匹配！dp[1][1] = dp[0][0] + 1 = 1"},
+      {title: "匹配时更新", desc: "取左上角值+1，LCS长度增加", line: 13, state: "dp[1][1] = 1"},
+      {title: "内层循环继续", desc: "j=2, text2[1]='c'", line: 10, state: "text1[0]='a' ≠ 'c'"},
+      {title: "不匹配时更新", desc: "取上方和左方的最大值", line: 16, state: "max(dp[0][2]=0, dp[1][1]=1) = 1"},
+      {title: "继续填充", desc: "按同样逻辑填充整个表格...", line: 9, state: "双层循环继续执行"},
+      {title: "最终结果", desc: "返回右下角的值，即最长公共子序列长度", line: 18, state: "dp[5][3] = 3, 答案为 'ace'"},
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach(({line, content}) => {
+      const div = document.createElement('div');
+      div.className = 'code-line';
+      div.dataset.line = line;
+      div.innerHTML = `<span class="line-number">${line}</span><span class="code-content">${content}</span>`;
+      div.addEventListener('click', () => highlightStepByLine(line));
+      codeBlock.appendChild(div);
+    });
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const div = document.createElement('div');
+      div.className = 'viz-step';
+      div.dataset.step = idx;
+      div.dataset.line = step.line;
+      div.innerHTML = `
+        <div class="step-title">${idx + 1}. ${step.title}</div>
+        <div class="step-desc">${step.desc}</div>
+        <div class="step-state">${step.state}</div>
+      `;
+      div.addEventListener('click', () => highlightStep(idx));
+      vizSteps.appendChild(div);
+    });
+
+    // 渲染DP表格
+    const dpTable = document.getElementById('dpTable');
+    // 表头
+    const headers = ['', 'Ø', 'a', 'c', 'e'];
+    headers.forEach(h => {
+      const cell = document.createElement('div');
+      cell.className = 'dp-cell header';
+      cell.textContent = h;
+      dpTable.appendChild(cell);
+    });
+    // DP数据
+    const dpData = [
+      ['Ø', 0, 0, 0, 0],
+      ['a', 0, 1, 1, 1],
+      ['b', 0, 1, 1, 1],
+      ['c', 0, 1, 2, 2],
+      ['d', 0, 1, 2, 2],
+      ['e', 0, 1, 2, 3]
+    ];
+    dpData.forEach((row, i) => {
+      row.forEach((val, j) => {
+        const cell = document.createElement('div');
+        cell.className = 'dp-cell';
+        if (i === 5 && j === 3) cell.className += ' active'; // 高亮答案位置
+        cell.textContent = val;
+        dpTable.appendChild(cell);
+      });
+    });
+
+    // 高亮逻辑
+    let currentStep = -1;
+    
+    function highlightStep(stepIdx) {
+      currentStep = stepIdx;
+      const step = steps[stepIdx];
+      
+      // 高亮步骤
+      document.querySelectorAll('.viz-step').forEach((el, idx) => {
+        el.classList.toggle('active', idx === stepIdx);
+      });
+      
+      // 高亮代码行
+      document.querySelectorAll('.code-line').forEach(el => {
+        el.classList.toggle('active', parseInt(el.dataset.line) === step.line);
+      });
+    }
+    
+    function highlightStepByLine(lineNum) {
+      const stepIdx = steps.findIndex(s => s.line === lineNum);
+      if (stepIdx !== -1) {
+        highlightStep(stepIdx);
+        // 滚动到对应步骤
+        const stepEl = document.querySelector(`[data-step="${stepIdx}"]`);
+        if (stepEl) stepEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    // 默认高亮第一个步骤
+    highlightStep(0);
+  </script>
+</body>
+</html>

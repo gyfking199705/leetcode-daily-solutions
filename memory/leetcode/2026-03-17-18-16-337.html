@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #337 - 打家劫舍 III</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --accent: #22d3ee;
+      --success: #4ade80;
+      --warning: #fbbf24;
+      --danger: #f87171;
+    }
+    body { 
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 40px 20px;
+      line-height: 1.7;
+    }
+    h1 { font-size: 2rem; margin-bottom: 8px; }
+    .subtitle { color: var(--text-muted); margin-bottom: 24px; }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px;
+      border: 1px solid #334155;
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 20px; 
+      overflow-x: auto;
+      border: 1px solid #30363d;
+      margin: 0;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 4px 0; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 14px;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.3); 
+      border-left: 3px solid var(--primary);
+      margin-left: -3px;
+      padding-left: 3px;
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 40px; 
+      text-align: right; 
+      padding-right: 16px;
+      user-select: none;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1.2fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    .viz-steps { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 8px;
+    }
+    .viz-step { 
+      padding: 16px; 
+      border-radius: 12px; 
+      background: #334155; 
+      cursor: pointer; 
+      border: 2px solid transparent; 
+      transition: all 0.2s;
+    }
+    .viz-step:hover {
+      background: #3d4a5c;
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.2);
+    }
+    .viz-step h4 {
+      margin: 0 0 8px 0;
+      color: var(--accent);
+      font-size: 14px;
+    }
+    .viz-step p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .viz-step .state {
+      margin-top: 8px;
+      padding: 8px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 12px;
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 16px; 
+      border: 1px solid #475569; 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block;
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.2);
+    }
+    .problem-card h4 { margin: 0 0 8px 0; color: var(--primary); }
+    .problem-card p { margin: 0; font-size: 13px; color: var(--text-muted); }
+    .problem-card .difficulty {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+    .difficulty.easy { background: rgba(74, 222, 128, 0.2); color: var(--success); }
+    .difficulty.medium { background: rgba(251, 191, 36, 0.2); color: var(--warning); }
+    .difficulty.hard { background: rgba(248, 113, 113, 0.2); color: var(--danger); }
+    .keyword { color: #ff7b72; } 
+    .function { color: #d2a8ff; } 
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; } 
+    .comment { color: #8b949e; font-style: italic; } 
+    .class { color: #ffa657; }
+    .operator { color: #ff7b72; }
+    .built-in { color: #79c0ff; }
+    
+    .tree-visual {
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      font-family: monospace;
+      margin: 16px 0;
+    }
+    .tree-node {
+      display: inline-block;
+      width: 36px;
+      height: 36px;
+      line-height: 36px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      font-weight: bold;
+      margin: 4px;
+    }
+    .tree-node.stolen {
+      background: var(--success);
+      box-shadow: 0 0 12px var(--success);
+    }
+    .tree-node.skip {
+      background: #475569;
+      opacity: 0.6;
+    }
+    .tree-level { margin: 8px 0; }
+    .tree-connector {
+      color: var(--text-muted);
+      font-size: 20px;
+    }
+    
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    .complexity-table th,
+    .complexity-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #334155;
+    }
+    .complexity-table th {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .complexity-table tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-right: 8px;
+    }
+    .badge.method { background: rgba(99, 102, 241, 0.2); color: var(--primary); }
+    .badge.difficulty { background: rgba(251, 191, 36, 0.2); color: var(--warning); }
+    
+    .idea-box {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(34, 211, 238, 0.1));
+      border-left: 4px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 12px 12px 0;
+      margin: 16px 0;
+    }
+    .idea-box h4 { margin: 0 0 8px 0; color: var(--accent); }
+    .idea-box ul { margin: 8px 0; padding-left: 20px; }
+    .idea-box li { margin: 4px 0; }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #337 - 打家劫舍 III</h1>
+  <p class="subtitle">在上次打劫完一条街道和一圈房屋后，小偷发现了一个新的目标——二叉树结构的房屋群 🌳</p>
+  
+  <div style="margin-bottom: 16px;">
+    <span class="badge difficulty">Medium</span>
+    <span class="badge method">树形DP</span>
+    <span class="badge method">后序遍历</span>
+    <span class="badge method">递归</span>
+  </div>
+
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>小偷又发现了一个新的可行窃的地区。这个地区只有一个入口，我们称之为 <code>root</code>。</p>
+    <p>除了 <code>root</code> 之外，每栋房子有且只有一个「父」房子与之相连。一番侦察之后，聪明的小偷意识到「这个地方的所有房屋的排列类似于一棵<strong>二叉树</strong>」。如果<strong>两个直接相连的房子在同一天晚上被打劫</strong>，房屋将自动报警。</p>
+    <p>给定二叉树的 <code>root</code>。返回<strong>在不触动警报的情况下</strong>，小偷能够盗取的最高金额。</p>
+    
+    <div class="tree-visual">
+      <p style="color: var(--text-muted); margin-bottom: 12px;">示例 1: root = [3,2,3,null,3,null,1]</p>
+      <div class="tree-level">
+        <span class="tree-node stolen">3</span>
+      </div>
+      <div class="tree-connector">/ &nbsp;\</div>
+      <div class="tree-level">
+        <span class="tree-node skip">2</span>
+        <span class="tree-node stolen">3</span>
+      </div>
+      <div class="tree-connector">&nbsp; \ &nbsp; &nbsp; \</div>
+      <div class="tree-level">
+        <span class="tree-node stolen">3</span>
+        <span class="tree-node stolen">1</span>
+      </div>
+      <p style="color: var(--success); margin-top: 12px;">输出: 7 (偷 3 + 3 + 1)</p>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>💡 核心思路</h2>
+    <div class="idea-box">
+      <h4>🎯 关键洞察：每个节点只有两种状态</h4>
+      <ul>
+        <li><strong>状态0 (不偷当前节点)</strong>：子节点可以偷，也可以不偷，取最大值</li>
+        <li><strong>状态1 (偷当前节点)</strong>：子节点绝对不能偷</li>
+      </ul>
+    </div>
+    <div class="idea-box">
+      <h4>🌲 为什么用后序遍历？</h4>
+      <ul>
+        <li>计算当前节点需要知道左右子树的结果</li>
+        <li>自底向上：先从叶子节点开始计算，再向上传递</li>
+        <li>符合「后序遍历」的顺序：左 → 右 → 根</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3 style="margin-top: 0;">Python 实现</h3>
+        <pre><code id="codeBlock">
+<!-- 每行代码用 .code-line 包裹，带行号 -->
+        </code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <thead>
+        <tr>
+          <th>维度</th>
+          <th>复杂度</th>
+          <th>说明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>时间复杂度</td>
+          <td><code>O(N)</code></td>
+          <td>每个节点只访问一次</td>
+        </tr>
+        <tr>
+          <td>空间复杂度</td>
+          <td><code>O(H)</code></td>
+          <td>递归栈深度，H为树高；最坏情况O(N)，平衡树O(logN)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/house-robber/" class="problem-card" target="_blank">
+        <h4>198. 打家劫舍</h4>
+        <p>线性DP基础：街道房屋，不能偷相邻的</p>
+        <span class="difficulty easy">Easy</span>
+      </a>
+      <a href="https://leetcode.cn/problems/house-robber-ii/" class="problem-card" target="_blank">
+        <h4>213. 打家劫舍 II</h4>
+        <p>环形数组：首尾相连的房屋</p>
+        <span class="difficulty medium">Medium</span>
+      </a>
+      <a href="https://leetcode.cn/problems/binary-tree-maximum-path-sum/" class="problem-card" target="_blank">
+        <h4>124. 二叉树中的最大路径和</h4>
+        <p>树形DP进阶：路径问题</p>
+        <span class="difficulty hard">Hard</span>
+      </a>
+      <a href="https://leetcode.cn/problems/diameter-of-binary-tree/" class="problem-card" target="_blank">
+        <h4>543. 二叉树的直径</h4>
+        <p>树形DP基础：后序遍历应用</p>
+        <span class="difficulty easy">Easy</span>
+      </a>
+      <a href="https://leetcode.cn/problems/path-sum-iii/" class="problem-card" target="_blank">
+        <h4>437. 路径总和 III</h4>
+        <p>前缀和 + 树形遍历</p>
+        <span class="difficulty medium">Medium</span>
+      </a>
+      <a href="https://leetcode.cn/problems/validate-binary-search-tree/" class="problem-card" target="_blank">
+        <h4>98. 验证二叉搜索树</h4>
+        <p>树形递归：边界传递</p>
+        <span class="difficulty medium">Medium</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>🔍 举一反三</h2>
+    <div class="idea-box">
+      <h4>核心技巧总结</h4>
+      <ul>
+        <li><strong>状态设计</strong>：为每个节点设计「偷/不偷」两种状态，返回二元组</li>
+        <li><strong>后序遍历</strong>：子树结果 → 当前节点结果，自底向上传递</li>
+        <li><strong>树形DP</strong>：在树上做DP时，通常需要遍历整棵树，每个节点计算后返回给父节点</li>
+        <li><strong>记忆化</strong>：如果直接递归会重复计算，可用 @lru_cache 优化（虽然本题不需要，因为每个节点只访问一次）</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // 代码行数据
+    const codeLines = [
+      { num: 1, text: '<span class="comment"># Definition for a binary tree node.</span>' },
+      { num: 2, text: '<span class="comment"># class TreeNode:</span>' },
+      { num: 3, text: '<span class="comment">#     def __init__(self, val=0, left=None, right=None):</span>' },
+      { num: 4, text: '<span class="comment">#         self.val = val</span>' },
+      { num: 5, text: '<span class="comment">#         self.left = left</span>' },
+      { num: 6, text: '<span class="comment">#         self.right = right</span>' },
+      { num: 7, text: '<span class="keyword">class</span> <span class="class">Solution</span>:' },
+      { num: 8, text: '    <span class="keyword">def</span> <span class="function">rob</span>(<span class="keyword">self</span>, root: TreeNode) -> <span class="built-in">int</span>:' },
+      { num: 9, text: '        <span class="keyword">def</span> <span class="function">rob_tree</span>(node):' },
+      { num: 10, text: '            <span class="comment"># 返回二元组: (偷当前节点的最大收益, 不偷当前节点的最大收益)</span>' },
+      { num: 11, text: '            <span class="keyword">if</span> <span class="keyword">not</span> node:' },
+      { num: 12, text: '                <span class="keyword">return</span> (<span class="number">0</span>, <span class="number">0</span>)' },
+      { num: 13, text: '            ' },
+      { num: 14, text: '            <span class="comment"># 后序遍历：先计算左右子树</span>' },
+      { num: 15, text: '            left = rob_tree(node.left)' },
+      { num: 16, text: '            right = rob_tree(node.right)' },
+      { num: 17, text: '            ' },
+      { num: 18, text: '            <span class="comment"># 情况1：偷当前节点</span>' },
+      { num: 19, text: '            <span class="comment"># 则不能偷子节点，只能偷孙节点的收益</span>' },
+      { num: 20, text: '            rob_current = node.val + left[<span class="number">1</span>] + right[<span class="number">1</span>]' },
+      { num: 21, text: '            ' },
+      { num: 22, text: '            <span class="comment"># 情况2：不偷当前节点</span>' },
+      { num: 23, text: '            <span class="comment"># 则子节点可偷可不偷，取各自最大值</span>' },
+      { num: 24, text: '            not_rob_current = <span class="built-in">max</span>(left) + <span class="built-in">max</span>(right)' },
+      { num: 25, text: '            ' },
+      { num: 26, text: '            <span class="keyword">return</span> (rob_current, not_rob_current)' },
+      { num: 27, text: '        ' },
+      { num: 28, text: '        <span class="comment"># 最终取根节点偷或不偷的最大值</span>' },
+      { num: 29, text: '        <span class="keyword">return</span> <span class="built-in">max</span>(rob_tree(root))' },
+    ];
+
+    // 步骤与代码行映射
+    const steps = [
+      {
+        title: "步骤1: 递归边界处理",
+        desc: "如果当前节点为空，返回 (0, 0)，表示空树收益为0",
+        line: 11,
+        state: { "node": "None", "return": "(0, 0)" }
+      },
+      {
+        title: "步骤2: 后序遍历左子树",
+        desc: "递归计算左子树，返回 (左偷, 左不偷)",
+        line: 15,
+        state: { "action": "递归调用 rob_tree(node.left)", "wait_for": "左子树结果" }
+      },
+      {
+        title: "步骤3: 后序遍历右子树", 
+        desc: "递归计算右子树，返回 (右偷, 右不偷)",
+        line: 16,
+        state: { "action": "递归调用 rob_tree(node.right)", "wait_for": "右子树结果" }
+      },
+      {
+        title: "步骤4: 计算「偷当前节点」的收益",
+        desc: "当前节点值 + 左子树不偷 + 右子树不偷\n(因为子节点不能偷)",
+        line: 20,
+        state: { "formula": "rob = val + left[1] + right[1]", "condition": "偷当前节点 → 子节点不能偷" }
+      },
+      {
+        title: "步骤5: 计算「不偷当前节点」的收益",
+        desc: "max(左偷, 左不偷) + max(右偷, 右不偷)\n(子节点可偷可不偷，取最优)",
+        line: 24,
+        state: { "formula": "not_rob = max(left) + max(right)", "condition": "不偷当前节点 → 子节点自由选择" }
+      },
+      {
+        title: "步骤6: 返回当前节点的两种状态",
+        desc: "向上层父节点返回 (偷当前, 不偷当前)",
+        line: 26,
+        state: { "return": "(rob_current, not_rob_current)", "upward": "结果传递给父节点" }
+      },
+      {
+        title: "步骤7: 最终结果",
+        desc: "对根节点取 max(偷, 不偷)，即为答案",
+        line: 29,
+        state: { "final": "max(rob_tree(root))", "meaning": "根节点偷或不偷的最大值" }
+      }
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach(line => {
+      const lineDiv = document.createElement('div');
+      lineDiv.className = 'code-line';
+      lineDiv.dataset.line = line.num;
+      lineDiv.innerHTML = `<span class="line-number">${line.num}</span><span>${line.text}</span>`;
+      lineDiv.addEventListener('click', () => highlightStepByLine(line.num));
+      codeBlock.appendChild(lineDiv);
+    });
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const stepDiv = document.createElement('div');
+      stepDiv.className = 'viz-step';
+      stepDiv.dataset.step = idx;
+      stepDiv.innerHTML = `
+        <h4>${step.title}</h4>
+        <p>${step.desc.replace(/\n/g, '<br>')}</p>
+        <div class="state">${Object.entries(step.state).map(([k, v]) => `${k}: ${v}`).join('<br>')}</div>
+      `;
+      stepDiv.addEventListener('click', () => highlightStep(idx));
+      vizSteps.appendChild(stepDiv);
+    });
+
+    // 高亮步骤
+    function highlightStep(stepIdx) {
+      // 清除所有高亮
+      document.querySelectorAll('.viz-step').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+      
+      // 高亮当前步骤
+      const stepEl = document.querySelector(`.viz-step[data-step="${stepIdx}"]`);
+      if (stepEl) stepEl.classList.add('active');
+      
+      // 高亮对应代码行
+      const lineNum = steps[stepIdx].line;
+      const lineEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+      if (lineEl) {
+        lineEl.classList.add('active');
+        lineEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    // 根据代码行高亮步骤
+    function highlightStepByLine(lineNum) {
+      const stepIdx = steps.findIndex(s => s.line === lineNum);
+      if (stepIdx !== -1) {
+        highlightStep(stepIdx);
+      }
+    }
+
+    // 默认高亮第一个步骤
+    highlightStep(0);
+  </script>
+</body>
+</html>

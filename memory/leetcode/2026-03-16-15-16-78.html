@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #78 - 子集</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --secondary: #8b5cf6;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --surface-light: #334155;
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    body { 
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.7;
+    }
+    h1 { 
+      font-size: 2.2rem; 
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+    .subtitle { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 30px; }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px;
+      border: 1px solid var(--surface-light);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .difficulty { 
+      display: inline-block; 
+      padding: 4px 12px; 
+      border-radius: 20px; 
+      font-size: 0.85rem; 
+      font-weight: 600;
+      margin-left: 10px;
+    }
+    .difficulty.medium { background: #f59e0b22; color: #f59e0b; border: 1px solid #f59e0b44; }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 0; 
+      overflow-x: auto;
+      margin: 16px 0;
+      border: 1px solid #30363d;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 4px 20px; 
+      cursor: pointer; 
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+    }
+    .code-line:hover { background: rgba(255,255,255,0.05); }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.2); 
+      border-left-color: var(--primary);
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 40px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.9rem;
+    }
+    .code-content {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.95rem;
+      white-space: pre;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 768px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    .viz-steps { 
+      max-height: 500px; 
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+    .viz-steps::-webkit-scrollbar { width: 6px; }
+    .viz-steps::-webkit-scrollbar-thumb { background: var(--surface-light); border-radius: 3px; }
+    .viz-step { 
+      padding: 14px 16px; 
+      margin: 10px 0; 
+      border-radius: 10px; 
+      background: var(--surface-light); 
+      cursor: pointer; 
+      border: 2px solid transparent;
+      transition: all 0.25s ease;
+    }
+    .viz-step:hover { 
+      transform: translateX(4px);
+      border-color: var(--secondary);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.25);
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+    }
+    .viz-step-title {
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+    }
+    .viz-step-desc {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+    }
+    .viz-state {
+      background: rgba(0,0,0,0.3);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      margin-top: 8px;
+    }
+    .viz-state-label { color: var(--warning); margin-right: 8px; }
+    .code-container h3 { 
+      margin-top: 0; 
+      color: var(--text-muted);
+      font-size: 1rem;
+      font-weight: 500;
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 16px; 
+      border: 1px solid var(--surface-light);
+      transition: all 0.25s ease;
+      text-decoration: none; 
+      color: inherit; 
+      display: block;
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.15);
+    }
+    .problem-card h4 { 
+      margin: 0 0 8px 0; 
+      color: var(--primary);
+      font-size: 1.05rem;
+    }
+    .problem-card p { 
+      margin: 0; 
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    .complexity-table th, .complexity-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--surface-light);
+    }
+    .complexity-table th {
+      color: var(--primary);
+      font-weight: 600;
+      background: rgba(99, 102, 241, 0.1);
+    }
+    .complexity-table tr:hover { background: rgba(255,255,255,0.02); }
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      background: var(--surface-light);
+      margin-right: 6px;
+      color: var(--text-muted);
+    }
+    .highlight-box {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+      border: 1px solid var(--primary);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 16px 0;
+    }
+    .tree-viz {
+      background: #0d1117;
+      border-radius: 8px;
+      padding: 16px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      line-height: 1.8;
+      overflow-x: auto;
+      white-space: pre;
+      color: var(--text-muted);
+    }
+    .tree-node { color: var(--primary); }
+    .tree-choice { color: var(--success); }
+    .tree-skip { color: var(--warning); }
+    /* Syntax highlighting */
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; }
+    .class { color: #ffa657; }
+    .builtin { color: #79c0ff; }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #78 - 子集 <span class="difficulty medium">Medium</span></h1>
+  <div class="subtitle">回溯算法的经典入门题，理解「选或不选」的决策树</div>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给你一个整数数组 <code>nums</code>，数组中的元素 <strong>互不相同</strong>。返回该数组所有可能的子集（幂集）。</p>
+    <p style="margin-top: 16px;"><strong>解集</strong>不能包含重复的子集。你可以按 <strong>任意顺序</strong> 返回解集。</p>
+    
+    <div class="highlight-box">
+      <strong>示例 1：</strong><br>
+      输入：nums = [1,2,3]<br>
+      输出：[[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]<br><br>
+      
+      <strong>示例 2：</strong><br>
+      输入：nums = [0]<br>
+      输出：[[],[0]]
+    </div>
+    
+    <p><strong>提示：</strong></p>
+    <ul>
+      <li><code>1 <= nums.length <= 10</code></li>
+      <li><code>-10 <= nums[i] <= 10</code></li>
+      <li><code>nums</code> 中的所有元素 <strong>互不相同</strong></li>
+    </ul>
+    
+    <div class="highlight-box" style="margin-top: 20px;">
+      <strong>💡 核心思路</strong><br>
+      对于每个元素，我们都有两种选择：<span class="tree-choice">选</span> 或 <span class="tree-skip">不选</span>。<br>
+      n个元素就有 2<sup>n</sup> 种组合，正好对应所有子集的数量。
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🌲 决策树可视化</h2>
+    <p>以 nums = [1, 2, 3] 为例，每个节点的决策如下：</p>
+    <div class="tree-viz">
+                      <span class="tree-node">[]</span>
+                     /    \
+              <span class="tree-choice">选1</span> /      \ <span class="tree-skip">不选1</span>
+                /          \
+             <span class="tree-node">[1]</span>            <span class="tree-node">[]</span>
+            /   \          /   \
+      <span class="tree-choice">选2</span>/     \<span class="tree-skip">不选2</span> <span class="tree-choice">选2</span>/     \<span class="tree-skip">不选2</span>
+        /         \      /         \
+    <span class="tree-node">[1,2]</span>      <span class="tree-node">[1]</span>   <span class="tree-node">[2]</span>        <span class="tree-node">[]</span>
+      / \        / \    / \        / \
+   选3/不\不选3 选3/不\不选3 选3/不\不选3 选3/不\不选3
+    /   \      /   \  /   \      /   \
+[1,2,3][1,2][1,3][1][2,3][2] [3]  []
+    </div>
+    <p style="margin-top: 12px; color: var(--text-muted);">每个叶子节点代表一个子集，共 2<sup>3</sup> = 8 个子集。</p>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程</h2>
+    <p style="color: var(--text-muted); margin-bottom: 16px;">点击左侧步骤或右侧代码行，查看对应关系</p>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <thead>
+        <tr>
+          <th>维度</th>
+          <th>复杂度</th>
+          <th>说明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>时间复杂度</strong></td>
+          <td>O(n × 2<sup>n</sup>)</td>
+          <td>共 2<sup>n</sup> 个子集，每个子集平均长度 n/2，复制到结果需要 O(n)</td>
+        </tr>
+        <tr>
+          <td><strong>空间复杂度</strong></td>
+          <td>O(n)</td>
+          <td>递归栈深度为 n（不考虑存储结果的 O(n × 2<sup>n</sup>) 空间）</td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <div class="highlight-box" style="margin-top: 20px;">
+      <strong>🔍 为什么是 O(n × 2<sup>n</sup>)？</strong><br>
+      子集数量：每个元素选或不选，共 2<sup>n</sup> 个<br>
+      每个子集平均长度：n/2<br>
+      总时间 = 2<sup>n</sup> × O(n) = <strong>O(n × 2<sup>n</sup>)</strong>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🎯 解题技巧总结</h2>
+    <ul>
+      <li><strong>回溯三要素</strong>：路径(path)、选择列表(nums[start:])、结束条件</li>
+      <li><strong>做选择</strong>：path.append(nums[i])</li>
+      <li><strong>撤销选择</strong>：path.pop()（回溯的关键）</li>
+      <li><strong>剪枝优化</strong>：本题无需剪枝，所有路径都是有效解</li>
+      <li><strong>迭代解法</strong>：也可以用迭代，逐个添加元素扩展已有子集</li>
+    </ul>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/subsets-ii/" class="problem-card" target="_blank">
+        <h4>#90 子集 II <span class="tag">Medium</span></h4>
+        <p>包含重复元素的去重子集，重点学习剪枝技巧</p>
+      </a>
+      <a href="https://leetcode.cn/problems/combinations/" class="problem-card" target="_blank">
+        <h4>#77 组合 <span class="tag">Medium</span></h4>
+        <p>限定子集大小为 k，练习回溯参数设计</p>
+      </a>
+      <a href="https://leetcode.cn/problems/permutations/" class="problem-card" target="_blank">
+        <h4>#46 全排列 <span class="tag">Medium</span></h4>
+        <p>元素顺序不同算不同解，used数组标记</p>
+      </a>
+      <a href="https://leetcode.cn/problems/combination-sum/" class="problem-card" target="_blank">
+        <h4>#39 组合总和 <span class="tag">Medium</span></h4>
+        <p>元素可重复选取，start索引不变</p>
+      </a>
+      <a href="https://leetcode.cn/problems/gray-code/" class="problem-card" target="_blank">
+        <h4>#89 格雷编码 <span class="tag">Medium</span></h4>
+        <p>子集的位运算表示，相邻子集只有一位不同</p>
+      </a>
+      <a href="https://leetcode.cn/problems/binary-watch/" class="problem-card" target="_blank">
+        <h4>#401 二进制手表 <span class="tag">Easy</span></h4>
+        <p>位运算枚举子集，组合数学应用</p>
+      </a>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>💻 其他解法</h2>
+    <p><strong>迭代法（非递归）</strong></p>
+    <pre style="padding: 20px;"><code class="code-content"><span class="line-number">1</span><span class="code-content"><span class="keyword">def</span> <span class="function">subsets</span>(<span class="builtin">self</span>, nums: List[<span class="builtin">int</span>]) -> List[List[<span class="builtin">int</span>]]:</span>
+<span class="line-number">2</span><span class="code-content">    result = [[]]  <span class="comment"># 初始：空集</span></span>
+<span class="line-number">3</span><span class="code-content">    <span class="keyword">for</span> num <span class="keyword">in</span> nums:</span>
+<span class="line-number">4</span><span class="code-content">        <span class="comment"># 将当前数字加入所有已有子集，生成新子集</span></span>
+<span class="line-number">5</span><span class="code-content">        new_subsets = [subset + [num] <span class="keyword">for</span> subset <span class="keyword">in</span> result]</span>
+<span class="line-number">6</span><span class="code-content">        result.extend(new_subsets)</span>
+<span class="line-number">7</span><span class="code-content">    <span class="keyword">return</span> result</span></code></pre>
+    
+    <p style="margin-top: 20px;"><strong>位运算法（最优雅）</strong></p>
+    <pre style="padding: 20px;"><code class="code-content"><span class="line-number">1</span><span class="code-content"><span class="keyword">def</span> <span class="function">subsets</span>(<span class="builtin">self</span>, nums: List[<span class="builtin">int</span>]) -> List[List[<span class="builtin">int</span>]]:</span>
+<span class="line-number">2</span><span class="code-content">    n = <span class="builtin">len</span>(nums)</span>
+<span class="line-number">3</span><span class="code-content">    result = []</span>
+<span class="line-number">4</span><span class="code-content">    <span class="comment"># 枚举 0 到 2^n - 1，每个数字代表一个子集</span></span>
+<span class="line-number">5</span><span class="code-content">    <span class="keyword">for</span> mask <span class="keyword">in</span> <span class="builtin">range</span>(<span class="number">1</span> << n):  <span class="comment"># 1 << n = 2^n</span></span>
+<span class="line-number">6</span><span class="code-content">        subset = []</span>
+<span class="line-number">7</span><span class="code-content">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="builtin">range</span>(n):</span>
+<span class="line-number">8</span><span class="code-content">            <span class="keyword">if</span> mask & (1 << i):  <span class="comment"># 第 i 位是否为 1</span></span>
+<span class="line-number">9</span><span class="code-content">                subset.append(nums[i])</span>
+<span class="line-number">10</span><span class="code-content">        result.append(subset)</span>
+<span class="line-number">11</span><span class="code-content">    <span class="keyword">return</span> result</span></code></pre>
+  </div>
+  
+  <script>
+    // Python代码行
+    const codeLines = [
+      {num: 1, code: '<span class="keyword">def</span> <span class="function">subsets</span>(<span class="builtin">self</span>, nums: List[<span class="builtin">int</span>]) -> List[List[<span class="builtin">int</span>]]:'},
+      {num: 2, code: '    result = []  <span class="comment"># 存储所有子集</span>'},
+      {num: 3, code: '    path = []    <span class="comment"># 当前正在构建的子集</span>'},
+      {num: 4, code: ''},
+      {num: 5, code: '    <span class="keyword">def</span> <span class="function">backtrack</span>(start):'},
+      {num: 6, code: '        <span class="comment"># 每次进入都保存当前路径（关键！）</span>'},
+      {num: 7, code: '        result.append(path[:])  <span class="comment"># 复制当前路径</span>'},
+      {num: 8, code: ''},
+      {num: 9, code: '        <span class="comment"># 从start开始尝试每个元素</span>'},
+      {num: 10, code: '        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="builtin">range</span>(start, <span class="builtin">len</span>(nums)):'},
+      {num: 11, code: '            path.append(nums[i])  <span class="comment"># 做选择：选nums[i]</span>'},
+      {num: 12, code: '            backtrack(i + <span class="number">1</span>)     <span class="comment"># 递归，从i+1开始</span>'},
+      {num: 13, code: '            path.pop()            <span class="comment"># 撤销选择：回溯</span>'},
+      {num: 14, code: ''},
+      {num: 15, code: '    backtrack(<span class="number">0</span>)  <span class="comment"># 从索引0开始</span>'},
+      {num: 16, code: '    <span class="keyword">return</span> result'},
+    ];
+    
+    // 执行步骤
+    const steps = [
+      {title: "初始化", desc: "创建结果列表和当前路径", line: 2, state: {result: "[]", path: "[]"}},
+      {title: "开始回溯(0)", desc: "从索引0开始探索", line: 15, state: {start: 0, path: "[]"}},
+      {title: "保存空集", desc: "将当前路径（空集）加入结果", line: 7, state: {result: "[ [] ]", path: "[]"}},
+      {title: "尝试选 nums[0]=1", desc: "将1加入当前路径", line: 11, state: {path: "[1]", choice: "选1"}},
+      {title: "递归回溯(1)", desc: "从索引1继续探索", line: 12, state: {start: 1, path: "[1]"}},
+      {title: "保存[1]", desc: "将当前路径加入结果", line: 7, state: {result: "[ [], [1] ]"}},
+      {title: "尝试选 nums[1]=2", desc: "将2加入当前路径", line: 11, state: {path: "[1,2]", choice: "选2"}},
+      {title: "递归回溯(2)", desc: "从索引2继续探索", line: 12, state: {start: 2, path: "[1,2]"}},
+      {title: "保存[1,2]", desc: "将当前路径加入结果", line: 7, state: {result: "[ [], [1], [1,2] ]"}},
+      {title: "尝试选 nums[2]=3", desc: "将3加入当前路径", line: 11, state: {path: "[1,2,3]", choice: "选3"}},
+      {title: "递归回溯(3)", desc: "start=3超出范围，直接返回", line: 12, state: {start: 3}},
+      {title: "保存[1,2,3]", desc: "将当前路径加入结果", line: 7, state: {result: "+ [1,2,3]"}},
+      {title: "撤销选3", desc: "回溯，path恢复为[1,2]", line: 13, state: {path: "[1,2]", action: "回溯"}},
+      {title: "循环结束(i=2)", desc: "索引2已处理完毕", line: 10},
+      {title: "撤销选2", desc: "回溯，path恢复为[1]", line: 13, state: {path: "[1]", action: "回溯"}},
+      {title: "尝试选 nums[2]=3", desc: "从[1]开始，尝试选3", line: 11, state: {path: "[1,3]"}},
+      {title: "保存[1,3]", desc: "将当前路径加入结果", line: 7, state: {result: "+ [1,3]"}},
+      {title: "撤销选3", desc: "回溯，path恢复为[1]", line: 13, state: {path: "[1]", action: "回溯"}},
+      {title: "撤销选1", desc: "回溯，path恢复为空", line: 13, state: {path: "[]", action: "回溯"}},
+      {title: "尝试选 nums[1]=2", desc: "从空开始，尝试选2", line: 11, state: {path: "[2]"}},
+      {title: "继续探索...", desc: "递归生成[2], [2,3]", line: 12},
+      {title: "尝试选 nums[2]=3", desc: "从空开始，尝试选3", line: 11, state: {path: "[3]"}},
+      {title: "完成", desc: "所有子集生成完毕，返回结果", line: 16, state: {result: "8个子集"}},
+    ];
+    
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach(({num, code}) => {
+      const lineDiv = document.createElement('div');
+      lineDiv.className = 'code-line';
+      lineDiv.dataset.line = num;
+      lineDiv.innerHTML = `<span class="line-number">${num}</span><span class="code-content">${code}</span>`;
+      lineDiv.addEventListener('click', () => highlightStepByLine(num));
+      codeBlock.appendChild(lineDiv);
+    });
+    
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const stepDiv = document.createElement('div');
+      stepDiv.className = 'viz-step';
+      stepDiv.dataset.index = idx;
+      stepDiv.dataset.line = step.line;
+      stepDiv.innerHTML = `
+        <div class="viz-step-title">步骤 ${idx + 1}: ${step.title}</div>
+        <div class="viz-step-desc">${step.desc}</div>
+        ${step.state ? `<div class="viz-state"><span class="viz-state-label">状态:</span>${JSON.stringify(step.state).slice(1,-1).replace(/"/g, '').replace(/,/g, ', ')}</div>` : ''}
+      `;
+      stepDiv.addEventListener('click', () => highlightStep(idx));
+      vizSteps.appendChild(stepDiv);
+    });
+    
+    // 高亮步骤
+    function highlightStep(index) {
+      document.querySelectorAll('.viz-step').forEach((el, i) => {
+        el.classList.toggle('active', i === index);
+      });
+      const line = steps[index].line;
+      document.querySelectorAll('.code-line').forEach(el => {
+        el.classList.toggle('active', parseInt(el.dataset.line) === line);
+      });
+      // 滚动到视图
+      steps[index].line && document.querySelector(`.code-line[data-line="${line}"]`)?.scrollIntoView({behavior: 'smooth', block: 'center'});
+    }
+    
+    // 通过代码行高亮步骤
+    function highlightStepByLine(lineNum) {
+      const stepIndex = steps.findIndex(s => s.line === lineNum);
+      if (stepIndex !== -1) {
+        highlightStep(stepIndex);
+        vizSteps.children[stepIndex]?.scrollIntoView({behavior: 'smooth', block: 'center'});
+      }
+    }
+    
+    // 默认高亮第一步
+    highlightStep(0);
+  </script>
+</body>
+</html>

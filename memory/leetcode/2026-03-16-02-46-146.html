@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #146 - LRU缓存</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0f1419;
+      --bg-secondary: #161b22;
+      --bg-tertiary: #21262d;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --accent: #58a6ff;
+      --accent-hover: #79b8ff;
+      --success: #238636;
+      --success-bg: rgba(35, 134, 54, 0.15);
+      --warning: #f0883e;
+      --warning-bg: rgba(240, 136, 62, 0.15);
+      --danger: #f85149;
+      --danger-bg: rgba(248, 81, 73, 0.15);
+      --border: #30363d;
+      --code-bg: #1c2128;
+      --highlight: rgba(88, 166, 255, 0.1);
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.7;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 40px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 30px;
+    }
+    
+    .problem-number {
+      display: inline-block;
+      background: var(--accent);
+      color: var(--bg-primary);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: 15px;
+    }
+    
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+    
+    .difficulty {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: var(--warning-bg);
+      color: var(--warning);
+    }
+    
+    .tags {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .tag {
+      background: var(--bg-tertiary);
+      padding: 5px 12px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+    
+    /* Sections */
+    .section {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 28px;
+      margin-bottom: 24px;
+      border: 1px solid var(--border);
+    }
+    
+    .section h2 {
+      font-size: 1.4rem;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .section h3 {
+      font-size: 1.1rem;
+      color: var(--accent);
+      margin: 20px 0 12px;
+    }
+    
+    /* Description */
+    .description {
+      font-size: 1.05rem;
+      color: var(--text-primary);
+      padding: 20px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      border-left: 4px solid var(--accent);
+    }
+    
+    .example {
+      margin: 20px 0;
+      padding: 16px 20px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+    }
+    
+    .example h4 {
+      color: var(--accent);
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+    }
+    
+    .example pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+    
+    .example .explanation {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    
+    /* Accordion */
+    .accordion {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    
+    .accordion-header {
+      background: var(--bg-tertiary);
+      padding: 16px 20px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.2s;
+    }
+    
+    .accordion-header:hover {
+      background: var(--highlight);
+    }
+    
+    .accordion-header h4 {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    
+    .accordion-icon {
+      transition: transform 0.3s;
+      font-size: 1.2rem;
+      color: var(--accent);
+    }
+    
+    .accordion.open .accordion-icon {
+      transform: rotate(180deg);
+    }
+    
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+      background: var(--bg-secondary);
+    }
+    
+    .accordion.open .accordion-content {
+      max-height: 1000px;
+    }
+    
+    .accordion-body {
+      padding: 20px;
+    }
+    
+    /* Visualization */
+    .visualization {
+      background: var(--code-bg);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 20px 0;
+      font-family: 'JetBrains Mono', monospace;
+      overflow-x: auto;
+    }
+    
+    .viz-title {
+      text-align: center;
+      color: var(--accent);
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+    
+    .cache-structure {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+    
+    .hash-table, .doubly-linked-list {
+      background: var(--bg-tertiary);
+      padding: 20px;
+      border-radius: 8px;
+      border: 2px solid var(--accent);
+    }
+    
+    .structure-label {
+      text-align: center;
+      margin-bottom: 15px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    
+    .hash-entry {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 8px 0;
+      padding: 8px 12px;
+      background: var(--bg-secondary);
+      border-radius: 4px;
+    }
+    
+    .key { color: var(--warning); }
+    .pointer { color: var(--accent); }
+    .value { color: var(--success); }
+    
+    .dll-visual {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+    
+    .node {
+      padding: 10px 14px;
+      background: var(--bg-secondary);
+      border: 2px solid var(--border);
+      text-align: center;
+      min-width: 60px;
+    }
+    
+    .node.head { border-color: var(--success); }
+    .node.tail { border-color: var(--danger); }
+    .node.recently-used { background: var(--success-bg); }
+    
+    .arrow {
+      color: var(--accent);
+      font-size: 1.2rem;
+      margin: 0 5px;
+    }
+    
+    .dll-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+    
+    /* Operation Steps */
+    .operation-steps {
+      margin-top: 20px;
+    }
+    
+    .step {
+      display: flex;
+      gap: 15px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .step:last-child { border-bottom: none; }
+    
+    .step-num {
+      width: 28px;
+      height: 28px;
+      background: var(--accent);
+      color: var(--bg-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    
+    .step-content {
+      flex: 1;
+    }
+    
+    .step-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    
+    .step-desc {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    
+    /* Code Block */
+    .code-block {
+      position: relative;
+      background: var(--code-bg);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    
+    .code-header {
+      background: var(--bg-tertiary);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .code-lang {
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    
+    pre {
+      margin: 0;
+      padding: 20px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    code {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    
+    .line-numbers {
+      display: table;
+      width: 100%;
+    }
+    
+    .line {
+      display: table-row;
+    }
+    
+    .line-num {
+      display: table-cell;
+      width: 40px;
+      color: var(--text-secondary);
+      text-align: right;
+      padding-right: 20px;
+      user-select: none;
+      border-right: 1px solid var(--border);
+    }
+    
+    .line-content {
+      display: table-cell;
+      padding-left: 20px;
+      white-space: pre;
+    }
+    
+    /* Syntax Highlighting */
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .class-name { color: #ffa657; }
+    .string { color: #a5d6ff; }
+    .comment { color: #8b949e; font-style: italic; }
+    .number { color: #79c0ff; }
+    .builtin { color: #ff7b72; }
+    .operator { color: #ff7b72; }
+    
+    /* Complexity Table */
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    
+    .complexity-table th,
+    .complexity-table td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .complexity-table th {
+      background: var(--bg-tertiary);
+      font-weight: 600;
+      color: var(--accent);
+    }
+    
+    .complexity-table tr:hover {
+      background: var(--highlight);
+    }
+    
+    .time-good { color: var(--success); font-weight: 600; }
+    .time-ok { color: var(--warning); font-weight: 600; }
+    
+    /* Similar Problems */
+    .problem-list {
+      display: grid;
+      gap: 12px;
+    }
+    
+    .problem-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 16px 20px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+    
+    .problem-item:hover {
+      border-color: var(--accent);
+      transform: translateX(5px);
+    }
+    
+    .problem-id {
+      background: var(--accent);
+      color: var(--bg-primary);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+    
+    .problem-info {
+      flex: 1;
+    }
+    
+    .problem-title {
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+    
+    .problem-tags {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+    
+    .problem-difficulty {
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .difficulty-easy { background: var(--success-bg); color: var(--success); }
+    .difficulty-medium { background: var(--warning-bg); color: var(--warning); }
+    .difficulty-hard { background: var(--danger-bg); color: var(--danger); }
+    
+    /* Key Insight Box */
+    .insight-box {
+      background: var(--success-bg);
+      border: 1px solid var(--success);
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    
+    .insight-box h4 {
+      color: var(--success);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 30px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      border-top: 1px solid var(--border);
+      margin-top: 20px;
+    }
+    
+    /* Animation for visualization */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    
+    .highlight-node {
+      animation: pulse 1.5s ease-in-out infinite;
+      border-color: var(--accent) !important;
+      box-shadow: 0 0 10px rgba(88, 166, 255, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="problem-number">LeetCode #146</div>
+      <h1>LRU 缓存</h1>
+      <span class="difficulty">Medium</span>
+      <div class="tags">
+        <span class="tag">🎨 设计</span>
+        <span class="tag">🗂️ 哈希表</span>
+        <span class="tag">🔗 双向链表</span>
+        <span class="tag">⚡ O(1) 操作</span>
+      </div>
+    </header>
+
+    <!-- Problem Description -->
+    <div class="section">
+      <h2>📋 题目描述</h2>
+      <div class="description">
+        请你设计并实现一个满足 <strong>LRU (最近最少使用) 缓存</strong> 约束的数据结构。
+        <br><br>
+        实现 <code>LRUCache</code> 类：
+        <ul style="margin: 10px 0; padding-left: 25px;">
+          <li><code>LRUCache(int capacity)</code> 以 <strong>正整数</strong> 作为容量 <code>capacity</code> 初始化 LRU 缓存</li>
+          <li><code>int get(int key)</code> 如果关键字 <code>key</code> 存在于缓存中，则返回关键字的值，否则返回 <code>-1</code></li>
+          <li><code>void put(int key, int value)</code> 如果关键字 <code>key</code> 已经存在，则变更其数据值 <code>value</code>；如果不存在，则向缓存中插入该组 <code>key-value</code>。如果插入操作导致关键字数量超过 <code>capacity</code> ，则应该 <strong>逐出</strong> 最久未使用的关键字。</li>
+        </ul>
+        函数 <code>get</code> 和 <code>put</code> 必须以 <code>O(1)</code> 的平均时间复杂度运行。
+      </div>
+      
+      <div class="example">
+        <h4>📌 示例</h4>
+        <pre>输入
+["LRUCache", "put", "put", "get", "put", "get", "put", "get", "get", "get"]
+[[2], [1, 1], [2, 2], [1], [3, 3], [2], [4, 4], [1], [3], [4]]
+
+输出
+[null, null, null, 1, null, -1, null, -1, 3, 4]</pre>
+        <div class="explanation">
+          <strong>解释</strong><br>
+          LRUCache lRUCache = new LRUCache(2);<br>
+          lRUCache.put(1, 1); // 缓存是 {1=1}<br>
+          lRUCache.put(2, 2); // 缓存是 {1=1, 2=2}<br>
+          lRUCache.get(1);    // 返回 1，缓存变为 {2=2, 1=1}<br>
+          lRUCache.put(3, 3); // 逐出 key 2，缓存是 {1=1, 3=3}<br>
+          lRUCache.get(2);    // 返回 -1 (未找到)<br>
+          lRUCache.put(4, 4); // 逐出 key 1，缓存是 {3=3, 4=4}<br>
+          lRUCache.get(1);    // 返回 -1 (未找到)<br>
+          lRUCache.get(3);    // 返回 3，缓存变为 {4=4, 3=3}<br>
+          lRUCache.get(4);    // 返回 4，缓存变为 {3=3, 4=4}
+        </div>
+      </div>
+    </div>
+
+    <!-- Solution Approach -->
+    <div class="section">
+      <h2>💡 解题思路</h2>
+      
+      <div class="insight-box">
+        <h4>💡 核心洞察</h4>
+        LRU缓存的核心矛盾：需要同时支持 <strong>O(1) 查找</strong> 和 <strong>O(1) 移动/删除</strong>。<br>
+        单一数据结构无法满足，因此采用 <strong>哈希表 + 双向链表</strong> 的组合策略。
+      </div>
+
+      <!-- Accordion for step-by-step -->
+      <div class="accordion open">
+        <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+          <h4>🔍 为什么需要两种数据结构？</h4>
+          <span class="accordion-icon">▼</span>
+        </div>
+        <div class="accordion-content">
+          <div class="accordion-body">
+            <table class="complexity-table">
+              <tr>
+                <th>数据结构</th>
+                <th>查找</th>
+                <th>插入/删除</th>
+                <th>维护访问顺序</th>
+              </tr>
+              <tr>
+                <td>数组</td>
+                <td>O(n)</td>
+                <td>O(n)</td>
+                <td>❌ 困难</td>
+              </tr>
+              <tr>
+                <td>普通链表</td>
+                <td>O(n)</td>
+                <td>O(1)*</td>
+                <td>✅ 容易</td>
+              </tr>
+              <tr>
+                <td>哈希表</td>
+                <td class="time-good">O(1)</td>
+                <td class="time-good">O(1)</td>
+                <td>❌ 无顺序</td>
+              </tr>
+              <tr>
+                <td><strong>哈希 + 双向链表</strong></td>
+                <td class="time-good">O(1)</td>
+                <td class="time-good">O(1)</td>
+                <td>✅ 完美</td>
+              </tr>
+            </table>
+            <p style="margin-top: 15px; color: var(--text-secondary);">
+              *链表插入删除是O(1)，但需要先找到节点，所以单独使用仍是O(n)
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visualization -->
+      <h3>🎯 数据结构可视化</h3>
+      <div class="visualization">
+        <div class="viz-title">LRU缓存结构示意图</div>
+        <div class="cache-structure">
+          <!-- Hash Table -->
+          <div class="hash-table">
+            <div class="structure-label">哈希表 (HashMap)</div>
+            <div class="hash-entry">
+              <span class="key">key: 1</span>
+              <span class="operator">→</span>
+              <span class="pointer">Node(1,10)</span>
+            </div>
+            <div class="hash-entry">
+              <span class="key">key: 2</span>
+              <span class="operator">→</span>
+              <span class="pointer">Node(2,20)</span>
+            </div>
+            <div class="hash-entry">
+              <span class="key">key: 3</span>
+              <span class="operator">→</span>
+              <span class="pointer">Node(3,30)</span>
+            </div>
+          </div>
+          
+          <!-- Doubly Linked List -->
+          <div class="doubly-linked-list">
+            <div class="structure-label">双向链表 (访问顺序)</div>
+            <div class="dll-visual">
+              <div class="node head recently-used">1:10</div>
+              <span class="arrow">⇄</span>
+              <div class="node">2:20</div>
+              <span class="arrow">⇄</span>
+              <div class="node tail">3:30</div>
+            </div>
+            <div class="dll-labels">
+              <span>👆 最近使用 (MRU)</span>
+              <span>最久未使用 (LRU) 👇</span>
+            </div>
+          </div>
+        </div>
+        
+        <div style="margin-top: 20px; padding: 15px; background: var(--bg-secondary); border-radius: 8px; font-size: 0.9rem;">
+          <strong>🔗 协作原理：</strong><br>
+          哈希表负责 <span class="key">O(1) 定位</span> 节点 → 双向链表负责 <span class="pointer">O(1) 调整顺序</span><br>
+          头节点 = 最近使用 (Most Recently Used)<br>
+          尾节点 = 最久未使用 (Least Recently Used) → 淘汰候选
+        </div>
+      </div>
+
+      <!-- Operations -->
+      <h3>⚙️ 操作步骤详解</h3>
+      <div class="operation-steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <div class="step-title">Get 操作 - 获取值</div>
+            <div class="step-desc">
+              ① 哈希表查找key → 不存在返回-1<br>
+              ② 存在则取出节点，移动到链表头部（标记为最近使用）<br>
+              ③ 返回节点值
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <div class="step-title">Put 操作 - 插入/更新</div>
+            <div class="step-desc">
+              ① key已存在？→ 更新值，移动到头部<br>
+              ② key不存在？→ 创建新节点，插入头部<br>
+              ③ 检查容量：超出则删除尾部节点（最久未使用）
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <div class="step-title">MoveToHead - 移到头部</div>
+            <div class="step-desc">
+              ① 从当前位置删除节点（修改前后指针）<br>
+              ② 插入到头部（头节点的next位置）<br>
+              时间复杂度：O(1)
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <div class="step-title">RemoveTail - 淘汰尾部</div>
+            <div class="step-desc">
+              ① 获取尾节点（tail.prev）<br>
+              ② 从链表和哈希表中删除<br>
+              ③ 返回被删除的key（用于清理哈希表）
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Implementation -->
+    <div class="section">
+      <h2>📝 代码实现</h2>
+      
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">Python3</span>
+          <span style="color: var(--text-secondary); font-size: 0.8rem;">执行用时: 180ms | 内存消耗: 80MB</span>
+        </div>
+        <div class="line-numbers">
+          <div class="line"><div class="line-num">1</div><div class="line-content"><span class="keyword">class</span> <span class="class-name">DLinkedNode</span>:</div></div>
+          <div class="line"><div class="line-num">2</div><div class="line-content">    <span class="string">"""双向链表节点"""</span></div></div>
+          <div class="line"><div class="line-num">3</div><div class="line-content">    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="builtin">self</span>, key=<span class="number">0</span>, value=<span class="number">0</span>):</div></div>
+          <div class="line"><div class="line-num">4</div><div class="line-content">        <span class="builtin">self</span>.key = key      <span class="comment"># 用于删除时定位哈希表</span></div></div>
+          <div class="line"><div class="line-num">5</div><div class="line-content">        <span class="builtin">self</span>.value = value</div></div>
+          <div class="line"><div class="line-num">6</div><div class="line-content">        <span class="builtin">self</span>.prev = <span class="builtin">None</span>  <span class="comment"># 前驱指针</span></div></div>
+          <div class="line"><div class="line-num">7</div><div class="line-content">        <span class="builtin">self</span>.<span class="builtin">next</span> = <span class="builtin">None</span>  <span class="comment"># 后继指针</span></div></div>
+          <div class="line"><div class="line-num">8</div><div class="line-content"></div></div>
+          <div class="line"><div class="line-num">9</div><div class="line-content"><span class="keyword">class</span> <span class="class-name">LRUCache</span>:</div></div>
+          <div class="line"><div class="line-num">10</div><div class="line-content">    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="builtin">self</span>, capacity: <span class="builtin">int</span>):</div></div>
+          <div class="line"><div class="line-num">11</div><div class="line-content">        <span class="builtin">self</span>.cache = {}           <span class="comment"># 哈希表: key → node</span></div></div>
+          <div class="line"><div class="line-num">12</div><div class="line-content">        <span class="builtin">self</span>.capacity = capacity  <span class="comment"># 最大容量</span></div></div>
+          <div class="line"><div class="line-num">13</div><div class="line-content">        <span class="builtin">self</span>.size = <span class="number">0</span>             <span class="comment"># 当前节点数</span></div></div>
+          <div class="line"><div class="line-num">14</div><div class="line-content">        </div></div>
+          <div class="line"><div class="line-num">15</div><div class="line-content">        <span class="comment"># 使用伪头部和伪尾部节点简化边界处理</span></div></div>
+          <div class="line"><div class="line-num">16</div><div class="line-content">        <span class="builtin">self</span>.head = DLinkedNode()  <span class="comment"># 伪头部</span></div></div>
+          <div class="line"><div class="line-num">17</div><div class="line-content">        <span class="builtin">self</span>.tail = DLinkedNode()  <span class="comment"># 伪尾部</span></div></div>
+          <div class="line"><div class="line-num">18</div><div class="line-content">        <span class="builtin">self</span>.head.<span class="builtin">next</span> = <span class="builtin">self</span>.tail</div></div>
+          <div class="line"><div class="line-num">19</div><div class="line-content">        <span class="builtin">self</span>.tail.prev = <span class="builtin">self</span>.head</div></div>
+          <div class="line"><div class="line-num">20</div><div class="line-content"></div></div>
+          <div class="line"><div class="line-num">21</div><div class="line-content">    <span class="keyword">def</span> <span class="function">get</span>(<span class="builtin">self</span>, key: <span class="builtin">int</span>) -> <span class="builtin">int</span>:</div></div>
+          <div class="line"><div class="line-num">22</div><div class="line-content">        <span class="string">"""获取值，并将节点移到头部"""</span></div></div>
+          <div class="line"><div class="line-num">23</div><div class="line-content">        <span class="keyword">if</span> key <span class="operator">not</span> <span class="keyword">in</span> <span class="builtin">self</span>.cache:</div></div>
+          <div class="line"><div class="line-num">24</div><div class="line-content">            <span class="keyword">return</span> -<span class="number">1</span></div></div>
+          <div class="line"><div class="line-num">25</div><div class="line-content">        </div></div>
+          <div class="line"><div class="line-num">26</div><div class="line-content">        node = <span class="builtin">self</span>.cache[key]</div></div>
+          <div class="line"><div class="line-num">27</div><div class="line-content">        <span class="builtin">self</span>._move_to_head(node)  <span class="comment"># O(1) 移到头部</span></div></div>
+          <div class="line"><div class="line-num">28</div><div class="line-content">        <span class="keyword">return</span> node.value</div></div>
+          <div class="line"><div class="line-num">29</div><div class="line-content"></div></div>
+          <div class="line"><div class="line-num">30</div><div class="line-content">    <span class="keyword">def</span> <span class="function">put</span>(<span class="builtin">self</span>, key: <span class="builtin">int</span>, value: <span class="builtin">int</span>) -> <span class="builtin">None</span>:</div></div>
+          <div class="line"><div class="line-num">31</div><div class="line-content">        <span class="string">"""插入或更新值"""</span></div></div>
+          <div class="line"><div class="line-num">32</div><div class="line-content">        <span class="keyword">if</span> key <span class="operator">not</span> <span class="keyword">in</span> <span class="builtin">self</span>.cache:</div></div>
+          <div class="line"><div class="line-num">33</div><div class="line-content">            <span class="comment"># 创建新节点</span></div></div>
+          <div class="line"><div class="line-num">34</div><div class="line-content">            new_node = DLinkedNode(key, value)</div></div>
+          <div class="line"><div class="line-num">35</div><div class="line-content">            <span class="builtin">self</span>.cache[key] = new_node</div></div>
+          <div class="line"><div class="line-num">36</div><div class="line-content">            <span class="builtin">self</span>._add_to_head(new_node)</div></div>
+          <div class="line"><div class="line-num">37</div><div class="line-content">            <span class="builtin">self</span>.size += <span class="number">1</span></div></div>
+          <div class="line"><div class="line-num">38</div><div class="line-content">            </div></div>
+          <div class="line"><div class="line-num">39</div><div class="line-content">            <span class="comment"># 超出容量，淘汰尾部</span></div></div>
+          <div class="line"><div class="line-num">40</div><div class="line-content">            <span class="keyword">if</span> <span class="builtin">self</span>.size > <span class="builtin">self</span>.capacity:</div></div>
+          <div class="line"><div class="line-num">41</div><div class="line-content">                tail = <span class="builtin">self</span>._remove_tail()</div></div>
+          <div class="line"><div class="line-num">42</div><div class="line-content">                <span class="keyword">del</span> <span class="builtin">self</span>.cache[tail.key]</div></div>
+          <div class="line"><div class="line-num">43</div><div class="line-content">                <span class="builtin">self</span>.size -= <span class="number">1</span></div></div>
+          <div class="line"><div class="line-num">44</div><div class="line-content">        <span class="keyword">else</span>:</div></div>
+          <div class="line"><div class="line-num">45</div><div class="line-content">            <span class="comment"># 更新已有节点</span></div></div>
+          <div class="line"><div class="line-num">46</div><div class="line-content">            node = <span class="builtin">self</span>.cache[key]</div></div>
+          <div class="line"><div class="line-num">47</div><div class="line-content">            node.value = value</div></div>
+          <div class="line"><div class="line-num">48</div><div class="line-content">            <span class="builtin">self</span>._move_to_head(node)</div></div>
+          <div class="line"><div class="line-num">49</div><div class="line-content"></div></div>
+          <div class="line"><div class="line-num">50</div><div class="line-content">    <span class="comment"># ========== 辅助方法 ==========</span></div></div>
+          <div class="line"><div class="line-num">51</div><div class="line-content">    </div></div>
+          <div class="line"><div class="line-num">52</div><div class="line-content">    <span class="keyword">def</span> <span class="function">_add_to_head</span>(<span class="builtin">self</span>, node):</div></div>
+          <div class="line"><div class="line-num">53</div><div class="line-content">        <span class="string">"""将节点添加到头部（伪头之后）"""</span></div></div>
+          <div class="line"><div class="line-num">54</div><div class="line-content">        node.prev = <span class="builtin">self</span>.head</div></div>
+          <div class="line"><div class="line-num">55</div><div class="line-content">        node.<span class="builtin">next</span> = <span class="builtin">self</span>.head.<span class="builtin">next</span></div></div>
+          <div class="line"><div class="line-num">56</div><div class="line-content">        <span class="builtin">self</span>.head.<span class="builtin">next</span>.prev = node</div></div>
+          <div class="line"><div class="line-num">57</div><div class="line-content">        <span class="builtin">self</span>.head.<span class="builtin">next</span> = node</div></div>
+          <div class="line"><div class="line-num">58</div><div class="line-content"></div></div>
+          <div class="line"><div class="line-num">59</div><div class="line-content">    <span class="keyword">def</span> <span class="function">_remove_node</span>(<span class="builtin">self</span>, node):</div></div>
+          <div class="line"><div class="line-num">60</div><div class="line-content">        <span class="string">"""从链表中移除节点"""</span></div></div>
+          <div class="line"><div class="line-num">61</div><div class="line-content">        node.prev.<span class="builtin">next</span> = node.<span class="builtin">next</span></div></div>
+          <div class="line"><div class="line-num">62</div><div class="line-content">        node.<span class="builtin">next</span>.prev = node.prev</div></div>
+          <div class="line"><div class="line-num">63</div><div class="line-content"></div></div>
+          <div class="line"><div class="line-num">64</div><div class="line-content">    <span class="keyword">def</span> <span class="function">_move_to_head</span>(<span class="builtin">self</span>, node):</div></div>
+          <div class="line"><div class="line-num">65</div><div class="line-content">        <span class="string">"""将节点移到头部：先删除，再添加"""</span></div></div>
+          <div class="line"><div class="line-num">66</div><div class="line-content">        <span class="builtin">self</span>._remove_node(node)</div></div>
+          <div class="line"><div class="line-num">67</div><div class="line-content">        <span class="builtin">self</span>._add_to_head(node)</div></div>
+          <div class="line"><div class="line-num">68</div><div class="line-content"></div></div>
+          <div class="line"><div class="line-num">69</div><div class="line-content">    <span class="keyword">def</span> <span class="function">_remove_tail</span>(<span class="builtin">self</span>):</div></div>
+          <div class="line"><div class="line-num">70</div><div class="line-content">        <span class="string">"""移除并返回尾节点（伪尾之前）"""</span></div></div>
+          <div class="line"><div class="line-num">71</div><div class="line-content">        node = <span class="builtin">self</span>.tail.prev</div></div>
+          <div class="line"><div class="line-num">72</div><div class="line-content">        <span class="builtin">self</span>._remove_node(node)</div></div>
+          <div class="line"><div class="line-num">73</div><div class="line-content">        <span class="keyword">return</span> node</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Complexity Analysis -->
+    <div class="section">
+      <h2>📊 复杂度分析</h2>
+      <table class="complexity-table">
+        <tr>
+          <th>操作</th>
+          <th>时间复杂度</th>
+          <th>空间复杂度</th>
+          <th>说明</th>
+        </tr>
+        <tr>
+          <td><code>get</code></td>
+          <td class="time-good">O(1)</td>
+          <td>O(1)</td>
+          <td>哈希查找O(1) + 链表移动O(1)</td>
+        </tr>
+        <tr>
+          <td><code>put</code></td>
+          <td class="time-good">O(1)</td>
+          <td>O(1)</td>
+          <td>哈希插入O(1) + 链表操作O(1)</td>
+        </tr>
+        <tr>
+          <td>总体空间</td>
+          <td>-</td>
+          <td class="time-ok">O(capacity)</td>
+          <td>哈希表 + 链表，最多capacity个节点</td>
+        </tr>
+      </table>
+      
+      <div class="insight-box" style="margin-top: 20px;">
+        <h4>🎯 为什么使用双向链表而非单向链表？</h4>
+        删除节点时需要知道前驱节点。单向链表需要从头遍历找前驱（O(n)），双向链表直接通过 <code>prev</code> 指针获取（O(1)）。
+      </div>
+    </div>
+
+    <!-- Similar Problems -->
+    <div class="section">
+      <h2>🔗 类似题目推荐</h2>
+      <div class="problem-list">
+        <div class="problem-item">
+          <span class="problem-id">460</span>
+          <div class="problem-info">
+            <div class="problem-title">LFU 缓存</div>
+            <div class="problem-tags">设计 · 哈希表 · 双向链表</div>
+          </div>
+          <span class="problem-difficulty difficulty-hard">Hard</span>
+        </div>
+        <div class="problem-item">
+          <span class="problem-id">432</span>
+          <div class="problem-info">
+            <div class="problem-title">全 O(1) 的数据结构</div>
+            <div class="problem-tags">设计 · 哈希表 · 双向链表</div>
+          </div>
+          <span class="problem-difficulty difficulty-hard">Hard</span>
+        </div>
+        <div class="problem-item">
+          <span class="problem-id">155</span>
+          <div class="problem-info">
+            <div class="problem-title">最小栈</div>
+            <div class="problem-tags">栈 · 设计</div>
+          </div>
+          <span class="problem-difficulty difficulty-medium">Medium</span>
+        </div>
+        <div class="problem-item">
+          <span class="problem-id">380</span>
+          <div class="problem-info">
+            <div class="problem-title">O(1) 时间插入、删除和获取随机元素</div>
+            <div class="problem-tags">设计 · 哈希表 · 数组</div>
+          </div>
+          <span class="problem-difficulty difficulty-medium">Medium</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>LeetCode 每日精讲 · 第35期</p>
+      <p>生成时间: 2026-03-16 02:46 (Asia/Shanghai)</p>
+      <p style="margin-top: 10px; color: var(--accent);">哈希表 + 双向链表 = 完美LRU</p>
+    </footer>
+  </div>
+
+  <script>
+    // 自动展开第一个accordion
+    document.querySelectorAll('.accordion').forEach((acc, index) => {
+      if (index === 0) acc.classList.add('open');
+    });
+  </script>
+</body>
+</html>

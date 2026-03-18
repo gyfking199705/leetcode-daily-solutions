@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #110 - 平衡二叉树</title>
+  <style>
+    :root { --primary: #6366f1; --bg: #0f172a; --surface: #1e293b; --text: #f1f5f9; --accent: #22d3ee; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); max-width: 1000px; margin: 0 auto; padding: 40px 20px; line-height: 1.7; }
+    .section { background: var(--surface); border-radius: 16px; padding: 28px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .section h2 { color: var(--primary); margin-top: 0; display: flex; align-items: center; gap: 10px; }
+    .difficulty { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+    .difficulty-easy { background: #22c55e; color: #fff; }
+    .difficulty-medium { background: #f59e0b; color: #fff; }
+    .difficulty-hard { background: #ef4444; color: #fff; }
+    pre { background: #0d1117; border-radius: 12px; padding: 20px; overflow-x: auto; margin: 15px 0; }
+    .code-line { display: flex; padding: 3px 0; cursor: pointer; transition: all 0.2s; border-radius: 0 4px 4px 0; }
+    .code-line:hover { background: rgba(255,255,255,0.05); }
+    .code-line.active { background: rgba(99, 102, 241, 0.3); border-left: 3px solid var(--primary); margin-left: -3px; }
+    .line-number { color: #484f58; min-width: 40px; text-align: right; padding-right: 16px; user-select: none; }
+    .viz-container { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 20px 0; }
+    @media (max-width: 768px) { .viz-container { grid-template-columns: 1fr; } }
+    .viz-step { padding: 14px 16px; margin: 10px 0; border-radius: 10px; background: #334155; cursor: pointer; border: 2px solid transparent; transition: all 0.3s ease; }
+    .viz-step:hover { background: #475569; transform: translateX(4px); }
+    .viz-step.active { border-color: var(--primary); background: rgba(99, 102, 241, 0.25); box-shadow: 0 0 15px rgba(99, 102, 241, 0.3); }
+    .viz-step-title { font-weight: bold; color: var(--accent); margin-bottom: 4px; }
+    .viz-step-desc { font-size: 13px; color: #94a3b8; }
+    .state-display { background: #1a2234; padding: 12px; border-radius: 8px; margin-top: 10px; font-family: monospace; font-size: 12px; }
+    .state-item { display: flex; justify-content: space-between; margin: 4px 0; }
+    .state-label { color: #8b949e; }
+    .state-value { color: var(--accent); }
+    .code-container h3 { color: var(--primary); margin-bottom: 12px; }
+    .problem-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .problem-card { background: var(--bg); border-radius: 12px; padding: 18px; border: 1px solid #475569; transition: all 0.3s; text-decoration: none; color: inherit; }
+    .problem-card:hover { border-color: var(--primary); transform: translateY(-4px); box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2); }
+    .problem-id { font-size: 12px; color: var(--primary); font-weight: bold; }
+    .problem-title { font-size: 16px; font-weight: 600; margin: 8px 0; }
+    .problem-tag { font-size: 12px; color: #94a3b8; }
+    .complexity-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    .complexity-table th, .complexity-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #334155; }
+    .complexity-table th { color: var(--primary); font-weight: 600; }
+    .tree-visual { font-family: monospace; line-height: 1.2; font-size: 14px; background: #0d1117; padding: 20px; border-radius: 10px; margin: 15px 0; }
+    .tree-node { display: inline-block; width: 28px; height: 28px; line-height: 28px; text-align: center; border-radius: 50%; background: var(--surface); margin: 2px; transition: all 0.3s; }
+    .tree-node.highlight { background: var(--primary); color: white; transform: scale(1.1); box-shadow: 0 0 10px var(--primary); }
+    .tree-node.balance-ok { background: #22c55e; color: white; }
+    .tree-node.balance-fail { background: #ef4444; color: white; }
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; font-style: italic; }
+    .class { color: #ffa657; }
+    .return { color: #f0883e; }
+    .highlight-line { background: rgba(99, 102, 241, 0.15); }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #110 - 平衡二叉树</h1>
+  <span class="difficulty difficulty-easy">EASY</span>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给定一个二叉树，判断它是否是高度平衡的二叉树。</p>
+    <p>本题中，<strong>一棵高度平衡二叉树</strong>定义为：</p>
+    <blockquote style="background: var(--bg); padding: 15px; border-radius: 8px; border-left: 4px solid var(--primary);">
+      一个二叉树<em>每个节点</em>的左右两个子树的高度差的绝对值不超过 1。
+    </blockquote>
+    <h3>示例 1:</h3>
+    <div class="tree-visual">
+          3
+         / \
+        9  20
+          /  \
+         15   7
+    </div>
+    <p><code>输入: root = [3,9,20,null,null,15,7]</code></p>
+    <p><code>输出: true</code></p>
+    
+    <h3>示例 2:</h3>
+    <div class="tree-visual">
+          1
+         / \
+        2   2
+       / \
+      3   3
+     / \
+    4   4
+    </div>
+    <p><code>输入: root = [1,2,2,3,3,null,null,4,4]</code></p>
+    <p><code>输出: false</code>（节点2的左右子树高度差为2）</p>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <p style="color: #94a3b8; font-size: 14px;">💡 本算法采用「后序遍历 + 剪枝」优化，一旦发现不平衡立即返回-1停止计算</p>
+    <div class="viz-container">
+      <div>
+        <h3 style="color: var(--primary);">执行步骤</h3>
+        <div id="vizSteps"></div>
+      </div>
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <tr>
+        <th>指标</th>
+        <th>复杂度</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>时间复杂度</td>
+        <td>O(n)</td>
+        <td>每个节点最多访问一次，剪枝后提前返回</td>
+      </tr>
+      <tr>
+        <td>空间复杂度</td>
+        <td>O(h)</td>
+        <td>递归栈深度，h为树的高度，最坏O(n)，平衡时O(log n)</td>
+      </tr>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>🧠 核心思路</h2>
+    <h3>方法一：自顶向下（不推荐）</h3>
+    <p>对每个节点计算左右子树高度，然后比较。时间复杂度 O(n²) — 每个节点被重复计算多次。</p>
+    
+    <h3>方法二：自底向上（推荐 ✓）</h3>
+    <p><strong>核心思想：</strong>后序遍历，从叶子节点向上计算高度。</p>
+    <ul>
+      <li>如果子树不平衡，返回 -1（剪枝）</li>
+      <li>如果子树平衡，返回实际高度</li>
+      <li>父节点根据子节点高度判断是否平衡</li>
+    </ul>
+    
+    <h3>关键点</h3>
+    <ul>
+      <li>🎯 空节点高度为 0</li>
+      <li>🎯 用 -1 作为「不平衡」的特殊标记</li>
+      <li>🎯 一旦发现不平衡，立即剪枝返回，不再计算其他节点</li>
+    </ul>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/maximum-depth-of-binary-tree/" class="problem-card" target="_blank">
+        <div class="problem-id">#104</div>
+        <div class="problem-title">二叉树的最大深度</div>
+        <div class="problem-tag">递归 / 分治 → 基础题型</div>
+      </a>
+      <a href="https://leetcode.cn/problems/diameter-of-binary-tree/" class="problem-card" target="_blank">
+        <div class="problem-id">#543</div>
+        <div class="problem-title">二叉树的直径</div>
+        <div class="problem-tag">后序遍历 → 计算路径长度</div>
+      </a>
+      <a href="https://leetcode.cn/problems/path-sum/" class="problem-card" target="_blank">
+        <div class="problem-id">#112</div>
+        <div class="problem-title">路径总和</div>
+        <div class="problem-tag">DFS / 回溯 → 路径问题入门</div>
+      </a>
+      <a href="https://leetcode.cn/problems/same-tree/" class="problem-card" target="_blank">
+        <div class="problem-id">#100</div>
+        <div class="problem-title">相同的树</div>
+        <div class="problem-tag">递归 / DFS → 树比较基础</div>
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // 代码行数据
+    const codeLines = [
+      {num: 1, text: '<span class="keyword">class</span> <span class="class">Solution</span>:'},
+      {num: 2, text: '    <span class="keyword">def</span> <span class="function">isBalanced</span>(self, root: Optional[TreeNode]) -> <span class="keyword">bool</span>:'},
+      {num: 3, text: '        <span class="comment"># 调用辅助函数，返回-1表示不平衡</span>'},
+      {num: 4, text: '        <span class="keyword">return</span> self.<span class="function">checkHeight</span>(root) != -<span class="number">1</span>'},
+      {num: 5, text: ''},
+      {num: 6, text: '    <span class="keyword">def</span> <span class="function">checkHeight</span>(self, node: Optional[TreeNode]) -> <span class="keyword">int</span>:'},
+      {num: 7, text: '        <span class="comment"># 空节点高度为0</span>'},
+      {num: 8, text: '        <span class="keyword">if</span> <span class="keyword">not</span> node:'},
+      {num: 9, text: '            <span class="keyword">return</span> <span class="number">0</span>'},
+      {num: 10, text: ''},
+      {num: 11, text: '        <span class="comment"># 递归计算左子树高度</span>'},
+      {num: 12, text: '        leftHeight = self.<span class="function">checkHeight</span>(node.left)'},
+      {num: 13, text: ''},
+      {num: 14, text: '        <span class="comment"># 剪枝：左子树不平衡，直接返回-1</span>'},
+      {num: 15, text: '        <span class="keyword">if</span> leftHeight == -<span class="number">1</span>:'},
+      {num: 16, text: '            <span class="keyword">return</span> -<span class="number">1</span>'},
+      {num: 17, text: ''},
+      {num: 18, text: '        <span class="comment"># 递归计算右子树高度</span>'},
+      {num: 19, text: '        rightHeight = self.<span class="function">checkHeight</span>(node.right)'},
+      {num: 20, text: ''},
+      {num: 21, text: '        <span class="comment"># 剪枝：右子树不平衡，直接返回-1</span>'},
+      {num: 22, text: '        <span class="keyword">if</span> rightHeight == -<span class="number">1</span>:'},
+      {num: 23, text: '            <span class="keyword">return</span> -<span class="number">1</span>'},
+      {num: 24, text: ''},
+      {num: 25, text: '        <span class="comment"># 检查当前节点是否平衡</span>'},
+      {num: 26, text: '        <span class="keyword">if</span> <span class="function">abs</span>(leftHeight - rightHeight) > <span class="number">1</span>:'},
+      {num: 27, text: '            <span class="keyword">return</span> -<span class="number">1</span>  <span class="comment"># 不平衡标记</span>'},
+      {num: 28, text: ''},
+      {num: 29, text: '        <span class="comment"># 返回当前节点的高度</span>'},
+      {num: 30, text: '        <span class="keyword">return</span> <span class="function">max</span>(leftHeight, rightHeight) + <span class="number">1</span>'}
+    ];
+
+    // 步骤数据
+    const steps = [
+      {title: "1. 调用入口函数", desc: "isBalanced() 调用 checkHeight() 开始递归", line: 4, state: {node: "root", action: "开始递归"}},
+      {title: "2. 空节点判断", desc: "如果是空节点，返回高度0", line: 8, state: {node: "null", height: 0}},
+      {title: "3. 递归左子树", desc: "深度优先遍历，先处理左子树", line: 12, state: {node: "left child", action: "进入左子树"}},
+      {title: "4. 左子树剪枝", desc: "如果左子树返回-1，直接剪枝返回", line: 15, state: {condition: "leftHeight == -1", action: "剪枝返回"}},
+      {title: "5. 递归右子树", desc: "左子树平衡，继续处理右子树", line: 19, state: {node: "right child", action: "进入右子树"}},
+      {title: "6. 右子树剪枝", desc: "如果右子树返回-1，直接剪枝返回", line: 22, state: {condition: "rightHeight == -1", action: "剪枝返回"}},
+      {title: "7. 检查平衡条件", desc: "左右子树高度差绝对值 <= 1？", line: 26, state: {leftHeight: "?", rightHeight: "?", diff: "?"}},
+      {title: "8. 不平衡标记", desc: "高度差 > 1，返回-1标记不平衡", line: 27, state: {balance: false, return: -1}},
+      {title: "9. 返回当前高度", desc: "当前节点平衡，返回 max(左,右)+1", line: 30, state: {height: "max(L,R)+1"}}
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach((line, idx) => {
+      const div = document.createElement('div');
+      div.className = 'code-line';
+      div.dataset.line = line.num;
+      div.innerHTML = `<span class="line-number">${line.num}</span><span class="code-content">${line.text}</span>`;
+      div.addEventListener('click', () => highlightStepByLine(line.num));
+      codeBlock.appendChild(div);
+    });
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const div = document.createElement('div');
+      div.className = 'viz-step';
+      div.dataset.step = idx;
+      div.dataset.line = step.line;
+      
+      let stateHtml = '';
+      if (step.state) {
+        stateHtml = '<div class="state-display">';
+        Object.entries(step.state).forEach(([k, v]) => {
+          stateHtml += `<div class="state-item"><span class="state-label">${k}:</span><span class="state-value">${v}</span></div>`;
+        });
+        stateHtml += '</div>';
+      }
+      
+      div.innerHTML = `
+        <div class="viz-step-title">${step.title}</div>
+        <div class="viz-step-desc">${step.desc}</div>
+        ${stateHtml}
+      `;
+      div.addEventListener('click', () => highlightLineByStep(idx));
+      vizSteps.appendChild(div);
+    });
+
+    // 当前高亮状态
+    let currentStep = -1;
+    let currentLine = -1;
+
+    // 根据步骤高亮代码行
+    function highlightLineByStep(stepIdx) {
+      // 清除之前的高亮
+      document.querySelectorAll('.viz-step').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+      
+      // 高亮当前步骤
+      const stepEl = document.querySelector(`.viz-step[data-step="${stepIdx}"]`);
+      if (stepEl) stepEl.classList.add('active');
+      
+      // 高亮对应代码行
+      const lineNum = steps[stepIdx].line;
+      const lineEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+      if (lineEl) {
+        lineEl.classList.add('active');
+        lineEl.scrollIntoView({behavior: 'smooth', block: 'center'});
+      }
+      
+      currentStep = stepIdx;
+      currentLine = lineNum;
+    }
+
+    // 根据代码行高亮步骤
+    function highlightStepByLine(lineNum) {
+      // 找到包含该代码行的步骤
+      const stepIdx = steps.findIndex(s => s.line === lineNum);
+      if (stepIdx === -1) return;
+      
+      highlightLineByStep(stepIdx);
+    }
+
+    // 默认高亮第一个步骤
+    highlightLineByStep(0);
+  </script>
+</body>
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>LeetCode #2 - 两数相加</title>
+  <style>
+    :root { --primary: #6366f1; --bg: #0f172a; --surface: #1e293b; --text: #f1f5f9; --accent: #22d3ee; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); max-width: 1000px; margin: 0 auto; padding: 40px 20px; line-height: 1.7; }
+    .section { background: var(--surface); border-radius: 16px; padding: 28px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .section h2 { color: var(--primary); margin-top: 0; font-size: 1.5em; }
+    h1 { text-align: center; margin-bottom: 8px; }
+    .subtitle { text-align: center; color: #94a3b8; margin-bottom: 30px; }
+    pre { background: #0d1117; border-radius: 12px; padding: 20px; overflow-x: auto; margin: 16px 0; }
+    .code-line { display: flex; padding: 3px 0; cursor: pointer; transition: all 0.2s; border-radius: 4px; }
+    .code-line:hover { background: rgba(255,255,255,0.05); }
+    .code-line.active { background: rgba(99, 102, 241, 0.3); border-left: 3px solid #6366f1; margin-left: -3px; padding-left: 8px; }
+    .line-number { color: #484f58; min-width: 40px; text-align: right; padding-right: 16px; user-select: none; }
+    .viz-container { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 20px 0; }
+    @media (max-width: 768px) { .viz-container { grid-template-columns: 1fr; } }
+    .viz-steps { max-height: 500px; overflow-y: auto; }
+    .viz-step { padding: 14px 16px; margin: 8px 0; border-radius: 10px; background: #334155; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+    .viz-step:hover { transform: translateX(4px); }
+    .viz-step.active { border-color: var(--primary); background: rgba(99, 102, 241, 0.2); }
+    .step-title { font-weight: 600; color: var(--accent); font-size: 0.95em; }
+    .step-desc { font-size: 0.9em; color: #cbd5e1; margin-top: 4px; }
+    .step-state { font-size: 0.85em; color: #94a3b8; margin-top: 6px; font-family: monospace; background: rgba(0,0,0,0.2); padding: 6px 10px; border-radius: 6px; }
+    .code-container h3 { margin-top: 0; color: var(--accent); }
+    .keyword { color: #ff7b72; } 
+    .function { color: #d2a8ff; } 
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; } 
+    .comment { color: #8b949e; } 
+    .class { color: #ffa657; }
+    .operator { color: #ff7b72; }
+    .variable { color: #ffa657; }
+    .problem-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .problem-card { background: var(--bg); border-radius: 12px; padding: 20px; border: 1px solid #475569; transition: all 0.2s; text-decoration: none; color: inherit; display: block; }
+    .problem-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 8px 25px rgba(99,102,241,0.2); }
+    .problem-number { font-size: 0.85em; color: var(--primary); font-weight: 600; }
+    .problem-title { font-size: 1.1em; font-weight: 600; margin: 6px 0; }
+    .problem-diff { font-size: 0.8em; padding: 2px 8px; border-radius: 12px; display: inline-block; }
+    .diff-medium { background: rgba(255,165,0,0.2); color: #ffa500; }
+    .diff-hard { background: rgba(255,70,70,0.2); color: #ff4646; }
+    .diff-easy { background: rgba(70,255,130,0.2); color: #46ff82; }
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #475569; }
+    th { color: var(--accent); font-weight: 600; }
+    .highlight-box { background: rgba(99,102,241,0.1); border-left: 4px solid var(--primary); padding: 16px 20px; border-radius: 0 10px 10px 0; margin: 16px 0; }
+    .listnum { display: flex; gap: 8px; flex-wrap: wrap; }
+    .listnode { background: var(--bg); padding: 8px 16px; border-radius: 8px; border: 1px solid #475569; }
+    .arrow { color: var(--primary); font-weight: bold; }
+    .null { color: #64748b; font-style: italic; }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #2 - 两数相加</h1>
+  <p class="subtitle">Add Two Numbers | 链表 | Medium</p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给你两个 <strong>非空</strong> 的链表，表示两个非负的整数。它们每位数字都是按照 <strong>逆序</strong> 的方式存储的，并且每个节点只能存储 <strong>一位</strong> 数字。</p>
+    <p>请你将两个数相加，并以相同形式返回一个表示和的链表。</p>
+    <p>你可以假设除了数字 0 之外，这两个数都不会以 0 开头。</p>
+    
+    <div class="highlight-box">
+      <strong>💡 核心考点：</strong>链表遍历 + 进位处理。需要同时处理两个链表的遍历、进位的计算与传递、以及最终链表末尾可能多出的进位。
+    </div>
+
+    <p><strong>示例 1：</strong></p>
+    <p>输入：l1 = [2,4,3], l2 = [5,6,4]</p>
+    <p>输出：[7,0,8]</p>
+    <p>解释：342 + 465 = 807</p>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table>
+      <tr><th>维度</th><th>值</th><th>说明</th></tr>
+      <tr><td>时间复杂度</td><td>O(max(m, n))</td><td>m 和 n 分别是两个链表的长度，遍历较长链表的每一位</td></tr>
+      <tr><td>空间复杂度</td><td>O(max(m, n))</td><td>新链表的长度，可能需要多一位存储进位</td></tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>🎯 关键思路</h2>
+    <ol>
+      <li><strong>逆序存储的优势：</strong>链表头就是个位，正好符合加法从低位到高位的运算顺序，无需反转链表。</li>
+      <li><strong>同步遍历：</strong>同时遍历两个链表，位数不足时用0补齐。</li>
+      <li><strong>进位处理：</strong>当前位和 = val1 + val2 + carry，新节点值 = sum % 10，新进位 = sum // 10。</li>
+      <li><strong>收尾检查：</strong>循环结束后若还有进位，需额外创建一个节点。</li>
+    </ol>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/add-two-numbers-ii/" target="_blank" class="problem-card">
+        <div class="problem-number">#445</div>
+        <div class="problem-title">两数相加 II</div>
+        <span class="problem-diff diff-medium">Medium</span>
+        <p style="font-size:0.85em;color:#94a3b8;margin-top:8px;">正序存储的数字相加，需要借助栈或反转链表</p>
+      </a>
+      <a href="https://leetcode.cn/problems/multiply-strings/" target="_blank" class="problem-card">
+        <div class="problem-number">#43</div>
+        <div class="problem-title">字符串相乘</div>
+        <div class="problem-diff diff-medium">Medium</div>
+        <p style="font-size:0.85em;color:#94a3b8;margin-top:8px;">字符串形式的数字相乘，模拟竖式乘法</p>
+      </a>
+      <a href="https://leetcode.cn/problems/plus-one/" target="_blank" class="problem-card">
+        <div class="problem-number">#66</div>
+        <div class="problem-title">加一</div>
+        <div class="problem-diff diff-easy">Easy</div>
+        <p style="font-size:0.85em;color:#94a3b8;margin-top:8px;">数组形式的数字加一，简化版进位处理</p>
+      </a>
+      <a href="https://leetcode.cn/problems/add-binary/" target="_blank" class="problem-card">
+        <div class="problem-number">#67</div>
+        <div class="problem-title">二进制求和</div>
+        <div class="problem-diff diff-easy">Easy</div>
+        <p style="font-size:0.85em;color:#94a3b8;margin-top:8px;">二进制字符串相加，进位只有0或1</p>
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // 代码行
+    const codeLines = [
+      {num: 1, code: '<span class="keyword">class</span> <span class="class">Solution</span>:'},
+      {num: 2, code: '    <span class="keyword">def</span> <span class="function">addTwoNumbers</span>(<span class="variable">self</span>, <span class="variable">l1</span>: <span class="class">ListNode</span>, <span class="variable">l2</span>: <span class="class">ListNode</span>) <span class="operator">-></span> <span class="class">ListNode</span>:'},
+      {num: 3, code: '        <span class="comment"># 哨兵节点，简化头节点处理</span>'},
+      {num: 4, code: '        <span class="variable">dummy</span> <span class="operator">=</span> <span class="class">ListNode</span>(<span class="number">0</span>)'},
+      {num: 5, code: '        <span class="variable">curr</span> <span class="operator">=</span> <span class="variable">dummy</span>'},
+      {num: 6, code: '        <span class="variable">carry</span> <span class="operator">=</span> <span class="number">0</span>  <span class="comment"># 进位值</span>'},
+      {num: 7, code: '        '},
+      {num: 8, code: '        <span class="comment"># 当还有节点或进位未处理时继续</span>'},
+      {num: 9, code: '        <span class="keyword">while</span> <span class="variable">l1</span> <span class="keyword">or</span> <span class="variable">l2</span> <span class="keyword">or</span> <span class="variable">carry</span>:'},
+      {num: 10, code: '            <span class="comment"># 获取当前位的值，链表已遍历完则用0</span>'},
+      {num: 11, code: '            <span class="variable">val1</span> <span class="operator">=</span> <span class="variable">l1</span>.<span class="variable">val</span> <span class="keyword">if</span> <span class="variable">l1</span> <span class="keyword">else</span> <span class="number">0</span>'},
+      {num: 12, code: '            <span class="variable">val2</span> <span class="operator">=</span> <span class="variable">l2</span>.<span class="variable">val</span> <span class="keyword">if</span> <span class="variable">l2</span> <span class="keyword">else</span> <span class="number">0</span>'},
+      {num: 13, code: '            '},
+      {num: 14, code: '            <span class="comment"># 计算当前位的和</span>'},
+      {num: 15, code: '            <span class="variable">total</span> <span class="operator">=</span> <span class="variable">val1</span> <span class="operator">+</span> <span class="variable">val2</span> <span class="operator">+</span> <span class="variable">carry</span>'},
+      {num: 16, code: '            <span class="variable">carry</span> <span class="operator">=</span> <span class="variable">total</span> <span class="operator">//</span> <span class="number">10</span>  <span class="comment"># 更新进位</span>'},
+      {num: 17, code: '            '},
+      {num: 18, code: '            <span class="comment"># 创建新节点存储当前位结果</span>'},
+      {num: 19, code: '            <span class="variable">curr</span>.<span class="variable">next</span> <span class="operator">=</span> <span class="class">ListNode</span>(<span class="variable">total</span> <span class="operator">%</span> <span class="number">10</span>)'},
+      {num: 20, code: '            <span class="variable">curr</span> <span class="operator">=</span> <span class="variable">curr</span>.<span class="variable">next</span>  <span class="comment"># 移动指针</span>'},
+      {num: 21, code: '            '},
+      {num: 22, code: '            <span class="comment"># 链表指针前进</span>'},
+      {num: 23, code: '            <span class="keyword">if</span> <span class="variable">l1</span>: <span class="variable">l1</span> <span class="operator">=</span> <span class="variable">l1</span>.<span class="variable">next</span>'},
+      {num: 24, code: '            <span class="keyword">if</span> <span class="variable">l2</span>: <span class="variable">l2</span> <span class="operator">=</span> <span class="variable">l2</span>.<span class="variable">next</span>'},
+      {num: 25, code: '        '},
+      {num: 26, code: '        <span class="comment"># 返回结果链表（跳过哨兵节点）</span>'},
+      {num: 27, code: '        <span class="keyword">return</span> <span class="variable">dummy</span>.<span class="variable">next</span>'}
+    ];
+
+    // 可视化步骤 - 用 l1=[2,4,3], l2=[5,6,4] 的例子
+    const steps = [
+      {title: "初始化", desc: "创建哨兵节点 dummy 和当前指针 curr，进位 carry=0", line: 4, state: "dummy → None, curr = dummy, carry = 0"},
+      {title: "第1轮迭代", desc: "l1=2, l2=5, carry=0 → total=7, carry=0, 新节点=7", line: 9, state: "val1=2, val2=5, total=7, carry=0, 结果: [7]"},
+      {title: "获取 l1 值", desc: "l1 存在，取 val1 = 2", line: 11, state: "l1 = [2→4→3]"},
+      {title: "获取 l2 值", desc: "l2 存在，取 val2 = 5", line: 12, state: "l2 = [5→6→4]"},
+      {title: "计算总和", desc: "total = 2 + 5 + 0 = 7, carry = 7//10 = 0", line: 15, state: "total = 7, carry = 0"},
+      {title: "创建新节点", desc: "curr.next = ListNode(7 % 10) = ListNode(7)", line: 19, state: "结果链表: [7]"},
+      {title: "移动指针", desc: "curr 前移，l1 和 l2 各前进一步", line: 23, state: "curr指向7, l1=[4→3], l2=[6→4]"},
+      {title: "第2轮迭代", desc: "l1=4, l2=6, carry=0 → total=10, carry=1, 新节点=0", line: 9, state: "val1=4, val2=6, total=10, carry=1, 结果: [7→0]"},
+      {title: "计算总和", desc: "total = 4 + 6 + 0 = 10, carry = 1", line: 15, state: "total = 10, carry = 1"},
+      {title: "创建新节点", desc: "curr.next = ListNode(10 % 10) = ListNode(0)", line: 19, state: "结果链表: [7→0]"},
+      {title: "第3轮迭代", desc: "l1=3, l2=4, carry=1 → total=8, carry=0, 新节点=8", line: 9, state: "val1=3, val2=4, total=8, carry=0, 结果: [7→0→8]"},
+      {title: "计算总和", desc: "total = 3 + 4 + 1 = 8, carry = 0", line: 15, state: "total = 8, carry = 0"},
+      {title: "创建新节点", desc: "curr.next = ListNode(8)", line: 19, state: "结果链表: [7→0→8]"},
+      {title: "链表遍历完毕", desc: "l1=None, l2=None, carry=0，循环结束", line: 9, state: "l1=None, l2=None, carry=0"},
+      {title: "返回结果", desc: "返回 dummy.next，即 [7→0→8] 代表 807", line: 27, state: "最终结果: [7→0→8] (即 342+465=807)"}
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach((line, idx) => {
+      const div = document.createElement('div');
+      div.className = 'code-line';
+      div.dataset.line = line.num;
+      div.dataset.idx = idx;
+      div.innerHTML = `<span class="line-number">${line.num}</span><span>${line.code}</span>`;
+      div.onclick = () => highlightStepByLine(line.num);
+      codeBlock.appendChild(div);
+    });
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const div = document.createElement('div');
+      div.className = 'viz-step';
+      div.dataset.line = step.line;
+      div.dataset.idx = idx;
+      div.innerHTML = `
+        <div class="step-title">${step.title}</div>
+        <div class="step-desc">${step.desc}</div>
+        <div class="step-state">${step.state}</div>
+      `;
+      div.onclick = () => highlightStep(idx);
+      vizSteps.appendChild(div);
+    });
+
+    // 高亮步骤
+    function highlightStep(idx) {
+      // 清除所有高亮
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      
+      // 高亮当前步骤
+      const stepEl = document.querySelector(`.viz-step[data-idx="${idx}"]`);
+      if (stepEl) {
+        stepEl.classList.add('active');
+        stepEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      
+      // 高亮对应代码行
+      const lineNum = steps[idx].line;
+      const codeEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+      if (codeEl) codeEl.classList.add('active');
+    }
+
+    // 根据代码行高亮步骤
+    function highlightStepByLine(lineNum) {
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      
+      // 高亮点击的代码行
+      const codeEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+      if (codeEl) codeEl.classList.add('active');
+      
+      // 找到对应步骤（可能有多个步骤对应同一行，取第一个）
+      const stepIdx = steps.findIndex(s => s.line === lineNum);
+      if (stepIdx !== -1) {
+        const stepEl = document.querySelector(`.viz-step[data-idx="${stepIdx}"]`);
+        if (stepEl) {
+          stepEl.classList.add('active');
+          stepEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    }
+
+    // 默认高亮第一步
+    highlightStep(0);
+  </script>
+</body>
+</html>

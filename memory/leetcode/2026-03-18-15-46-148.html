@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #148 - 排序链表</title>
+  <style>
+    :root { --primary: #6366f1; --bg: #0f172a; --surface: #1e293b; --text: #f1f5f9; --success: #22c55e; --warning: #f59e0b; --danger: #ef4444; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); max-width: 1100px; margin: 0 auto; padding: 40px 20px; line-height: 1.7; }
+    h1 { color: var(--primary); font-size: 2.2rem; margin-bottom: 8px; }
+    .subtitle { color: #94a3b8; font-size: 1rem; margin-bottom: 30px; }
+    .section { background: var(--surface); border-radius: 16px; padding: 28px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+    .section h2 { color: var(--primary); margin-top: 0; display: flex; align-items: center; gap: 10px; }
+    .section h3 { color: #cbd5e1; margin-top: 20px; }
+    .tag { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; margin-right: 8px; }
+    .tag-hard { background: var(--danger); color: white; }
+    .tag-algo { background: var(--primary); color: white; }
+    pre { background: #0d1117; border-radius: 12px; padding: 20px; overflow-x: auto; font-family: 'Consolas', 'Monaco', monospace; font-size: 0.95rem; }
+    .code-line { display: flex; padding: 3px 0; cursor: pointer; transition: all 0.2s; border-radius: 4px; }
+    .code-line:hover { background: rgba(255,255,255,0.05); }
+    .code-line.active { background: rgba(99, 102, 241, 0.3); border-left: 3px solid #6366f1; margin-left: -3px; padding-left: 3px; }
+    .line-number { color: #484f58; min-width: 45px; text-align: right; padding-right: 16px; user-select: none; }
+    .code-content { flex: 1; }
+    .viz-container { display: grid; grid-template-columns: 1fr 1.3fr; gap: 24px; margin: 20px 0; }
+    .viz-steps { background: rgba(0,0,0,0.2); border-radius: 12px; padding: 16px; }
+    .viz-step { padding: 14px 16px; margin: 10px 0; border-radius: 10px; background: #334155; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+    .viz-step:hover { background: #3d4b5f; }
+    .viz-step.active { border-color: var(--primary); background: rgba(99, 102, 241, 0.25); }
+    .viz-step-title { font-weight: 600; color: var(--primary); margin-bottom: 6px; }
+    .viz-step-desc { font-size: 0.9rem; color: #cbd5e1; }
+    .viz-step-state { margin-top: 8px; padding: 8px 12px; background: rgba(0,0,0,0.3); border-radius: 6px; font-family: monospace; font-size: 0.85rem; }
+    .problem-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 16px; }
+    .problem-card { background: var(--bg); border-radius: 12px; padding: 18px; border: 1px solid #475569; transition: all 0.2s; text-decoration: none; color: inherit; display: block; }
+    .problem-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 8px 25px rgba(99,102,241,0.2); }
+    .problem-card h4 { margin: 0 0 8px 0; color: var(--primary); }
+    .problem-card p { margin: 0; font-size: 0.9rem; color: #94a3b8; }
+    .complexity-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    .complexity-table th, .complexity-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #475569; }
+    .complexity-table th { color: var(--primary); font-weight: 600; }
+    .complexity-table td code { background: rgba(99,102,241,0.15); padding: 4px 10px; border-radius: 4px; font-family: monospace; }
+    .highlight { background: rgba(99,102,241,0.2); padding: 2px 6px; border-radius: 4px; }
+    .keyword { color: #ff7b72; } .function { color: #d2a8ff; } .string { color: #a5d6ff; }
+    .number { color: #79c0ff; } .comment { color: #8b949e; } .class { color: #ffa657; }
+    .link-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .link-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--primary); color: white; border-radius: 8px; text-decoration: none; font-size: 0.9rem; transition: all 0.2s; }
+    .link-btn:hover { background: #5558e0; transform: translateY(-1px); }
+    .state-var { color: var(--warning); }
+    .state-val { color: var(--success); }
+  </style>
+</head>
+<body>
+  <h1>🎯 LeetCode #148 - 排序链表</h1>
+  <p class="subtitle">Sort List | 归并排序 + 快慢指针找中点 | Hard</p>
+  
+  <div class="section">
+    <div style="margin-bottom: 16px;">
+      <span class="tag tag-hard">Hard</span>
+      <span class="tag tag-algo">归并排序</span>
+      <span class="tag tag-algo">链表</span>
+      <span class="tag tag-algo">分治</span>
+    </div>
+    <h2>📋 题目描述</h2>
+    <p>给你链表的头结点 <code>head</code> ，请将其按 <strong>升序</strong> 排列并返回 <strong>排序后的链表</strong> 。</p>
+    
+    <h3>进阶要求：</h3>
+    <ul>
+      <li>你可以在 <code>O(n log n)</code> 时间复杂度和常数级空间复杂度下，对链表进行排序吗？</li>
+    </ul>
+    
+    <h3>示例 1：</h3>
+    <pre><code>输入：head = [4,2,1,3]
+输出：[1,2,3,4]</code></pre>
+    
+    <h3>示例 2：</h3>
+    <pre><code>输入：head = [-1,5,3,4,0]
+输出：[-1,0,3,4,5]</code></pre>
+    
+    <h3>核心考点：</h3>
+    <ul>
+      <li><strong>归并排序</strong>：链表排序最优选择，天然适合 <code>O(n log n)</code> 时间</li>
+      <li><strong>快慢指针</strong>：找到链表中点，将链表一分为二</li>
+      <li><strong>链表合并</strong>：双指针技巧合并两个有序链表</li>
+      <li><strong>递归分治</strong>：自顶向下的分治策略</li>
+    </ul>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程</h2>
+    <p style="color: #94a3b8; margin-bottom: 16px;">点击左侧步骤或右侧代码行，查看对应关系</p>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>🐍 Python 实现</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <tr>
+        <th>指标</th>
+        <th>值</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>时间复杂度</td>
+        <td><code>O(n log n)</code></td>
+        <td>归并排序标准复杂度，每层需要O(n)时间合并，共log n层</td>
+      </tr>
+      <tr>
+        <td>空间复杂度</td>
+        <td><code>O(log n)</code></td>
+        <td>递归栈空间（若用迭代版归并排序可达到O(1)）</td>
+      </tr>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>💡 解题思路详解</h2>
+    <h3>1. 为什么选择归并排序？</h3>
+    <p>链表无法像数组那样快速随机访问，所以快速排序不适合（需要partition时频繁访问）。而归并排序：</p>
+    <ul>
+      <li>只需要顺序访问，完美适配链表</li>
+      <li>稳定排序，时间复杂度稳定为 <code>O(n log n)</code></li>
+      <li>可以自底向上实现常数空间</li>
+    </ul>
+    
+    <h3>2. 快慢指针找中点</h3>
+    <p>快指针走2步，慢指针走1步。当快指针到达末尾，慢指针正好在中点。<strong>关键点</strong>：找到中点后要断开链表。</p>
+    
+    <h3>3. 合并两个有序链表</h3>
+    <p>使用虚拟头节点 <code>dummy</code> 简化操作，双指针逐个比较，小的先接入结果链表。</p>
+    
+    <h3>4. 递归终止条件</h3>
+    <p>当链表为空或只有一个节点时，直接返回（已经有序）。</p>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐</h2>
+    <p style="color: #94a3b8; margin-bottom: 16px;">点击卡片跳转到LeetCode练习</p>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/merge-two-sorted-lists/" target="_blank" class="problem-card">
+        <h4>#21 合并两个有序链表</h4>
+        <p>基础版本，先练熟这个再做本题</p>
+      </a>
+      <a href="https://leetcode.cn/problems/merge-k-sorted-lists/" target="_blank" class="problem-card">
+        <h4>#23 合并K个升序链表</h4>
+        <p>多个链表合并，用优先队列或分治</p>
+      </a>
+      <a href="https://leetcode.cn/problems/sort-an-array/" target="_blank" class="problem-card">
+        <h4>#912 排序数组</h4>
+        <p>数组版归并/快排，对比学习</p>
+      </a>
+      <a href="https://leetcode.cn/problems/reverse-linked-list/" target="_blank" class="problem-card">
+        <h4>#206 反转链表</h4>
+        <p>链表基础操作，必练题目</p>
+      </a>
+      <a href="https://leetcode.cn/problems/middle-of-the-linked-list/" target="_blank" class="problem-card">
+        <h4>#876 链表的中间结点</h4>
+        <p>快慢指针找中点的单独练习</p>
+      </a>
+      <a href="https://leetcode.cn/problems/linked-list-cycle-ii/" target="_blank" class="problem-card">
+        <h4>#142 环形链表 II</h4>
+        <p>快慢指针的另一经典应用</p>
+      </a>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📚 相关资源</h2>
+    <div class="link-list">
+      <a href="https://leetcode.cn/problems/sort-list/" target="_blank" class="link-btn">🎯 去LeetCode做题</a>
+      <a href="https://en.wikipedia.org/wiki/Merge_sort" target="_blank" class="link-btn">📖 归并排序维基百科</a>
+    </div>
+  </div>
+
+  <script>
+    // Python代码
+    const pythonCode = `class Solution:
+    def sortList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        # 递归终止条件：空链表或单节点
+        if not head or not head.next:
+            return head
+        
+        # 快慢指针找中点（slow最终停在左半部分末尾）
+        slow, fast = head, head.next
+        while fast and fast.next:
+            slow = slow.next          # 慢指针走一步
+            fast = fast.next.next     # 快指针走两步
+        
+        # 断开链表，分成左右两部分
+        mid = slow.next
+        slow.next = None
+        
+        # 递归排序左右两部分
+        left = self.sortList(head)
+        right = self.sortList(mid)
+        
+        # 合并两个有序链表
+        return self.merge(left, right)
+    
+    def merge(self, l1: ListNode, l2: ListNode) -> ListNode:
+        # 虚拟头节点简化操作
+        dummy = ListNode(0)
+        tail = dummy
+        
+        # 双指针合并
+        while l1 and l2:
+            if l1.val <= l2.val:
+                tail.next = l1
+                l1 = l1.next
+            else:
+                tail.next = l2
+                l2 = l2.next
+            tail = tail.next
+        
+        # 连接剩余部分
+        tail.next = l1 if l1 else l2
+        
+        return dummy.next`;
+
+    // 步骤与代码行映射
+    const steps = [
+      {
+        title: "1️⃣ 递归终止检查",
+        desc: "如果链表为空或只有一个节点，直接返回（已经有序）",
+        line: 3,
+        state: { head: "当前链表头", result: "直接返回（已排序）" }
+      },
+      {
+        title: "2️⃣ 快慢指针初始化",
+        desc: "slow指向head，fast指向head.next（确保slow停在左半部分末尾）",
+        line: 6,
+        state: { slow: "指向head", fast: "指向head.next" }
+      },
+      {
+        title: "3️⃣ 寻找中点",
+        desc: "fast走2步，slow走1步，当fast到达末尾，slow在中点",
+        line: 7,
+        state: { loop: "fast存在且fast.next存在", slow: "走一步", fast: "走两步" }
+      },
+      {
+        title: "4️⃣ 断开链表",
+        desc: "mid指向右半部分头，slow.next置None切断链表",
+        line: 11,
+        state: { mid: "slow.next（右半部分）", "slow.next": "None（断开）" }
+      },
+      {
+        title: "5️⃣ 递归排序左半部分",
+        desc: "对head开始的左半部分递归调用sortList",
+        line: 14,
+        state: { left: "递归返回已排序的左半部分" }
+      },
+      {
+        title: "6️⃣ 递归排序右半部分",
+        desc: "对mid开始的右半部分递归调用sortList",
+        line: 15,
+        state: { right: "递归返回已排序的右半部分" }
+      },
+      {
+        title: "7️⃣ 合并两个有序链表",
+        desc: "调用merge函数将两个有序链表合并为一个",
+        line: 17,
+        state: { result: "合并后的有序链表" }
+      },
+      {
+        title: "8️⃣ 创建虚拟头节点",
+        desc: "dummy作为结果链表的虚拟头，tail用于构建结果",
+        line: 21,
+        state: { dummy: "虚拟头", tail: "指向dummy" }
+      },
+      {
+        title: "9️⃣ 双指针比较合并",
+        desc: "比较l1和l2的值，小的接入tail，对应指针前移",
+        line: 24,
+        state: { condition: "l1.val <= l2.val", tail: "指向较小节点" }
+      },
+      {
+        title: "🔟 连接剩余节点",
+        desc: "其中一个链表遍历完后，将另一个剩余部分全部接上",
+        line: 31,
+        state: { tail.next: "l1剩余 或 l2剩余" }
+      },
+      {
+        title: "✅ 返回结果",
+        desc: "返回dummy.next（跳过虚拟头）",
+        line: 33,
+        state: { return: "排序完成的链表头" }
+      }
+    ];
+
+    // 生成代码HTML
+    function renderCode() {
+      const lines = pythonCode.split('\n');
+      const codeBlock = document.getElementById('codeBlock');
+      codeBlock.innerHTML = lines.map((line, idx) => {
+        const highlighted = highlightSyntax(line);
+        return `<div class="code-line" data-line="${idx + 1}" onclick="highlightStep(${idx + 1})">
+          <span class="line-number">${idx + 1}</span>
+          <span class="code-content">${highlighted}</span>
+        </div>`;
+      }).join('');
+    }
+
+    // 简单语法高亮
+    function highlightSyntax(line) {
+      return line
+        .replace(/^(\s*#.*)$/, '<span class="comment">$1</span>')
+        .replace(/\b(def|class|if|elif|else|while|return|and|or|not|None|True|False|in)\b/g, '<span class="keyword">$1</span>')
+        .replace(/\b([A-Z][a-zA-Z0-9_]*)\b/g, '<span class="class">$1</span>')
+        .replace(/\b([a-z_][a-zA-Z0-9_]*)\s*(?=\()/g, '<span class="function">$1</span>')
+        .replace(/(['"])(?:(?=(\\?))\2[\\s\\S])*?\1/g, '<span class="string">$&</span>')
+        .replace(/\b(\d+)\b/g, '<span class="number">$1</span>');
+    }
+
+    // 生成步骤HTML
+    function renderSteps() {
+      const vizSteps = document.getElementById('vizSteps');
+      vizSteps.innerHTML = steps.map((step, idx) => `
+        <div class="viz-step" data-step="${idx}" data-line="${step.line}" onclick="highlightLine(${step.line}, ${idx})">
+          <div class="viz-step-title">${step.title}</div>
+          <div class="viz-step-desc">${step.desc}</div>
+          <div class="viz-step-state">
+            ${Object.entries(step.state).map(([k, v]) => `<span class="state-var">${k}</span>: <span class="state-val">${v}</span>`).join(', ')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // 点击步骤高亮代码行
+    function highlightLine(lineNum, stepIdx) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      
+      const codeLine = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+      if (codeLine) codeLine.classList.add('active');
+      
+      const stepEl = document.querySelector(`.viz-step[data-step="${stepIdx}"]`);
+      if (stepEl) stepEl.classList.add('active');
+    }
+
+    // 点击代码行高亮步骤
+    function highlightStep(lineNum) {
+      const stepIdx = steps.findIndex(s => s.line === lineNum);
+      if (stepIdx !== -1) {
+        highlightLine(lineNum, stepIdx);
+      }
+    }
+
+    // 初始化
+    renderCode();
+    renderSteps();
+    highlightLine(3, 0); // 默认高亮第一步
+  </script>
+</body>
+</html>

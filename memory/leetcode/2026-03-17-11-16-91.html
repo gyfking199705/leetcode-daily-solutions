@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #91 - 解码方法</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --primary-light: #818cf8;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --surface-light: #334155;
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.7;
+    }
+    h1 { 
+      font-size: 2rem; 
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle { color: var(--text-muted); margin-bottom: 30px; }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px;
+      border: 1px solid rgba(99, 102, 241, 0.1);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    .tag-medium { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+    .tag-dp { background: rgba(99, 102, 241, 0.2); color: var(--primary-light); }
+    .tag-string { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+    
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 0;
+      overflow-x: auto;
+      border: 1px solid #30363d;
+    }
+    .code-header {
+      background: #161b22;
+      padding: 12px 20px;
+      border-bottom: 1px solid #30363d;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .code-header::before {
+      content: "🐍";
+      font-size: 1.1rem;
+    }
+    code {
+      display: block;
+      padding: 20px;
+      font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+      font-size: 0.95rem;
+      line-height: 1.8;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 2px 0; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+      margin-left: -3px;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.25); 
+      border-left-color: var(--primary);
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 45px; 
+      text-align: right; 
+      padding-right: 16px;
+      user-select: none;
+      font-size: 0.85rem;
+    }
+    .line-content { flex: 1; }
+    
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 768px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    .viz-steps { 
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .viz-step { 
+      padding: 16px; 
+      border-radius: 12px; 
+      background: var(--surface-light); 
+      cursor: pointer; 
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .viz-step:hover { 
+      border-color: var(--primary-light);
+      transform: translateX(4px);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.2); 
+    }
+    .viz-step h4 {
+      margin: 0 0 6px 0;
+      color: var(--primary-light);
+      font-size: 0.95rem;
+    }
+    .viz-step p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .viz-step .state {
+      margin-top: 8px;
+      padding: 8px 12px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+    
+    .dp-table {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+      gap: 8px;
+      margin: 16px 0;
+      padding: 16px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 12px;
+    }
+    .dp-cell {
+      text-align: center;
+      padding: 12px;
+      background: var(--surface-light);
+      border-radius: 8px;
+      border: 2px solid transparent;
+      transition: all 0.3s;
+    }
+    .dp-cell.active {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.3);
+      transform: scale(1.05);
+    }
+    .dp-cell .idx {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .dp-cell .val {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: var(--primary-light);
+    }
+    
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 20px; 
+      border: 1px solid #475569; 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block;
+      cursor: pointer;
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+    }
+    .problem-card h4 {
+      margin: 0 0 8px 0;
+      color: var(--primary-light);
+    }
+    .problem-card p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .problem-card .tags {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .problem-card .tag-small {
+      font-size: 0.75rem;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: var(--surface-light);
+      color: var(--text-muted);
+    }
+    
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    .complexity-table th, .complexity-table td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--surface-light);
+    }
+    .complexity-table th {
+      color: var(--primary-light);
+      font-weight: 600;
+    }
+    .complexity-table tr:hover {
+      background: rgba(255,255,255,0.02);
+    }
+    
+    .highlight-box {
+      background: rgba(99, 102, 241, 0.1);
+      border-left: 4px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 12px 12px 0;
+      margin: 20px 0;
+    }
+    .highlight-box h4 {
+      margin: 0 0 8px 0;
+      color: var(--primary-light);
+    }
+    .highlight-box ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+    .highlight-box li {
+      margin: 6px 0;
+    }
+    
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; font-style: italic; }
+    .class { color: #ffa657; }
+    .var { color: #ffa657; }
+    
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background: var(--primary);
+      color: white;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .btn:hover {
+      background: var(--primary-light);
+      transform: translateY(-2px);
+    }
+    .btn-secondary {
+      background: var(--surface-light);
+    }
+    .btn-secondary:hover {
+      background: #475569;
+    }
+    
+    .example-box {
+      background: rgba(0,0,0,0.2);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 16px 0;
+    }
+    .example-box h4 {
+      margin: 0 0 12px 0;
+      color: var(--success);
+    }
+    .example-box .input, .example-box .output {
+      font-family: monospace;
+      padding: 8px 12px;
+      background: var(--surface-light);
+      border-radius: 6px;
+      margin: 8px 0;
+    }
+    .example-box .explain {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--surface-light);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    
+    #currentStepInfo {
+      background: var(--surface-light);
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      min-height: 80px;
+    }
+    #currentStepInfo h4 {
+      margin: 0 0 8px 0;
+      color: var(--primary-light);
+    }
+    #currentStepInfo p {
+      margin: 0;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #91 - 解码方法</h1>
+  <p class="subtitle">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-dp">动态规划</span>
+    <span class="tag tag-string">字符串</span>
+  </p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>一条包含字母 <code>A-Z</code> 的消息通过以下映射进行了<strong>编码</strong>：</p>
+    <ul>
+      <li><code>'A' -> "1"</code></li>
+      <li><code>'B' -> "2"</code></li>
+      <li>...</li>
+      <li><code>'Z' -> "26"</code></li>
+    </ul>
+    <p>给定一个只包含数字的<strong>非空</strong>字符串，请计算解码方法的总数。</p>
+    
+    <div class="example-box">
+      <h4>示例 1</h4>
+      <div class="input">输入: s = "12"</div>
+      <div class="output">输出: 2</div>
+      <div class="explain">解释: 它可以解码为 "AB"（1 2）或者 "L"（12）。</div>
+    </div>
+    
+    <div class="example-box">
+      <h4>示例 2</h4>
+      <div class="input">输入: s = "226"</div>
+      <div class="output">输出: 3</div>
+      <div class="explain">解释: 它可以解码为 "BZ"（2 26）、"VF"（22 6）或 "BBF"（2 2 6）。</div>
+    </div>
+    
+    <div class="example-box">
+      <h4>示例 3</h4>
+      <div class="input">输入: s = "0"</div>
+      <div class="output">输出: 0</div>
+      <div class="explain">解释: 没有字符映射到以 0 开头的有效数字。</div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>💡 解题思路</h2>
+    <div class="highlight-box">
+      <h4>核心洞察</h4>
+      <ul>
+        <li>每个数字可以<strong>单独解码</strong>（如果该数字不是'0'）</li>
+        <li>每两个连续数字可以<strong>组合解码</strong>（如果组合在10-26范围内）</li>
+        <li>设 <code>dp[i]</code> 表示前 <code>i</code> 个字符的解码方法数</li>
+        <li>状态转移：dp[i] = (单独解码的方案) + (组合解码的方案)</li>
+      </ul>
+    </div>
+    
+    <table class="complexity-table">
+      <tr>
+        <th>维度</th>
+        <th>结果</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>时间复杂度</td>
+        <td>O(n)</td>
+        <td>只需遍历字符串一次</td>
+      </tr>
+      <tr>
+        <td>空间复杂度</td>
+        <td>O(1) 或 O(n)</td>
+        <td>可优化为只用两个变量</td>
+      </tr>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <p style="color: var(--text-muted); margin-bottom: 16px;">
+      以输入 <code>s = "226"</code> 为例，观察DP数组的填充过程：
+    </p>
+    
+    <div id="currentStepInfo">
+      <h4>当前步骤：初始化</h4>
+      <p>点击左侧步骤或右侧代码行来查看执行细节</p>
+    </div>
+    
+    <div class="dp-table" id="dpTable">
+      <div class="dp-cell active" data-idx="0"><div class="idx">dp[0]</div><div class="val">1</div></div>
+      <div class="dp-cell" data-idx="1"><div class="idx">dp[1]</div><div class="val">?</div></div>
+      <div class="dp-cell" data-idx="2"><div class="idx">dp[2]</div><div class="val">?</div></div>
+      <div class="dp-cell" data-idx="3"><div class="idx">dp[3]</div><div class="val">?</div></div>
+    </div>
+    
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <div class="code-header">solution.py</div>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/climbing-stairs/" target="_blank" class="problem-card">
+        <h4>70. 爬楼梯</h4>
+        <p>经典的动态规划入门题，斐波那契数列应用</p>
+        <div class="tags">
+          <span class="tag-small">动态规划</span>
+          <span class="tag-small">Easy</span>
+        </div>
+      </a>
+      <a href="https://leetcode.cn/problems/house-robber/" target="_blank" class="problem-card">
+        <h4>198. 打家劫舍</h4>
+        <p>线性DP经典题，状态转移与当前题思路类似</p>
+        <div class="tags">
+          <span class="tag-small">动态规划</span>
+          <span class="tag-small">Medium</span>
+        </div>
+      </a>
+      <a href="https://leetcode.cn/problems/decode-ways-ii/" target="_blank" class="problem-card">
+        <h4>639. 解码方法 II</h4>
+        <p>本题进阶版，增加了通配符 '*' 的处理</p>
+        <div class="tags">
+          <span class="tag-small">动态规划</span>
+          <span class="tag-small">Hard</span>
+        </div>
+      </a>
+      <a href="https://leetcode.cn/problems/palindrome-partitioning-ii/" target="_blank" class="problem-card">
+        <h4>132. 分割回文串 II</h4>
+        <p>字符串分割类DP，状态设计思路相通</p>
+        <div class="tags">
+          <span class="tag-small">动态规划</span>
+          <span class="tag-small">Hard</span>
+        </div>
+      </a>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📝 完整代码</h2>
+    <div class="code-header">solution.py - 空间优化版</div>
+    <pre style="padding: 0;"><code style="padding: 20px;"><span class="keyword">class</span> <span class="class">Solution</span>:
+    <span class="keyword">def</span> <span class="function">numDecodings</span>(<span class="var">self</span>, <span class="var">s</span>: <span class="keyword">str</span>) -> <span class="keyword">int</span>:
+        <span class="comment"># 空字符串或首字符为'0'，无法解码</span>
+        <span class="keyword">if</span> <span class="keyword">not</span> s <span class="keyword">or</span> s[<span class="number">0</span>] == <span class="string">'0'</span>:
+            <span class="keyword">return</span> <span class="number">0</span>
+        
+        n = <span class="function">len</span>(s)
+        <span class="comment"># dp[i] 表示前i个字符的解码方法数</span>
+        <span class="comment"># 使用滚动数组优化，只保留前两个状态</span>
+        prev2 = <span class="number">1</span>  <span class="comment"># dp[i-2]</span>
+        prev1 = <span class="number">1</span>  <span class="comment"># dp[i-1]，空字符串有一种解码方式</span>
+        
+        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="number">1</span>, n):
+            current = <span class="number">0</span>
+            
+            <span class="comment"># 情况1：单独解码 s[i]（如果当前数字不是'0'）</span>
+            <span class="keyword">if</span> s[i] != <span class="string">'0'</span>:
+                current += prev1
+            
+            <span class="comment"># 情况2：组合解码 s[i-1:i+1]（如果组合在10-26之间）</span>
+            two_digit = <span class="function">int</span>(s[i<span class="number">-1</span>:i<span class="number">+1</span>])
+            <span class="keyword">if</span> <span class="number">10</span> <= two_digit <= <span class="number">26</span>:
+                current += prev2
+            
+            <span class="comment"># 如果当前位置无法解码，返回0</span>
+            <span class="keyword">if</span> current == <span class="number">0</span>:
+                <span class="keyword">return</span> <span class="number">0</span>
+            
+            <span class="comment"># 滚动更新</span>
+            prev2 = prev1
+            prev1 = current
+        
+        <span class="keyword">return</span> prev1</code></pre>
+  </div>
+  
+  <script>
+    // 代码行数据
+    const codeLines = [
+      { num: 1,  content: '<span class="keyword">class</span> <span class="class">Solution</span>:' },
+      { num: 2,  content: '    <span class="keyword">def</span> <span class="function">numDecodings</span>(<span class="var">self</span>, <span class="var">s</span>: <span class="keyword">str</span>) -> <span class="keyword">int</span>:' },
+      { num: 3,  content: '        <span class="comment"># 空字符串或首字符为\'0\'，无法解码</span>' },
+      { num: 4,  content: '        <span class="keyword">if</span> <span class="keyword">not</span> s <span class="keyword">or</span> s[<span class="number">0</span>] == <span class="string">\'0\'</span>:' },
+      { num: 5,  content: '            <span class="keyword">return</span> <span class="number">0</span>' },
+      { num: 6,  content: '        ' },
+      { num: 7,  content: '        n = <span class="function">len</span>(s)' },
+      { num: 8,  content: '        <span class="comment"># dp[i] 表示前i个字符的解码方法数</span>' },
+      { num: 9,  content: '        <span class="comment"># 使用滚动数组优化，只保留前两个状态</span>' },
+      { num: 10, content: '        prev2 = <span class="number">1</span>  <span class="comment"># dp[i-2]</span>' },
+      { num: 11, content: '        prev1 = <span class="number">1</span>  <span class="comment"># dp[i-1]，空字符串有一种解码方式</span>' },
+      { num: 12, content: '        ' },
+      { num: 13, content: '        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="number">1</span>, n):' },
+      { num: 14, content: '            current = <span class="number">0</span>' },
+      { num: 15, content: '            ' },
+      { num: 16, content: '            <span class="comment"># 情况1：单独解码 s[i]（如果当前数字不是\'0\'）</span>' },
+      { num: 17, content: '            <span class="keyword">if</span> s[i] != <span class="string">\'0\'</span>:' },
+      { num: 18, content: '                current += prev1' },
+      { num: 19, content: '            ' },
+      { num: 20, content: '            <span class="comment"># 情况2：组合解码 s[i-1:i+1]（如果组合在10-26之间）</span>' },
+      { num: 21, content: '            two_digit = <span class="function">int</span>(s[i<span class="number">-1</span>:i<span class="number">+1</span>])' },
+      { num: 22, content: '            <span class="keyword">if</span> <span class="number">10</span> <= two_digit <= <span class="number">26</span>:' },
+      { num: 23, content: '                current += prev2' },
+      { num: 24, content: '            ' },
+      { num: 25, content: '            <span class="comment"># 如果当前位置无法解码，返回0</span>' },
+      { num: 26, content: '            <span class="keyword">if</span> current == <span class="number">0</span>:' },
+      { num: 27, content: '                <span class="keyword">return</span> <span class="number">0</span>' },
+      { num: 28, content: '            ' },
+      { num: 29, content: '            <span class="comment"># 滚动更新</span>' },
+      { num: 30, content: '            prev2 = prev1' },
+      { num: 31, content: '            prev1 = current' },
+      { num: 32, content: '        ' },
+      { num: 33, content: '        <span class="keyword">return</span> prev1' },
+    ];
+    
+    // 步骤与代码行映射（以 s="226" 为例）
+    const steps = [
+      {
+        title: "初始化检查", 
+        desc: "检查字符串是否为空或以'0'开头。s='226'，检查通过。", 
+        line: 4,
+        dpIdx: 0,
+        dpVal: 1,
+        state: { prev1: 1, prev2: 1, i: null }
+      },
+      {
+        title: "初始化变量", 
+        desc: "prev1=1（表示空字符串的解码方式），prev2=1（备用）", 
+        line: 10,
+        dpIdx: 0,
+        dpVal: 1,
+        state: { prev1: 1, prev2: 1, i: null }
+      },
+      {
+        title: "i=1, 处理 '2'", 
+        desc: "s[1]='2'≠'0'，可以单独解码 → current += prev1 = 1。s[0:2]='22'在10-26之间，可以组合解码 → current += prev2 = 1。current = 2", 
+        line: 17,
+        dpIdx: 1,
+        dpVal: 2,
+        state: { prev1: 2, prev2: 1, i: 1 }
+      },
+      {
+        title: "更新状态 (i=1)", 
+        desc: "prev2 = prev1(1), prev1 = current(2)。现在dp[2]=2，表示'22'有2种解码方式：'BB'或'V'", 
+        line: 30,
+        dpIdx: 2,
+        dpVal: 2,
+        state: { prev1: 2, prev2: 2, i: 1 }
+      },
+      {
+        title: "i=2, 处理 '6'", 
+        desc: "s[2]='6'≠'0'，可以单独解码 → current += prev1 = 2。s[1:3]='26'在10-26之间，可以组合解码 → current += prev2 = 2。current = 3", 
+        line: 17,
+        dpIdx: 2,
+        dpVal: 3,
+        state: { prev1: 3, prev2: 2, i: 2 }
+      },
+      {
+        title: "更新状态 (i=2)", 
+        desc: "prev2 = prev1(2), prev1 = current(3)。现在dp[3]=3，表示'226'有3种解码方式", 
+        line: 30,
+        dpIdx: 3,
+        dpVal: 3,
+        state: { prev1: 3, prev2: 3, i: 2 }
+      },
+      {
+        title: "返回结果", 
+        desc: "遍历结束，返回 prev1 = 3。'226'的解码方式：'BBF'(2-2-6)、'VF'(22-6)、'BZ'(2-26)", 
+        line: 33,
+        dpIdx: 3,
+        dpVal: 3,
+        state: { result: 3 }
+      }
+    ];
+    
+    let currentStep = 0;
+    
+    // 渲染代码
+    function renderCode() {
+      const codeBlock = document.getElementById('codeBlock');
+      codeBlock.innerHTML = codeLines.map((line, idx) => `
+        <div class="code-line" data-line="${line.num}" data-idx="${idx}">
+          <span class="line-number">${line.num}</span>
+          <span class="line-content">${line.content}</span>
+        </div>
+      `).join('');
+    }
+    
+    // 渲染步骤
+    function renderSteps() {
+      const vizSteps = document.getElementById('vizSteps');
+      vizSteps.innerHTML = steps.map((step, idx) => `
+        <div class="viz-step ${idx === currentStep ? 'active' : ''}" data-step="${idx}">
+          <h4>步骤 ${idx + 1}: ${step.title}</h4>
+          <p>${step.desc}</p>
+          <div class="state">
+            ${Object.entries(step.state).map(([k, v]) => `${k}=${v}`).join(', ')}
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    // 更新高亮状态
+    function updateHighlight() {
+      // 更新步骤高亮
+      document.querySelectorAll('.viz-step').forEach((el, idx) => {
+        el.classList.toggle('active', idx === currentStep);
+      });
+      
+      // 更新代码行高亮
+      document.querySelectorAll('.code-line').forEach(el => {
+        el.classList.remove('active');
+      });
+      const activeLine = document.querySelector(`.code-line[data-line="${steps[currentStep].line}"]`);
+      if (activeLine) {
+        activeLine.classList.add('active');
+        activeLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      
+      // 更新DP表格
+      document.querySelectorAll('.dp-cell').forEach((cell, idx) => {
+        cell.classList.toggle('active', idx === steps[currentStep].dpIdx);
+        if (idx === steps[currentStep].dpIdx) {
+          cell.querySelector('.val').textContent = steps[currentStep].dpVal;
+        }
+      });
+      
+      // 更新步骤信息
+      const info = document.getElementById('currentStepInfo');
+      info.innerHTML = `
+        <h4>步骤 ${currentStep + 1}: ${steps[currentStep].title}</h4>
+        <p>${steps[currentStep].desc}</p>
+      `;
+    }
+    
+    // 事件绑定
+    function bindEvents() {
+      // 点击步骤
+      document.getElementById('vizSteps').addEventListener('click', (e) => {
+        const step = e.target.closest('.viz-step');
+        if (step) {
+          currentStep = parseInt(step.dataset.step);
+          updateHighlight();
+        }
+      });
+      
+      // 点击代码行
+      document.getElementById('codeBlock').addEventListener('click', (e) => {
+        const line = e.target.closest('.code-line');
+        if (line) {
+          const lineNum = parseInt(line.dataset.line);
+          // 找到包含该行的步骤
+          const stepIdx = steps.findIndex(s => s.line === lineNum);
+          if (stepIdx !== -1) {
+            currentStep = stepIdx;
+            updateHighlight();
+          }
+        }
+      });
+    }
+    
+    // 初始化
+    renderCode();
+    renderSteps();
+    updateHighlight();
+    bindEvents();
+  </script>
+</body>
+</html>

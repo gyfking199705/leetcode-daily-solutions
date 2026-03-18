@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #437 - 路径总和 III</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --primary-light: #818cf8;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --surface-light: #334155;
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1100px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.7;
+    }
+    h1 { 
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 2.5rem;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin-bottom: 32px;
+    }
+    .difficulty {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-left: 12px;
+    }
+    .difficulty.medium { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px; 
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section h3 {
+      color: var(--text);
+      margin-top: 24px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--surface-light);
+    }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 0; 
+      overflow-x: auto; 
+      border: 1px solid var(--surface-light);
+    }
+    .code-content {
+      padding: 20px;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 3px 0; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+      margin-left: -3px;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.25); 
+      border-left-color: var(--primary);
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 45px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.9em;
+    }
+    .line-content {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.95em;
+      white-space: pre;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1.2fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 900px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    .viz-steps {
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    .viz-step { 
+      padding: 14px 16px; 
+      margin: 10px 0; 
+      border-radius: 10px; 
+      background: var(--surface-light); 
+      cursor: pointer; 
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .viz-step:hover { 
+      background: rgba(99, 102, 241, 0.15);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.25);
+    }
+    .viz-step-title {
+      font-weight: 600;
+      color: var(--primary-light);
+      margin-bottom: 4px;
+    }
+    .viz-step-desc {
+      font-size: 0.9em;
+      color: var(--text-muted);
+    }
+    .viz-step-state {
+      margin-top: 8px;
+      padding: 6px 10px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 0.85em;
+    }
+    .code-container h3 {
+      margin-top: 0;
+      border-bottom: none;
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 18px; 
+      border: 1px solid var(--surface-light); 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block;
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15);
+    }
+    .problem-card-title {
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--primary-light);
+    }
+    .problem-card-method {
+      font-size: 0.9em;
+      color: var(--text-muted);
+    }
+    .keyword { color: #ff7b72; } 
+    .function { color: #d2a8ff; } 
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; } 
+    .comment { color: #8b949e; } 
+    .class { color: #ffa657; }
+    .var { color: #79c0ff; }
+    .builtin { color: #ffa657; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+    }
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--surface-light);
+    }
+    th {
+      color: var(--primary-light);
+      font-weight: 600;
+      background: rgba(99, 102, 241, 0.1);
+    }
+    .example-box {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 16px;
+      margin: 12px 0;
+      border-left: 4px solid var(--primary);
+    }
+    .example-title {
+      font-weight: 600;
+      color: var(--primary-light);
+      margin-bottom: 8px;
+    }
+    .tree-diagram {
+      font-family: monospace;
+      white-space: pre;
+      background: var(--bg);
+      padding: 16px;
+      border-radius: 10px;
+      overflow-x: auto;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .insight-box {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(129, 140, 248, 0.1) 100%);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 16px 0;
+    }
+    .insight-box h4 {
+      margin: 0 0 10px 0;
+      color: var(--primary-light);
+    }
+    .highlight-tip {
+      background: rgba(34, 197, 94, 0.15);
+      border-left: 4px solid var(--success);
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 12px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #437 - 路径总和 III<span class="difficulty medium">Medium</span></h1>
+  <p class="subtitle">前缀和 + 哈希表优化的二叉树路径问题</p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给定一个二叉树的根节点 <code>root</code> ，和一个整数目标和 <code>targetSum</code> ，求该二叉树里节点值之和等于 <code>targetSum</code> 的<strong>路径</strong>的数目。</p>
+    <p><strong>路径</strong>不需要从根节点开始，也不需要在叶子节点结束，但是路径方向必须是向下的（只能从父节点到子节点）。</p>
+    
+    <div class="example-box">
+      <div class="example-title">示例 1</div>
+      <div class="tree-diagram">        10
+       /  \
+      5   -3
+     / \    \
+    3   2   11
+   / \   \
+  3  -2   1</div>
+      <p><strong>输入：</strong>root = [10,5,-3,3,2,null,11,3,-2,null,1], targetSum = 8</p>
+      <p><strong>输出：</strong>3</p>
+      <p><strong>解释：</strong>和等于 8 的路径有:</p>
+      <ul>
+        <li>5 → 3</li>
+        <li>5 → 2 → 1</li>
+        <li>-3 → 11</li>
+      </ul>
+    </div>
+
+    <div class="insight-box">
+      <h4>💡 核心思路</h4>
+      <p>利用<strong>前缀和</strong>思想：如果两个节点的前缀和之差等于 targetSum，则这两个节点之间的路径和等于 targetSum。</p>
+      <p>用哈希表记录从根节点到当前节点的路径上，各个前缀和出现的次数。</p>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table>
+      <tr>
+        <th>指标</th>
+        <th>值</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>时间复杂度</td>
+        <td>O(N)</td>
+        <td>每个节点只访问一次</td>
+      </tr>
+      <tr>
+        <td>空间复杂度</td>
+        <td>O(H)</td>
+        <td>H为树的高度，递归栈空间 + 哈希表</td>
+      </tr>
+    </table>
+    
+    <div class="highlight-tip">
+      <strong>优化对比：</strong>暴力解法 O(N²) → 前缀和优化 O(N)。前缀和技巧将「枚举所有路径」转化为「查哈希表」。
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转 LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/path-sum/" class="problem-card" target="_blank">
+        <div class="problem-card-title">#112 路径总和</div>
+        <div class="problem-card-method">基础版：判断是否存在根到叶子的路径</div>
+      </a>
+      <a href="https://leetcode.cn/problems/path-sum-ii/" class="problem-card" target="_blank">
+        <div class="problem-card-title">#113 路径总和 II</div>
+        <div class="problem-card-method">返回所有满足条件的路径</div>
+      </a>
+      <a href="https://leetcode.cn/problems/binary-tree-maximum-path-sum/" class="problem-card" target="_blank">
+        <div class="problem-card-title">#124 二叉树中的最大路径和</div>
+        <div class="problem-card-method">Hard | 后序遍历 + 全局最大值</div>
+      </a>
+      <a href="https://leetcode.cn/problems/subarray-sum-equals-k/" class="problem-card" target="_blank">
+        <div class="problem-card-title">#560 和为 K 的子数组</div>
+        <div class="problem-card-method">一维数组的前缀和 + 哈希表</div>
+      </a>
+      <a href="https://leetcode.cn/problems/construct-binary-tree-from-preorder-and-inorder-traversal/" class="problem-card" target="_blank">
+        <div class="problem-card-title">#105 从前序与中序遍历序列构造二叉树</div>
+        <div class="problem-card-method">递归分治 | 高频经典</div>
+      </a>
+      <a href="https://leetcode.cn/problems/longest-univalue-path/" class="problem-card" target="_blank">
+        <div class="problem-card-title">#687 最长同值路径</div>
+        <div class="problem-card-method">后序遍历 + 路径计数</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>🎯 面试要点</h2>
+    <ul>
+      <li><strong>前缀和</strong>的定义：从根节点到当前节点的路径和</li>
+      <li>为什么用哈希表？为了 O(1) 时间查询「之前有多少个节点的前缀和等于 currSum - target」</li>
+      <li><strong>回溯的关键</strong>：离开节点时要恢复状态（前缀和计数减1）</li>
+      <li>与「和为 K 的子数组」(#560) 的本质联系</li>
+    </ul>
+  </div>
+  
+  <script>
+    // 代码行
+    const codeLines = [
+      {num: 1, content: '<span class="keyword">from</span> collections <span class="keyword">import</span> defaultdict'},
+      {num: 2, content: ''},
+      {num: 3, content: '<span class="keyword">class</span> <span class="class">Solution</span>:'},
+      {num: 4, content: '    <span class="keyword">def</span> <span class="function">pathSum</span>(self, root: TreeNode, targetSum: <span class="builtin">int</span>) -> <span class="builtin">int</span>:'},
+      {num: 5, content: '        <span class="comment"># prefix_sum[sum] = 该前缀和出现的次数</span>'},
+      {num: 6, content: '        prefix_sum = defaultdict(<span class="builtin">int</span>)'},
+      {num: 7, content: '        prefix_sum[<span class="number">0</span>] = <span class="number">1</span>  <span class="comment"># 前缀和为0的路径有1条（空路径）</span>'},
+      {num: 8, content: '        <span class="keyword">return</span> self.<span class="function">dfs</span>(root, targetSum, <span class="number">0</span>, prefix_sum)'},
+      {num: 9, content: ''},
+      {num: 10, content: '    <span class="keyword">def</span> <span class="function">dfs</span>(self, node, target, curr_sum, prefix_sum):'},
+      {num: 11, content: '        <span class="keyword">if</span> <span class="keyword">not</span> node:'},
+      {num: 12, content: '            <span class="keyword">return</span> <span class="number">0</span>'},
+      {num: 13, content: ''},
+      {num: 14, content: '        <span class="comment"># 更新当前前缀和</span>'},
+      {num: 15, content: '        curr_sum += node.val'},
+      {num: 16, content: ''},
+      {num: 17, content: '        <span class="comment"># 查找有多少个前缀和等于 curr_sum - target</span>'},
+      {num: 18, content: '        <span class="comment"># 即：存在多少条从上到下的路径，其和等于 target</span>'},
+      {num: 19, content: '        count = prefix_sum.get(curr_sum - target, <span class="number">0</span>)'},
+      {num: 20, content: ''},
+      {num: 21, content: '        <span class="comment"># 将当前前缀和加入哈希表</span>'},
+      {num: 22, content: '        prefix_sum[curr_sum] += <span class="number">1</span>'},
+      {num: 23, content: ''},
+      {num: 24, content: '        <span class="comment"># 递归遍历左右子树</span>'},
+      {num: 25, content: '        count += self.<span class="function">dfs</span>(node.left, target, curr_sum, prefix_sum)'},
+      {num: 26, content: '        count += self.<span class="function">dfs</span>(node.right, target, curr_sum, prefix_sum)'},
+      {num: 27, content: ''},
+      {num: 28, content: '        <span class="comment"># 回溯：离开节点时，将当前前缀和计数减1</span>'},
+      {num: 29, content: '        prefix_sum[curr_sum] -= <span class="number">1</span>'},
+      {num: 30, content: ''},
+      {num: 31, content: '        <span class="keyword">return</span> count'},
+    ];
+
+    // 可视化步骤
+    const steps = [
+      {title: "初始化哈希表", desc: "prefix_sum[0] = 1，表示前缀和为0的路径有1条（空路径）", line: 7, state: "prefix_sum = {0: 1}"},
+      {title: "进入根节点 10", desc: "开始DFS遍历，当前节点值为10", line: 10, state: "node=10, curr_sum=0 → 10"},
+      {title: "更新前缀和", desc: "curr_sum = 0 + 10 = 10", line: 15, state: "curr_sum = 10"},
+      {title: "查询有效路径数", desc: "找前缀和 = 10-8 = 2 的次数，当前为0", line: 19, state: "count += prefix_sum[2] = 0"},
+      {title: "记录当前前缀和", desc: "prefix_sum[10] = 1", line: 22, state: "prefix_sum = {0:1, 10:1}"},
+      {title: "递归左子树 5", desc: "进入节点5，继续DFS", line: 25, state: "进入 node=5"},
+      {title: "更新前缀和", desc: "curr_sum = 10 + 5 = 15", line: 15, state: "curr_sum = 15"},
+      {title: "查询有效路径数", desc: "找前缀和 = 15-8 = 7 的次数", line: 19, state: "count += prefix_sum[7] = 0"},
+      {title: "记录当前前缀和", desc: "prefix_sum[15] = 1", line: 22, state: "prefix_sum[15] = 1"},
+      {title: "递归左子树 3", desc: "进入节点3", line: 25, state: "进入 node=3"},
+      {title: "更新前缀和", desc: "curr_sum = 15 + 3 = 18", line: 15, state: "curr_sum = 18"},
+      {title: "查询有效路径数", desc: "找前缀和 = 18-8 = 10 的次数 → 1次！", line: 19, state: "count += prefix_sum[10] = 1 ✓"},
+      {title: "找到第一条路径！", desc: "路径 10→5→3 中包含子路径 5→3 = 8", line: 19, state: "发现路径: 5→3"},
+      {title: "记录前缀和 18", desc: "prefix_sum[18] = 1", line: 22, state: "prefix_sum[18] = 1"},
+      {title: "继续递归子节点...", desc: "访问3的左右子节点（3和-2），然后回溯", line: 25, state: "递归子节点"},
+      {title: "回溯节点 3", desc: "离开节点3，prefix_sum[18] -= 1", line: 29, state: "prefix_sum[18] = 0"},
+      {title: "回到节点 5，递归右子树 2", desc: "进入节点2，继续探索", line: 26, state: "进入 node=2"},
+      {title: "更新前缀和", desc: "curr_sum = 15 + 2 = 17", line: 15, state: "curr_sum = 17"},
+      {title: "查询有效路径数", desc: "找前缀和 = 17-8 = 9 的次数 → 0", line: 19, state: "count += prefix_sum[9] = 0"},
+      {title: "递归节点 2 的右子树 1", desc: "进入节点1", line: 26, state: "进入 node=1"},
+      {title: "更新前缀和", desc: "curr_sum = 17 + 1 = 18", line: 15, state: "curr_sum = 18"},
+      {title: "查询有效路径数", desc: "找前缀和 = 18-8 = 10 的次数 → 1次！", line: 19, state: "count += prefix_sum[10] = 1 ✓"},
+      {title: "找到第二条路径！", desc: "路径 10→5→2→1 中包含子路径 5→2→1 = 8", line: 19, state: "发现路径: 5→2→1"},
+      {title: "回溯并继续遍历...", desc: "完成左子树遍历，回到根节点，遍历右子树 -3", line: 26, state: "进入 node=-3"},
+      {title: "更新前缀和", desc: "curr_sum = 10 + (-3) = 7", line: 15, state: "curr_sum = 7"},
+      {title: "查询有效路径数", desc: "找前缀和 = 7-8 = -1 的次数 → 0", line: 19, state: "count += prefix_sum[-1] = 0"},
+      {title: "记录前缀和 7", desc: "prefix_sum[7] = 1", line: 22, state: "prefix_sum[7] = 1"},
+      {title: "递归右子树 11", desc: "进入节点11", line: 26, state: "进入 node=11"},
+      {title: "更新前缀和", desc: "curr_sum = 7 + 11 = 18", line: 15, state: "curr_sum = 18"},
+      {title: "查询有效路径数", desc: "找前缀和 = 18-8 = 10 的次数 → 1次！", line: 19, state: "count += prefix_sum[10] = 1 ✓"},
+      {title: "找到第三条路径！", desc: "路径 10→(-3)→11 中包含子路径 (-3)→11 = 8", line: 19, state: "发现路径: -3→11"},
+      {title: "完成遍历", desc: "总共找到 3 条满足条件的路径", line: 31, state: "最终答案: 3"},
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach(line => {
+      const lineDiv = document.createElement('div');
+      lineDiv.className = 'code-line';
+      lineDiv.dataset.line = line.num;
+      lineDiv.innerHTML = `<span class="line-number">${line.num}</span><span class="line-content">${line.content}</span>`;
+      lineDiv.addEventListener('click', () => selectLine(line.num));
+      codeBlock.appendChild(lineDiv);
+    });
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const stepDiv = document.createElement('div');
+      stepDiv.className = 'viz-step';
+      stepDiv.dataset.step = idx;
+      stepDiv.dataset.line = step.line;
+      stepDiv.innerHTML = `
+        <div class="viz-step-title">步骤 ${idx + 1}: ${step.title}</div>
+        <div class="viz-step-desc">${step.desc}</div>
+        <div class="viz-step-state">${step.state}</div>
+      `;
+      stepDiv.addEventListener('click', () => selectStep(idx));
+      vizSteps.appendChild(stepDiv);
+    });
+
+    // 选择步骤
+    function selectStep(idx) {
+      // 清除所有高亮
+      document.querySelectorAll('.viz-step').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+      
+      // 高亮当前步骤
+      const stepEl = document.querySelector(`.viz-step[data-step="${idx}"]`);
+      if (stepEl) {
+        stepEl.classList.add('active');
+        stepEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      
+      // 高亮对应代码行
+      const lineNum = steps[idx].line;
+      const lineEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+      if (lineEl) {
+        lineEl.classList.add('active');
+        lineEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    // 选择代码行
+    function selectLine(lineNum) {
+      // 清除所有高亮
+      document.querySelectorAll('.viz-step').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+      
+      // 高亮代码行
+      const lineEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+      if (lineEl) lineEl.classList.add('active');
+      
+      // 找到并高亮对应的步骤（取第一个匹配的）
+      const stepIdx = steps.findIndex(s => s.line === lineNum);
+      if (stepIdx !== -1) {
+        const stepEl = document.querySelector(`.viz-step[data-step="${stepIdx}"]`);
+        if (stepEl) {
+          stepEl.classList.add('active');
+          stepEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    }
+
+    // 默认选中第一个步骤
+    selectStep(0);
+  </script>
+</body>
+</html>

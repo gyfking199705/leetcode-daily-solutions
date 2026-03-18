@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>LeetCode #739 - 每日温度</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --text: #f1f5f9; 
+      --text-secondary: #94a3b8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.6;
+    }
+    h1 { 
+      font-size: 2rem; 
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-bottom: 30px;
+    }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px; 
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tag {
+      display: inline-block;
+      background: rgba(99, 102, 241, 0.2);
+      color: var(--primary);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-right: 8px;
+    }
+    .difficulty-medium {
+      background: rgba(245, 158, 11, 0.2);
+      color: var(--warning);
+    }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 20px; 
+      overflow-x: auto;
+      margin: 16px 0;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 2px 0; 
+      cursor: pointer; 
+      transition: background 0.2s; 
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.3); 
+      border-left: 3px solid #6366f1; 
+      margin-left: -3px;
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 40px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 768px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    .viz-panel {
+      background: rgba(0,0,0,0.2);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .viz-step { 
+      padding: 14px; 
+      margin: 10px 0; 
+      border-radius: 10px; 
+      background: #334155; 
+      cursor: pointer; 
+      border: 2px solid transparent; 
+      transition: all 0.2s;
+    }
+    .viz-step:hover {
+      transform: translateX(4px);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.25);
+    }
+    .viz-step-title {
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+    }
+    .viz-step-desc {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    .state-display {
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 10px;
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+    .state-row {
+      display: flex;
+      gap: 16px;
+      margin: 4px 0;
+    }
+    .state-label {
+      color: var(--text-secondary);
+      min-width: 60px;
+    }
+    .array-viz {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin: 8px 0;
+    }
+    .array-item {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      background: #334155;
+      font-weight: 600;
+      font-size: 0.85rem;
+      position: relative;
+    }
+    .array-item.highlight {
+      background: var(--primary);
+    }
+    .array-item.solved {
+      background: var(--success);
+    }
+    .array-item.index {
+      background: transparent;
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      height: 20px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 16px; 
+      border: 1px solid #475569; 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block; 
+      margin-bottom: 12px;
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-2px);
+      background: rgba(99, 102, 241, 0.1);
+    }
+    .problem-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .problem-meta {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+    }
+    .keyword { color: #ff7b72; } 
+    .function { color: #d2a8ff; } 
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; } 
+    .comment { color: #8b949e; } 
+    .class { color: #ffa657; }
+    .operator { color: #ff7b72; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #334155;
+    }
+    th {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .complexity-good {
+      color: var(--success);
+    }
+    .tip-box {
+      background: rgba(34, 197, 94, 0.1);
+      border-left: 4px solid var(--success);
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 16px 0;
+    }
+    .tip-title {
+      color: var(--success);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #739 - 每日温度</h1>
+  <p class="subtitle">
+    <span class="tag difficulty-medium">Medium</span>
+    <span class="tag">单调栈</span>
+    <span class="tag">数组</span>
+  </p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给定一个数组 <code>temperatures</code>，表示每天的温度，返回一个数组 <code>answer</code>，其中 <code>answer[i]</code> 是指对于第 <code>i</code> 天，下一个更高温度出现在几天后。如果气温在这之后都不会升高，在该位置用 <code>0</code> 来代替。</p>
+    
+    <div class="tip-box">
+      <div class="tip-title">💡 核心思路</div>
+      <p>利用<strong>单调递减栈</strong>，栈中存储的是<strong>索引</strong>而非温度值。当遇到比栈顶温度高的新温度时，就找到了栈顶元素的"下一个更高温度"，计算天数差并出栈。这样保证栈内温度始终递减，每个元素最多入栈出栈一次。</p>
+    </div>
+    
+    <p><strong>示例：</strong></p>
+    <pre style="background: rgba(0,0,0,0.3);">输入: temperatures = [73, 74, 75, 71, 69, 72, 76, 73]
+输出: [1, 1, 4, 2, 1, 1, 0, 0]</pre>
+    <p style="color: var(--text-secondary); font-size: 0.9rem;">解释：第0天73度，第1天74度比它高，所以是1天后；第3天71度，第6天76度比它高，相差3天...</p>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程可视化</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 16px;">点击下方步骤或代码行查看对应关系，理解单调栈的工作原理。</p>
+    
+    <div class="array-viz" id="tempArray">
+      <div class="array-item index">0</div>
+      <div class="array-item index">1</div>
+      <div class="array-item index">2</div>
+      <div class="array-item index">3</div>
+      <div class="array-item index">4</div>
+      <div class="array-item index">5</div>
+      <div class="array-item index">6</div>
+      <div class="array-item index">7</div>
+    </div>
+    <div class="array-viz" id="tempValues">
+      <div class="array-item" data-idx="0">73</div>
+      <div class="array-item" data-idx="1">74</div>
+      <div class="array-item" data-idx="2">75</div>
+      <div class="array-item" data-idx="3">71</div>
+      <div class="array-item" data-idx="4">69</div>
+      <div class="array-item" data-idx="5">72</div>
+      <div class="array-item" data-idx="6">76</div>
+      <div class="array-item" data-idx="7">73</div>
+    </div>
+    
+    <div class="viz-container">
+      <div class="viz-panel">
+        <h3 style="margin-top: 0; color: var(--primary);">📍 执行步骤</h3>
+        <div id="vizSteps">
+          <!-- 步骤由JS生成 -->
+        </div>
+      </div>
+      <div class="viz-panel">
+        <h3 style="margin-top: 0; color: var(--primary);">🐍 Python 实现</h3>
+        <pre><code id="codeBlock">
+<!-- 代码行由JS生成 -->
+        </code></pre>
+      </div>
+    </div>
+    
+    <div id="currentState" class="state-display" style="display: none;">
+      <div class="state-row">
+        <span class="state-label">栈状态:</span>
+        <span id="stackState">[]</span>
+      </div>
+      <div class="state-row">
+        <span class="state-label">当前i:</span>
+        <span id="currentIdx">-</span>
+      </div>
+      <div class="state-row">
+        <span class="state-label">ans数组:</span>
+        <span id="ansState">[0,0,0,0,0,0,0,0]</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table>
+      <tr>
+        <th>复杂度类型</th>
+        <th>值</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>时间复杂度</td>
+        <td class="complexity-good">O(n)</td>
+        <td>每个元素最多入栈和出栈各一次，共2n次操作</td>
+      </tr>
+      <tr>
+        <td>空间复杂度</td>
+        <td class="complexity-good">O(n)</td>
+        <td>最坏情况下栈需要存储所有索引（递减序列）</td>
+      </tr>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>🎯 类似题目推荐</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 16px;">以下题目同样运用单调栈思想，建议对比练习：</p>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/next-greater-element-i/" class="problem-card" target="_blank">
+        <div class="problem-title">#496 下一个更大元素 I</div>
+        <div class="problem-meta">单调栈 · Easy · 基础版下一个更大元素</div>
+      </a>
+      <a href="https://leetcode.cn/problems/next-greater-element-ii/" class="problem-card" target="_blank">
+        <div class="problem-title">#503 下一个更大元素 II</div>
+        <div class="problem-meta">单调栈 · Medium · 循环数组版本</div>
+      </a>
+      <a href="https://leetcode.cn/problems/largest-rectangle-in-histogram/" class="problem-card" target="_blank">
+        <div class="problem-title">#84 柱状图中最大的矩形</div>
+        <div class="problem-meta">单调栈 · Hard · 找左右边界</div>
+      </a>
+      <a href="https://leetcode.cn/problems/sliding-window-maximum/" class="problem-card" target="_blank">
+        <div class="problem-title">#239 滑动窗口最大值</div>
+        <div class="problem-meta">单调队列 · Hard · 双端队列维护</div>
+      </a>
+      <a href="https://leetcode.cn/problems/online-stock-span/" class="problem-card" target="_blank">
+        <div class="problem-title">#901 股票价格跨度</div>
+        <div class="problem-meta">单调栈 · Medium · 递减天数统计</div>
+      </a>
+      <a href="https://leetcode.cn/problems/remove-k-digits/" class="problem-card" target="_blank">
+        <div class="problem-title">#402 移掉K位数字</div>
+        <div class="problem-meta">单调栈 · Medium · 贪心+单调栈</div>
+      </a>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🧠 解题技巧总结</h2>
+    <ul style="color: var(--text-secondary); line-height: 2;">
+      <li><strong>何时用单调栈？</strong> 找"下一个更大/更小元素"、"左侧/右侧第一个满足条件的元素"这类问题</li>
+      <li><strong>递增还是递减？</strong> 找下一个更大用递减栈（栈顶最大），找下一个更小用递增栈</li>
+      <li><strong>存值还是存索引？</strong> 需要计算距离时存索引，只需要比较值时可存值</li>
+      <li><strong>本题的变形：</strong> 若问"前一个更高温度"，只需改为从右向左遍历</li>
+    </ul>
+  </div>
+
+  <script>
+    // Python代码行
+    const codeLines = [
+      {num: 1, code: '<span class="keyword">def</span> <span class="function">dailyTemperatures</span>(<span class="keyword">self</span>, temperatures: List[<span class="keyword">int</span>]) -> List[<span class="keyword">int</span>]:', indent: 0},
+      {num: 2, code: '    n = <span class="function">len</span>(temperatures)', indent: 1},
+      {num: 3, code: '    ans = [<span class="number">0</span>] * n  <span class="comment"># 初始化结果数组</span>', indent: 1},
+      {num: 4, code: '    stack = []  <span class="comment"># 单调递减栈，存储索引</span>', indent: 1},
+      {num: 5, code: '    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(n):  <span class="comment"># 遍历每一天</span>', indent: 1},
+      {num: 6, code: '        <span class="comment"># 当前温度 > 栈顶温度，说明找到下一个更高温</span>', indent: 2},
+      {num: 7, code: '        <span class="keyword">while</span> stack <span class="keyword">and</span> temperatures[i] > temperatures[stack[-<span class="number">1</span>]]:', indent: 2},
+      {num: 8, code: '            prev_idx = stack.pop()  <span class="comment"># 出栈，计算天数差</span>', indent: 3},
+      {num: 9, code: '            ans[prev_idx] = i - prev_idx  <span class="comment"># 记录答案</span>', indent: 3},
+      {num: 10, code: '        stack.append(i)  <span class="comment"># 当前索引入栈</span>', indent: 2},
+      {num: 11, code: '    <span class="keyword">return</span> ans', indent: 1},
+    ];
+    
+    // 执行步骤数据
+    const steps = [
+      {title: "初始化", desc: "创建结果数组ans全为0，空栈stack，准备遍历", line: 4, 
+       state: {stack: "[]", i: "-", ans: "[0,0,0,0,0,0,0,0]"}},
+      {title: "i=0, 温度=73", desc: "栈为空，73直接入栈", line: 10,
+       state: {stack: "[0]", i: "0", ans: "[0,0,0,0,0,0,0,0]"}},
+      {title: "i=1, 温度=74", desc: "74 > 73(栈顶)，找到73的下一个更高温！ans[0]=1-0=1，73出栈，74入栈", line: 7,
+       state: {stack: "[0] → pop → [1]", i: "1", ans: "[1,0,0,0,0,0,0,0]"}},
+      {title: "i=2, 温度=75", desc: "75 > 74(栈顶)，ans[1]=2-1=1，74出栈，75入栈", line: 9,
+       state: {stack: "[1] → pop → [2]", i: "2", ans: "[1,1,0,0,0,0,0,0]"}},
+      {title: "i=3, 温度=71", desc: "71 < 75，未找到更高温，71入栈", line: 10,
+       state: {stack: "[2,3]", i: "3", ans: "[1,1,0,0,0,0,0,0]"}},
+      {title: "i=4, 温度=69", desc: "69 < 71，未找到更高温，69入栈", line: 10,
+       state: {stack: "[2,3,4]", i: "4", ans: "[1,1,0,0,0,0,0,0]"}},
+      {title: "i=5, 温度=72", desc: "72 > 69，ans[4]=5-4=1，69出栈；72 > 71，ans[3]=5-3=2，71出栈；72 < 75，入栈", line: 7,
+       state: {stack: "[2,3,4] → pop,pop → [2,5]", i: "5", ans: "[1,1,0,2,1,0,0,0]"}},
+      {title: "i=6, 温度=76", desc: "76 > 72，ans[5]=6-5=1；76 > 75，ans[2]=6-2=4；76入栈", line: 9,
+       state: {stack: "[2,5] → pop,pop → [6]", i: "6", ans: "[1,1,4,2,1,1,0,0]"}},
+      {title: "i=7, 温度=73", desc: "73 < 76，未找到更高温，73入栈", line: 10,
+       state: {stack: "[6,7]", i: "7", ans: "[1,1,4,2,1,1,0,0]"}},
+      {title: "遍历结束", desc: "栈中剩余元素[6,7]没有下一个更高温，ans保持为0", line: 11,
+       state: {stack: "[6,7] (剩余)", i: "end", ans: "[1,1,4,2,1,1,0,0]"}},
+    ];
+    
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach(line => {
+      const div = document.createElement('div');
+      div.className = 'code-line';
+      div.dataset.line = line.num;
+      div.innerHTML = `<span class="line-number">${line.num}</span><span style="padding-left:${line.indent * 20}px">${line.code}</span>`;
+      div.onclick = () => selectByLine(line.num);
+      codeBlock.appendChild(div);
+    });
+    
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const div = document.createElement('div');
+      div.className = 'viz-step';
+      div.dataset.step = idx;
+      div.innerHTML = `
+        <div class="viz-step-title">步骤 ${idx + 1}: ${step.title}</div>
+        <div class="viz-step-desc">${step.desc}</div>
+      `;
+      div.onclick = () => selectStep(idx);
+      vizSteps.appendChild(div);
+    });
+    
+    let currentStep = -1;
+    
+    function selectStep(idx) {
+      // 清除之前的高亮
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.array-item').forEach(el => el.classList.remove('highlight', 'solved'));
+      
+      currentStep = idx;
+      const step = steps[idx];
+      
+      // 高亮步骤
+      document.querySelector(`.viz-step[data-step="${idx}"]`).classList.add('active');
+      
+      // 高亮代码行
+      if (step.line) {
+        const codeLine = document.querySelector(`.code-line[data-line="${step.line}"]`);
+        if (codeLine) codeLine.classList.add('active');
+      }
+      
+      // 更新状态显示
+      const stateDiv = document.getElementById('currentState');
+      if (step.state) {
+        stateDiv.style.display = 'block';
+        document.getElementById('stackState').textContent = step.state.stack;
+        document.getElementById('currentIdx').textContent = step.state.i;
+        document.getElementById('ansState').textContent = step.state.ans;
+      }
+      
+      // 高亮数组元素
+      if (step.state && step.state.i !== '-') {
+        const idxEl = document.querySelector(`.array-item[data-idx="${step.state.i}"]`);
+        if (idxEl) idxEl.classList.add('highlight');
+      }
+      
+      // 标记已解决的元素
+      if (idx >= 2) {
+        for (let i = 0; i < Math.min(idx - 1, 8); i++) {
+          const el = document.querySelector(`.array-item[data-idx="${i}"]`);
+          if (el && steps.slice(2, idx+1).some(s => s.state.ans[i] > 0)) {
+            el.classList.add('solved');
+          }
+        }
+      }
+    }
+    
+    function selectByLine(lineNum) {
+      // 找到对应这个代码行的步骤
+      const stepIdx = steps.findIndex(s => s.line === lineNum);
+      if (stepIdx !== -1) {
+        selectStep(stepIdx);
+      }
+    }
+    
+    // 默认选中第一步
+    selectStep(0);
+  </script>
+</body>
+</html>

@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #42 - 接雨水</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+  <style>
+    :root {
+      --bg-primary: #0d1117;
+      --bg-secondary: #161b22;
+      --bg-tertiary: #21262d;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --accent-blue: #58a6ff;
+      --accent-green: #3fb950;
+      --accent-yellow: #d29922;
+      --accent-purple: #a371f7;
+      --accent-red: #f85149;
+      --border-color: #30363d;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.7;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      padding: 40px 0;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 30px;
+    }
+    
+    .problem-id {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+      color: white;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+      background: linear-gradient(90deg, var(--text-primary), var(--accent-blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .difficulty {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    
+    .difficulty.hard {
+      color: var(--accent-red);
+      border: 1px solid var(--accent-red);
+    }
+    
+    .section {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 25px;
+      border: 1px solid var(--border-color);
+    }
+    
+    .section h2 {
+      font-size: 1.3rem;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .section h3 {
+      font-size: 1.1rem;
+      margin: 20px 0 12px 0;
+      color: var(--accent-blue);
+    }
+    
+    .problem-desc {
+      background: var(--bg-tertiary);
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 4px solid var(--accent-blue);
+    }
+    
+    .example {
+      background: var(--bg-primary);
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 14px;
+    }
+    
+    .example-label {
+      color: var(--accent-yellow);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    /* 可视化样式 */
+    .visualization {
+      background: var(--bg-primary);
+      border-radius: 12px;
+      padding: 25px;
+      margin: 20px 0;
+    }
+    
+    .rain-bar {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 4px;
+      height: 200px;
+      padding: 20px;
+      background: linear-gradient(180deg, #0d1117 0%, #161b22 100%);
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    
+    .bar-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .bar {
+      width: 30px;
+      background: linear-gradient(180deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+      border-radius: 4px 4px 0 0;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+    
+    .bar.water {
+      background: linear-gradient(180deg, #58a6ff80 0%, #58a6ff40 100%);
+      border: 2px dashed var(--accent-blue);
+    }
+    
+    .bar-label {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-family: monospace;
+    }
+    
+    .bar-index {
+      font-size: 10px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+    
+    /* 指针动画 */
+    .pointers {
+      display: flex;
+      justify-content: center;
+      gap: 150px;
+      margin: 15px 0;
+      font-family: monospace;
+    }
+    
+    .pointer {
+      text-align: center;
+      padding: 10px 20px;
+      border-radius: 8px;
+      animation: pulse 2s infinite;
+    }
+    
+    .pointer.left {
+      background: var(--accent-green);
+      color: var(--bg-primary);
+    }
+    
+    .pointer.right {
+      background: var(--accent-red);
+      color: var(--bg-primary);
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.05); }
+    }
+    
+    /* 步骤说明 */
+    .step-container {
+      margin: 15px 0;
+    }
+    
+    .step {
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    
+    .step-header {
+      padding: 15px 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: background 0.2s;
+    }
+    
+    .step-header:hover {
+      background: rgba(88, 166, 255, 0.1);
+    }
+    
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    
+    .step-title {
+      flex: 1;
+      font-weight: 500;
+    }
+    
+    .step-arrow {
+      transition: transform 0.3s;
+      color: var(--text-secondary);
+    }
+    
+    .step.active .step-arrow {
+      transform: rotate(180deg);
+    }
+    
+    .step-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      padding: 0 20px;
+    }
+    
+    .step.active .step-content {
+      max-height: 500px;
+      padding: 0 20px 20px 20px;
+    }
+    
+    /* 代码样式 */
+    pre {
+      background: var(--bg-primary) !important;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 20px 0;
+    }
+    
+    code {
+      font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace !important;
+      font-size: 14px !important;
+      line-height: 1.6 !important;
+    }
+    
+    .code-block {
+      position: relative;
+    }
+    
+    .code-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background: var(--bg-tertiary);
+      border-radius: 8px 8px 0 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .code-lang {
+      color: var(--accent-yellow);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    /* 复杂度表格 */
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    
+    .complexity-table th,
+    .complexity-table td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .complexity-table th {
+      background: var(--bg-tertiary);
+      font-weight: 600;
+      color: var(--accent-blue);
+    }
+    
+    .complexity-table tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      margin-right: 8px;
+    }
+    
+    .tag.time {
+      background: rgba(63, 185, 80, 0.2);
+      color: var(--accent-green);
+    }
+    
+    .tag.space {
+      background: rgba(163, 113, 247, 0.2);
+      color: var(--accent-purple);
+    }
+    
+    /* 推荐题目 */
+    .problem-list {
+      display: grid;
+      gap: 12px;
+    }
+    
+    .problem-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      transition: all 0.2s;
+      text-decoration: none;
+      color: inherit;
+    }
+    
+    .problem-item:hover {
+      background: rgba(88, 166, 255, 0.1);
+      transform: translateX(5px);
+    }
+    
+    .problem-num {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: var(--bg-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      color: var(--accent-blue);
+    }
+    
+    .problem-info {
+      flex: 1;
+    }
+    
+    .problem-title {
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    
+    .problem-tags {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    
+    .diff-badge {
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    .diff-badge.medium {
+      background: rgba(210, 153, 34, 0.2);
+      color: var(--accent-yellow);
+    }
+    
+    .diff-badge.hard {
+      background: rgba(248, 81, 73, 0.2);
+      color: var(--accent-red);
+    }
+    
+    /* 关键洞察 */
+    .insight-box {
+      background: linear-gradient(135deg, rgba(63, 185, 80, 0.1), rgba(88, 166, 255, 0.1));
+      border: 1px solid var(--accent-green);
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    
+    .insight-box h4 {
+      color: var(--accent-green);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    footer {
+      text-align: center;
+      padding: 30px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      border-top: 1px solid var(--border-color);
+      margin-top: 30px;
+    }
+    
+    /* ASCII 图示 */
+    .ascii-art {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 13px;
+      line-height: 1.4;
+      background: var(--bg-primary);
+      padding: 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      color: var(--accent-blue);
+    }
+    
+    .water-level {
+      color: var(--accent-blue);
+      background: rgba(88, 166, 255, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="problem-id">LeetCode #42</span>
+      <h1>接雨水</h1>
+      <div class="difficulty hard">
+        <span>🔴 Hard</span>
+        <span>数组 · 双指针 · 动态规划 · 单调栈</span>
+      </div>
+    </header>
+
+    <div class="section">
+      <h2>📋 题目描述</h2>
+      <div class="problem-desc">
+        <p>给定 <code>n</code> 个非负整数表示每个宽度为 1 的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水。</p>
+        <br>
+        <p><strong>核心问题：</strong>每个位置的柱子能接多少雨水？</p>
+      </div>
+      
+      <div class="example">
+        <div class="example-label">示例 1</div>
+        <div>输入：height = [0,1,0,2,1,0,1,3,2,1,2,1]</div>
+        <div>输出：6</div>
+        <div>解释：可以接 6 个单位的雨水</div>
+      </div>
+      
+      <div class="example">
+        <div class="example-label">示例 2</div>
+        <div>输入：height = [4,2,0,3,2,5]</div>
+        <div>输出：9</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>💡 解题思路</h2>
+      
+      <div class="insight-box">
+        <h4>💡 核心洞察</h4>
+        <p>每个位置能接的雨水 = <strong>min(左边最高, 右边最高) - 当前高度</strong></p>
+        <p style="margin-top: 10px; font-size: 14px;">只有当左右两边都有更高的柱子时，当前位置才能存水！</p>
+      </div>
+
+      <h3>🎯 双指针解法（最优解）</h3>
+      <p style="margin-bottom: 15px; color: var(--text-secondary);">时间 O(n)，空间 O(1) —— 面试首选方案</p>
+      
+      <div class="visualization">
+        <h4 style="margin-bottom: 15px; color: var(--accent-yellow);">可视化：双指针移动过程</h4>
+        
+        <div style="text-align: center; margin-bottom: 20px;">
+          <code>height = [0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1]</code>
+        </div>
+        
+        <div class="rain-bar">
+          <div class="bar-container">
+            <div class="bar" style="height: 10px;"></div>
+            <div class="bar-label">0</div>
+          </div>
+          <div class="bar-container">
+            <div class="bar" style="height: 30px;"></div>
+            <div class="bar-label">1</div>
+          </div>
+          <div class="bar-container">
+            <div class="bar" style="height: 10px;"></div>
+            <div class="bar-label">0</div>
+          </div>
+          <div class="bar-container">
+            <div class="bar" style="height: 50px;"></div>
+            <div class="bar-label">2</div>
+          </div>
+          <div class="bar-container">
+            <div class="bar" style="height: 30px;"></div>
+            <div class="bar-label">1</div>
+          </div>
+          <div class="bar-container">
+            <div class="bar" style="height: 10px;"></div>
+            <div class="bar-label">0</div>
+          </div>
+          <div class="bar-container">
+            <div class="bar water" style="height: 30px;"></div>
+            <div class="bar-label">1</div>
+          </div>
+          <div class="bar-container">
+            <div class="bar" style="height: 70px;"></div>
+            <div class="bar-label">3</div>
+          </div>
+          <div class="bar-container">
+            <div class="bar water" style="height: 50px;"></div>
+            <div class="bar-label">2</div>
+          </div>
+          <div class="bar-container">
+            <div class="bar water" style="height: 30px;"></div>
+            <div class="bar-label">1</div>
+          </div>
+          <div class="bar-container">
+            <div class="bar water" style="height: 50px;"></div>
+            <div class="bar-label">2</div>
+          </div>
+          <div class="bar-container">
+            <div class="bar water" style="height: 30px;"></div>
+            <div class="bar-label">1</div>
+          </div>
+        </div>
+        <p style="text-align: center; color: var(--text-secondary); font-size: 14px;">
+          🔵 实色 = 柱子 │ 🔵 虚线 = 接住的雨水
+        </p>
+      </div>
+
+      <div class="step-container">
+        <div class="step active">
+          <div class="step-header" onclick="this.parentElement.classList.toggle('active')">
+            <span class="step-num">1</span>
+            <span class="step-title">初始化双指针</span>
+            <span class="step-arrow">▼</span>
+          </div>
+          <div class="step-content">
+            <p>left = 0（从数组开头），right = n-1（从数组末尾）</p>
+            <p>left_max = 0（左边遇到的最大高度），right_max = 0（右边遇到的最大高度）</p>
+          </div>
+        </div>
+        
+        <div class="step">
+          <div class="step-header" onclick="this.parentElement.classList.toggle('active')">
+            <span class="step-num">2</span>
+            <span class="step-title">移动较小的一侧</span>
+            <span class="step-arrow">▼</span>
+          </div>
+          <div class="step-content">
+            <p>比较 height[left] 和 height[right]：</p>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+              <li>如果 height[left] < height[right]，处理左边</li>
+              <li>否则，处理右边</li>
+            </ul>
+            <p style="margin-top: 10px;"><strong>为什么？</strong>较小的一侧决定了当前能接的雨水量上限。</p>
+          </div>
+        </div>
+        
+        <div class="step">
+          <div class="step-header" onclick="this.parentElement.classList.toggle('active')">
+            <span class="step-num">3</span>
+            <span class="step-title">计算当前位置接水量</span>
+            <span class="step-arrow">▼</span>
+          </div>
+          <div class="step-content">
+            <p>以处理左边为例：</p>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+              <li>更新 left_max = max(left_max, height[left])</li>
+              <li>如果 height[left] < left_max，可以接水：ans += left_max - height[left]</li>
+              <li>left++</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="step">
+          <div class="step-header" onclick="this.parentElement.classList.toggle('active')">
+            <span class="step-num">4</span>
+            <span class="step-title">重复直到相遇</span>
+            <span class="step-arrow">▼</span>
+          </div>
+          <div class="step-content">
+            <p>持续移动指针，直到 left >= right</p>
+            <p>最终 ans 就是能接的雨水总量</p>
+          </div>
+        </div>
+      </div>
+
+      <h3>📊 算法执行过程示意</h3>
+      <div class="ascii-art">
+数组: [0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1]
+索引:  0  1  2  3  4  5  6  7  8  9  10 11
+
+Step 1: left=0, right=11, left_max=0, right_max=1
+        height[0]=0 < height[11]=1, 处理左边
+        left_max = max(0,0) = 0, 0>=0 不积水, left→1
+
+Step 2: left=1, right=11, left_max=0, right_max=1  
+        height[1]=1 < height[11]=1, 处理左边
+        left_max = max(0,1) = 1, 1>=1 不积水, left→2
+
+Step 3: left=2, right=11, left_max=1, right_max=1
+        height[2]=0 < height[11]=1, 处理左边
+        left_max = max(1,0) = 1, 1>0 积水=1! 💧, left→3
+
+Step 4: left=3, right=11, left_max=1, right_max=1
+        height[3]=2 > height[11]=1, 处理右边
+        right_max = max(1,1) = 1, 1>=1 不积水, right→10
+
+... (继续直到指针相遇)
+
+最终结果: ans = 6 单位雨水
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>📝 代码实现</h2>
+      
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">PYTHON</span>
+          <span style="color: var(--text-secondary); font-size: 12px;">双指针解法 - 最优解</span>
+        </div>
+        <pre><code class="language-python">class Solution:
+    def trap(self, height: List[int]) -> int:
+        if not height or len(height) < 3:
+            return 0
+        
+        left, right = 0, len(height) - 1
+        left_max, right_max = 0, 0
+        ans = 0
+        
+        while left < right:
+            # 移动较小的一侧，因为积水高度由较小侧决定
+            if height[left] < height[right]:
+                # 处理左边
+                if height[left] >= left_max:
+                    # 更新左边最大值
+                    left_max = height[left]
+                else:
+                    # 可以接雨水！
+                    ans += left_max - height[left]
+                left += 1
+            else:
+                # 处理右边
+                if height[right] >= right_max:
+                    # 更新右边最大值
+                    right_max = height[right]
+                else:
+                    # 可以接雨水！
+                    ans += right_max - height[right]
+                right -= 1
+        
+        return ans</code></pre>
+      </div>
+
+      <h3>🔄 其他解法对比</h3>
+      
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">PYTHON</span>
+          <span style="color: var(--text-secondary); font-size: 12px;">动态规划解法 - 空间换时间</span>
+        </div>
+        <pre><code class="language-python">class Solution:
+    def trap(self, height: List[int]) -> int:
+        n = len(height)
+        if n < 3:
+            return 0
+        
+        # left_max[i] = height[0..i] 的最大值
+        # right_max[i] = height[i..n-1] 的最大值
+        left_max = [0] * n
+        right_max = [0] * n
+        
+        left_max[0] = height[0]
+        for i in range(1, n):
+            left_max[i] = max(left_max[i-1], height[i])
+        
+        right_max[n-1] = height[n-1]
+        for i in range(n-2, -1, -1):
+            right_max[i] = max(right_max[i+1], height[i])
+        
+        ans = 0
+        for i in range(n):
+            # 当前位置能接的雨水 = min(左边最高, 右边最高) - 当前高度
+            ans += min(left_max[i], right_max[i]) - height[i]
+        
+        return ans  # 时间 O(n), 空间 O(n)</code></pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">PYTHON</span>
+          <span style="color: var(--text-secondary); font-size: 12px;">单调栈解法 - 按层计算</span>
+        </div>
+        <pre><code class="language-python">class Solution:
+    def trap(self, height: List[int]) -> int:
+        n = len(height)
+        if n < 3:
+            return 0
+        
+        stack = []  # 单调递减栈，存索引
+        ans = 0
+        
+        for i in range(n):
+            # 当前柱子比栈顶高，可以形成凹槽
+            while stack and height[i] > height[stack[-1]]:
+                top = stack.pop()
+                if not stack:
+                    break
+                # 计算凹槽宽度
+                width = i - stack[-1] - 1
+                # 计算凹槽高度（取两侧较小值减去底部）
+                bounded_height = min(height[i], height[stack[-1]]) - height[top]
+                ans += width * bounded_height
+            stack.append(i)
+        
+        return ans  # 时间 O(n), 空间 O(n)</code></pre>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>📊 复杂度分析</h2>
+      
+      <table class="complexity-table">
+        <thead>
+          <tr>
+            <th>解法</th>
+            <th>时间复杂度</th>
+            <th>空间复杂度</th>
+            <th>适用场景</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>双指针</strong></td>
+            <td><span class="tag time">O(n)</span></td>
+            <td><span class="tag space">O(1)</span></td>
+            <td>✅ 面试首选，最优空间</td>
+          </tr>
+          <tr>
+            <td><strong>动态规划</strong></td>
+            <td><span class="tag time">O(n)</span></td>
+            <td><span class="tag space">O(n)</span></td>
+            <td>好理解，可扩展</td>
+          </tr>
+          <tr>
+            <td><strong>单调栈</strong></td>
+            <td><span class="tag time">O(n)</span></td>
+            <td><span class="tag space">O(n)</span></td>
+            <td>适合接雨水 II（2D）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>🔗 类似题目推荐</h2>
+      
+      <div class="problem-list">
+        <a href="https://leetcode.com/problems/container-with-most-water/" class="problem-item" target="_blank">
+          <div class="problem-num">11</div>
+          <div class="problem-info">
+            <div class="problem-title">盛最多水的容器</div>
+            <div class="problem-tags">双指针 · 贪心</div>
+          </div>
+          <span class="diff-badge medium">Medium</span>
+        </a>
+        
+        <a href="https://leetcode.com/problems/largest-rectangle-in-histogram/" class="problem-item" target="_blank">
+          <div class="problem-num">84</div>
+          <div class="problem-info">
+            <div class="problem-title">柱状图中最大的矩形</div>
+            <div class="problem-tags">单调栈 · 经典</div>
+          </div>
+          <span class="diff-badge hard">Hard</span>
+        </a>
+        
+        <a href="https://leetcode.com/problems/trapping-rain-water-ii/" class="problem-item" target="_blank">
+          <div class="problem-num">407</div>
+          <div class="problem-info">
+            <div class="problem-title">接雨水 II（3D版本）</div>
+            <div class="problem-tags">优先队列 · BFS</div>
+          </div>
+          <span class="diff-badge hard">Hard</span>
+        </a>
+        
+        <a href="https://leetcode.com/problems/product-of-array-except-self/" class="problem-item" target="_blank">
+          <div class="problem-num">238</div>
+          <div class="problem-info">
+            <div class="problem-title">除自身以外数组的乘积</div>
+            <div class="problem-tags">前缀和 · 双指针</div>
+          </div>
+          <span class="diff-badge medium">Medium</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>🎯 面试要点</h2>
+      <ul style="margin-left: 20px; line-height: 2;">
+        <li><strong>先讲暴力解</strong>：每个位置向两边扫描找最大，O(n²)，展示思维过程</li>
+        <li><strong>再优化到DP</strong>：预处理左右最大值，O(n)时间 O(n)空间</li>
+        <li><strong>最终双指针</strong>：O(n)时间 O(1)空间，这才是面试官想看的</li>
+        <li><strong>关键证明</strong>：为什么移动较小的一侧是安全的？</li>
+        <li><strong>边界处理</strong>：数组长度小于3时直接返回0</li>
+      </ul>
+    </div>
+
+    <footer>
+      <p>LeetCode 每日精讲 · 第38期</p>
+      <p style="margin-top: 8px; font-size: 12px;">生成时间：2026-03-16 04:16 CST</p>
+    </footer>
+  </div>
+
+  <script>
+    // 代码高亮
+    hljs.highlightAll();
+  </script>
+</body>
+</html>

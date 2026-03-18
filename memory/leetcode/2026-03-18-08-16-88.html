@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #88 - 合并两个有序数组</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --secondary: #8b5cf6;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --surface-light: #334155;
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --border: #475569;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    body { 
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1100px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.6;
+    }
+    h1 { font-size: 2rem; margin-bottom: 8px; background: linear-gradient(90deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .subtitle { color: var(--text-muted); margin-bottom: 32px; }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px; 
+      border: 1px solid var(--border);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .tags { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0; }
+    .tag { 
+      background: rgba(99, 102, 241, 0.2); 
+      color: var(--primary); 
+      padding: 4px 12px; 
+      border-radius: 20px; 
+      font-size: 0.85rem;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+    .tag.easy { background: rgba(34, 197, 94, 0.2); color: var(--success); border-color: rgba(34, 197, 94, 0.3); }
+    .tag.medium { background: rgba(245, 158, 11, 0.2); color: var(--warning); border-color: rgba(245, 158, 11, 0.3); }
+    .tag.hard { background: rgba(239, 68, 68, 0.2); color: #ef4444; border-color: rgba(239, 68, 68, 0.3); }
+    
+    /* 代码块样式 */
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 20px; 
+      overflow-x: auto;
+      margin: 16px 0;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 4px 0; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+      margin-left: -3px;
+    }
+    .code-line:hover { background: rgba(255,255,255,0.05); }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.25); 
+      border-left-color: var(--primary);
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 40px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+      font-family: 'Consolas', monospace;
+    }
+    .code-content { font-family: 'Consolas', 'Monaco', monospace; }
+    
+    /* 语法高亮 */
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; font-style: italic; }
+    .class { color: #ffa657; }
+    .builtin { color: #79c0ff; }
+    
+    /* 可视化容器 */
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1.2fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 768px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    
+    .viz-steps { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 16px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .viz-step { 
+      padding: 14px; 
+      margin: 10px 0; 
+      border-radius: 10px; 
+      background: var(--surface-light); 
+      cursor: pointer; 
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .viz-step:hover { border-color: var(--border); }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.2);
+    }
+    .viz-step h4 { margin: 0 0 6px 0; color: var(--text); font-size: 0.95rem; }
+    .viz-step p { margin: 0; color: var(--text-muted); font-size: 0.85rem; }
+    .step-badge {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 22px;
+      font-size: 0.75rem;
+      margin-right: 8px;
+    }
+    
+    /* 数组可视化 */
+    .array-viz {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 12px 0;
+      padding: 12px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+    }
+    .array-cell {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+    .array-cell.nums1 { background: rgba(99, 102, 241, 0.3); border: 2px solid var(--primary); }
+    .array-cell.nums2 { background: rgba(245, 158, 11, 0.3); border: 2px solid var(--warning); }
+    .array-cell.merged { background: rgba(34, 197, 94, 0.3); border: 2px solid var(--success); }
+    .array-cell.pointer-p { border: 2px solid #ff6b6b; box-shadow: 0 0 8px #ff6b6b; }
+    .array-cell.pointer-q { border: 2px solid #4ecdc4; box-shadow: 0 0 8px #4ecdc4; }
+    .array-cell.pointer-k { border: 2px solid #ffe66d; box-shadow: 0 0 8px #ffe66d; }
+    
+    /* 状态显示 */
+    .state-display {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+    .state-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .state-item:last-child { border-bottom: none; }
+    .state-label { color: var(--text-muted); }
+    .state-value { font-family: monospace; color: var(--primary); }
+    
+    /* 类似题目卡片 */
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 20px; 
+      border: 1px solid var(--border); 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block; 
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15);
+    }
+    .problem-card h3 { margin: 0 0 8px 0; color: var(--text); font-size: 1rem; }
+    .problem-card p { margin: 0; color: var(--text-muted); font-size: 0.85rem; }
+    .problem-card .difficulty {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      margin-top: 10px;
+    }
+    .difficulty.easy { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+    .difficulty.medium { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+    .difficulty.hard { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    
+    /* 复杂度表格 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+    }
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      color: var(--primary);
+      font-weight: 600;
+      background: rgba(99, 102, 241, 0.1);
+    }
+    tr:hover { background: rgba(255,255,255,0.02); }
+    
+    /* 核心思想卡片 */
+    .insight-box {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15));
+      border-left: 4px solid var(--primary);
+      padding: 20px;
+      border-radius: 0 12px 12px 0;
+      margin: 20px 0;
+    }
+    .insight-box h3 { margin-top: 0; color: var(--primary); }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #88 - 合并两个有序数组</h1>
+  <p class="subtitle">Merge Sorted Array · Easy · 数组 · 双指针</p>
+  
+  <div class="tags">
+    <span class="tag easy">Easy</span>
+    <span class="tag">数组</span>
+    <span class="tag">双指针</span>
+    <span class="tag">原地算法</span>
+  </div>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给你两个按 <strong>非递减顺序</strong> 排列的整数数组 <code>nums1</code> 和 <code>nums2</code>，另有两个整数 <code>m</code> 和 <code>n</code>，分别表示 <code>nums1</code> 和 <code>nums2</code> 中的元素数目。</p>
+    <p>请你 <strong>合并</strong> <code>nums2</code> 到 <code>nums1</code> 中，使合并后的数组同样按 <strong>非递减顺序</strong> 排列。</p>
+    <p><strong>注意：</strong>最终，合并后数组不应由函数返回，而是存储在数组 <code>nums1</code> 中。为了应对这种情况，<code>nums1</code> 的初始长度为 <code>m + n</code>，其中前 <code>m</code> 个元素表示应合并的元素，后 <code>n</code> 个元素为 <code>0</code>，应忽略。<code>nums2</code> 的长度为 <code>n</code>。</p>
+    
+    <div class="insight-box">
+      <h3>💡 核心思想</h3>
+      <p><strong>从后往前填充！</strong> 常规思路是从前往后合并，但会覆盖 <code>nums1</code> 的元素。改为从后往前，从两个数组的末尾开始比较，将较大的元素放到 <code>nums1</code> 的末尾，这样可以避免覆盖问题。</p>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <p style="color: var(--text-muted); margin-bottom: 16px;">示例：nums1 = [1,2,3,0,0,0], m=3 | nums2 = [2,5,6], n=3</p>
+    
+    <div class="viz-container">
+      <div>
+        <div class="viz-steps" id="vizSteps">
+          <!-- 步骤由JS生成 -->
+        </div>
+        
+        <div class="state-display" id="stateDisplay">
+          <div class="state-item">
+            <span class="state-label">指针 p (nums1末尾)</span>
+            <span class="state-value" id="state-p">2</span>
+          </div>
+          <div class="state-item">
+            <span class="state-label">指针 q (nums2末尾)</span>
+            <span class="state-value" id="state-q">2</span>
+          </div>
+          <div class="state-item">
+            <span class="state-label">指针 k (填充位置)</span>
+            <span class="state-value" id="state-k">5</span>
+          </div>
+          <div class="state-item">
+            <span class="state-label">当前操作</span>
+            <span class="state-value" id="state-action">初始化</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre><code id="codeBlock">
+<span class="code-line" data-line="1"><span class="line-number">1</span><span class="code-content"><span class="keyword">class</span> <span class="class">Solution</span>:</span></span>
+<span class="code-line" data-line="2"><span class="line-number">2</span><span class="code-content">    <span class="keyword">def</span> <span class="function">merge</span>(<span class="builtin">self</span>, nums1: <span class="builtin">list</span>[<span class="builtin">int</span>], m: <span class="builtin">int</span>, nums2: <span class="builtin">list</span>[<span class="builtin">int</span>], n: <span class="builtin">int</span>) -> <span class="builtin">None</span>:</span></span>
+<span class="code-line" data-line="3"><span class="line-number">3</span><span class="code-content">        <span class="comment"># 初始化三个指针：p指向nums1有效元素末尾，q指向nums2末尾，k指向填充位置</span></span></span>
+<span class="code-line" data-line="4"><span class="line-number">4</span><span class="code-content">        p, q, k = m - <span class="number">1</span>, n - <span class="number">1</span>, m + n - <span class="number">1</span></span></span>
+<span class="code-line" data-line="5"><span class="line-number">5</span><span class="code-content">        </span></span>
+<span class="code-line" data-line="6"><span class="line-number">6</span><span class="code-content">        <span class="comment"># 当两个数组都还有元素时，比较并填充</span></span></span>
+<span class="code-line" data-line="7"><span class="line-number">7</span><span class="code-content">        <span class="keyword">while</span> p >= <span class="number">0</span> <span class="keyword">and</span> q >= <span class="number">0</span>:</span></span>
+<span class="code-line" data-line="8"><span class="line-number">8</span><span class="code-content">            <span class="keyword">if</span> nums1[p] > nums2[q]:</span></span>
+<span class="code-line" data-line="9"><span class="line-number">9</span><span class="code-content">                nums1[k] = nums1[p]  <span class="comment"># nums1[p]更大，放到末尾</span></span></span>
+<span class="code-line" data-line="10"><span class="line-number">10</span><span class="code-content">                p -= <span class="number">1</span></span></span>
+<span class="code-line" data-line="11"><span class="line-number">11</span><span class="code-content">            <span class="keyword">else</span>:</span></span>
+<span class="code-line" data-line="12"><span class="line-number">12</span><span class="code-content">                nums1[k] = nums2[q]  <span class="comment"># nums2[q]更大或相等，放到末尾</span></span></span>
+<span class="code-line" data-line="13"><span class="line-number">13</span><span class="code-content">                q -= <span class="number">1</span></span></span>
+<span class="code-line" data-line="14"><span class="line-number">14</span><span class="code-content">            k -= <span class="number">1</span></span></span>
+<span class="code-line" data-line="15"><span class="line-number">15</span><span class="code-content">        </span></span>
+<span class="code-line" data-line="16"><span class="line-number">16</span><span class="code-content">        <span class="comment"># 如果nums2还有剩余，全部复制到nums1前面</span></span></span>
+<span class="code-line" data-line="17"><span class="line-number">17</span><span class="code-content">        <span class="keyword">while</span> q >= <span class="number">0</span>:</span></span>
+<span class="code-line" data-line="18"><span class="line-number">18</span><span class="code-content">            nums1[k] = nums2[q]</span></span>
+<span class="code-line" data-line="19"><span class="line-number">19</span><span class="code-content">            q -= <span class="number">1</span></span></span>
+<span class="code-line" data-line="20"><span class="line-number">20</span><span class="code-content">            k -= <span class="number">1</span></span></span>
+<span class="code-line" data-line="21"><span class="line-number">21</span><span class="code-content">        <span class="comment"># 不需要处理nums1剩余，因为已经在原地了</span></span></span>
+        </code></pre>
+      </div>
+    </div>
+    
+    <h3>📊 可视化演示</h3>
+    <div id="arrayViz" class="array-viz">
+      <!-- 数组可视化 -->
+    </div>
+    <div style="display: flex; gap: 20px; font-size: 0.85rem; color: var(--text-muted);">
+      <span><span style="display:inline-block;width:12px;height:12px;background:rgba(99,102,241,0.5);border-radius:2px;margin-right:6px;"></span>nums1</span>
+      <span><span style="display:inline-block;width:12px;height:12px;background:rgba(245,158,11,0.5);border-radius:2px;margin-right:6px;"></span>nums2</span>
+      <span><span style="display:inline-block;width:12px;height:12px;background:rgba(34,197,94,0.5);border-radius:2px;margin-right:6px;"></span>已合并</span>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📈 复杂度分析</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>指标</th>
+          <th>值</th>
+          <th>说明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>时间复杂度</strong></td>
+          <td>O(m + n)</td>
+          <td>只需要遍历两个数组各一次</td>
+        </tr>
+        <tr>
+          <td><strong>空间复杂度</strong></td>
+          <td>O(1)</td>
+          <td>只使用了3个指针，原地修改</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>🔍 易错点 & 面试要点</h2>
+    <ul style="padding-left: 20px; color: var(--text);">
+      <li style="margin-bottom: 12px;"><strong>为什么从后往前？</strong> 如果从前往后，合并时会覆盖 nums1 中尚未处理的元素。从后往前利用 nums1 尾部的空闲空间，避免覆盖。</li>
+      <li style="margin-bottom: 12px;"><strong>边界情况：</strong> nums1 或 nums2 为空；所有 nums2 元素都大于 nums1；所有 nums2 元素都小于 nums1。</li>
+      <li style="margin-bottom: 12px;"><strong>为什么最后只检查 q >= 0？</strong> 如果 p >= 0（nums1 有剩余），这些元素已经在正确位置，无需移动。</li>
+      <li><strong>变体：</strong> 如果不允许修改 nums1 呢？那就需要从前往后，使用额外数组存储结果。</li>
+    </ul>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/merge-two-sorted-lists/" class="problem-card" target="_blank">
+        <h3>21. 合并两个有序链表</h3>
+        <p>链表版本的合并问题，思路完全相同</p>
+        <span class="difficulty easy">Easy</span>
+      </a>
+      <a href="https://leetcode.cn/problems/merge-k-sorted-lists/" class="problem-card" target="_blank">
+        <h3>23. 合并K个升序链表</h3>
+        <p>合并两个的扩展，使用优先队列或分治</p>
+        <span class="difficulty hard">Hard</span>
+      </a>
+      <a href="https://leetcode.cn/problems/sorted-merge-lcci/" class="problem-card" target="_blank">
+        <h3>面试题 10.01. 合并排序的数组</h3>
+        <p>《程序员面试金典》原题，与本题完全一致</p>
+        <span class="difficulty easy">Easy</span>
+      </a>
+      <a href="https://leetcode.cn/problems/remove-duplicates-from-sorted-array/" class="problem-card" target="_blank">
+        <h3>26. 删除有序数组中的重复项</h3>
+        <p>同样使用双指针技巧处理有序数组</p>
+        <span class="difficulty easy">Easy</span>
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // 步骤与代码行映射
+    const steps = [
+      {
+        title: "初始化指针",
+        desc: "p=2指向nums1[2]=3, q=2指向nums2[2]=6, k=5指向填充位置",
+        line: 4,
+        state: { p: 2, q: 2, k: 5, action: "初始化三个指针" },
+        array: [
+          { val: 1, type: 'nums1' }, { val: 2, type: 'nums1' }, { val: 3, type: 'nums1', pointer: 'p' },
+          { val: 0, type: 'merged' }, { val: 0, type: 'merged' }, { val: 0, type: 'merged', pointer: 'k' }
+        ],
+        nums2: [{ val: 2, type: 'nums2' }, { val: 5, type: 'nums2' }, { val: 6, type: 'nums2', pointer: 'q' }]
+      },
+      {
+        title: "比较 3 和 6",
+        desc: "nums1[p]=3 < nums2[q]=6，将6放到nums1[5]",
+        line: 7,
+        state: { p: 2, q: 2, k: 5, action: "比较 nums1[2]=3 和 nums2[2]=6" },
+        array: [
+          { val: 1, type: 'nums1' }, { val: 2, type: 'nums1' }, { val: 3, type: 'nums1', pointer: 'p' },
+          { val: 0, type: 'merged' }, { val: 0, type: 'merged' }, { val: 6, type: 'merged', pointer: 'k' }
+        ],
+        nums2: [{ val: 2, type: 'nums2' }, { val: 5, type: 'nums2' }, { val: 6, type: 'nums2', pointer: 'q' }]
+      },
+      {
+        title: "放入6，q--, k--",
+        desc: "nums2[q]放入nums1[k]，q变为1，k变为4",
+        line: 12,
+        state: { p: 2, q: 1, k: 4, action: "nums1[5]=6, q=1, k=4" },
+        array: [
+          { val: 1, type: 'nums1' }, { val: 2, type: 'nums1' }, { val: 3, type: 'nums1', pointer: 'p' },
+          { val: 0, type: 'merged' }, { val: 0, type: 'merged', pointer: 'k' }, { val: 6, type: 'merged' }
+        ],
+        nums2: [{ val: 2, type: 'nums2' }, { val: 5, type: 'nums2', pointer: 'q' }, { val: 6, type: 'nums2' }]
+      },
+      {
+        title: "比较 3 和 5",
+        desc: "nums1[p]=3 < nums2[q]=5，将5放到nums1[4]",
+        line: 7,
+        state: { p: 2, q: 1, k: 4, action: "比较 nums1[2]=3 和 nums2[1]=5" },
+        array: [
+          { val: 1, type: 'nums1' }, { val: 2, type: 'nums1' }, { val: 3, type: 'nums1', pointer: 'p' },
+          { val: 0, type: 'merged' }, { val: 5, type: 'merged', pointer: 'k' }, { val: 6, type: 'merged' }
+        ],
+        nums2: [{ val: 2, type: 'nums2' }, { val: 5, type: 'nums2', pointer: 'q' }, { val: 6, type: 'nums2' }]
+      },
+      {
+        title: "放入5，q--, k--",
+        desc: "q变为0，k变为3",
+        line: 13,
+        state: { p: 2, q: 0, k: 3, action: "nums1[4]=5, q=0, k=3" },
+        array: [
+          { val: 1, type: 'nums1' }, { val: 2, type: 'nums1' }, { val: 3, type: 'nums1', pointer: 'p' },
+          { val: 0, type: 'merged', pointer: 'k' }, { val: 5, type: 'merged' }, { val: 6, type: 'merged' }
+        ],
+        nums2: [{ val: 2, type: 'nums2', pointer: 'q' }, { val: 5, type: 'nums2' }, { val: 6, type: 'nums2' }]
+      },
+      {
+        title: "比较 3 和 2",
+        desc: "nums1[p]=3 > nums2[q]=2，将3放到nums1[3]",
+        line: 8,
+        state: { p: 2, q: 0, k: 3, action: "比较 nums1[2]=3 和 nums2[0]=2" },
+        array: [
+          { val: 1, type: 'nums1' }, { val: 2, type: 'nums1' }, { val: 3, type: 'nums1', pointer: 'p' },
+          { val: 3, type: 'merged', pointer: 'k' }, { val: 5, type: 'merged' }, { val: 6, type: 'merged' }
+        ],
+        nums2: [{ val: 2, type: 'nums2', pointer: 'q' }, { val: 5, type: 'nums2' }, { val: 6, type: 'nums2' }]
+      },
+      {
+        title: "放入3，p--, k--",
+        desc: "p变为1，k变为2",
+        line: 10,
+        state: { p: 1, q: 0, k: 2, action: "nums1[3]=3, p=1, k=2" },
+        array: [
+          { val: 1, type: 'nums1' }, { val: 2, type: 'nums1', pointer: 'p' }, { val: 3, type: 'nums1' },
+          { val: 3, type: 'merged', pointer: 'k' }, { val: 5, type: 'merged' }, { val: 6, type: 'merged' }
+        ],
+        nums2: [{ val: 2, type: 'nums2', pointer: 'q' }, { val: 5, type: 'nums2' }, { val: 6, type: 'nums2' }]
+      },
+      {
+        title: "比较 2 和 2",
+        desc: "nums1[p]=2 == nums2[q]=2，将2放到nums1[2]",
+        line: 11,
+        state: { p: 1, q: 0, k: 2, action: "比较 nums1[1]=2 和 nums2[0]=2" },
+        array: [
+          { val: 1, type: 'nums1' }, { val: 2, type: 'nums1', pointer: 'p' }, { val: 2, type: 'merged', pointer: 'k' },
+          { val: 3, type: 'merged' }, { val: 5, type: 'merged' }, { val: 6, type: 'merged' }
+        ],
+        nums2: [{ val: 2, type: 'nums2', pointer: 'q' }, { val: 5, type: 'nums2' }, { val: 6, type: 'nums2' }]
+      },
+      {
+        title: "放入2，q--, k--",
+        desc: "q变为-1，循环结束",
+        line: 13,
+        state: { p: 1, q: -1, k: 1, action: "nums1[2]=2, q=-1, k=1" },
+        array: [
+          { val: 1, type: 'nums1' }, { val: 2, type: 'nums1', pointer: 'p' }, { val: 2, type: 'merged', pointer: 'k' },
+          { val: 3, type: 'merged' }, { val: 5, type: 'merged' }, { val: 6, type: 'merged' }
+        ],
+        nums2: [{ val: 2, type: 'nums2' }, { val: 5, type: 'nums2' }, { val: 6, type: 'nums2' }]
+      },
+      {
+        title: "结束",
+        desc: "合并完成！结果：[1,2,2,3,5,6]",
+        line: 21,
+        state: { p: 1, q: -1, k: 1, action: "合并完成" },
+        array: [
+          { val: 1, type: 'merged' }, { val: 2, type: 'merged' }, { val: 2, type: 'merged' },
+          { val: 3, type: 'merged' }, { val: 5, type: 'merged' }, { val: 6, type: 'merged' }
+        ],
+        nums2: []
+      }
+    ];
+
+    let currentStep = 0;
+
+    function renderSteps() {
+      const container = document.getElementById('vizSteps');
+      container.innerHTML = steps.map((step, idx) => `
+        <div class="viz-step ${idx === currentStep ? 'active' : ''}" data-idx="${idx}">
+          <h4><span class="step-badge">${idx + 1}</span>${step.title}</h4>
+          <p>${step.desc}</p>
+        </div>
+      `).join('');
+      
+      // 添加点击事件
+      container.querySelectorAll('.viz-step').forEach(el => {
+        el.addEventListener('click', () => {
+          currentStep = parseInt(el.dataset.idx);
+          updateUI();
+        });
+      });
+    }
+
+    function renderArray() {
+      const container = document.getElementById('arrayViz');
+      const step = steps[currentStep];
+      
+      let html = '<div style="width:100%;"><strong>nums1:</strong></div>';
+      html += step.array.map(cell => {
+        let classes = `array-cell ${cell.type}`;
+        if (cell.pointer === 'p') classes += ' pointer-p';
+        if (cell.pointer === 'k') classes += ' pointer-k';
+        return `<div class="${classes}">${cell.val}</div>`;
+      }).join('');
+      
+      if (step.nums2.length > 0) {
+        html += '<div style="width:100%;margin-top:10px;"><strong>nums2:</strong></div>';
+        html += step.nums2.map(cell => {
+          let classes = `array-cell ${cell.type}`;
+          if (cell.pointer === 'q') classes += ' pointer-q';
+          return `<div class="${classes}">${cell.val}</div>`;
+        }).join('');
+      }
+      
+      container.innerHTML = html;
+    }
+
+    function updateState() {
+      const step = steps[currentStep];
+      document.getElementById('state-p').textContent = step.state.p;
+      document.getElementById('state-q').textContent = step.state.q;
+      document.getElementById('state-k').textContent = step.state.k;
+      document.getElementById('state-action').textContent = step.state.action;
+    }
+
+    function highlightCode() {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      const step = steps[currentStep];
+      const lineEl = document.querySelector(`.code-line[data-line="${step.line}"]`);
+      if (lineEl) lineEl.classList.add('active');
+    }
+
+    function updateUI() {
+      renderSteps();
+      renderArray();
+      updateState();
+      highlightCode();
+    }
+
+    // 代码行点击事件
+    document.querySelectorAll('.code-line').forEach(el => {
+      el.addEventListener('click', () => {
+        const line = parseInt(el.dataset.line);
+        const stepIdx = steps.findIndex(s => s.line === line);
+        if (stepIdx !== -1) {
+          currentStep = stepIdx;
+          updateUI();
+        }
+      });
+    });
+
+    // 初始化
+    updateUI();
+  </script>
+</body>
+</html>

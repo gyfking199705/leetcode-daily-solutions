@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #7 - 整数反转</title>
+  <style>
+    :root { --primary: #6366f1; --bg: #0f172a; --surface: #1e293b; --text: #f1f5f9; --success: #22c55e; --warning: #f59e0b; --danger: #ef4444; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); max-width: 1000px; margin: 0 auto; padding: 40px 20px; line-height: 1.6; }
+    h1 { color: var(--primary); margin-bottom: 8px; }
+    .subtitle { color: #94a3b8; margin-bottom: 32px; }
+    .section { background: var(--surface); border-radius: 16px; padding: 28px; margin-bottom: 24px; }
+    .section h2 { color: var(--primary); margin-top: 0; }
+    pre { background: #0d1117; border-radius: 12px; padding: 20px; overflow-x: auto; font-family: 'Consolas', 'Monaco', monospace; font-size: 14px; }
+    .code-line { display: flex; padding: 3px 0; cursor: pointer; transition: background 0.2s; border-radius: 4px; }
+    .code-line:hover { background: rgba(255,255,255,0.08); }
+    .code-line.active { background: rgba(99, 102, 241, 0.35); border-left: 3px solid var(--primary); margin-left: -3px; }
+    .line-number { color: #484f58; min-width: 36px; text-align: right; padding-right: 12px; user-select: none; }
+    .viz-container { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 20px 0; }
+    @media (max-width: 768px) { .viz-container { grid-template-columns: 1fr; } }
+    .viz-step { padding: 14px 16px; margin: 8px 0; border-radius: 10px; background: #334155; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+    .viz-step:hover { background: #475569; transform: translateX(4px); }
+    .viz-step.active { border-color: var(--primary); background: rgba(99, 102, 241, 0.25); }
+    .viz-step h4 { margin: 0 0 6px 0; color: var(--text); font-size: 14px; }
+    .viz-step p { margin: 0; color: #94a3b8; font-size: 13px; }
+    .problem-card { background: var(--bg); border-radius: 12px; padding: 16px; border: 1px solid #475569; transition: all 0.2s; text-decoration: none; color: inherit; display: block; }
+    .problem-card:hover { border-color: var(--primary); transform: translateY(-3px); }
+    .problem-card h4 { margin: 0 0 8px 0; color: var(--primary); }
+    .problem-card p { margin: 0; color: #94a3b8; font-size: 13px; }
+    .problem-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; }
+    .class { color: #ffa657; }
+    .variable { color: #79c0ff; }
+    .operator { color: #ff7b72; }
+    .state-box { background: #0d1117; border-radius: 8px; padding: 12px; margin-top: 8px; font-family: monospace; font-size: 13px; }
+    .state-item { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #21262d; }
+    .state-item:last-child { border-bottom: none; }
+    .state-label { color: #8b949e; }
+    .state-value { color: var(--primary); }
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #334155; }
+    th { color: var(--primary); font-weight: 600; }
+    .highlight-box { background: rgba(99, 102, 241, 0.15); border-left: 3px solid var(--primary); padding: 16px; border-radius: 8px; margin: 16px 0; }
+    .example-box { background: #0d1117; border-radius: 8px; padding: 16px; margin: 12px 0; }
+    .example-title { color: var(--primary); font-weight: 600; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+  <h1>🔄 LeetCode #7 - 整数反转</h1>
+  <p class="subtitle">Reverse Integer | 数学方法 | 溢出检测</p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给你一个 <span class="number">32</span> 位的有符号整数 <code class="variable">x</code>，返回将 <code class="variable">x</code> 中的数字部分反转后的结果。</p>
+    
+    <div class="highlight-box">
+      <strong>⚠️ 关键约束：</strong>如果反转后整数超过 <span class="number">32</span> 位有符号整数的范围 <code class="number">[−2³¹, 2³¹ − 1]</code>，则返回 <span class="number">0</span>。
+    </div>
+    
+    <div class="example-box">
+      <div class="example-title">示例 1：</div>
+      <p>输入：<code class="variable">x = 123</code></p>
+      <p>输出：<code class="number">321</code></p>
+    </div>
+    
+    <div class="example-box">
+      <div class="example-title">示例 2：</div>
+      <p>输入：<code class="variable">x = -123</code></p>
+      <p>输出：<code class="number">-321</code></p>
+    </div>
+    
+    <div class="example-box">
+      <div class="example-title">示例 3：</div>
+      <p>输入：<code class="variable">x = 120</code></p>
+      <p>输出：<code class="number">21</code></p>
+    </div>
+    
+    <div class="example-box">
+      <div class="example-title">示例 4：</div>
+      <p>输入：<code class="variable">x = 1534236469</code></p>
+      <p>输出：<code class="number">0</code> <span class="comment">(反转后溢出)</span></p>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <p style="color: #94a3b8; margin-bottom: 16px;">输入: <code class="variable">x = 123</code>，观察每次循环的变化</p>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre><code id="codeBlock">
+<div class="code-line" data-line="1"><span class="line-number">1</span><span class="keyword">class</span> <span class="class">Solution</span>:</span></div>
+<div class="code-line" data-line="2"><span class="line-number">2</span>    <span class="keyword">def</span> <span class="function">reverse</span>(<span class="variable">self</span>, x: <span class="keyword">int</span>) -> <span class="keyword">int</span>:</span></div>
+<div class="code-line" data-line="3"><span class="line-number">3</span>        INT_MIN, INT_MAX = -<span class="number">2</span>**<span class="number">31</span>, <span class="number">2</span>**<span class="number">31</span> - <span class="number">1</span>  <span class="comment"># -2147483648 ~ 2147483647</span></span></div>
+<div class="code-line" data-line="4"><span class="line-number">4</span>        result = <span class="number">0</span></span></div>
+<div class="code-line" data-line="5"><span class="line-number">5</span>        <span class="keyword">while</span> x != <span class="number">0</span>:</span></div>
+<div class="code-line" data-line="6"><span class="line-number">6</span>            <span class="comment"># Python取模特殊处理：%运算结果符号与除数一致</span></span></div>
+<div class="code-line" data-line="7"><span class="line-number">7</span>            digit = x % <span class="number">10</span> <span class="keyword">if</span> x > <span class="number">0</span> <span class="keyword">else</span> x % -<span class="number">10</span></span></div>
+<div class="code-line" data-line="8"><span class="line-number">8</span>            x = x // <span class="number">10</span> <span class="keyword">if</span> x > <span class="number">0</span> <span class="keyword">else</span> (x - digit) // -<span class="number">10</span></span></div>
+<div class="code-line" data-line="9"><span class="line-number">9</span>            <span class="comment"># 溢出检测：在乘10加digit之前判断</span></span></div>
+<div class="code-line" data-line="10"><span class="line-number">10</span>            <span class="keyword">if</span> result > INT_MAX // <span class="number">10</span> <span class="keyword">or</span> (result == INT_MAX // <span class="number">10</span> <span class="keyword">and</span> digit > <span class="number">7</span>):</span></div>
+<div class="code-line" data-line="11"><span class="line-number">11</span>                <span class="keyword">return</span> <span class="number">0</span></span></div>
+<div class="code-line" data-line="12"><span class="line-number">12</span>            <span class="keyword">if</span> result < INT_MIN // <span class="number">10</span> <span class="keyword">or</span> (result == INT_MIN // <span class="number">10</span> <span class="keyword">and</span> digit < -<span class="number">8</span>):</span></div>
+<div class="code-line" data-line="13"><span class="line-number">13</span>                <span class="keyword">return</span> <span class="number">0</span></span></div>
+<div class="code-line" data-line="14"><span class="line-number">14</span>            result = result * <span class="number">10</span> + digit</span></div>
+<div class="code-line" data-line="15"><span class="line-number">15</span>        <span class="keyword">return</span> result</span></div>
+        </code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>💡 核心思路解析</h2>
+    <h3>🎯 数学方法</h3>
+    <p>通过循环每次取出整数的<strong>最后一位</strong>，然后将其添加到结果中：</p>
+    <pre><span class="variable">result</span> = <span class="variable">result</span> * <span class="number">10</span> + <span class="variable">digit</span></pre>
+    
+    <h3>🔍 关键问题：溢出检测</h3>
+    <p>32位有符号整数范围：<code class="number">[-2147483648, 2147483647]</code></p>
+    <p>在 <code>result * 10 + digit</code> <strong>之前</strong>进行溢出检查：</p>
+    <ul>
+      <li><strong>正溢出</strong>：如果 <code>result > 214748364</code>，或者 <code>result == 214748364</code> 且 <code>digit > 7</code></li>
+      <li><strong>负溢出</strong>：如果 <code>result < -214748364</code>，或者 <code>result == -214748364</code> 且 <code>digit < -8</code></li>
+    </ul>
+    
+    <h3>🐍 Python 特殊处理</h3>
+    <p>Python的 <code>%</code> 和 <code>//</code> 运算符结果符号与<strong>除数</strong>一致（而不是被除数），需要特殊处理负数情况：</p>
+    <ul>
+      <li><code>-123 % 10</code> 在Python中等于 <code>7</code>，而不是 <code>-3</code></li>
+      <li>解决方案：负数时取模用 <code>x % -10</code> 得到 <code>-3</code></li>
+    </ul>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table>
+      <tr>
+        <th>维度</th>
+        <th>复杂度</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td><strong>时间复杂度</strong></td>
+        <td>O(log|x|)</td>
+        <td>循环次数等于x的位数，约log₁₀|x|</td>
+      </tr>
+      <tr>
+        <td><strong>空间复杂度</strong></td>
+        <td>O(1)</td>
+        <td>只使用常数额外空间</td>
+      </tr>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/palindrome-number/" class="problem-card" target="_blank">
+        <h4>9. 回文数</h4>
+        <p>同样使用数学方法反转数字的一半进行比较，避免溢出</p>
+      </a>
+      <a href="https://leetcode.cn/problems/string-to-integer-atoi/" class="problem-card" target="_blank">
+        <h4>8. 字符串转换整数</h4>
+        <p>同样的溢出检测逻辑，从字符串解析整数</p>
+      </a>
+      <a href="https://leetcode.cn/problems/add-two-numbers/" class="problem-card" target="_blank">
+        <h4>2. 两数相加</h4>
+        <p>链表形式的数字相加，涉及进位处理</p>
+      </a>
+      <a href="https://leetcode.cn/problems/multiply-strings/" class="problem-card" target="_blank">
+        <h4>43. 字符串相乘</h4>
+        <p>大数乘法，处理超出整型范围的数字运算</p>
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // 步骤与代码行映射 - 以 x=123 为例
+    const steps = [
+      {
+        title: "🚀 初始化阶段",
+        desc: "定义32位整数范围，result初始化为0",
+        line: 4,
+        state: { x: "123", result: "0", digit: "-" }
+      },
+      {
+        title: "🔄 第1轮循环",
+        desc: "digit = 123 % 10 = 3, x 更新为 12",
+        line: 7,
+        state: { x: "12", digit: "3", result: "0" }
+      },
+      {
+        title: "✅ 溢出检查通过",
+        desc: "result(0) 不会溢出，继续执行",
+        line: 10,
+        state: { "overflow_check": "passed" }
+      },
+      {
+        title: "➕ 更新结果",
+        desc: "result = 0 * 10 + 3 = 3",
+        line: 14,
+        state: { x: "12", result: "3", digit: "3" }
+      },
+      {
+        title: "🔄 第2轮循环",
+        desc: "digit = 12 % 10 = 2, x 更新为 1",
+        line: 7,
+        state: { x: "1", digit: "2", result: "3" }
+      },
+      {
+        title: "✅ 溢出检查通过",
+        desc: "result(3) * 10 + 2 = 32 不会溢出",
+        line: 10,
+        state: { "overflow_check": "passed" }
+      },
+      {
+        title: "➕ 更新结果",
+        desc: "result = 3 * 10 + 2 = 32",
+        line: 14,
+        state: { x: "1", result: "32", digit: "2" }
+      },
+      {
+        title: "🔄 第3轮循环",
+        desc: "digit = 1 % 10 = 1, x 更新为 0",
+        line: 7,
+        state: { x: "0", digit: "1", result: "32" }
+      },
+      {
+        title: "✅ 溢出检查通过",
+        desc: "result(32) * 10 + 1 = 321 不会溢出",
+        line: 10,
+        state: { "overflow_check": "passed" }
+      },
+      {
+        title: "➕ 更新结果",
+        desc: "result = 32 * 10 + 1 = 321",
+        line: 14,
+        state: { x: "0", result: "321", digit: "1" }
+      },
+      {
+        title: "🏁 循环结束",
+        desc: "x == 0，退出循环",
+        line: 5,
+        state: { "loop_condition": "false" }
+      },
+      {
+        title: "✨ 返回结果",
+        desc: "返回 result = 321",
+        line: 15,
+        state: { "return_value": "321" }
+      }
+    ];
+
+    // 生成步骤HTML
+    const stepsContainer = document.getElementById('vizSteps');
+    steps.forEach((step, index) => {
+      const stepEl = document.createElement('div');
+      stepEl.className = 'viz-step';
+      stepEl.dataset.index = index;
+      stepEl.dataset.line = step.line;
+      
+      let stateHtml = '';
+      for (const [key, val] of Object.entries(step.state)) {
+        stateHtml += `<div class="state-item"><span class="state-label">${key}:</span><span class="state-value">${val}</span></div>`;
+      }
+      
+      stepEl.innerHTML = `
+        <h4>${step.title}</h4>
+        <p>${step.desc}</p>
+        <div class="state-box">${stateHtml}</div>
+      `;
+      
+      stepEl.addEventListener('click', () => highlightStep(index));
+      stepsContainer.appendChild(stepEl);
+    });
+
+    // 代码行点击事件
+    document.querySelectorAll('.code-line').forEach(line => {
+      line.addEventListener('click', () => {
+        const lineNum = parseInt(line.dataset.line);
+        const stepIndex = steps.findIndex(s => s.line === lineNum);
+        if (stepIndex !== -1) {
+          highlightStep(stepIndex);
+        }
+      });
+    });
+
+    function highlightStep(index) {
+      // 清除所有高亮
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      
+      // 高亮当前步骤
+      const stepEl = document.querySelector(`.viz-step[data-index="${index}"]`);
+      if (stepEl) {
+        stepEl.classList.add('active');
+        stepEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      
+      // 高亮对应代码行
+      const lineNum = steps[index].line;
+      const codeLine = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+      if (codeLine) {
+        codeLine.classList.add('active');
+      }
+    }
+
+    // 默认高亮第一步
+    highlightStep(0);
+  </script>
+</body>
+</html>

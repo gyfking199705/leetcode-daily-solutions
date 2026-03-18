@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #117 - 填充每个节点的下一个右侧节点指针 II</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --primary-light: #818cf8;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --surface-light: #334155;
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1100px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.6;
+    }
+    h1 { 
+      font-size: 2rem; 
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px; 
+      border: 1px solid var(--surface-light);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .difficulty {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: var(--warning);
+      color: #000;
+    }
+    .tag {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      background: var(--surface-light);
+      color: var(--text-muted);
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 0;
+      overflow-x: auto; 
+      margin: 16px 0;
+      border: 1px solid var(--surface-light);
+    }
+    .code-line { 
+      display: flex; 
+      padding: 4px 16px; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.9rem;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.25); 
+      border-left: 3px solid var(--primary);
+      margin-left: 0;
+      padding-left: 13px;
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 40px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1.2fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 768px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    .viz-steps { 
+      max-height: 500px; 
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+    .viz-steps::-webkit-scrollbar {
+      width: 6px;
+    }
+    .viz-steps::-webkit-scrollbar-thumb {
+      background: var(--surface-light);
+      border-radius: 3px;
+    }
+    .viz-step { 
+      padding: 16px; 
+      margin: 8px 0; 
+      border-radius: 12px; 
+      background: var(--surface-light); 
+      cursor: pointer; 
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .viz-step:hover { 
+      border-color: var(--primary-light);
+      transform: translateX(4px);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.15);
+    }
+    .viz-step h4 {
+      margin: 0 0 8px 0;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+    .viz-step p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .viz-step .state {
+      margin-top: 8px;
+      padding: 8px 12px;
+      background: var(--bg);
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: var(--primary-light);
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 20px; 
+      border: 1px solid var(--surface-light); 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block; 
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15);
+    }
+    .problem-card h4 {
+      margin: 0 0 8px 0;
+      color: var(--primary-light);
+    }
+    .problem-card p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    .complexity-table th,
+    .complexity-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--surface-light);
+    }
+    .complexity-table th {
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+    .complexity-table tr:hover {
+      background: rgba(255,255,255,0.02);
+    }
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; }
+    .class { color: #ffa657; }
+    .var { color: #79c0ff; }
+    .builtin { color: #ff7b72; }
+    .tree-viz {
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 16px 0;
+      text-align: center;
+      font-family: monospace;
+    }
+    .tree-node {
+      display: inline-block;
+      width: 36px;
+      height: 36px;
+      line-height: 36px;
+      border-radius: 50%;
+      background: var(--surface-light);
+      margin: 4px;
+      font-size: 0.85rem;
+      position: relative;
+    }
+    .tree-node.highlight {
+      background: var(--primary);
+      color: #000;
+      font-weight: bold;
+    }
+    .tree-node.next-pointer::after {
+      content: "→";
+      position: absolute;
+      right: -20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--success);
+      font-weight: bold;
+    }
+    .tree-level {
+      margin: 8px 0;
+    }
+    .arrow-down {
+      color: var(--text-muted);
+      font-size: 0.7rem;
+    }
+    .idea-box {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(99, 102, 241, 0.05));
+      border-left: 4px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 12px 12px 0;
+      margin: 16px 0;
+    }
+    .idea-box h4 {
+      margin: 0 0 8px 0;
+      color: var(--primary-light);
+    }
+    .idea-box p {
+      margin: 0;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #117 - 填充每个节点的下一个右侧节点指针 II</h1>
+  <p class="subtitle">Populate Next Right Pointers in Each Node II</p>
+  
+  <div style="margin-bottom: 24px;">
+    <span class="difficulty">Medium</span>
+    <span style="margin-left: 12px;">
+      <span class="tag">🌲 二叉树</span>
+      <span class="tag">🔗 链表</span>
+      <span class="tag">🔄 BFS</span>
+      <span class="tag">⭐ O(1)空间</span>
+    </span>
+  </div>
+
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给定一个<strong>二叉树</strong>，其每个节点包含：</p>
+    <ul>
+      <li><code>val</code>：节点的值</li>
+      <li><code>left</code>：左子节点指针</li>
+      <li><code>right</code>：右子节点指针</li>
+      <li><code>next</code>：指向同一层中右侧的下一个节点（初始为 <code>NULL</code>）</li>
+    </ul>
+    <p>要求：将每个节点的 <code>next</code> 指针指向其<strong>同一层的下一个右侧节点</strong>。如果找不到下一个右侧节点，则将 <code>next</code> 指针设置为 <code>NULL</code>。</p>
+    <div class="idea-box">
+      <h4>💡 关键点</h4>
+      <p>这是一个<strong>不完全二叉树</strong>，不像116题那样保证每层都是满的。这意味着不能使用基于完全二叉树的性质优化，需要更通用的解法。</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="tree-viz" id="treeViz">
+      <div class="tree-level">
+        <span class="tree-node" id="node-1">1</span>
+      </div>
+      <div class="arrow-down">↙ ↘</div>
+      <div class="tree-level">
+        <span class="tree-node" id="node-2">2</span>
+        <span class="tree-node" id="node-3">3</span>
+      </div>
+      <div class="arrow-down">↙ ↘ ↙ ↘</div>
+      <div class="tree-level">
+        <span class="tree-node" id="node-4">4</span>
+        <span class="tree-node" id="node-5">5</span>
+        <span class="tree-node" id="node-7">7</span>
+      </div>
+    </div>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>Python 实现（O(1)空间 - 利用已建立的next指针）</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>⏱️ 复杂度分析</h2>
+    <table class="complexity-table">
+      <thead>
+        <tr>
+          <th>解法</th>
+          <th>时间复杂度</th>
+          <th>空间复杂度</th>
+          <th>说明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>BFS（队列）</td>
+          <td>O(N)</td>
+          <td>O(W)</td>
+          <td>W为最大层宽，需要队列存储每层节点</td>
+        </tr>
+        <tr>
+          <td><strong>O(1)空间迭代</strong></td>
+          <td><strong>O(N)</strong></td>
+          <td><strong>O(1)</strong></td>
+          <td>利用已建立的next指针作为"链表"遍历，最优解 ⭐</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>🔗 类似题目推荐</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/populating-next-right-pointers-in-each-node/" class="problem-card" target="_blank">
+        <h4>#116 填充每个节点的下一个右侧节点指针</h4>
+        <p>完美二叉树版本，可以利用完全二叉树性质优化</p>
+      </a>
+      <a href="https://leetcode.cn/problems/binary-tree-level-order-traversal/" class="problem-card" target="_blank">
+        <h4>#102 二叉树的层序遍历</h4>
+        <p>BFS基础，本题的核心遍历方式</p>
+      </a>
+      <a href="https://leetcode.cn/problems/binary-tree-right-side-view/" class="problem-card" target="_blank">
+        <h4>#199 二叉树的右视图</h4>
+        <p>同样涉及层序遍历，取每层最右节点</p>
+      </a>
+      <a href="https://leetcode.cn/problems/flatten-binary-tree-to-linked-list/" class="problem-card" target="_blank">
+        <h4>#114 二叉树展开为链表</h4>
+        <p>同样是树结构转链表，思路相通</p>
+      </a>
+      <a href="https://leetcode.cn/problems/linked-list-binary-tree/" class="problem-card" target="_blank">
+        <h4>#1367 二叉树中的链表</h4>
+        <p>链表与二叉树的结合问题</p>
+      </a>
+      <a href="https://leetcode.cn/problems/vertical-order-traversal-of-a-binary-tree/" class="problem-card" target="_blank">
+        <h4>#987 二叉树的垂序遍历</h4>
+        <p>进阶层序遍历，考察更复杂的遍历技巧</p>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📝 核心思路总结</h2>
+    <div class="idea-box">
+      <h4>🎯 解法一：BFS层序遍历（直观）</h4>
+      <p>使用队列进行层序遍历，每层遍历时将前一个节点的next指向当前节点。空间复杂度O(W)，W为树的最大宽度。</p>
+    </div>
+    <div class="idea-box">
+      <h4>🌟 解法二：O(1)空间迭代（最优）</h4>
+      <p>将每一层看作一个链表，利用上一层已经建立好的next指针来遍历并连接下一层。核心是维护三个指针：当前层节点、下一层的头部、下一层的尾部。</p>
+    </div>
+    <div class="idea-box">
+      <h4>🔑 关键技巧</h4>
+      <p><code>dummy = Node(0)</code> 作为下一层的"虚拟头节点"，避免处理下一层第一个节点的特殊逻辑，简化代码。</p>
+    </div>
+  </div>
+
+  <script>
+    // 代码行数据
+    const codeLines = [
+      { num: 1, code: '<span class="class">class</span> <span class="class">Solution</span>:' },
+      { num: 2, code: '    <span class="keyword">def</span> <span class="function">connect</span>(<span class="var">self</span>, <span class="var">root</span>: <span class="string">\'Node\'</span>) -> <span class="string">\'Node\'</span>:' },
+      { num: 3, code: '        <span class="comment"># 从根节点开始，逐层处理</span>' },
+      { num: 4, code: '        <span class="var">curr</span> = <span class="var">root</span>' },
+      { num: 5, code: '        ' },
+      { num: 6, code: '        <span class="keyword">while</span> <span class="var">curr</span>:' },
+      { num: 7, code: '            <span class="comment"># dummy是下一层的虚拟头节点</span>' },
+      { num: 8, code: '            <span class="var">dummy</span> = <span class="class">Node</span>(<span class="number">0</span>)' },
+      { num: 9, code: '            <span class="var">tail</span> = <span class="var">dummy</span>' },
+      { num: 10, code: '            ' },
+      { num: 11, code: '            <span class="comment"># 遍历当前层，连接下一层节点</span>' },
+      { num: 12, code: '            <span class="keyword">while</span> <span class="var">curr</span>:' },
+      { num: 13, code: '                <span class="comment"># 连接左子节点</span>' },
+      { num: 14, code: '                <span class="keyword">if</span> <span class="var">curr</span>.<span class="var">left</span>:' },
+      { num: 15, code: '                    <span class="var">tail</span>.<span class="var">next</span> = <span class="var">curr</span>.<span class="var">left</span>' },
+      { num: 16, code: '                    <span class="var">tail</span> = <span class="var">tail</span>.<span class="var">next</span>' },
+      { num: 17, code: '                <span class="comment"># 连接右子节点</span>' },
+      { num: 18, code: '                <span class="keyword">if</span> <span class="var">curr</span>.<span class="var">right</span>:' },
+      { num: 19, code: '                    <span class="var">tail</span>.<span class="var">next</span> = <span class="var">curr</span>.<span class="var">right</span>' },
+      { num: 20, code: '                    <span class="var">tail</span> = <span class="var">tail</span>.<span class="var">next</span>' },
+      { num: 21, code: '                <span class="comment"># 移动到当前层的下一个节点</span>' },
+      { num: 22, code: '                <span class="var">curr</span> = <span class="var">curr</span>.<span class="var">next</span>' },
+      { num: 23, code: '            ' },
+      { num: 24, code: '            <span class="comment"># 移动到下一层的第一个实际节点</span>' },
+      { num: 25, code: '            <span class="var">curr</span> = <span class="var">dummy</span>.<span class="var">next</span>' },
+      { num: 26, code: '        ' },
+      { num: 27, code: '        <span class="keyword">return</span> <span class="var">root</span>' }
+    ];
+
+    // 步骤与代码行映射
+    const steps = [
+      {title: "初始化 curr = root", desc: "从根节点开始，准备逐层处理二叉树", line: 4, state: "curr = 节点1"},
+      {title: "进入外层循环", desc: "只要当前层还有节点，就继续处理", line: 6, state: "curr = 节点1 ≠ None"},
+      {title: "创建虚拟头节点 dummy", desc: "dummy用于简化下一层第一个节点的处理逻辑", line: 8, state: "dummy = Node(0)"},
+      {title: "初始化 tail = dummy", desc: "tail是下一层链表的尾指针，用于追加节点", line: 9, state: "tail = dummy"},
+      {title: "进入内层循环", desc: "遍历当前层的所有节点（通过next指针）", line: 12, state: "curr = 节点1"},
+      {title: "检查并连接左子节点", desc: "节点1有左子节点2，将tail.next指向它", line: 14, state: "节点1.left = 节点2 ✓"},
+      {title: "执行连接操作", desc: "dummy.next = 节点2，tail移动到节点2", line: 15, state: "tail.next = 节点2"},
+      {title: "更新tail指针", desc: "tail现在是节点2，后续节点会接到它后面", line: 16, state: "tail = 节点2"},
+      {title: "检查并连接右子节点", desc: "节点1有右子节点3，将tail.next指向它", line: 18, state: "节点1.right = 节点3 ✓"},
+      {title: "执行连接操作", desc: "节点2.next = 节点3，第二层链表: 2→3", line: 19, state: "tail.next = 节点3"},
+      {title: "更新tail指针", desc: "tail现在是节点3", line: 20, state: "tail = 节点3"},
+      {title: "移动到当前层下一个节点", desc: "通过已建立的next指针移动（节点1.next此时还是None）", line: 22, state: "curr = None (当前层结束)"},
+      {title: "内层循环结束", desc: "当前层（第一层）处理完毕，第二层链表已建立: 2→3→None", line: 12, state: "dummy.next = 节点2"},
+      {title: "移动到下一层", desc: "curr = dummy.next = 节点2，开始处理第二层", line: 25, state: "curr = 节点2"},
+      {title: "重复处理第二层", desc: "同样的逻辑，连接节点2的子节点4、5和节点3的子节点7", line: 6, state: "建立第三层: 4→5→7→None"},
+      {title: "处理结束", desc: "第三层没有子节点，循环结束，返回root", line: 27, state: "所有层处理完成 ✓"}
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach(line => {
+      const div = document.createElement('div');
+      div.className = 'code-line';
+      div.dataset.line = line.num;
+      div.innerHTML = `<span class="line-number">${line.num}</span><span>${line.code}</span>`;
+      div.addEventListener('click', () => highlightStepByLine(line.num));
+      codeBlock.appendChild(div);
+    });
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const div = document.createElement('div');
+      div.className = 'viz-step';
+      div.dataset.step = idx;
+      div.dataset.line = step.line;
+      div.innerHTML = `
+        <h4>步骤 ${idx + 1}: ${step.title}</h4>
+        <p>${step.desc}</p>
+        <div class="state">${step.state}</div>
+      `;
+      div.addEventListener('click', () => highlightStep(idx));
+      vizSteps.appendChild(div);
+    });
+
+    let activeStep = -1;
+
+    function highlightStep(stepIdx) {
+      // 清除之前的高亮
+      document.querySelectorAll('.viz-step').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+      document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('highlight', 'next-pointer'));
+      
+      if (stepIdx < 0 || stepIdx >= steps.length) return;
+      
+      activeStep = stepIdx;
+      const step = steps[stepIdx];
+      
+      // 高亮步骤
+      const stepEl = document.querySelector(`.viz-step[data-step="${stepIdx}"]`);
+      if (stepEl) stepEl.classList.add('active');
+      
+      // 高亮代码行
+      const lineEl = document.querySelector(`.code-line[data-line="${step.line}"]`);
+      if (lineEl) {
+        lineEl.classList.add('active');
+        lineEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      
+      // 更新树可视化
+      updateTreeViz(stepIdx);
+    }
+
+    function highlightStepByLine(lineNum) {
+      // 找到对应的步骤
+      for (let i = 0; i < steps.length; i++) {
+        if (steps[i].line === lineNum) {
+          highlightStep(i);
+          // 滚动到步骤
+          const stepEl = document.querySelector(`.viz-step[data-step="${i}"]`);
+          if (stepEl) stepEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          break;
+        }
+      }
+    }
+
+    function updateTreeViz(stepIdx) {
+      const node1 = document.getElementById('node-1');
+      const node2 = document.getElementById('node-2');
+      const node3 = document.getElementById('node-3');
+      const node4 = document.getElementById('node-4');
+      const node5 = document.getElementById('node-5');
+      const node7 = document.getElementById('node-7');
+      
+      // 根据步骤高亮不同节点
+      if (stepIdx >= 5 && stepIdx <= 11) {
+        node1.classList.add('highlight');
+      }
+      if (stepIdx >= 9) {
+        node2.classList.add('next-pointer');
+        node3.classList.add('highlight');
+      }
+      if (stepIdx >= 15) {
+        node4.classList.add('next-pointer');
+        node5.classList.add('next-pointer');
+        node7.classList.add('highlight');
+      }
+    }
+
+    // 默认高亮第一步
+    highlightStep(0);
+  </script>
+</body>
+</html>

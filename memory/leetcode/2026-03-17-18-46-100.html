@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #100 - 相同的树</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --text: #f1f5f9; 
+      --text-secondary: #94a3b8;
+      --success: #22c55e;
+      --error: #ef4444;
+    }
+    body { 
+      font-family: system-ui, -apple-system, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.7;
+    }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px; 
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 20px; 
+      overflow-x: auto;
+      margin: 0;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 3px 0; 
+      cursor: pointer; 
+      transition: all 0.2s; 
+      border-radius: 4px;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.08); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.4); 
+      border-left: 3px solid var(--primary); 
+      margin-left: -3px;
+      padding-left: 3px;
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 45px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+      font-family: monospace;
+    }
+    .code-content {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 14px;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1.2fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 768px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    .viz-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .viz-step { 
+      padding: 16px; 
+      border-radius: 12px; 
+      background: #334155; 
+      cursor: pointer; 
+      border: 2px solid transparent; 
+      transition: all 0.2s;
+    }
+    .viz-step:hover { 
+      background: #3d4d63; 
+      transform: translateX(4px);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.25); 
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+    }
+    .viz-step h4 {
+      margin: 0 0 8px 0;
+      color: var(--text);
+      font-size: 15px;
+    }
+    .viz-step p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .step-result {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+    .step-result.same { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+    .step-result.diff { background: rgba(239, 68, 68, 0.2); color: var(--error); }
+    .code-container h3 {
+      margin-top: 0;
+      color: var(--text-secondary);
+      font-size: 16px;
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 20px; 
+      border: 1px solid #475569; 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block; 
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px); 
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.2);
+    }
+    .problem-card h4 {
+      margin: 0 0 8px 0;
+      color: var(--primary);
+      font-size: 16px;
+    }
+    .problem-card p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    .complexity-table th,
+    .complexity-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #475569;
+    }
+    .complexity-table th {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .complexity-table td {
+      color: var(--text-secondary);
+    }
+    .tag {
+      display: inline-block;
+      padding: 4px 12px;
+      background: rgba(99, 102, 241, 0.2);
+      color: var(--primary);
+      border-radius: 20px;
+      font-size: 12px;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+    .tree-viz {
+      display: flex;
+      justify-content: center;
+      gap: 60px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    .tree-box {
+      text-align: center;
+    }
+    .tree-box h4 {
+      margin-bottom: 16px;
+      color: var(--text-secondary);
+    }
+    .tree-svg {
+      width: 200px;
+      height: 150px;
+    }
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; }
+    .class { color: #ffa657; }
+    .bool { color: #ff7b72; }
+    .return { color: #ff7b72; }
+    .def { color: #ff7b72; }
+    .if { color: #ff7b72; }
+    .or { color: #ff7b72; }
+    .and { color: #ff7b72; }
+    .not { color: #ff7b72; }
+    .algo-highlight {
+      background: rgba(99, 102, 241, 0.15);
+      padding: 16px;
+      border-radius: 8px;
+      border-left: 3px solid var(--primary);
+      margin: 16px 0;
+    }
+    .algo-highlight h4 {
+      margin: 0 0 8px 0;
+      color: var(--primary);
+    }
+    .algo-highlight p {
+      margin: 0;
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #100 - 相同的树 (Same Tree)</h1>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给你两棵二叉树的根节点 <code>p</code> 和 <code>q</code>，编写一个函数来检验这两棵树是否相同。</p>
+    <p>如果两个树在结构上相同，并且节点具有相同的值，则认为它们是相同的。</p>
+    <div style="margin-top: 20px;">
+      <span class="tag">Easy</span>
+      <span class="tag">二叉树</span>
+      <span class="tag">递归</span>
+      <span class="tag">DFS</span>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🎯 核心思路</h2>
+    <div class="algo-highlight">
+      <h4>递归分治思想</h4>
+      <p>两棵树相同 ⟺ 当前节点值相同 <strong>AND</strong> 左子树相同 <strong>AND</strong> 右子树相同</p>
+    </div>
+    <p>这是一个典型的递归问题，遵循「分解-解决-合并」的思路：</p>
+    <ul>
+      <li><strong>分解</strong>：判断当前节点 + 递归判断左右子树</li>
+      <li><strong>解决</strong>：基本情况（空节点判断）</li>
+      <li><strong>合并</strong>：三个条件同时满足才返回 true</li>
+    </ul>
+    <div class="tree-viz">
+      <div class="tree-box">
+        <h4>树 p</h4>
+        <svg class="tree-svg" viewBox="0 0 200 150">
+          <circle cx="100" cy="25" r="18" fill="#6366f1" stroke="#818cf8" stroke-width="2"/>
+          <text x="100" y="30" text-anchor="middle" fill="white" font-size="14">1</text>
+          <line x1="100" y1="43" x2="50" y2="75" stroke="#475569" stroke-width="2"/>
+          <line x1="100" y1="43" x2="150" y2="75" stroke="#475569" stroke-width="2"/>
+          <circle cx="50" cy="85" r="18" fill="#6366f1" stroke="#818cf8" stroke-width="2"/>
+          <text x="50" y="90" text-anchor="middle" fill="white" font-size="14">2</text>
+          <circle cx="150" cy="85" r="18" fill="#6366f1" stroke="#818cf8" stroke-width="2"/>
+          <text x="150" y="90" text-anchor="middle" fill="white" font-size="14">3</text>
+        </svg>
+      </div>
+      <div class="tree-box">
+        <h4>树 q</h4>
+        <svg class="tree-svg" viewBox="0 0 200 150">
+          <circle cx="100" cy="25" r="18" fill="#6366f1" stroke="#818cf8" stroke-width="2"/>
+          <text x="100" y="30" text-anchor="middle" fill="white" font-size="14">1</text>
+          <line x1="100" y1="43" x2="50" y2="75" stroke="#475569" stroke-width="2"/>
+          <line x1="100" y1="43" x2="150" y2="75" stroke="#475569" stroke-width="2"/>
+          <circle cx="50" cy="85" r="18" fill="#6366f1" stroke="#818cf8" stroke-width="2"/>
+          <text x="50" y="90" text-anchor="middle" fill="white" font-size="14">2</text>
+          <circle cx="150" cy="85" r="18" fill="#6366f1" stroke="#818cf8" stroke-width="2"/>
+          <text x="150" y="90" text-anchor="middle" fill="white" font-size="14">3</text>
+        </svg>
+      </div>
+    </div>
+    <p style="text-align: center; color: var(--success);">✓ 结构相同 + 值相同 = 相同的树</p>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <div class="viz-step active" data-line="2" onclick="highlightStep(0)">
+          <h4>步骤 1: 基本情况处理<span class="step-result same">✓</span></h4>
+          <p>如果 p 和 q 都为空，返回 True。两棵空树是相同的。</p>
+        </div>
+        <div class="viz-step" data-line="3" onclick="highlightStep(1)">
+          <h4>步骤 2: 单一空节点判断<span class="step-result diff">✗</span></h4>
+          <p>如果只有一个为空，返回 False。结构不同。</p>
+        </div>
+        <div class="viz-step" data-line="4" onclick="highlightStep(2)">
+          <h4>步骤 3: 节点值比较<span class="step-result diff">✗</span></h4>
+          <p>如果当前节点值不同，返回 False。</p>
+        </div>
+        <div class="viz-step" data-line="6" onclick="highlightStep(3)">
+          <h4>步骤 4: 递归左子树</h4>
+          <p>递归判断 p 的左子树和 q 的左子树是否相同。</p>
+        </div>
+        <div class="viz-step" data-line="6" onclick="highlightStep(4)">
+          <h4>步骤 5: 递归右子树</h4>
+          <p>递归判断 p 的右子树和 q 的右子树是否相同。</p>
+        </div>
+        <div class="viz-step" data-line="6" onclick="highlightStep(5)">
+          <h4>步骤 6: 合并结果<span class="step-result same">✓</span></h4>
+          <p>左右子树都相同，整棵树才相同。</p>
+        </div>
+      </div>
+      <div class="code-container">
+        <h3>Python 实现（递归法）</h3>
+        <pre><code id="codeBlock">
+<div class="code-line" data-line="1" onclick="highlightLine(1)">
+<span class="line-number">1</span>
+<span class="code-content"><span class="def">def</span> <span class="function">isSameTree</span>(<span class="class">self</span>, p: TreeNode, q: TreeNode) -> <span class="class">bool</span>:</span>
+</div>
+<div class="code-line" data-line="2" onclick="highlightLine(2)">
+<span class="line-number">2</span>
+<span class="code-content">    <span class="comment"># 都为空，相同</span></span>
+</div>
+<div class="code-line" data-line="2" onclick="highlightLine(2)">
+<span class="line-number">2</span>
+<span class="code-content">    <span class="if">if</span> <span class="not">not</span> p <span class="and">and</span> <span class="not">not</span> q:</span>
+</div>
+<div class="code-line" data-line="2" onclick="highlightLine(2)">
+<span class="line-number">2</span>
+<span class="code-content">        <span class="return">return</span> <span class="bool">True</span></span>
+</div>
+<div class="code-line" data-line="3" onclick="highlightLine(3)">
+<span class="line-number">3</span>
+<span class="code-content">    <span class="comment"># 一个为空，不同</span></span>
+</div>
+<div class="code-line" data-line="3" onclick="highlightLine(3)">
+<span class="line-number">3</span>
+<span class="code-content">    <span class="if">if</span> <span class="not">not</span> p <span class="or">or</span> <span class="not">not</span> q:</span>
+</div>
+<div class="code-line" data-line="3" onclick="highlightLine(3)">
+<span class="line-number">3</span>
+<span class="code-content">        <span class="return">return</span> <span class="bool">False</span></span>
+</div>
+<div class="code-line" data-line="4" onclick="highlightLine(4)">
+<span class="line-number">4</span>
+<span class="code-content">    <span class="comment"># 值不同，不同</span></span>
+</div>
+<div class="code-line" data-line="4" onclick="highlightLine(4)">
+<span class="line-number">4</span>
+<span class="code-content">    <span class="if">if</span> p.val != q.val:</span>
+</div>
+<div class="code-line" data-line="4" onclick="highlightLine(4)">
+<span class="line-number">4</span>
+<span class="code-content">        <span class="return">return</span> <span class="bool">False</span></span>
+</div>
+<div class="code-line" data-line="5" onclick="highlightLine(5)">
+<span class="line-number">5</span>
+<span class="code-content">    <span class="comment"># 递归检查左右子树</span></span>
+</div>
+<div class="code-line" data-line="6" onclick="highlightLine(6)">
+<span class="line-number">6</span>
+<span class="code-content">    <span class="return">return</span> (<span class="class">self</span>.isSameTree(p.left, q.left) <span class="and">and</span></span>
+</div>
+<div class="code-line" data-line="6" onclick="highlightLine(6)">
+<span class="line-number">6</span>
+<span class="code-content">            <span class="class">self</span>.isSameTree(p.right, q.right))</span>
+</div>
+        </code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🔄 迭代实现（BFS）</h2>
+    <p>除了递归，也可以用队列实现 BFS 遍历：</p>
+    <pre style="margin-top: 16px;"><code id="bfsCode">
+<div class="code-line">
+<span class="line-number">1</span>
+<span class="code-content"><span class="def">def</span> <span class="function">isSameTree</span>(<span class="class">self</span>, p: TreeNode, q: TreeNode) -> <span class="class">bool</span>:</span>
+</div>
+<div class="code-line">
+<span class="line-number">2</span>
+<span class="code-content">    <span class="keyword">from</span> collections <span class="keyword">import</span> deque</span>
+</div>
+<div class="code-line">
+<span class="line-number">3</span>
+<span class="code-content">    queue = deque([(p, q)])</span>
+</div>
+<div class="code-line">
+<span class="line-number">4</span>
+<span class="code-content">    <span class="keyword">while</span> queue:</span>
+</div>
+<div class="code-line">
+<span class="line-number">5</span>
+<span class="code-content">        node1, node2 = queue.popleft()</span>
+</div>
+<div class="code-line">
+<span class="line-number">6</span>
+<span class="code-content">        <span class="comment"># 都为空，跳过</span></span>
+</div>
+<div class="code-line">
+<span class="line-number">7</span>
+<span class="code-content">        <span class="if">if</span> <span class="not">not</span> node1 <span class="and">and</span> <span class="not">not</span> node2:</span>
+</div>
+<div class="code-line">
+<span class="line-number">8</span>
+<span class="code-content">            <span class="keyword">continue</span></span>
+</div>
+<div class="code-line">
+<span class="line-number">9</span>
+<span class="code-content">        <span class="comment"># 一个为空或值不同</span></span>
+</div>
+<div class="code-line">
+<span class="line-number">10</span>
+<span class="code-content">        <span class="if">if</span> <span class="not">not</span> node1 <span class="or">or</span> <span class="not">not</span> node2 <span class="or">or</span> node1.val != node2.val:</span>
+</div>
+<div class="code-line">
+<span class="line-number">11</span>
+<span class="code-content">            <span class="return">return</span> <span class="bool">False</span></span>
+</div>
+<div class="code-line">
+<span class="line-number">12</span>
+<span class="code-content">        <span class="comment"># 入队左右子节点</span></span>
+</div>
+<div class="code-line">
+<span class="line-number">13</span>
+<span class="code-content">        queue.append((node1.left, node2.left))</span>
+</div>
+<div class="code-line">
+<span class="line-number">14</span>
+<span class="code-content">        queue.append((node1.right, node2.right))</span>
+</div>
+<div class="code-line">
+<span class="line-number">15</span>
+<span class="code-content">    <span class="return">return</span> <span class="bool">True</span></span>
+</div>
+    </code></pre>
+  </div>
+
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <tr>
+        <th>方法</th>
+        <th>时间复杂度</th>
+        <th>空间复杂度</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>递归 (DFS)</td>
+        <td>O(min(n,m))</td>
+        <td>O(min(h1,h2))</td>
+        <td>h 为树的高度，递归栈空间</td>
+      </tr>
+      <tr>
+        <td>迭代 (BFS)</td>
+        <td>O(min(n,m))</td>
+        <td>O(min(n,m))</td>
+        <td>队列存储节点对</td>
+      </tr>
+    </table>
+    <p style="margin-top: 16px; color: var(--text-secondary);">其中 n, m 分别是两棵树的节点数。一旦发现不同会提前返回，所以是 min(n,m)。</p>
+  </div>
+
+  <div class="section">
+    <h2>📝 关键要点总结</h2>
+    <ul>
+      <li><strong>递归三要素</strong>：基本情况（终止条件）、递归条件、返回值</li>
+      <li><strong>空节点处理</strong>：都为空时返回 true，一个为空返回 false</li>
+      <li><strong>短路求值</strong>：Python 的 <code>and/or</code> 可以简化条件判断</li>
+      <li><strong>提前返回</strong>：值不同立即返回 false，不需要继续递归</li>
+    </ul>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/symmetric-tree/" class="problem-card" target="_blank">
+        <h4>#101. 对称二叉树</h4>
+        <p>判断一棵树是否轴对称，类似思路，比较左子树和右子树</p>
+      </a>
+      <a href="https://leetcode.cn/problems/subtree-of-another-tree/" class="problem-card" target="_blank">
+        <h4>#572. 另一棵树的子树</h4>
+        <p>判断一棵树是否是另一棵的子树，需要用到本题解法</p>
+      </a>
+      <a href="https://leetcode.cn/problems/invert-binary-tree/" class="problem-card" target="_blank">
+        <h4>#226. 翻转二叉树</h4>
+        <p>经典的二叉树递归题目，交换左右子树</p>
+      </a>
+      <a href="https://leetcode.cn/problems/maximum-depth-of-binary-tree/" class="problem-card" target="_blank">
+        <h4>#104. 二叉树的最大深度</h4>
+        <p>基础递归，计算树的高度</p>
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // 步骤与代码行映射
+    const steps = [
+      {line: 2, title: "基本情况处理", desc: "如果 p 和 q 都为空，返回 True"},
+      {line: 3, title: "单一空节点判断", desc: "如果只有一个为空，返回 False"},
+      {line: 4, title: "节点值比较", desc: "如果当前节点值不同，返回 False"},
+      {line: 6, title: "递归左子树", desc: "递归判断 p 的左子树和 q 的左子树"},
+      {line: 6, title: "递归右子树", desc: "递归判断 p 的右子树和 q 的右子树"},
+      {line: 6, title: "合并结果", desc: "左右子树都相同，整棵树才相同"}
+    ];
+    
+    let currentStep = 0;
+    
+    function highlightStep(stepIndex) {
+      currentStep = stepIndex;
+      
+      // 更新步骤高亮
+      document.querySelectorAll('.viz-step').forEach((step, idx) => {
+        step.classList.toggle('active', idx === stepIndex);
+      });
+      
+      // 更新代码行高亮
+      const line = steps[stepIndex].line;
+      document.querySelectorAll('.code-line').forEach(codeLine => {
+        codeLine.classList.remove('active');
+      });
+      document.querySelectorAll(`.code-line[data-line="${line}"]`).forEach(el => {
+        el.classList.add('active');
+      });
+    }
+    
+    function highlightLine(lineNum) {
+      // 找到包含该行的步骤
+      const stepIndex = steps.findIndex(s => s.line === lineNum);
+      if (stepIndex !== -1) {
+        highlightStep(stepIndex);
+      }
+    }
+    
+    // 初始化高亮
+    highlightStep(0);
+  </script>
+</body>
+</html>

@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>LeetCode #1 - 两数之和</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; 
+      max-width: 900px; 
+      margin: 0 auto; 
+      padding: 20px; 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    .container {
+      background: #f8f9fa;
+      border-radius: 16px;
+      padding: 30px;
+      margin-top: 20px;
+    }
+    h1 { 
+      color: #333; 
+      text-align: center; 
+      margin-bottom: 10px;
+      font-size: 2.2em;
+    }
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 1.1em;
+    }
+    .section { 
+      background: #fff; 
+      border-radius: 12px; 
+      padding: 25px; 
+      margin: 20px 0; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      transition: transform 0.2s;
+    }
+    .section:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    }
+    .section h2 {
+      color: #667eea;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 10px;
+      margin-top: 0;
+    }
+    .collapsible { 
+      cursor: pointer; 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+      color: white; 
+      padding: 18px; 
+      border-radius: 10px; 
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s;
+    }
+    .collapsible:hover {
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    .collapsible::after {
+      content: '▼';
+      font-size: 0.8em;
+      transition: transform 0.3s;
+    }
+    .collapsible.active::after {
+      transform: rotate(180deg);
+    }
+    .content { 
+      max-height: 0; 
+      overflow: hidden; 
+      transition: max-height 0.4s ease-out;
+      background: #f8f9fa;
+      border-radius: 0 0 10px 10px;
+    }
+    .content-inner {
+      padding: 20px;
+    }
+    .visual { 
+      background: #1a1a2e; 
+      padding: 25px; 
+      border-radius: 12px; 
+      font-family: 'Fira Code', 'Consolas', monospace; 
+      color: #eaeaea;
+      overflow-x: auto;
+      position: relative;
+    }
+    .array-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    .array-element {
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #16213e;
+      border: 2px solid #0f3460;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 1.2em;
+      transition: all 0.5s ease;
+    }
+    .array-element.index {
+      background: #e94560;
+      border-color: #ff6b6b;
+      animation: pulse 1s infinite;
+    }
+    .array-element.found {
+      background: #00d9ff;
+      border-color: #00d9ff;
+      animation: glow 1s infinite alternate;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    @keyframes glow {
+      from { box-shadow: 0 0 5px #00d9ff; }
+      to { box-shadow: 0 0 20px #00d9ff, 0 0 40px #00d9ff; }
+    }
+    .hash-demo {
+      margin-top: 20px;
+    }
+    .hash-row {
+      display: flex;
+      align-items: center;
+      margin: 8px 0;
+      opacity: 0;
+      animation: fadeIn 0.5s forwards;
+    }
+    .hash-row:nth-child(1) { animation-delay: 0.5s; }
+    .hash-row:nth-child(2) { animation-delay: 1s; }
+    .hash-row:nth-child(3) { animation-delay: 1.5s; }
+    .hash-row:nth-child(4) { animation-delay: 2s; }
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+    .hash-key {
+      width: 80px;
+      padding: 8px;
+      background: #0f3460;
+      border-radius: 4px;
+      text-align: center;
+    }
+    .hash-arrow {
+      margin: 0 15px;
+      color: #e94560;
+    }
+    .hash-value {
+      padding: 8px 15px;
+      background: #533483;
+      border-radius: 4px;
+    }
+    pre { 
+      background: #1e1e1e; 
+      color: #d4d4d4; 
+      padding: 20px; 
+      border-radius: 10px; 
+      overflow-x: auto;
+      line-height: 1.6;
+      font-family: 'Fira Code', 'Consolas', monospace;
+    }
+    .code-line {
+      display: flex;
+    }
+    .line-num { 
+      color: #858585; 
+      margin-right: 20px;
+      min-width: 30px;
+      text-align: right;
+      user-select: none;
+    }
+    .code-content {
+      flex: 1;
+    }
+    .keyword { color: #569cd6; }
+    .function { color: #dcdcaa; }
+    .string { color: #ce9178; }
+    .number { color: #b5cea8; }
+    .comment { color: #6a9955; }
+    .operator { color: #d4d4d4; }
+    table { 
+      width: 100%; 
+      border-collapse: collapse; 
+      margin-top: 15px;
+    }
+    th, td { 
+      border: 1px solid #e0e0e0; 
+      padding: 15px; 
+      text-align: left; 
+    }
+    th { 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+      color: white;
+      font-weight: 600;
+    }
+    tr:nth-child(even) {
+      background: #f8f9fa;
+    }
+    tr:hover {
+      background: #e8f4f8;
+    }
+    .tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      margin: 2px;
+      font-weight: 500;
+    }
+    .tag-easy { background: #4caf50; color: white; }
+    .tag-medium { background: #ff9800; color: white; }
+    .tag-hard { background: #f44336; color: white; }
+    .tag-topic { background: #e3f2fd; color: #1976d2; }
+    .example-box {
+      background: #f5f5f5;
+      border-left: 4px solid #667eea;
+      padding: 15px 20px;
+      margin: 15px 0;
+      border-radius: 0 8px 8px 0;
+    }
+    .example-box h4 {
+      margin-top: 0;
+      color: #667eea;
+    }
+    .related-problem {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      margin: 10px 0;
+      background: #f8f9fa;
+      border-radius: 8px;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    .related-problem:hover {
+      background: #e8f4f8;
+      transform: translateX(5px);
+    }
+    .problem-num {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 15px;
+    }
+    .problem-info {
+      flex: 1;
+    }
+    .problem-title {
+      font-weight: 600;
+      color: #333;
+    }
+    .problem-desc {
+      font-size: 0.9em;
+      color: #666;
+      margin-top: 3px;
+    }
+    .flow-step {
+      display: flex;
+      align-items: center;
+      margin: 15px 0;
+      padding: 15px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .step-num {
+      width: 35px;
+      height: 35px;
+      background: #667eea;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 15px;
+      flex-shrink: 0;
+    }
+    .step-content {
+      flex: 1;
+    }
+    .step-arrow {
+      text-align: center;
+      color: #667eea;
+      font-size: 1.5em;
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎯 LeetCode #1 - 两数之和</h1>
+    <p class="subtitle">
+      <span class="tag tag-easy">简单</span>
+      <span class="tag tag-topic">数组</span>
+      <span class="tag tag-topic">哈希表</span>
+    </p>
+
+    <!-- 题目描述 -->
+    <div class="section">
+      <h2>📋 题目描述</h2>
+      <p>给定一个整数数组 <code>nums</code> 和一个整数目标值 <code>target</code>，请你在该数组中找出 <strong>和为目标值</strong> 的那 <strong>两个</strong> 整数，并返回它们的数组下标。</p>
+      
+      <p>你可以假设每种输入只会对应一个答案。但是，数组中同一个元素在答案里不能重复出现。</p>
+      
+      <p>你可以按任意顺序返回答案。</p>
+
+      <div class="example-box">
+        <h4>示例 1：</h4>
+        <p><strong>输入：</strong>nums = [2,7,11,15], target = 9</p>
+        <p><strong>输出：</strong>[0,1]</p>
+        <p><strong>解释：</strong>因为 nums[0] + nums[1] == 9 ，返回 [0, 1] 。</p>
+      </div>
+
+      <div class="example-box">
+        <h4>示例 2：</h4>
+        <p><strong>输入：</strong>nums = [3,2,4], target = 6</p>
+        <p><strong>输出：</strong>[1,2]</p>
+      </div>
+
+      <div class="example-box">
+        <h4>示例 3：</h4>
+        <p><strong>输入：</strong>nums = [3,3], target = 6</p>
+        <p><strong>输出：</strong>[0,1]</p>
+      </div>
+
+      <p><strong>提示：</strong></p>
+      <ul>
+        <li>2 ≤ nums.length ≤ 10⁴</li>
+        <li>-10⁹ ≤ nums[i] ≤ 10⁹</li>
+        <li>-10⁹ ≤ target ≤ 10⁹</li>
+        <li><strong>只会存在一个有效答案</strong></li>
+      </ul>
+    </div>
+
+    <!-- 解题思路 -->
+    <div class="section">
+      <h2>💡 解题思路</h2>
+      
+      <div class="collapsible" onclick="togglePanel(this)">
+        方法一：暴力枚举（双重循环）
+      </div>
+      <div class="content">
+        <div class="content-inner">
+          <p>最容易想到的方法是枚举数组中的每一个数 <code>x</code>，寻找数组中是否存在 <code>target - x</code>。</p>
+          <p>当我们使用遍历整个数组的方式寻找 <code>target - x</code> 时，需要注意到每一个位于 <code>x</code> 之前的元素都已经和 <code>x</code> 匹配过，因此不需要再进行匹配。而每一个元素不能被使用两次，所以我们只需要在 <code>x</code> 后面的元素中寻找 <code>target - x</code>。</p>
+          <p><strong>时间复杂度：</strong>O(n²)，其中 n 是数组中的元素数量。</p>
+        </div>
+      </div>
+
+      <div class="collapsible" onclick="togglePanel(this)" style="margin-top: 15px;">
+        方法二：哈希表（推荐）⭐
+      </div>
+      <div class="content">
+        <div class="content-inner">
+          <p>注意到方法一的时间复杂度较高的原因是寻找 <code>target - x</code> 的时间复杂度过高。因此，我们需要一种更优秀的方法，能够快速寻找数组中是否存在目标元素。如果存在，我们需要找出它的索引。</p>
+          <p>使用哈希表，可以将寻找 <code>target - x</code> 的时间复杂度降低到从 O(n) 降低到 O(1)。</p>
+          <p>我们创建一个哈希表，对于每一个 <code>x</code>，我们首先查询哈希表中是否存在 <code>target - x</code>，然后将 <code>x</code> 插入到哈希表中，即可保证不会让 <code>x</code> 和自己匹配。</p>
+          <p><strong>时间复杂度：</strong>O(n)，我们只需遍历数组一次。</p>
+          <p><strong>空间复杂度：</strong>O(n)，其中 n 是数组中的元素数量。主要为哈希表的开销。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 可视化演示 -->
+    <div class="section">
+      <h2>🎬 算法可视化演示</h2>
+      <p>以 <code>nums = [2, 7, 11, 15], target = 9</code> 为例，演示哈希表法的执行过程：</p>
+      
+      <div class="visual">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <div style="font-size: 0.9em; color: #888; margin-bottom: 10px;">数组 nums</div>
+          <div class="array-container">
+            <div class="array-element index">2</div>
+            <div class="array-element found">7</div>
+            <div class="array-element">11</div>
+            <div class="array-element">15</div>
+          </div>
+          <div style="font-size: 0.85em; color: #888; margin-top: 5px;">
+            <span style="color: #e94560;">●</span> 当前元素 
+            <span style="color: #00d9ff; margin-left: 15px;">●</span> 目标匹配
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid #0f3460; padding-top: 20px;">
+          <div style="text-align: center; font-size: 0.9em; color: #888; margin-bottom: 15px;">
+            哈希表构建过程（target = 9）
+          </div>
+          
+          <div class="hash-demo">
+            <div class="hash-row">
+              <span style="color: #888; margin-right: 15px;">i=0:</span>
+              <span>x = 2, need = 9-2 = 7</span>
+              <span style="margin-left: 20px; color: #6a9955;">// 7 不在表中</span>
+            </div>
+            <div class="hash-row">
+              <span style="color: #888; margin-right: 15px;"></span>
+              <span class="hash-key">2</span>
+              <span class="hash-arrow">→</span>
+              <span class="hash-value">0</span>
+              <span style="margin-left: 15px; color: #6a9955;">// 存入哈希表</span>
+            </div>
+            
+            <div class="hash-row">
+              <span style="color: #888; margin-right: 15px;">i=1:</span>
+              <span>x = 7, need = 9-7 = 2</span>
+              <span style="margin-left: 20px; color: #00d9ff;">// 2 在表中！✓</span>
+            </div>
+            <div class="hash-row">
+              <span style="color: #888; margin-right: 15px;"></span>
+              <span style="color: #00d9ff; font-weight: bold;">返回 [0, 1]</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 25px;">
+        <h4>算法执行流程图：</h4>
+        <div class="flow-step">
+          <div class="step-num">1</div>
+          <div class="step-content">初始化空哈希表，用于存储已遍历的元素值及其索引</div>
+        </div>
+        <div class="step-arrow">↓</div>
+        <div class="flow-step">
+          <div class="step-num">2</div>
+          <div class="step-content">遍历数组，对于每个元素 x，计算 complement = target - x</div>
+        </div>
+        <div class="step-arrow">↓</div>
+        <div class="flow-step">
+          <div class="step-num">3</div>
+          <div class="step-content">检查 complement 是否在哈希表中</div>
+        </div>
+        <div class="step-arrow">↓</div>
+        <div class="flow-step">
+          <div class="step-num">4</div>
+          <div class="step-content">若存在，返回当前索引和 complement 的索引；若不存在，将 x 存入哈希表</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 代码实现 -->
+    <div class="section">
+      <h2>💻 代码实现（Python）</h2>
+      <pre>
+<div class="code-line"><span class="line-num">1</span><span class="code-content"><span class="keyword">class</span> <span class="function">Solution</span>:</span></div>
+<div class="code-line"><span class="line-num">2</span><span class="code-content">    <span class="keyword">def</span> <span class="function">twoSum</span>(self, nums: List[<span class="keyword">int</span>], target: <span class="keyword">int</span>) -> List[<span class="keyword">int</span>]:</span></div>
+<div class="code-line"><span class="line-num">3</span><span class="code-content">        <span class="comment"># 创建哈希表：值 -> 索引</span></span></div>
+<div class="code-line"><span class="line-num">4</span><span class="code-content">        hash_map = {}</span></div>
+<div class="code-line"><span class="line-num">5</span><span class="code-content">        </span></div>
+<div class="code-line"><span class="line-num">6</span><span class="code-content">        <span class="comment"># 遍历数组</span></span></div>
+<div class="code-line"><span class="line-num">7</span><span class="code-content">        <span class="keyword">for</span> i, num <span class="keyword">in</span> <span class="function">enumerate</span>(nums):</span></div>
+<div class="code-line"><span class="line-num">8</span><span class="code-content">            <span class="comment"># 计算需要找的另一个数</span></span></div>
+<div class="code-line"><span class="line-num">9</span><span class="code-content">            complement = target - num</span></div>
+<div class="code-line"><span class="line-num">10</span><span class="code-content">            </span></div>
+<div class="code-line"><span class="line-num">11</span><span class="code-content">            <span class="comment"># 如果 complement 在哈希表中，说明找到了答案</span></span></div>
+<div class="code-line"><span class="line-num">12</span><span class="code-content">            <span class="keyword">if</span> complement <span class="keyword">in</span> hash_map:</span></div>
+<div class="code-line"><span class="line-num">13</span><span class="code-content">                <span class="keyword">return</span> [hash_map[complement], i]</span></div>
+<div class="code-line"><span class="line-num">14</span><span class="code-content">            </span></div>
+<div class="code-line"><span class="line-num">15</span><span class="code-content">            <span class="comment"># 将当前数存入哈希表</span></span></div>
+<div class="code-line"><span class="line-num">16</span><span class="code-content">            hash_map[num] = i</span></div>
+<div class="code-line"><span class="line-num">17</span><span class="code-content">        </span></div>
+<div class="code-line"><span class="line-num">18</span><span class="code-content">        <span class="comment"># 根据题意，一定有解，所以这里不会执行</span></span></div>
+<div class="code-line"><span class="line-num">19</span><span class="code-content">        <span class="keyword">return</span> []</span></div>
+      </pre>
+
+      <h4 style="margin-top: 25px;">代码关键点解析：</h4>
+      <ul>
+        <li><strong>第4行：</strong>使用字典作为哈希表，键为数组值，值为对应的索引</li>
+        <li><strong>第7行：</strong>使用 <code>enumerate</code> 同时获取索引和值</li>
+        <li><strong>第9行：</strong>计算需要寻找的补数 <code>complement</code></li>
+        <li><strong>第12行：</strong>哈希表查找，时间复杂度 O(1)</li>
+        <li><strong>第16行：</strong>先查找后插入，避免同一个元素使用两次</li>
+      </ul>
+    </div>
+
+    <!-- 复杂度分析 -->
+    <div class="section">
+      <h2>📊 复杂度分析</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>方法</th>
+            <th>时间复杂度</th>
+            <th>空间复杂度</th>
+            <th>适用场景</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>暴力枚举</td>
+            <td>O(n²)</td>
+            <td>O(1)</td>
+            <td>数组很小，对空间敏感</td>
+          </tr>
+          <tr>
+            <td><strong>哈希表（推荐）</strong></td>
+            <td><strong>O(n)</strong></td>
+            <td>O(n)</td>
+            <td>大多数场景，追求速度</td>
+          </tr>
+          <tr>
+            <td>双指针（排序后）</td>
+            <td>O(n log n)</td>
+            <td>O(1) 或 O(n)</td>
+            <td>需要返回值的场景</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 style="margin-top: 25px;">详细分析：</h4>
+      <div class="example-box">
+        <h4>时间复杂度 O(n)</h4>
+        <p>我们只遍历了包含有 n 个元素的列表一次。在表中进行的每次查找只花费 O(1) 的时间。</p>
+      </div>
+      <div class="example-box">
+        <h4>空间复杂度 O(n)</h4>
+        <p>所需的额外空间取决于哈希表中存储的元素数量，该表最多需要存储 n 个元素。</p>
+      </div>
+    </div>
+
+    <!-- 类似题目推荐 -->
+    <div class="section">
+      <h2>🔥 类似题目推荐</h2>
+      
+      <div class="related-problem">
+        <div class="problem-num">15</div>
+        <div class="problem-info">
+          <div class="problem-title">三数之和 <span class="tag tag-medium">中等</span></div>
+          <div class="problem-desc">在数组中找到三个数，使得它们的和为零。需要处理去重问题。</div>
+        </div>
+      </div>
+
+      <div class="related-problem">
+        <div class="problem-num">18</div>
+        <div class="problem-info">
+          <div class="problem-title">四数之和 <span class="tag tag-medium">中等</span></div>
+          <div class="problem-desc">在数组中找到四个数，使得它们的和为目标值。</div>
+        </div>
+      </div>
+
+      <div class="related-problem">
+        <div class="problem-num">167</div>
+        <div class="problem-info">
+          <div class="problem-title">两数之和 II - 输入有序数组 <span class="tag tag-medium">中等</span></div>
+          <div class="problem-desc">数组已排序，使用双指针法，空间复杂度可优化至 O(1)。</div>
+        </div>
+      </div>
+
+      <div class="related-problem">
+        <div class="problem-num">560</div>
+        <div class="problem-info">
+          <div class="problem-title">和为 K 的子数组 <span class="tag tag-medium">中等</span></div>
+          <div class="problem-desc">使用前缀和 + 哈希表，经典的两数之和变种。</div>
+        </div>
+      </div>
+
+      <div class="related-problem">
+        <div class="problem-num">653</div>
+        <div class="problem-info">
+          <div class="problem-title">两数之和 IV - 输入 BST <span class="tag tag-easy">简单</span></div>
+          <div class="problem-desc">在二叉搜索树中寻找两个数，使它们的和等于目标值。</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 总结 -->
+    <div class="section">
+      <h2>📝 解题技巧总结</h2>
+      <ul>
+        <li><strong>哈希表是利器：</strong>当需要快速查找元素时，优先考虑哈希表，能将 O(n) 的查找优化到 O(1)</li>
+        <li><strong>空间换时间：</strong>在算法设计中，经常用额外的空间来换取时间复杂度的优化</li>
+        <li><strong>避免重复：</strong>本题中"先查找后插入"的技巧确保不会使用同一个元素两次</li>
+        <li><strong>补数思想：</strong>寻找两数之和等于 target，等价于寻找当前数的补数（target - x）</li>
+        <li><strong>一遍哈希 vs 两遍哈希：</strong>一遍哈希更优，但需要理解"先查后存"的逻辑</li>
+      </ul>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px; color: #666; font-size: 0.9em;">
+      <p>🎉 恭喜完成 LeetCode #1 两数之和 的学习！</p>
+      <p>生成时间：2026-03-16 | 使用哈希表法攻克经典题目</p>
+    </div>
+  </div>
+
+  <script>
+    function togglePanel(element) {
+      element.classList.toggle("active");
+      var content = element.nextElementSibling;
+      if (content.style.maxHeight) {
+        content.style.maxHeight = null;
+      } else {
+        content.style.maxHeight = content.scrollHeight + "px";
+      }
+    }
+  </script>
+</body>
+</html>

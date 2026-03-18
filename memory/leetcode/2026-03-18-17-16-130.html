@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #130 - 被围绕的区域</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --primary-light: #818cf8;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --surface-light: #334155;
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --border: #475569;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+    body { 
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 40px 20px;
+      line-height: 1.6;
+    }
+    h1 { 
+      font-size: 2rem; 
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 32px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-right: 8px;
+      text-transform: uppercase;
+    }
+    .badge-medium { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+    .badge-dfs { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      font-size: 1.25rem;
+      margin-top: 0;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section h3 {
+      color: var(--text);
+      font-size: 1.1rem;
+      margin-top: 24px;
+      margin-bottom: 12px;
+    }
+    .problem-desc {
+      background: rgba(99, 102, 241, 0.1);
+      border-left: 4px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 12px 12px 0;
+      margin: 16px 0;
+    }
+    .example {
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin: 12px 0;
+      font-family: 'Consolas', monospace;
+      font-size: 0.9rem;
+    }
+    .example-label {
+      color: var(--primary-light);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 20px; 
+      overflow-x: auto;
+      border: 1px solid rgba(255,255,255,0.05);
+      margin: 16px 0;
+    }
+    code {
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.9rem;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 3px 0; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      border-radius: 4px;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.25); 
+      border-left: 3px solid var(--primary); 
+      margin-left: -3px;
+      padding-left: 3px;
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 40px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 768px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    .viz-steps { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 16px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    .viz-step { 
+      padding: 14px 16px; 
+      margin: 8px 0; 
+      border-radius: 10px; 
+      background: var(--surface-light); 
+      cursor: pointer; 
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .viz-step:hover { 
+      border-color: var(--border);
+      transform: translateX(4px);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.2);
+    }
+    .viz-step-title {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .viz-step-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .viz-step-line {
+      font-size: 0.75rem;
+      color: var(--primary-light);
+      margin-top: 6px;
+    }
+    .matrix-container {
+      display: grid;
+      gap: 4px;
+      margin: 16px 0;
+      justify-content: start;
+    }
+    .matrix-cell {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.3s;
+    }
+    .cell-o { background: #1e3a5f; color: #60a5fa; }
+    .cell-x { background: #3f1f1f; color: #f87171; }
+    .cell-e { background: var(--surface-light); color: var(--text-muted); }
+    .cell-border { border: 2px solid var(--success); }
+    .cell-marked { background: rgba(34, 197, 94, 0.3); }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 16px; 
+      border: 1px solid var(--border); 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block;
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15);
+    }
+    .problem-card-title {
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+    .problem-card-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .problem-card-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--primary-light);
+      border-radius: 4px;
+      font-size: 0.75rem;
+      margin-top: 10px;
+    }
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+    }
+    .complexity-table th, .complexity-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .complexity-table th {
+      color: var(--primary-light);
+      font-weight: 600;
+    }
+    .complexity-table tr:last-child td {
+      border-bottom: none;
+    }
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; }
+    .class { color: #ffa657; }
+    .decorator { color: #ff7b72; }
+    .builtin { color: #79c0ff; }
+    .insight-box {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .insight-title {
+      color: var(--primary-light);
+      font-weight: 600;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--primary);
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background: var(--primary-light);
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #130 - 被围绕的区域</h1>
+  <div class="subtitle">
+    <span class="badge badge-medium">Medium</span>
+    <span class="badge badge-dfs">DFS / BFS</span>
+    逆向思维 + 边界搜索的经典例题
+  </div>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <div class="problem-desc">
+      给你一个 <code>m x n</code> 的矩阵 <code>board</code> ，由若干字符 <code>'X'</code> 和 <code>'O'</code> 组成，找到所有被 <code>'X'</code> 围绕的区域，并将这些区域里所有的 <code>'O'</code> 用 <code>'X'</code> 填充。
+    </div>
+    
+    <h3>🎯 核心考点</h3>
+    <p>这道题的本质是「连通区域」问题。直接处理比较困难，关键技巧是<strong>逆向思维</strong>：</p>
+    <ul>
+      <li>被围绕的区域 = 不与边界相连的 <code>'O'</code> 区域</li>
+      <li>从四条边界的 <code>'O'</code> 出发，标记所有与边界相连的区域</li>
+      <li>最后遍历整个矩阵，未标记的 <code>'O'</code> 就是被围绕的区域</li>
+    </ul>
+
+    <h3>📝 示例</h3>
+    <div class="example">
+      <div class="example-label">输入：</div>
+      board = [<br>
+      &nbsp;&nbsp;["X","X","X","X"],<br>
+      &nbsp;&nbsp;["X","O","O","X"],<br>
+      &nbsp;&nbsp;["X","X","O","X"],<br>
+      &nbsp;&nbsp;["X","O","X","X"]<br>
+      ]
+    </div>
+    <div class="example">
+      <div class="example-label">输出：</div>
+      [<br>
+      &nbsp;&nbsp;["X","X","X","X"],<br>
+      &nbsp;&nbsp;["X","X","X","X"],<br>
+      &nbsp;&nbsp;["X","X","X","X"],<br>
+      &nbsp;&nbsp;["X","O","X","X"]<br>
+      ]
+    </div>
+    <p style="color: var(--text-muted); font-size: 0.9rem;">
+      解释：中间的三个 <code>'O'</code> 被 <code>'X'</code> 围绕，最下面的 <code>'O'</code> 与边界相连，保留。
+    </p>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程可视化</h2>
+    <p style="color: var(--text-muted); margin-bottom: 16px;">
+      点击步骤或代码行查看对应关系。算法从边界开始DFS标记所有与边界相连的'O'，最后翻转未标记的内部'O'。
+    </p>
+    
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+
+    <div class="insight-box">
+      <div class="insight-title">💡 关键洞察</div>
+      <p>这道题和「岛屿数量」的区别在于：岛屿问题找连通块，本题则是<strong>找与边界不连通的区域</strong>。从边界开始搜索（而非内部）是解题的关键。</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <tr>
+        <th>指标</th>
+        <th>复杂度</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>时间复杂度</td>
+        <td><code style="color: var(--success);">O(m × n)</code></td>
+        <td>每个单元格最多被访问两次（标记阶段 + 翻转阶段）</td>
+      </tr>
+      <tr>
+        <td>空间复杂度</td>
+        <td><code style="color: var(--success);">O(m × n)</code></td>
+        <td>递归栈深度，最坏情况下（全是'O'）为矩阵大小</td>
+      </tr>
+    </table>
+    
+    <div class="insight-box">
+      <div class="insight-title">🚀 优化方向</div>
+      <p><strong>BFS版本：</strong> 使用队列替代递归栈，空间复杂度相同但避免了递归深度限制。</p>
+      <p><strong>并查集版本：</strong> 将边界'O'连接到一个虚拟节点，最后检查每个'O'是否与虚拟节点连通。</p>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐</h2>
+    <p style="color: var(--text-muted); margin-bottom: 16px;">点击卡片跳转到 LeetCode 练习</p>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/number-of-islands/" target="_blank" class="problem-card">
+        <div class="problem-card-title">#200 岛屿数量</div>
+        <div class="problem-card-desc">经典的连通块计数问题，DFS/BFS/并查集皆可</div>
+        <span class="problem-card-tag">Medium</span>
+      </a>
+      <a href="https://leetcode.cn/problems/rotting-oranges/" target="_blank" class="problem-card">
+        <div class="problem-card-title">#994 腐烂的橘子</div>
+        <div class="problem-card-desc">多源BFS，同时从多个起点开始搜索</div>
+        <span class="problem-card-tag">Medium</span>
+      </a>
+      <a href="https://leetcode.cn/problems/walls-and-gates/" target="_blank" class="problem-card">
+        <div class="problem-card-title">#286 墙与门</div>
+        <div class="problem-card-desc">多源BFS，从所有门同时出发计算最近距离</div>
+        <span class="problem-card-tag">Medium</span>
+      </a>
+      <a href="https://leetcode.cn/problems/clone-graph/" target="_blank" class="problem-card">
+        <div class="problem-card-title">#133 克隆图</div>
+        <div class="problem-card-desc">图的遍历与克隆，哈希表记录访问状态</div>
+        <span class="problem-card-tag">Medium</span>
+      </a>
+      <a href="https://leetcode.cn/problems/word-search/" target="_blank" class="problem-card">
+        <div class="problem-card-title">#79 单词搜索</div>
+        <div class="problem-card-desc">二维网格上的回溯算法</div>
+        <span class="problem-card-tag">Medium</span>
+      </a>
+      <a href="https://leetcode.cn/problems/pacific-atlantic-water-flow/" target="_blank" class="problem-card">
+        <div class="problem-card-title">#417 太平洋大西洋水流问题</div>
+        <div class="problem-card-desc">从边界反向搜索，找能流到两个海洋的单元格</div>
+        <span class="problem-card-tag">Medium</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>🎯 解题思路总结</h2>
+    <ol style="line-height: 2;">
+      <li><strong>逆向思维：</strong> 正难则反，不从内部找被围绕区域，而是从边界找「不被围绕」的区域</li>
+      <li><strong>边界扫描：</strong> 遍历四条边，对每条边上的'O'启动DFS/BFS</li>
+      <li><strong>标记连通：</strong> 将所有与边界相连的'O'标记为特殊字符（如'E'）</li>
+      <li><strong>最终处理：</strong> 遍历矩阵，'O'→'X'（被围绕），'E'→'O'（恢复）</li>
+    </ol>
+    
+    <div class="insight-box">
+      <div class="insight-title">🧠 举一反三</div>
+      <p>这种「从边界反向搜索」的技巧还可以应用于：</p>
+      <ul>
+        <li><strong>太平洋大西洋水流问题：</strong> 从海洋边界反向找能到达该海洋的单元格</li>
+        <li><strong>逃离迷宫：</strong> 从出口反向BFS找最短路径</li>
+        <li><strong>连通性判断：</strong> 判断内部点是否与边界连通</li>
+      </ul>
+    </div>
+  </div>
+  
+  <script>
+    // Python代码，按行分割
+    const pythonCode = [
+      { line: 1, text: '<span class="keyword">class</span> <span class="class">Solution</span>:' },
+      { line: 2, text: '    <span class="keyword">def</span> <span class="function">solve</span>(<span class="builtin">self</span>, board: List[List[<span class="builtin">str</span>]]) -> <span class="builtin">None</span>:' },
+      { line: 3, text: '        <span class="comment"># 特判：空矩阵或小于3x3无需处理</span>' },
+      { line: 4, text: '        <span class="keyword">if</span> <span class="keyword">not</span> board <span class="keyword">or</span> <span class="keyword">not</span> board[<span class="number">0</span>]:' },
+      { line: 5, text: '            <span class="keyword">return</span>' },
+      { line: 6, text: '        m, n = <span class="builtin">len</span>(board), <span class="builtin">len</span>(board[<span class="number">0</span>])' },
+      { line: 7, text: '        <span class="keyword">if</span> m < <span class="number">3</span> <span class="keyword">or</span> n < <span class="number">3</span>:' },
+      { line: 8, text: '            <span class="keyword">return</span>' },
+      { line: 9, text: '' },
+      { line: 10, text: '        <span class="comment"># DFS：标记与边界相连的'O'</span>' },
+      { line: 11, text: '        <span class="keyword">def</span> <span class="function">dfs</span>(i, j):' },
+      { line: 12, text: '            <span class="comment"># 越界或不是'O'则返回</span>' },
+      { line: 13, text: '            <span class="keyword">if</span> i < <span class="number">0</span> <span class="keyword">or</span> i >= m <span class="keyword">or</span> j < <span class="number">0</span> <span class="keyword">or</span> j >= n:' },
+      { line: 14, text: '                <span class="keyword">return</span>' },
+      { line: 15, text: '            <span class="keyword">if</span> board[i][j] != <span class="string">"O"</span>:' },
+      { line: 16, text: '                <span class="keyword">return</span>' },
+      { line: 17, text: '            <span class="comment"># 标记为'E'（Escape，逃脱被围绕）</span>' },
+      { line: 18, text: '            board[i][j] = <span class="string">"E"</span>' },
+      { line: 19, text: '            <span class="comment"># 四方向继续DFS</span>' },
+      { line: 20, text: '            dfs(i + <span class="number">1</span>, j)' },
+      { line: 21, text: '            dfs(i - <span class="number">1</span>, j)' },
+      { line: 22, text: '            dfs(i, j + <span class="number">1</span>)' },
+      { line: 23, text: '            dfs(i, j - <span class="number">1</span>)' },
+      { line: 24, text: '' },
+      { line: 25, text: '        <span class="comment"># 步骤1：从四条边界出发，标记所有与边界相连的'O'</span>' },
+      { line: 26, text: '        <span class="comment"># 标记第一列和最后一列</span>' },
+      { line: 27, text: '        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="builtin">range</span>(m):' },
+      { line: 28, text: '            <span class="keyword">if</span> board[i][<span class="number">0</span>] == <span class="string">"O"</span>:' },
+      { line: 29, text: '                dfs(i, <span class="number">0</span>)' },
+      { line: 30, text: '            <span class="keyword">if</span> board[i][n-<span class="number">1</span>] == <span class="string">"O"</span>:' },
+      { line: 31, text: '                dfs(i, n-<span class="number">1</span>)' },
+      { line: 32, text: '        <span class="comment"># 标记第一行和最后一行（避免角重复）</span>' },
+      { line: 33, text: '        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="builtin">range</span>(<span class="number">1</span>, n-<span class="number">1</span>):' },
+      { line: 34, text: '            <span class="keyword">if</span> board[<span class="number">0</span>][j] == <span class="string">"O"</span>:' },
+      { line: 35, text: '                dfs(<span class="number">0</span>, j)' },
+      { line: 36, text: '            <span class="keyword">if</span> board[m-<span class="number">1</span>][j] == <span class="string">"O"</span>:' },
+      { line: 37, text: '                dfs(m-<span class="number">1</span>, j)' },
+      { line: 38, text: '' },
+      { line: 39, text: '        <span class="comment"># 步骤2：遍历整个矩阵，完成最终转换</span>' },
+      { line: 40, text: '        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="builtin">range</span>(m):' },
+      { line: 41, text: '            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="builtin">range</span>(n):' },
+      { line: 42, text: '                <span class="keyword">if</span> board[i][j] == <span class="string">"O"</span>:' },
+      { line: 43, text: '                    <span class="comment"># 未被标记的'O'是被围绕的区域</span>' },
+      { line: 44, text: '                    board[i][j] = <span class="string">"X"</span>' },
+      { line: 45, text: '                <span class="keyword">elif</span> board[i][j] == <span class="string">"E"</span>:' },
+      { line: 46, text: '                    <span class="comment"># 恢复与边界相连的区域</span>' },
+      { line: 47, text: '                    board[i][j] = <span class="string">"O"</span>' }
+    ];
+
+    // 步骤定义
+    const steps = [
+      {
+        title: "步骤 0：初始化",
+        desc: "检查矩阵是否为空或小于3x3（边界无法形成围绕）",
+        line: 1,
+        state: { board: "原始矩阵", action: "边界检查" }
+      },
+      {
+        title: "步骤 1：特判处理",
+        desc: "如果矩阵太小，直接返回（无法形成封闭区域）",
+        line: 7,
+        state: { condition: "m < 3 或 n < 3", result: "直接返回" }
+      },
+      {
+        title: "步骤 2：定义DFS函数",
+        desc: "创建dfs(i,j)函数，用于标记与边界相连的'O'",
+        line: 11,
+        state: { function: "dfs(i, j)", purpose: "标记连通区域" }
+      },
+      {
+        title: "步骤 3：DFS边界检查",
+        desc: "如果坐标越界，直接返回",
+        line: 13,
+        state: { check: "0<=i<m 且 0<=j<n", fail: "return" }
+      },
+      {
+        title: "步骤 4：DFS字符检查",
+        desc: "如果当前不是'O'，直接返回（避免重复访问）",
+        line: 15,
+        state: { check: "board[i][j] == 'O'", fail: "return" }
+      },
+      {
+        title: "步骤 5：标记为'E'",
+        desc: "将与边界相连的'O'标记为'E'（Escape，表示逃脱被围绕）",
+        line: 18,
+        state: { change: "'O' → 'E'", meaning: "标记为已访问" }
+      },
+      {
+        title: "步骤 6：四方向扩展",
+        desc: "向上下左右四个方向继续DFS，标记所有连通区域",
+        line: 20,
+        state: { directions: ["上", "下", "左", "右"], type: "递归调用" }
+      },
+      {
+        title: "步骤 7：处理左边界",
+        desc: "遍历第一列，对所有的'O'启动DFS",
+        line: 28,
+        state: { boundary: "第一列", action: "启动DFS标记" }
+      },
+      {
+        title: "步骤 8：处理右边界",
+        desc: "遍历最后一列，对所有的'O'启动DFS",
+        line: 30,
+        state: { boundary: "最后一列", action: "启动DFS标记" }
+      },
+      {
+        title: "步骤 9：处理上边界",
+        desc: "遍历第一行（除去角，已处理），对'O'启动DFS",
+        line: 34,
+        state: { boundary: "第一行", range: "j=1 to n-2" }
+      },
+      {
+        title: "步骤 10：处理下边界",
+        desc: "遍历最后一行（除去角），对'O'启动DFS",
+        line: 36,
+        state: { boundary: "最后一行", range: "j=1 to n-2" }
+      },
+      {
+        title: "步骤 11：标记完成",
+        desc: "所有与边界相连的'O'都已标记为'E'",
+        line: 39,
+        state: { result: "边界'O'→'E'", next: "遍历翻转" }
+      },
+      {
+        title: "步骤 12：翻转内部'O'",
+        desc: "遇到'O'说明未与边界连通，是被围绕的区域，翻转为'X'",
+        line: 42,
+        state: { condition: "board[i][j]=='O'", change: "→ 'X'" }
+      },
+      {
+        title: "步骤 13：恢复边界区域",
+        desc: "将标记的'E'恢复为'O'（这些是与边界相连的区域）",
+        line: 45,
+        state: { condition: "board[i][j]=='E'", change: "→ 'O'" }
+      },
+      {
+        title: "步骤 14：完成",
+        desc: "矩阵处理完成，所有被围绕的'O'都已变为'X'",
+        line: 47,
+        state: { status: "完成", in_place: "原地修改" }
+      }
+    ];
+
+    // 渲染代码
+    function renderCode() {
+      const codeBlock = document.getElementById('codeBlock');
+      codeBlock.innerHTML = pythonCode.map(line => `
+        <div class="code-line" data-line="${line.line}">
+          <span class="line-number">${line.line}</span>
+          <span>${line.text}</span>
+        </div>
+      `).join('');
+
+      // 添加点击事件
+      document.querySelectorAll('.code-line').forEach(el => {
+        el.addEventListener('click', () => {
+          const lineNum = parseInt(el.dataset.line);
+          highlightStepByLine(lineNum);
+        });
+      });
+    }
+
+    // 渲染步骤
+    function renderSteps() {
+      const stepsContainer = document.getElementById('vizSteps');
+      stepsContainer.innerHTML = steps.map((step, idx) => `
+        <div class="viz-step" data-step="${idx}" data-line="${step.line}">
+          <div class="viz-step-title">${step.title}</div>
+          <div class="viz-step-desc">${step.desc}</div>
+          <div class="viz-step-line">→ 第 ${step.line} 行</div>
+        </div>
+      `).join('');
+
+      // 添加点击事件
+      document.querySelectorAll('.viz-step').forEach(el => {
+        el.addEventListener('click', () => {
+          const stepIdx = parseInt(el.dataset.step);
+          highlightStep(stepIdx);
+        });
+      });
+    }
+
+    // 高亮步骤
+    function highlightStep(idx) {
+      // 移除所有高亮
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+
+      // 高亮当前步骤
+      const stepEl = document.querySelector(`.viz-step[data-step="${idx}"]`);
+      if (stepEl) {
+        stepEl.classList.add('active');
+        stepEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      // 高亮对应代码行
+      const lineNum = steps[idx].line;
+      const codeEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+      if (codeEl) {
+        codeEl.classList.add('active');
+        codeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    // 根据代码行高亮步骤
+    function highlightStepByLine(lineNum) {
+      // 找到对应的步骤
+      const stepIdx = steps.findIndex(s => s.line === lineNum);
+      if (stepIdx !== -1) {
+        highlightStep(stepIdx);
+      } else {
+        // 只高亮代码行
+        document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+        const codeEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+        if (codeEl) codeEl.classList.add('active');
+      }
+    }
+
+    // 初始化
+    renderCode();
+    renderSteps();
+  </script>
+</body>
+</html>

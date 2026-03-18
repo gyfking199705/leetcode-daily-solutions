@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #62 - 不同路径</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --secondary: #a855f7;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --border: #475569;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1100px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.7;
+    }
+    h1 { 
+      font-size: 2.5rem; 
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin-bottom: 32px;
+    }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    .badge-medium { background: var(--warning); color: #000; }
+    .badge-tag { background: rgba(99,102,241,0.2); color: var(--primary); margin-right: 8px; }
+    
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 0;
+      overflow-x: auto;
+      border: 1px solid #30363d;
+    }
+    .code-header {
+      background: #161b22;
+      padding: 12px 20px;
+      border-bottom: 1px solid #30363d;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .code-content { padding: 20px; }
+    
+    .code-line { 
+      display: flex; 
+      padding: 3px 0; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+      margin-left: -3px;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+      border-left-color: rgba(99,102,241,0.5);
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.2); 
+      border-left-color: var(--primary);
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 40px; 
+      text-align: right; 
+      padding-right: 16px;
+      font-family: monospace;
+      user-select: none;
+    }
+    .code-text { font-family: 'Consolas', 'Monaco', monospace; }
+    
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 800px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    
+    .viz-steps { 
+      max-height: 500px; 
+      overflow-y: auto;
+      padding-right: 10px;
+    }
+    .viz-steps::-webkit-scrollbar { width: 6px; }
+    .viz-steps::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    
+    .viz-step { 
+      padding: 14px 16px; 
+      margin: 10px 0; 
+      border-radius: 10px; 
+      background: rgba(255,255,255,0.03); 
+      cursor: pointer; 
+      border: 2px solid transparent;
+      transition: all 0.25s;
+    }
+    .viz-step:hover { 
+      background: rgba(99,102,241,0.1); 
+      transform: translateX(4px);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.15);
+      box-shadow: 0 0 20px rgba(99,102,241,0.2);
+    }
+    .viz-step h4 {
+      margin: 0 0 6px 0;
+      color: var(--text);
+      font-size: 1rem;
+    }
+    .viz-step p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .viz-step .highlight {
+      color: var(--primary);
+      font-weight: 500;
+    }
+    
+    .state-display {
+      background: #0d1117;
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 16px;
+      border: 1px solid #30363d;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+    .state-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid #21262d;
+    }
+    .state-item:last-child { border-bottom: none; }
+    .state-key { color: var(--text-muted); }
+    .state-value { color: var(--success); }
+    
+    .grid-demo {
+      display: grid;
+      grid-template-columns: repeat(7, 40px);
+      gap: 4px;
+      margin: 20px 0;
+      padding: 16px;
+      background: #0d1117;
+      border-radius: 10px;
+      width: fit-content;
+    }
+    .grid-cell {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      transition: all 0.3s;
+    }
+    .grid-start { background: var(--primary); color: white; }
+    .grid-end { background: var(--secondary); color: white; }
+    .grid-path { background: rgba(99,102,241,0.3); color: var(--text); }
+    .grid-normal { background: #21262d; color: var(--text-muted); }
+    
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 18px; 
+      border: 1px solid var(--border); 
+      transition: all 0.25s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block;
+      cursor: pointer;
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(99,102,241,0.15);
+    }
+    .problem-card h4 {
+      margin: 0 0 8px 0;
+      color: var(--text);
+    }
+    .problem-card p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .problem-card .difficulty {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      margin-top: 10px;
+    }
+    .diff-easy { background: rgba(34,197,94,0.2); color: var(--success); }
+    .diff-medium { background: rgba(245,158,11,0.2); color: var(--warning); }
+    .diff-hard { background: rgba(239,68,68,0.2); color: #ef4444; }
+    
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    .complexity-table th, .complexity-table td {
+      padding: 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .complexity-table th {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .complexity-table tr:hover {
+      background: rgba(255,255,255,0.02);
+    }
+    
+    .insight-box {
+      background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(168,85,247,0.1));
+      border-left: 4px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 10px 10px 0;
+      margin: 20px 0;
+    }
+    .insight-box h4 {
+      margin: 0 0 8px 0;
+      color: var(--primary);
+    }
+    
+    /* Syntax highlighting */
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; font-style: italic; }
+    .class { color: #ffa657; }
+    .decorator { color: #f0883e; }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #62 - 不同路径</h1>
+  <p class="subtitle">
+    <span class="badge badge-medium">Medium</span>
+    <span class="badge badge-tag">动态规划</span>
+    <span class="badge badge-tag">组合数学</span>
+    <span class="badge badge-tag">网格遍历</span>
+  </p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>一个机器人位于一个 <code>m x n</code> 网格的左上角（起始点在下图中标记为 <code>"Start"</code> ）。</p>
+    <p style="margin-top: 12px;">机器人每次只能向下或者向右移动一步。机器人试图达到网格的右下角（在下图中标记为 <code>"Finish"</code> ）。</p>
+    <p style="margin-top: 12px;">问总共有多少条不同的路径？</p>
+    
+    <div class="grid-demo" id="demoGrid">
+      <!-- 由JS生成 -->
+    </div>
+    
+    <div class="insight-box">
+      <h4>💡 核心思路</h4>
+      <p>到达任意格子 (i,j) 的路径数 = 从上方格子 (i-1,j) 下来的路径数 + 从左方格子 (i,j-1) 过来的路径数。这就是典型的 <strong>状态转移方程</strong>。</p>
+    </div>
+    
+    <p style="color: var(--text-muted); margin-top: 16px;"><strong>示例：</strong> m = 3, n = 7 → 输出: 28</p>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <div class="code-header">
+          <span>🐍</span>
+          <span>Python 实现 - 动态规划解法</span>
+        </div>
+        <div class="code-content">
+          <pre><code id="codeBlock"></code></pre>
+        </div>
+        <div class="state-display" id="stateDisplay">
+          <div class="state-item"><span class="state-key">点击步骤查看执行状态</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <tr>
+        <th>解法</th>
+        <th>时间复杂度</th>
+        <th>空间复杂度</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>二维DP</td>
+        <td>O(m × n)</td>
+        <td>O(m × n)</td>
+        <td>标准动态规划，存储完整dp表</td>
+      </tr>
+      <tr>
+        <td>一维DP（滚动数组）</td>
+        <td>O(m × n)</td>
+        <td>O(n)</td>
+        <td>只保留当前行，空间优化</td>
+      </tr>
+      <tr>
+        <td>组合数学</td>
+        <td>O(min(m,n))</td>
+        <td>O(1)</td>
+        <td>C(m+n-2, m-1) 直接计算</td>
+      </tr>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/unique-paths-ii/" target="_blank" class="problem-card">
+        <h4>#63 不同路径 II</h4>
+        <p>带有障碍物的路径计数，dp转移需要判断障碍</p>
+        <span class="difficulty diff-medium">Medium</span>
+      </a>
+      <a href="https://leetcode.cn/problems/minimum-path-sum/" target="_blank" class="problem-card">
+        <h4>#64 最小路径和</h4>
+        <p>求路径上的数字和最小，dp[i][j] = min(上, 左) + grid[i][j]</p>
+        <span class="difficulty diff-medium">Medium</span>
+      </a>
+      <a href="https://leetcode.cn/problems/triangle/" target="_blank" class="problem-card">
+        <h4>#120 三角形最小路径和</h4>
+        <p>自底向上或自顶向下的dp，经典路径问题</p>
+        <span class="difficulty diff-medium">Medium</span>
+      </a>
+      <a href="https://leetcode.cn/problems/climbing-stairs/" target="_blank" class="problem-card">
+        <h4>#70 爬楼梯</h4>
+        <p>简化版路径问题，dp[i] = dp[i-1] + dp[i-2]</p>
+        <span class="difficulty diff-easy">Easy</span>
+      </a>
+      <a href="https://leetcode.cn/problems/unique-binary-search-trees/" target="_blank" class="problem-card">
+        <h4>#96 不同的二叉搜索树</h4>
+        <p>卡特兰数问题，dp[i] = Σdp[j-1]*dp[i-j]</p>
+        <span class="difficulty diff-medium">Medium</span>
+      </a>
+      <a href="https://leetcode.cn/problems/coin-change/" target="_blank" class="problem-card">
+        <h4>#322 零钱兑换</h4>
+        <p>完全背包问题，经典动态规划</p>
+        <span class="difficulty diff-medium">Medium</span>
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // 代码内容
+    const codeLines = [
+      { num: 1, text: '<span class="decorator">@staticmethod</span>' },
+      { num: 2, text: '<span class="keyword">def</span> <span class="function">uniquePaths</span>(m: <span class="keyword">int</span>, n: <span class="keyword">int</span>) -> <span class="keyword">int</span>:' },
+      { num: 3, text: '    <span class="comment"># 创建 m x n 的 dp 数组，初始化为0</span>' },
+      { num: 4, text: '    dp = [[<span class="number">0</span>] * n <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="function">range</span>(m)]' },
+      { num: 5, text: '    ' },
+      { num: 6, text: '    <span class="comment"># 边界条件：第一行和第一列都只有一种走法</span>' },
+      { num: 7, text: '    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(m):' },
+      { num: 8, text: '        dp[i][<span class="number">0</span>] = <span class="number">1</span>  <span class="comment"># 只能从上往下</span>' },
+      { num: 9, text: '    <span class="keyword">for</span> j <span class="keyword">in</span> <span class="function">range</span>(n):' },
+      { num: 10, text: '        dp[<span class="number">0</span>][j] = <span class="number">1</span>  <span class="comment"># 只能从左往右</span>' },
+      { num: 11, text: '    ' },
+      { num: 12, text: '    <span class="comment"># 填充dp数组：每个格子的路径数 = 上方 + 左方</span>' },
+      { num: 13, text: '    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="number">1</span>, m):' },
+      { num: 14, text: '        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="function">range</span>(<span class="number">1</span>, n):' },
+      { num: 15, text: '            dp[i][j] = dp[i-<span class="number">1</span>][j] + dp[i][j-<span class="number">1</span>]' },
+      { num: 16, text: '    ' },
+      { num: 17, text: '    <span class="comment"># 返回到达右下角的路径总数</span>' },
+      { num: 18, text: '    <span class="keyword">return</span> dp[m-<span class="number">1</span>][n-<span class="number">1</span>]' }
+    ];
+    
+    // 步骤与代码行映射
+    const steps = [
+      { title: "1️⃣ 初始化 DP 数组", desc: "创建 m×n 的二维数组，所有元素初始化为0", line: 4, state: { "dp数组": "3×7 全0矩阵", "操作": "初始化" } },
+      { title: "2️⃣ 设置第一列边界", desc: "第一列只能从上往下走，所以每个格子都是1条路径", line: 7, state: { "dp[0][0]": "1", "dp[1][0]": "1", "dp[2][0]": "1", "说明": "第一列全置1" } },
+      { title: "3️⃣ 设置第一行边界", desc: "第一行只能从左往右走，所以每个格子都是1条路径", line: 9, state: { "dp[0][0..6]": "全为1", "说明": "第一行全置1" } },
+      { title: "4️⃣ 开始填充 dp[1][1]", desc: "到达(1,1)的路径 = 从(0,1)下来 + 从(1,0)过来 = 1+1 = 2", line: 15, state: { "dp[1][1]": "dp[0][1] + dp[1][0] = 2", "状态": "计算中" } },
+      { title: "5️⃣ 填充第一行余下", desc: "dp[1][2] = dp[0][2] + dp[1][1] = 1 + 2 = 3", line: 15, state: { "dp[1][2]": "3", "dp[1][3]": "4", "规律": "逐渐递增" } },
+      { title: "6️⃣ 填充第二行", desc: "dp[2][1] = dp[1][1] + dp[2][0] = 2 + 1 = 3", line: 15, state: { "dp[2][1]": "3", "dp[2][2]": "6", "说明": "帕斯卡三角形" } },
+      { title: "7️⃣ 最终结果", desc: "dp[2][6] 就是答案：到达右下角共有28条不同路径", line: 18, state: { "dp[2][6]": "28", "答案": "28条路径" } }
+    ];
+    
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeBlock.innerHTML = codeLines.map(line => 
+      `<div class="code-line" data-line="${line.num}">
+        <span class="line-number">${line.num}</span>
+        <span class="code-text">${line.text}</span>
+      </div>`
+    ).join('');
+    
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    vizSteps.innerHTML = steps.map((step, idx) => 
+      `<div class="viz-step" data-step="${idx}" data-line="${step.line}">
+        <h4>${step.title}</h4>
+        <p>${step.desc}</p>
+      </div>`
+    ).join('');
+    
+    // 渲染演示网格
+    const demoGrid = document.getElementById('demoGrid');
+    const m = 3, n = 7;
+    for (let i = 0; i < m; i++) {
+      for (let j = 0; j < n; j++) {
+        const cell = document.createElement('div');
+        cell.className = 'grid-cell';
+        if (i === 0 && j === 0) {
+          cell.classList.add('grid-start');
+          cell.textContent = 'S';
+        } else if (i === m-1 && j === n-1) {
+          cell.classList.add('grid-end');
+          cell.textContent = 'E';
+        } else {
+          cell.classList.add('grid-normal');
+        }
+        demoGrid.appendChild(cell);
+      }
+    }
+    
+    // 交互逻辑
+    let activeStep = null;
+    let activeLine = null;
+    
+    function updateStateDisplay(state) {
+      const stateDisplay = document.getElementById('stateDisplay');
+      stateDisplay.innerHTML = Object.entries(state).map(([k, v]) => 
+        `<div class="state-item">
+          <span class="state-key">${k}:</span>
+          <span class="state-value">${v}</span>
+        </div>`
+      ).join('');
+    }
+    
+    function highlightStep(idx) {
+      // 清除之前的
+      document.querySelectorAll('.viz-step').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+      
+      // 高亮当前步骤
+      const stepEl = document.querySelector(`.viz-step[data-step="${idx}"]`);
+      if (stepEl) stepEl.classList.add('active');
+      
+      // 高亮对应代码行
+      const lineNum = steps[idx].line;
+      const lineEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+      if (lineEl) lineEl.classList.add('active');
+      
+      // 更新状态显示
+      updateStateDisplay(steps[idx].state);
+      
+      activeStep = idx;
+    }
+    
+    function highlightLine(lineNum) {
+      document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+      document.querySelectorAll('.viz-step').forEach(s => s.classList.remove('active'));
+      
+      const lineEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+      if (lineEl) lineEl.classList.add('active');
+      
+      // 找到对应的步骤
+      const stepIdx = steps.findIndex(s => s.line === lineNum);
+      if (stepIdx !== -1) {
+        const stepEl = document.querySelector(`.viz-step[data-step="${stepIdx}"]`);
+        if (stepEl) stepEl.classList.add('active');
+        updateStateDisplay(steps[stepIdx].state);
+        activeStep = stepIdx;
+      }
+      
+      activeLine = lineNum;
+    }
+    
+    // 绑定事件
+    document.querySelectorAll('.viz-step').forEach(step => {
+      step.addEventListener('click', () => {
+        const idx = parseInt(step.dataset.step);
+        highlightStep(idx);
+      });
+    });
+    
+    document.querySelectorAll('.code-line').forEach(line => {
+      line.addEventListener('click', () => {
+        const lineNum = parseInt(line.dataset.line);
+        highlightLine(lineNum);
+      });
+    });
+    
+    // 默认高亮第一步
+    highlightStep(0);
+  </script>
+</body>
+</html>

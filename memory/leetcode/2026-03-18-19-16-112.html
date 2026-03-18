@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #112 - 路径总和</title>
+  <style>
+    :root { --primary: #6366f1; --bg: #0f172a; --surface: #1e293b; --text: #f1f5f9; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); max-width: 1000px; margin: 0 auto; padding: 40px 20px; line-height: 1.6; }
+    .section { background: var(--surface); border-radius: 16px; padding: 28px; margin-bottom: 24px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+    .section h2 { color: var(--primary); margin-top: 0; }
+    pre { background: #0d1117; border-radius: 12px; padding: 20px; overflow-x: auto; margin: 0; }
+    .code-line { display: flex; padding: 3px 0; cursor: pointer; transition: background 0.2s; }
+    .code-line:hover { background: rgba(255,255,255,0.08); }
+    .code-line.active { background: rgba(99, 102, 241, 0.35); border-left: 3px solid #6366f1; margin-left: -3px; }
+    .line-number { color: #484f58; min-width: 40px; text-align: right; padding-right: 16px; user-select: none; }
+    .viz-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+    @media (max-width: 768px) { .viz-container { grid-template-columns: 1fr; } }
+    .viz-step { padding: 12px; margin: 8px 0; border-radius: 8px; background: #334155; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+    .viz-step:hover { background: #475569; }
+    .viz-step.active { border-color: var(--primary); background: rgba(99, 102, 241, 0.3); }
+    .viz-steps { max-height: 400px; overflow-y: auto; }
+    .problem-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 16px; }
+    .problem-card { background: var(--bg); border-radius: 12px; padding: 16px; border: 1px solid #475569; transition: all 0.2s; text-decoration: none; color: inherit; display: block; }
+    .problem-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 8px 25px -5px rgba(99, 102, 241, 0.3); }
+    .problem-card h4 { margin: 0 0 8px 0; color: var(--primary); }
+    .problem-card .difficulty { font-size: 12px; padding: 2px 8px; border-radius: 4px; display: inline-block; }
+    .difficulty.easy { background: #22c55e33; color: #22c55e; }
+    .difficulty.medium { background: #eab30833; color: #eab308; }
+    .difficulty.hard { background: #ef444433; color: #ef4444; }
+    .keyword { color: #ff7b72; } .function { color: #d2a8ff; } .string { color: #a5d6ff; }
+    .number { color: #79c0ff; } .comment { color: #8b949e; } .class { color: #ffa657; }
+    .complexity-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    .complexity-table th, .complexity-table td { padding: 12px; text-align: left; border-bottom: 1px solid #475569; }
+    .complexity-table th { color: var(--primary); }
+    .tree-viz { background: #0d1117; border-radius: 12px; padding: 20px; margin: 16px 0; font-family: monospace; text-align: center; }
+    .tree-node { display: inline-block; width: 40px; height: 40px; line-height: 40px; border-radius: 50%; background: #334155; margin: 4px; transition: all 0.3s; }
+    .tree-node.active { background: var(--primary); transform: scale(1.1); }
+    .tree-node.path { background: #22c55e; }
+    .tree-level { margin: 8px 0; }
+    .state-display { background: #0d1117; border-radius: 8px; padding: 12px; margin-top: 12px; font-family: monospace; font-size: 14px; }
+    .state-item { margin: 4px 0; }
+    .highlight { color: #fbbf24; }
+  </style>
+</head>
+<body>
+  <h1>🌳 LeetCode #112 - 路径总和</h1>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p><strong>难度：</strong><span class="difficulty easy">Easy</span></p>
+    <p>给你二叉树的根节点 <code>root</code> 和一个表示目标和的整数 <code>targetSum</code> 。判断该树中是否存在 <strong>根节点到叶子节点</strong> 的路径，这条路径上所有节点值之和等于 <code>targetSum</code> 。</p>
+    <p><strong>叶子节点</strong> 是指没有子节点的节点。</p>
+    
+    <div style="margin-top: 20px;">
+      <strong>示例 1：</strong>
+      <div class="tree-viz">
+        <div class="tree-level">
+          <span class="tree-node path">5</span>
+        </div>
+        <div class="tree-level">
+          <span class="tree-node path">4</span>
+          <span class="tree-node">8</span>
+        </div>
+        <div class="tree-level">
+          <span class="tree-node">11</span>
+          <span class="tree-node path">13</span>
+          <span class="tree-node path">4</span>
+        </div>
+        <div class="tree-level">
+          <span class="tree-node">7</span>
+          <span class="tree-node">2</span>
+          <span style="visibility:hidden" class="tree-node">_</span>
+          <span class="tree-node path">1</span>
+        </div>
+        <p style="color: #8b949e; margin-top: 12px;">输入：root = [5,4,8,11,null,13,4,7,2,null,null,null,1], targetSum = 22<br>输出：true<br>解释：5→4→11→2 = 22（绿色路径为有效路径）</p>
+      </div>
+    </div>
+    
+    <div style="margin-top: 16px;">
+      <strong>示例 2：</strong>
+      <pre style="background: #1e293b; padding: 12px;">输入：root = [1,2,3], targetSum = 5
+输出：false</pre>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="viz-container">
+      <div>
+        <h3>递归执行步骤</h3>
+        <div class="viz-steps" id="vizSteps"></div>
+        <div class="state-display" id="stateDisplay">
+          <div class="state-item">点击上方步骤查看状态变化</div>
+        </div>
+      </div>
+      <div class="code-container">
+        <h3>Python 实现（DFS递归）</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <tr>
+        <th>指标</th>
+        <th>值</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>时间复杂度</td>
+        <td><code>O(N)</code></td>
+        <td>最坏情况下需要遍历所有 N 个节点</td>
+      </tr>
+      <tr>
+        <td>空间复杂度</td>
+        <td><code>O(H)</code></td>
+        <td>H 为树的高度，递归栈深度最坏为 N（退化成链表）</td>
+      </tr>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>💡 解题思路</h2>
+    <h3>方法一：DFS 递归（推荐）</h3>
+    <p>采用自顶向下的递归思路：</p>
+    <ol>
+      <li><strong>基准情况</strong>：当前节点为空，返回 False</li>
+      <li><strong>叶子节点判断</strong>：如果当前节点是叶子节点（无左右子树），判断当前节点值是否等于剩余目标值</li>
+      <li><strong>递归下探</strong>：向左右子树递归，目标值减去当前节点值</li>
+      <li><strong>结果合并</strong>：左右子树任一找到路径即可返回 True</li>
+    </ol>
+    
+    <h3>方法二：BFS 迭代</h3>
+    <p>使用队列进行层序遍历，同时记录从根到当前节点的路径和：</p>
+    <ul>
+      <li>队列中存储 <code>(节点, 当前路径和)</code> 元组</li>
+      <li>遇到叶子节点时检查路径和是否等于 targetSum</li>
+    </ul>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/path-sum-ii/" class="problem-card" target="_blank">
+        <h4>#113 路径总和 II</h4>
+        <span class="difficulty medium">Medium</span>
+        <p style="margin-top: 8px; color: #94a3b8;">返回所有满足条件的路径，需要记录路径</p>
+      </a>
+      <a href="https://leetcode.cn/problems/binary-tree-maximum-path-sum/" class="problem-card" target="_blank">
+        <h4>#124 二叉树中的最大路径和</h4>
+        <span class="difficulty hard">Hard</span>
+        <p style="margin-top: 8px; color: #94a3b8;">不需要经过根节点，后序遍历 + 树形DP</p>
+      </a>
+      <a href="https://leetcode.cn/problems/path-sum-iii/" class="problem-card" target="_blank">
+        <h4>#437 路径总和 III</h4>
+        <span class="difficulty medium">Medium</span>
+        <p style="margin-top: 8px; color: #94a3b8;">路径不需要从根开始，前缀和 + 哈希表</p>
+      </a>
+      <a href="https://leetcode.cn/problems/sum-root-to-leaf-numbers/" class="problem-card" target="_blank">
+        <h4>#129 求根节点到叶节点数字之和</h4>
+        <span class="difficulty medium">Medium</span>
+        <p style="margin-top: 8px; color: #94a3b8;">类似路径累加，把路径看作数字拼接</p>
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // 代码内容
+    const codeLines = [
+      { num: 1, text: '<span class="keyword">class</span> <span class="class">Solution</span>:' },
+      { num: 2, text: '    <span class="keyword">def</span> <span class="function">hasPathSum</span>(<span class="keyword">self</span>, root: Optional[TreeNode], targetSum: <span class="keyword">int</span>) -> <span class="keyword">bool</span>:' },
+      { num: 3, text: '        <span class="comment"># 基准情况：空节点</span>' },
+      { num: 4, text: '        <span class="keyword">if not</span> root:' },
+      { num: 5, text: '            <span class="keyword">return</span> <span class="keyword">False</span>' },
+      { num: 6, text: '        ' },
+      { num: 7, text: '        <span class="comment"># 叶子节点：检查剩余值</span>' },
+      { num: 8, text: '        <span class="keyword">if not</span> root.left <span class="keyword">and not</span> root.right:' },
+      { num: 9, text: '            <span class="keyword">return</span> root.val == targetSum' },
+      { num: 10, text: '        ' },
+      { num: 11, text: '        <span class="comment"># 递归：更新剩余目标和</span>' },
+      { num: 12, text: '        remain = targetSum - root.val' },
+      { num: 13, text: '        ' },
+      { num: 14, text: '        <span class="comment"># 向左子树或右子树寻找路径</span>' },
+      { num: 15, text: '        <span class="keyword">return</span> (<span class="keyword">self</span>.hasPathSum(root.left, remain) <span class="keyword">or</span>' },
+      { num: 16, text: '                <span class="keyword">self</span>.hasPathSum(root.right, remain))' }
+    ];
+
+    // 步骤定义
+    const steps = [
+      { title: "1️⃣ 初始调用", desc: "从根节点开始，targetSum=22", line: 2, state: { root: "5", targetSum: "22", 当前节点值: "5" } },
+      { title: "2️⃣ 检查空节点", desc: "root不为空，继续执行", line: 4, state: { root: "5", 结果: "不为空，继续" } },
+      { title: "3️⃣ 非叶子节点", desc: "节点5有左右子树，不是叶子", line: 8, state: { 左子树: "4", 右子树: "8", 是叶子: "否" } },
+      { title: "4️⃣ 计算剩余值", desc: "remain = 22 - 5 = 17", line: 12, state: { remain: "17", 说明: "向左/右子树传递" } },
+      { title: "5️⃣ 递归左子树", desc: "检查节点4，targetSum=17", line: 15, state: { 进入: "左子树", 新目标: "17", 当前节点: "4" } },
+      { title: "6️⃣ 节点4非叶子", desc: "节点4只有左子树11", line: 8, state: { 左子树: "11", 右子树: "null" } },
+      { title: "7️⃣ 递归更深", desc: "检查节点11，targetSum=13", line: 12, state: { remain: "17-4=13", 当前节点: "11" } },
+      { title: "8️⃣ 节点11非叶子", desc: "节点11有左右子树7和2", line: 8, state: { 左子树: "7", 右子树: "2" } },
+      { title: "9️⃣ 向左到节点7", desc: "检查节点7，targetSum=2", line: 15, state: { remain: "13-11=2", 当前节点: "7" } },
+      { title: "🔟 节点7是叶子", desc: "节点7无子树，检查 7==2?", line: 8, state: { 是叶子: "是", 检查: "7 == 2", 结果: "False" } },
+      { title: "1️⃣1️⃣ 返回False", desc: "节点7不满足，返回上一层", line: 9, state: { 节点7返回: "False" } },
+      { title: "1️⃣2️⃣ 尝试右子树", desc: "检查节点2，targetSum=2", line: 16, state: { 转向: "右子树", 当前节点: "2" } },
+      { title: "1️⃣3️⃣ 节点2是叶子", desc: "节点2无子树，检查 2==2?", line: 8, state: { 是叶子: "是", 检查: "2 == 2", 结果: "True" } },
+      { title: "1️⃣4️⃣ ✅ 找到路径!", desc: "5→4→11→2 = 22，返回True", line: 9, state: { 路径: "5→4→11→2", 总和: "22", 结果: "True" } }
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach(({ num, text }) => {
+      const line = document.createElement('div');
+      line.className = 'code-line';
+      line.dataset.line = num;
+      line.innerHTML = `<span class="line-number">${num}</span><span>${text}</span>`;
+      line.addEventListener('click', () => highlightStepByLine(num));
+      codeBlock.appendChild(line);
+    });
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const stepEl = document.createElement('div');
+      stepEl.className = 'viz-step';
+      stepEl.dataset.idx = idx;
+      stepEl.innerHTML = `<strong>${step.title}</strong><br><span style="color:#94a3b8">${step.desc}</span>`;
+      stepEl.addEventListener('click', () => highlightStep(idx));
+      vizSteps.appendChild(stepEl);
+    });
+
+    // 高亮步骤
+    function highlightStep(idx) {
+      // 清除旧高亮
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      
+      // 添加新高亮
+      const step = steps[idx];
+      document.querySelector(`.viz-step[data-idx="${idx}"]`).classList.add('active');
+      document.querySelector(`.code-line[data-line="${step.line}"]`).classList.add('active');
+      
+      // 更新状态显示
+      const stateDisplay = document.getElementById('stateDisplay');
+      stateDisplay.innerHTML = Object.entries(step.state).map(([k, v]) => 
+        `<div class="state-item"><span class="highlight">${k}:</span> ${v}</div>`
+      ).join('');
+      
+      // 滚动到可视区域
+      document.querySelector(`.code-line[data-line="${step.line}"]`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // 通过代码行高亮步骤
+    function highlightStepByLine(lineNum) {
+      const stepIdx = steps.findIndex(s => s.line === lineNum);
+      if (stepIdx !== -1) highlightStep(stepIdx);
+    }
+
+    // 默认高亮第一步
+    highlightStep(0);
+  </script>
+</body>
+</html>

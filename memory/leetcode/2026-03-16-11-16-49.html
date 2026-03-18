@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #49 - 字母异位词分组</title>
+  <style>
+    :root { --primary: #6366f1; --bg: #0f172a; --surface: #1e293b; --text: #f1f5f9; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); max-width: 1000px; margin: 0 auto; padding: 40px 20px; line-height: 1.6; }
+    .section { background: var(--surface); border-radius: 16px; padding: 28px; margin-bottom: 24px; }
+    .section h2 { color: var(--primary); margin-top: 0; }
+    pre { background: #0d1117; border-radius: 12px; padding: 20px; overflow-x: auto; font-size: 14px; }
+    .code-line { display: flex; padding: 2px 0; cursor: pointer; transition: background 0.2s; }
+    .code-line:hover { background: rgba(255,255,255,0.05); }
+    .code-line.active { background: rgba(99, 102, 241, 0.3); border-left: 3px solid #6366f1; margin-left: -3px; }
+    .line-number { color: #484f58; min-width: 40px; text-align: right; padding-right: 16px; user-select: none; }
+    .viz-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+    @media (max-width: 768px) { .viz-container { grid-template-columns: 1fr; } }
+    .viz-step { padding: 12px; margin: 8px 0; border-radius: 8px; background: #334155; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+    .viz-step:hover { background: #475569; }
+    .viz-step.active { border-color: var(--primary); background: rgba(99, 102, 241, 0.3); }
+    .viz-steps { max-height: 500px; overflow-y: auto; }
+    .code-container { max-height: 500px; overflow-y: auto; }
+    .problem-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .problem-card { background: var(--bg); border-radius: 12px; padding: 16px; border: 1px solid #475569; transition: all 0.2s; text-decoration: none; color: inherit; display: block; }
+    .problem-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 4px 20px rgba(99, 102, 241, 0.2); }
+    .problem-card h4 { margin: 0 0 8px 0; color: var(--primary); }
+    .problem-card p { margin: 0; color: #94a3b8; font-size: 14px; }
+    .complexity-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    .complexity-table th, .complexity-table td { padding: 12px; text-align: left; border-bottom: 1px solid #475569; }
+    .complexity-table th { color: var(--primary); }
+    .tag { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; margin-right: 8px; }
+    .tag-easy { background: #22c55e; color: #0f172a; }
+    .tag-medium { background: #f59e0b; color: #0f172a; }
+    .tag-hard { background: #ef4444; color: white; }
+    .keyword { color: #ff7b72; } .function { color: #d2a8ff; } .string { color: #a5d6ff; }
+    .number { color: #79c0ff; } .comment { color: #8b949e; } .class { color: #ffa657; }
+    .state-display { background: #0d1117; border-radius: 8px; padding: 16px; margin-top: 12px; font-family: monospace; font-size: 13px; }
+    .state-display h4 { margin: 0 0 12px 0; color: var(--primary); font-size: 14px; }
+    .state-item { padding: 4px 0; }
+    .state-key { color: #79c0ff; }
+    .state-value { color: #a5d6ff; }
+    .highlight { background: rgba(99, 102, 241, 0.2); padding: 2px 6px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>🎯 LeetCode #49 - 字母异位词分组</h1>
+  <div style="margin-bottom: 24px;">
+    <span class="tag tag-medium">Medium</span>
+    <span style="color: #94a3b8;">哈希表 · 字符串 · 排序</span>
+  </div>
+
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给你一个字符串数组 <code>strs</code>，请你将 <strong>字母异位词</strong> 组合在一起。可以按任意顺序返回结果列表。</p>
+    <p><strong>字母异位词</strong> 是由重新排列源单词的所有字母得到的一个新单词。</p>
+    
+    <div style="background: #0d1117; padding: 16px; border-radius: 8px; margin: 16px 0;">
+      <strong>示例 1：</strong>
+      <pre style="margin: 8px 0;">输入: strs = ["eat", "tea", "tan", "ate", "nat", "bat"]
+输出: [["bat"],["nat","tan"],["ate","eat","tea"]]</pre>
+    </div>
+    
+    <div style="background: #0d1117; padding: 16px; border-radius: 8px; margin: 16px 0;">
+      <strong>示例 2：</strong>
+      <pre style="margin: 8px 0;">输入: strs = [""]
+输出: [[""]]</pre>
+    </div>
+    
+    <div style="background: #0d1117; padding: 16px; border-radius: 8px; margin: 16px 0;">
+      <strong>示例 3：</strong>
+      <pre style="margin: 8px 0;">输入: strs = ["a"]
+输出: [["a"]]</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>💡 核心思路</h2>
+    <p>字母异位词的特点是：<strong>排序后的字符串相同</strong>。</p>
+    <p>例如：<code>"eat"</code>、<code>"tea"</code>、<code>"ate"</code> 排序后都是 <code>"aet"</code>。</p>
+    <p>因此，我们可以：</p>
+    <ol>
+      <li>遍历每个字符串，将其排序后作为 <span class="highlight">哈希表的键（key）</span></li>
+      <li>将原字符串添加到对应键的值列表中</li>
+      <li>最后返回哈希表的所有值</li>
+    </ol>
+  </div>
+
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="viz-container">
+      <div>
+        <h3>执行步骤</h3>
+        <div class="viz-steps" id="vizSteps">
+          <!-- 步骤由JS生成 -->
+        </div>
+        <div class="state-display" id="stateDisplay">
+          <h4>当前状态</h4>
+          <div id="stateContent">点击步骤查看执行状态</div>
+        </div>
+      </div>
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <tr>
+        <th>维度</th>
+        <th>复杂度</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>时间复杂度</td>
+        <td>O(N × K log K)</td>
+        <td>N为字符串数量，K为字符串最大长度。对每个字符串排序耗时O(K log K)</td>
+      </tr>
+      <tr>
+        <td>空间复杂度</td>
+        <td>O(N × K)</td>
+        <td>哈希表存储所有字符串</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>🚀 优化思路</h2>
+    <p><strong>计数法优化（O(N × K)）：</strong></p>
+    <p>用字符计数代替排序。将每个字符串的26个字母计数组成元组作为键，避免排序的 log K 开销。</p>
+    <pre style="margin-top: 16px;"><code><span class="keyword">def</span> <span class="function">groupAnagrams</span>(<span class="keyword">self</span>, strs: List[<span class="keyword">str</span>]) -> List[List[<span class="keyword">str</span>]]:
+    groups = defaultdict(<span class="keyword">list</span>)
+    <span class="keyword">for</span> s <span class="keyword">in</span> strs:
+        count = [<span class="number">0</span>] * <span class="number">26</span>
+        <span class="keyword">for</span> c <span class="keyword">in</span> s:
+            count[<span class="function">ord</span>(c) - <span class="function">ord</span>(<span class="string">'a'</span>)] += <span class="number">1</span>
+        groups[<span class="function">tuple</span>(count)].append(s)
+    <span class="keyword">return</span> <span class="function">list</span>(groups.values())</code></pre>
+  </div>
+
+  <div class="section">
+    <h2>🔗 类似题目推荐</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/valid-anagram/" class="problem-card" target="_blank">
+        <h4>#242 有效的字母异位词 <span class="tag tag-easy">Easy</span></h4>
+        <p>判断两个字符串是否为字母异位词，本题的基础版本</p>
+      </a>
+      <a href="https://leetcode.cn/problems/find-all-anagrams-in-a-string/" class="problem-card" target="_blank">
+        <h4>#438 找到字符串中所有字母异位词 <span class="tag tag-medium">Medium</span></h4>
+        <p>滑动窗口 + 字符计数，在字符串中找异位词</p>
+      </a>
+      <a href="https://leetcode.cn/problems/group-shifted-strings/" class="problem-card" target="_blank">
+        <h4>#249 移位字符串分组 <span class="tag tag-medium">Medium</span></h4>
+        <p>类似的分组思想，但基于字符位移</p>
+      </a>
+      <a href="https://leetcode.cn/problems/design-log-storage-system/" class="problem-card" target="_blank">
+        <h4>#635 设计日志存储系统 <span class="tag tag-medium">Medium</span></h4>
+        <p>哈希表存储与检索的实际应用</p>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    const codeLines = [
+      { num: 1, text: '<span class="keyword">from</span> collections <span class="keyword">import</span> defaultdict' },
+      { num: 2, text: '' },
+      { num: 3, text: '<span class="keyword">class</span> <span class="class">Solution</span>:' },
+      { num: 4, text: '    <span class="keyword">def</span> <span class="function">groupAnagrams</span>(<span class="keyword">self</span>, strs: List[<span class="keyword">str</span>]) -> List[List[<span class="keyword">str</span>]]:' },
+      { num: 5, text: '        groups = defaultdict(<span class="keyword">list</span>)' },
+      { num: 6, text: '        ' },
+      { num: 7, text: '        <span class="keyword">for</span> s <span class="keyword">in</span> strs:' },
+      { num: 8, text: '            sorted_s = <span class="string">""</span>.join(<span class="function">sorted</span>(s))' },
+      { num: 9, text: '            groups[sorted_s].append(s)' },
+      { num: 10, text: '        ' },
+      { num: 11, text: '        <span class="keyword">return</span> <span class="function">list</span>(groups.values())' }
+    ];
+
+    const steps = [
+      { title: "初始化哈希表", desc: "创建 defaultdict，值为列表类型", line: 5, 
+        state: {"groups": "{}"} },
+      { title: "处理 'eat'", desc: "排序后得到 'aet'，添加到对应列表", line: 8, 
+        state: {"s": "\"eat\"", "sorted_s": "\"aet\"", "groups['aet']": "['eat']"} },
+      { title: "处理 'tea'", desc: "排序后得到 'aet'，添加到对应列表", line: 9, 
+        state: {"s": "\"tea\"", "sorted_s": "\"aet\"", "groups['aet']": "['eat', 'tea']"} },
+      { title: "处理 'tan'", desc: "排序后得到 'ant'，新键值对", line: 8, 
+        state: {"s": "\"tan\"", "sorted_s": "\"ant\"", "groups['ant']": "['tan']"} },
+      { title: "处理 'ate'", desc: "排序后得到 'aet'，添加到对应列表", line: 9, 
+        state: {"s": "\"ate\"", "sorted_s": "\"aet\"", "groups['aet']": "['eat', 'tea', 'ate']"} },
+      { title: "处理 'nat'", desc: "排序后得到 'ant'，添加到对应列表", line: 9, 
+        state: {"s": "\"nat\"", "sorted_s": "\"ant\"", "groups['ant']": "['tan', 'nat']"} },
+      { title: "处理 'bat'", desc: "排序后得到 'abt'，新键值对", line: 8, 
+        state: {"s": "\"bat\"", "sorted_s": "\"abt\"", "groups['abt']": "['bat']"} },
+      { title: "返回结果", desc: "将哈希表的所有值转换为列表返回", line: 11, 
+        state: {"result": "[['eat','tea','ate'], ['tan','nat'], ['bat']]"} }
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach(line => {
+      const div = document.createElement('div');
+      div.className = 'code-line';
+      div.dataset.line = line.num;
+      div.innerHTML = `<span class="line-number">${line.num}</span><span>${line.text}</span>`;
+      div.onclick = () => highlightByLine(line.num);
+      codeBlock.appendChild(div);
+    });
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const div = document.createElement('div');
+      div.className = 'viz-step';
+      div.dataset.step = idx;
+      div.innerHTML = `<strong>${idx + 1}. ${step.title}</strong><br><span style="color:#94a3b8;font-size:13px;">${step.desc}</span>`;
+      div.onclick = () => highlightByStep(idx);
+      vizSteps.appendChild(div);
+    });
+
+    function updateState(stepIdx) {
+      const state = steps[stepIdx].state;
+      const content = document.getElementById('stateContent');
+      content.innerHTML = Object.entries(state).map(([k, v]) => 
+        `<div class="state-item"><span class="state-key">${k}:</span> <span class="state-value">${v}</span></div>`
+      ).join('');
+    }
+
+    function highlightByStep(stepIdx) {
+      document.querySelectorAll('.viz-step').forEach((el, i) => {
+        el.classList.toggle('active', i === stepIdx);
+      });
+      document.querySelectorAll('.code-line').forEach(el => {
+        el.classList.remove('active');
+      });
+      const lineNum = steps[stepIdx].line;
+      const lineEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+      if (lineEl) lineEl.classList.add('active');
+      updateState(stepIdx);
+    }
+
+    function highlightByLine(lineNum) {
+      document.querySelectorAll('.code-line').forEach(el => {
+        el.classList.remove('active');
+      });
+      const lineEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+      if (lineEl) lineEl.classList.add('active');
+      
+      document.querySelectorAll('.viz-step').forEach((el, i) => {
+        el.classList.remove('active');
+        if (steps[i].line === lineNum) {
+          el.classList.add('active');
+          updateState(i);
+        }
+      });
+    }
+
+    // 默认选中第一步
+    highlightByStep(0);
+  </script>
+</body>
+</html>

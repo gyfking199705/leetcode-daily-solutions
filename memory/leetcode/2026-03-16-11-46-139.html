@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #139 - 单词拆分</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --primary-dark: #4f46e5;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --surface-light: #334155;
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+    body { 
+      font-family: system-ui, -apple-system, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.7;
+    }
+    h1 { 
+      font-size: 2.5rem; 
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--primary) 0%, #a855f7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin-bottom: 30px;
+    }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .problem-tags {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 15px 0;
+    }
+    .tag {
+      background: var(--surface-light);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .tag.difficulty-medium { 
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: white;
+    }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 20px; 
+      overflow-x: auto;
+      border: 1px solid var(--surface-light);
+      margin: 15px 0;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 3px 0; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      border-radius: 4px;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.25); 
+      border-left: 3px solid var(--primary); 
+      margin-left: -3px;
+      padding-left: 3px;
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 40px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.9rem;
+    }
+    .code-content {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.95rem;
+      white-space: pre;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1.2fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 768px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    .viz-steps { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 16px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .viz-step { 
+      padding: 14px 16px; 
+      margin: 8px 0; 
+      border-radius: 10px; 
+      background: var(--surface-light); 
+      cursor: pointer; 
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .viz-step:hover { 
+      background: rgba(99, 102, 241, 0.15);
+      transform: translateX(4px);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.2);
+    }
+    .viz-step-title {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .viz-step-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .viz-step-state {
+      margin-top: 8px;
+      padding: 8px;
+      background: var(--bg);
+      border-radius: 6px;
+      font-family: 'SF Mono', monospace;
+      font-size: 0.85rem;
+    }
+    .state-item {
+      display: flex;
+      gap: 10px;
+      margin: 4px 0;
+    }
+    .state-key { color: var(--primary); }
+    .state-value { color: var(--success); }
+    .dp-array {
+      display: flex;
+      gap: 6px;
+      margin: 12px 0;
+      flex-wrap: wrap;
+    }
+    .dp-cell {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: var(--surface-light);
+      font-weight: 600;
+      font-family: monospace;
+      transition: all 0.3s;
+    }
+    .dp-cell.active {
+      background: var(--primary);
+      transform: scale(1.1);
+    }
+    .dp-cell.index {
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 20px; 
+      border: 1px solid var(--surface-light); 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block;
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.3);
+    }
+    .problem-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .problem-card-title {
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    .problem-card-difficulty {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+    .difficulty-easy { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+    .difficulty-medium { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+    .difficulty-hard { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+    .problem-card-desc {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+    }
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--surface-light);
+    }
+    th {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .complexity-good { color: var(--success); }
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; }
+    .class { color: #ffa657; }
+    .operator { color: #ff7b72; }
+    .builtin { color: #79c0ff; }
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--primary);
+      background: transparent;
+      color: var(--primary);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+    .btn:hover {
+      background: var(--primary);
+      color: white;
+    }
+    .btn.active {
+      background: var(--primary);
+      color: white;
+    }
+    .example-box {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 16px;
+      margin: 12px 0;
+      border-left: 3px solid var(--primary);
+    }
+    .example-title {
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+    .fade-in {
+      animation: fadeIn 0.3s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #139 - 单词拆分</h1>
+  <div class="subtitle">Word Break · 动态规划 · 中等难度</div>
+
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给定一个非空字符串 <code>s</code> 和一个包含非空单词的列表 <code>wordDict</code>，判断字符串 <code>s</code> 是否可以被空格拆分为一个或多个在字典中出现的单词。</p>
+    
+    <div class="problem-tags">
+      <span class="tag difficulty-medium">Medium</span>
+      <span class="tag">动态规划</span>
+      <span class="tag">字符串</span>
+      <span class="tag">哈希表</span>
+      <span class="tag">记忆化搜索</span>
+    </div>
+
+    <div class="example-box">
+      <div class="example-title">示例 1</div>
+      <p><strong>输入:</strong> s = "leetcode", wordDict = ["leet", "code"]</p>
+      <p><strong>输出:</strong> true</p>
+      <p><strong>解释:</strong> 返回 true 因为 "leetcode" 可以被拆分成 "leet" + "code"</p>
+    </div>
+
+    <div class="example-box">
+      <div class="example-title">示例 2</div>
+      <p><strong>输入:</strong> s = "applepenapple", wordDict = ["apple", "pen"]</p>
+      <p><strong>输出:</strong> true</p>
+      <p><strong>解释:</strong> 返回 true 因为 "applepenapple" 可以被拆分成 "apple" + "pen" + "apple"</p>
+    </div>
+
+    <div class="example-box">
+      <div class="example-title">示例 3</div>
+      <p><strong>输入:</strong> s = "catsandog", wordDict = ["cats", "dog", "sand", "and", "cat"]</p>
+      <p><strong>输出:</strong> false</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>💡 核心思路</h2>
+    <p>这是一个经典的<strong>动态规划</strong>问题。定义 <code>dp[i]</code> 表示：字符串的前 <code>i</code> 个字符（即 <code>s[0:i]</code>）是否可以被拆分成字典中的单词。</p>
+    
+    <h3 style="color: var(--primary); margin-top: 24px;">状态转移方程</h3>
+    <div class="example-box" style="background: rgba(99, 102, 241, 0.1);">
+      <p style="font-family: monospace; font-size: 1.1rem;">
+        dp[i] = OR { dp[j] AND s[j:i] ∈ wordDict } for all j < i
+      </p>
+    </div>
+    <p>即：对于每个位置 <code>i</code>，检查是否存在一个位置 <code>j</code>，使得前 <code>j</code> 个字符可以被拆分，且从 <code>j</code> 到 <code>i</code> 的子串在字典中。</p>
+
+    <h3 style="color: var(--primary); margin-top: 24px;">优化技巧</h3>
+    <ul>
+      <li>将 <code>wordDict</code> 转换为 <code>set</code>，实现 O(1) 查找</li>
+      <li>利用单词最大长度限制搜索范围，减少不必要的检查</li>
+      <li><code>dp[0] = true</code> 作为边界条件（空字符串可以被拆分）</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>🎬 算法执行可视化</h2>
+    <p style="color: var(--text-muted);">点击步骤或代码行查看对应关系。当前示例：s = "leetcode", wordDict = ["leet", "code"]</p>
+    
+    <div class="dp-array" id="dpArray">
+      <!-- DP数组可视化由JS生成 -->
+    </div>
+
+    <div class="controls">
+      <button class="btn active" onclick="resetViz()">重置</button>
+      <button class="btn" onclick="stepViz(-1)">上一步</button>
+      <button class="btn" onclick="stepViz(1)">下一步</button>
+      <button class="btn" onclick="autoPlay()">自动播放</button>
+    </div>
+
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3 style="color: var(--primary); margin-top: 0;">Python 实现</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table>
+      <tr>
+        <th>维度</th>
+        <th>值</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>时间复杂度</td>
+        <td class="complexity-good">O(n × m × L)</td>
+        <td>n为字符串长度，m为字典单词数，L为平均单词长度（优化后为 O(n × maxLen)）</td>
+      </tr>
+      <tr>
+        <td>空间复杂度</td>
+        <td class="complexity-good">O(n)</td>
+        <td>DP数组空间，n为字符串长度</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>🔗 类似题目推荐</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/word-break-ii/" class="problem-card" target="_blank">
+        <div class="problem-card-header">
+          <span class="problem-card-title">#140 单词拆分 II</span>
+          <span class="problem-card-difficulty difficulty-hard">Hard</span>
+        </div>
+        <div class="problem-card-desc">在#139基础上，要求返回所有可能的拆分方案，需要回溯+记忆化</div>
+      </a>
+      
+      <a href="https://leetcode.cn/problems/concatenated-words/" class="problem-card" target="_blank">
+        <div class="problem-card-header">
+          <span class="problem-card-title">#472 连接词</span>
+          <span class="problem-card-difficulty difficulty-hard">Hard</span>
+        </div>
+        <div class="problem-card-desc">找出所有由字典中其他单词拼接而成的单词，可用字典树优化</div>
+      </a>
+      
+      <a href="https://leetcode.cn/problems/palindrome-partitioning/" class="problem-card" target="_blank">
+        <div class="problem-card-header">
+          <span class="problem-card-title">#131 分割回文串</span>
+          <span class="problem-card-difficulty difficulty-medium">Medium</span>
+        </div>
+        <div class="problem-card-desc">将字符串分割成所有可能的回文子串组合，回溯法经典题</div>
+      </a>
+      
+      <a href="https://leetcode.cn/problems/decode-ways/" class="problem-card" target="_blank">
+        <div class="problem-card-header">
+          <span class="problem-card-title">#91 解码方法</span>
+          <span class="problem-card-difficulty difficulty-medium">Medium</span>
+        </div>
+        <div class="problem-card-desc">数字字符串解码方案数，DP状态转移的经典应用</div>
+      </a>
+      
+      <a href="https://leetcode.cn/problems/longest-valid-parentheses/" class="problem-card" target="_blank">
+        <div class="problem-card-header">
+          <span class="problem-card-title">#32 最长有效括号</span>
+          <span class="problem-card-difficulty difficulty-hard">Hard</span>
+        </div>
+        <div class="problem-card-desc">找最长有效括号子串，可用DP或栈解决</div>
+      </a>
+      
+      <a href="https://leetcode.cn/problems/edit-distance/" class="problem-card" target="_blank">
+        <div class="problem-card-header">
+          <span class="problem-card-title">#72 编辑距离</span>
+          <span class="problem-card-difficulty difficulty-medium">Medium</span>
+        </div>
+        <div class="problem-card-desc">经典DP问题，二维状态转移的代表</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>🔍 解题技巧总结</h2>
+    <ul>
+      <li><strong>前缀思维：</strong>判断s能否拆分 = 检查所有前缀是否可拆，且剩余部分在字典中</li>
+      <li><strong>边界处理：</strong>dp[0] = True 是关键，表示空字符串天然可拆分</li>
+      <li><strong>哈希优化：</strong>将list转为set，查询从O(m)降到O(1)</li>
+      <li><strong>剪枝：</strong>利用单词最大长度限制内层循环范围</li>
+      <li><strong>记忆化：</strong>DFS版本需要memo字典避免重复计算</li>
+    </ul>
+  </div>
+
+  <script>
+    // Python代码行
+    const codeLines = [
+      { num: 1, code: '<span class="keyword">class</span> <span class="class">Solution</span>:' },
+      { num: 2, code: '    <span class="keyword">def</span> <span class="function">wordBreak</span>(self, s: <span class="builtin">str</span>, wordDict: List[<span class="builtin">str</span>]) -> <span class="builtin">bool</span>:' },
+      { num: 3, code: '        word_set = <span class="builtin">set</span>(wordDict)  <span class="comment"># O(1) 查找</span>' },
+      { num: 4, code: '        n = <span class="builtin">len</span>(s)' },
+      { num: 5, code: '        dp = [<span class="keyword">False</span>] * (n + <span class="number">1</span>)  <span class="comment"># dp[i] = 前i个字符可拆分</span>' },
+      { num: 6, code: '        dp[<span class="number">0</span>] = <span class="keyword">True</span>  <span class="comment"># 空字符串可拆分</span>' },
+      { num: 7, code: '        ' },
+      { num: 8, code: '        max_len = <span class="builtin">max</span>(<span class="builtin">len</span>(w) <span class="keyword">for</span> w <span class="keyword">in</span> wordDict) <span class="keyword">if</span> wordDict <span class="keyword">else</span> <span class="number">0</span>' },
+      { num: 9, code: '        ' },
+      { num: 10, code: '        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="builtin">range</span>(<span class="number">1</span>, n + <span class="number">1</span>):  <span class="comment"># 遍历字符串每个位置</span>' },
+      { num: 11, code: '            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="builtin">range</span>(<span class="builtin">max</span>(<span class="number">0</span>, i - max_len), i):  <span class="comment"># 检查可能的起始位置</span>' },
+      { num: 12, code: '                <span class="keyword">if</span> dp[j] <span class="keyword">and</span> s[j:i] <span class="keyword">in</span> word_set:  <span class="comment"># 核心状态转移</span>' },
+      { num: 13, code: '                    dp[i] = <span class="keyword">True</span>' },
+      { num: 14, code: '                    <span class="keyword">break</span>  <span class="comment"># 找到一个即可</span>' },
+      { num: 15, code: '        ' },
+      { num: 16, code: '        <span class="keyword">return</span> dp[n]  <span class="comment"># 整个字符串是否可拆分</span>' },
+    ];
+
+    // 可视化步骤 (对应示例 s="leetcode", wordDict=["leet","code"])
+    const steps = [
+      { title: "初始化", desc: "创建set和dp数组，dp[0]=True作为边界", line: 6, 
+        state: { word_set: '{"leet", "code"}', dp: '[T,F,F,F,F,F,F,F,F]', i: '-', j: '-' } },
+      { title: "i=4, j=0", desc: "检查s[0:4]='leet'是否在字典中", line: 12,
+        state: { "s[j:i]": "'leet'", "s[j:i] in word_set": "True", dp: '[T,F,F,F,T,F,F,F,F]', current: '发现匹配！' } },
+      { title: "i=4 完成", desc: "dp[4]=True，前4个字符'leet'可拆分", line: 13,
+        state: { dp: '[T,F,F,F,T,F,F,F,F]', progress: '"leet" ✓' } },
+      { title: "i=5-7", desc: "检查s[0:5]='leetc'等，均不在字典中", line: 12,
+        state: { note: "内层循环结束，无匹配", dp: '[T,F,F,F,T,F,F,F,F]' } },
+      { title: "i=8, j=4", desc: "检查s[4:8]='code'，且dp[4]=True", line: 12,
+        state: { "s[j:i]": "'code'", "dp[4]": "True", "s[j:i] in word_set": "True", match: '完美！' } },
+      { title: "i=8 完成", desc: "dp[8]=True，整个字符串可拆分", line: 13,
+        state: { dp: '[T,F,F,F,T,F,F,F,T]', result: '"leet"+"code" ✓' } },
+      { title: "返回结果", desc: "返回dp[8]=True，算法结束", line: 16,
+        state: { result: "True", breakdown: "'leet' + 'code'" } },
+    ];
+
+    let currentStep = -1;
+    let autoPlayInterval = null;
+
+    function renderCode() {
+      const codeBlock = document.getElementById('codeBlock');
+      codeBlock.innerHTML = codeLines.map((line, idx) => 
+        `<div class="code-line" data-line="${line.num}" onclick="selectLine(${idx})">
+          <span class="line-number">${line.num}</span>
+          <span class="code-content">${line.code}</span>
+        </div>`
+      ).join('');
+    }
+
+    function renderSteps() {
+      const stepsContainer = document.getElementById('vizSteps');
+      stepsContainer.innerHTML = steps.map((step, idx) => `
+        <div class="viz-step ${idx === currentStep ? 'active' : ''}" data-step="${idx}" onclick="selectStep(${idx})">
+          <div class="viz-step-title">步骤 ${idx + 1}: ${step.title}</div>
+          <div class="viz-step-desc">${step.desc}</div>
+          ${idx === currentStep ? renderState(step.state) : ''}
+        </div>
+      `).join('');
+    }
+
+    function renderState(state) {
+      return `<div class="viz-step-state">
+        ${Object.entries(state).map(([k, v]) => 
+          `<div class="state-item"><span class="state-key">${k}:</span> <span class="state-value">${v}</span></div>`
+        ).join('')}
+      </div>`;
+    }
+
+    function renderDpArray() {
+      const s = "leetcode";
+      const container = document.getElementById('dpArray');
+      let html = '<div style="display:flex;flex-direction:column;gap:8px;">';
+      
+      // 字符串字符
+      html += '<div style="display:flex;gap:6px;margin-left:48px;">';
+      for (let i = 0; i < s.length; i++) {
+        html += `<div class="dp-cell" style="background:transparent;color:var(--text-muted);">${s[i]}</div>`;
+      }
+      html += '</div>';
+      
+      // DP数组索引和值
+      html += '<div style="display:flex;gap:6px;align-items:center;"><span style="color:var(--text-muted);font-size:0.8rem;">dp:</span>';
+      const dpValues = currentStep >= 0 ? steps[currentStep].state.dp || '[T,F,F,F,F,F,F,F,F]' : '[T,F,F,F,F,F,F,F,F]';
+      const vals = dpValues.match(/[TF]/g) || [];
+      for (let i = 0; i <= s.length; i++) {
+        const isActive = currentStep >= 0 && steps[currentStep].state.i !== '-' && parseInt(steps[currentStep].state.i) === i;
+        html += `<div class="dp-cell ${vals[i] === 'T' ? 'active' : ''} ${isActive ? 'active' : ''}">${vals[i] || 'F'}</div>`;
+      }
+      html += '</div>';
+      
+      // 索引数字
+      html += '<div style="display:flex;gap:6px;margin-left:48px;">';
+      for (let i = 0; i <= s.length; i++) {
+        html += `<div class="dp-cell index">${i}</div>`;
+      }
+      html += '</div></div>';
+      
+      container.innerHTML = html;
+    }
+
+    function selectStep(idx) {
+      currentStep = idx;
+      updateUI();
+    }
+
+    function selectLine(lineIdx) {
+      const lineNum = codeLines[lineIdx].num;
+      const stepIdx = steps.findIndex(s => s.line === lineNum);
+      if (stepIdx !== -1) {
+        currentStep = stepIdx;
+        updateUI();
+      }
+    }
+
+    function updateUI() {
+      renderSteps();
+      renderDpArray();
+      
+      // 高亮代码行
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      if (currentStep >= 0) {
+        const lineEl = document.querySelector(`.code-line[data-line="${steps[currentStep].line}"]`);
+        if (lineEl) lineEl.classList.add('active');
+      }
+    }
+
+    function stepViz(direction) {
+      const newStep = currentStep + direction;
+      if (newStep >= 0 && newStep < steps.length) {
+        currentStep = newStep;
+        updateUI();
+      }
+    }
+
+    function resetViz() {
+      currentStep = -1;
+      if (autoPlayInterval) {
+        clearInterval(autoPlayInterval);
+        autoPlayInterval = null;
+      }
+      updateUI();
+    }
+
+    function autoPlay() {
+      if (autoPlayInterval) {
+        clearInterval(autoPlayInterval);
+        autoPlayInterval = null;
+        return;
+      }
+      currentStep = -1;
+      autoPlayInterval = setInterval(() => {
+        if (currentStep < steps.length - 1) {
+          currentStep++;
+          updateUI();
+        } else {
+          clearInterval(autoPlayInterval);
+          autoPlayInterval = null;
+        }
+      }, 1200);
+    }
+
+    // 初始化
+    renderCode();
+    renderSteps();
+    renderDpArray();
+  </script>
+</body>
+</html>

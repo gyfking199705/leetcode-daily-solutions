@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>LeetCode #96 - 不同的二叉搜索树</title>
+  <style>
+    :root { --primary: #6366f1; --bg: #0f172a; --surface: #1e293b; --text: #f1f5f9; --text-secondary: #94a3b8; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); max-width: 1000px; margin: 0 auto; padding: 40px 20px; line-height: 1.6; }
+    .section { background: var(--surface); border-radius: 16px; padding: 28px; margin-bottom: 24px; }
+    .section h2 { color: var(--primary); margin-top: 0; display: flex; align-items: center; gap: 12px; }
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .badge-medium { background: #f59e0b33; color: #f59e0b; }
+    .badge-tag { background: #6366f133; color: #818cf8; margin-right: 8px; }
+    pre { background: #0d1117; border-radius: 12px; padding: 0; overflow-x: auto; margin: 0; }
+    .code-line { display: flex; padding: 4px 20px; cursor: pointer; transition: background 0.15s; font-family: 'SF Mono', Monaco, monospace; font-size: 14px; }
+    .code-line:hover { background: rgba(255,255,255,0.03); }
+    .code-line.active { background: rgba(99, 102, 241, 0.25); border-left: 3px solid #6366f1; padding-left: 17px; }
+    .line-number { color: #484f58; min-width: 36px; text-align: right; padding-right: 16px; user-select: none; }
+    .viz-container { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 20px 0; }
+    .viz-steps { max-height: 400px; overflow-y: auto; }
+    .viz-step { padding: 16px; margin: 8px 0; border-radius: 12px; background: #334155; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+    .viz-step:hover { background: #3d4d66; }
+    .viz-step.active { border-color: var(--primary); background: rgba(99, 102, 241, 0.2); }
+    .viz-step h4 { margin: 0 0 8px 0; color: var(--text); font-size: 14px; }
+    .viz-step p { margin: 0; color: var(--text-secondary); font-size: 13px; }
+    .viz-step .state { margin-top: 10px; padding-top: 10px; border-top: 1px solid #475569; font-family: monospace; font-size: 12px; color: #a78bfa; }
+    .problem-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .problem-card { background: var(--bg); border-radius: 12px; padding: 20px; border: 1px solid #475569; transition: all 0.2s; text-decoration: none; color: inherit; }
+    .problem-card:hover { border-color: var(--primary); transform: translateY(-3px); background: rgba(99, 102, 241, 0.1); }
+    .problem-card h4 { margin: 0 0 8px 0; color: var(--primary); }
+    .problem-card p { margin: 0; color: var(--text-secondary); font-size: 13px; }
+    .complexity-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    .complexity-table th, .complexity-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #334155; }
+    .complexity-table th { color: var(--primary); font-weight: 600; }
+    .highlight-box { background: rgba(99, 102, 241, 0.1); border-left: 3px solid var(--primary); padding: 16px 20px; border-radius: 0 12px 12px 0; margin: 16px 0; }
+    .highlight-box strong { color: var(--primary); }
+    .tree-viz { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; margin: 20px 0; }
+    .tree { text-align: center; }
+    .tree-node { display: inline-block; width: 36px; height: 36px; line-height: 36px; border-radius: 50%; background: var(--primary); color: white; font-weight: bold; font-size: 14px; margin: 4px; }
+    .tree-null { display: inline-block; width: 36px; height: 36px; line-height: 36px; color: #64748b; font-size: 12px; }
+    .tree-children { display: flex; justify-content: center; gap: 20px; margin-top: 8px; }
+    .formula { background: #0d1117; padding: 16px 20px; border-radius: 12px; font-family: monospace; text-align: center; color: #a78bfa; margin: 16px 0; }
+    .keyword { color: #ff7b72; } .function { color: #d2a8ff; } .string { color: #a5d6ff; }
+    .number { color: #79c0ff; } .comment { color: #8b949e; } .class { color: #ffa657; }
+    .operator { color: #ff7b72; }
+    h1 { margin-bottom: 8px; }
+    .subtitle { color: var(--text-secondary); margin-bottom: 24px; }
+  </style>
+</head>
+<body>
+  <h1>🌲 LeetCode #96 - 不同的二叉搜索树</h1>
+  <p class="subtitle">
+    <span class="badge badge-medium">Medium</span>
+    <span class="badge badge-tag">动态规划</span>
+    <span class="badge badge-tag">卡特兰数</span>
+    <span class="badge badge-tag">二叉树</span>
+  </p>
+
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给你一个整数 <code>n</code>，求恰由 <code>n</code> 个节点组成且节点值从 <code>1</code> 到 <code>n</code> 互不相同的 <strong>二叉搜索树</strong> 有多少种？返回满足题意的二叉搜索树的种数。</p>
+    
+    <div class="highlight-box">
+      <strong>示例 1：</strong><br>
+      输入：n = 3<br>
+      输出：5<br>
+      <br>
+      <strong>示例 2：</strong><br>
+      输入：n = 1<br>
+      输出：1
+    </div>
+
+    <p><strong>二叉搜索树定义：</strong>对于任意节点，左子树所有节点的值小于当前节点，右子树所有节点的值大于当前节点。</p>
+  </div>
+
+  <div class="section">
+    <h2>💡 核心思路</h2>
+    <p>这道题的本质是计算<strong>卡特兰数（Catalan Number）</strong>。关键在于发现以下规律：</p>
+    
+    <div class="formula">
+      G(n) = G(0)×G(n-1) + G(1)×G(n-2) + ... + G(n-1)×G(0)
+    </div>
+    
+    <p>其中 <code>G(i)</code> 表示 <code>i</code> 个节点能构成的不同 BST 数量。对于以 <code>i</code> 为根节点的 BST：</p>
+    <ul>
+      <li>左子树有 <code>i-1</code> 个节点（值为 1 到 i-1），方案数为 <code>G(i-1)</code></li>
+      <li>右子树有 <code>n-i</code> 个节点（值为 i+1 到 n），方案数为 <code>G(n-i)</code></li>
+      <li>以 <code>i</code> 为根的方案数 = <code>G(i-1) × G(n-i)</code></li>
+    </ul>
+
+    <p>当 n=3 时，可以构造出 5 种不同的 BST：</p>
+    <div class="tree-viz">
+      <div class="tree">
+        <div class="tree-node">1</div>
+        <div class="tree-children">
+          <div class="tree-null">∅</div>
+          <div>
+            <div class="tree-node">2</div>
+            <div class="tree-children">
+              <div class="tree-null">∅</div>
+              <div class="tree-node">3</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tree">
+        <div class="tree-node">1</div>
+        <div class="tree-children">
+          <div class="tree-null">∅</div>
+          <div>
+            <div class="tree-node">3</div>
+            <div class="tree-children">
+              <div class="tree-node">2</div>
+              <div class="tree-null">∅</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tree">
+        <div class="tree-node">2</div>
+        <div class="tree-children">
+          <div class="tree-node">1</div>
+          <div class="tree-node">3</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <tr>
+        <th>时间复杂度</th>
+        <th>空间复杂度</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>O(n²)</td>
+        <td>O(n)</td>
+        <td>双重循环计算，一维DP数组存储中间结果</td>
+      </tr>
+    </table>
+    
+    <div class="highlight-box" style="margin-top: 20px;">
+      <strong>数学进阶：</strong>卡特兰数有通项公式 C(2n,n)/(n+1)，可用数学方法O(n)求解，但面试中通常要求DP解法展示思维过程。
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/unique-binary-search-trees-ii/" class="problem-card" target="_blank">
+        <h4>#95 不同的二叉搜索树 II</h4>
+        <p>本题进阶版，要求返回所有具体的BST结构，需要DFS生成所有树</p>
+      </a>
+      <a href="https://leetcode.cn/problems/validate-binary-search-tree/" class="problem-card" target="_blank">
+        <h4>#98 验证二叉搜索树</h4>
+        <p>巩固BST性质，递归时传递上下边界进行验证</p>
+      </a>
+      <a href="https://leetcode.cn/problems/construct-binary-search-tree-from-preorder-traversal/" class="problem-card" target="_blank">
+        <h4>#1008 前序遍历构造二叉搜索树</h4>
+        <p>利用BST性质从前序序列重建树，与本题思路相通</p>
+      </a>
+      <a href="https://leetcode.cn/problems/generate-parentheses/" class="problem-card" target="_blank">
+        <h4>#22 括号生成</h4>
+        <p>同样是卡特兰数问题，用回溯法生成所有合法括号组合</p>
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // 代码内容
+    const codeLines = [
+      { num: 1, content: '<span class="keyword">class</span> <span class="class">Solution</span>:' },
+      { num: 2, content: '    <span class="keyword">def</span> <span class="function">numTrees</span>(self, n: <span class="keyword">int</span>) -> <span class="keyword">int</span>:' },
+      { num: 3, content: '        <span class="comment"># dp[i] 表示 i 个节点能组成的 BST 数量</span>' },
+      { num: 4, content: '        dp = [<span class="number">0</span>] * (n + <span class="number">1</span>)' },
+      { num: 5, content: '        dp[<span class="number">0</span>] = <span class="number">1</span>  <span class="comment"># 空树也算一种</span>' },
+      { num: 6, content: '        dp[<span class="number">1</span>] = <span class="number">1</span>  <span class="comment"># 单个节点只有一种</span>' },
+      { num: 7, content: '        ' },
+      { num: 8, content: '        <span class="comment"># 从 2 到 n 逐个计算</span>' },
+      { num: 9, content: '        <span class="keyword">for</span> nodes <span class="keyword">in</span> <span class="function">range</span>(<span class="number">2</span>, n + <span class="number">1</span>):' },
+      { num: 10, content: '            <span class="comment"># 枚举每个数字作为根节点</span>' },
+      { num: 11, content: '            <span class="keyword">for</span> root <span class="keyword">in</span> <span class="function">range</span>(<span class="number">1</span>, nodes + <span class="number">1</span>):' },
+      { num: 12, content: '                left = root - <span class="number">1</span>   <span class="comment"># 左子树节点数</span>' },
+      { num: 13, content: '                right = nodes - root  <span class="comment"># 右子树节点数</span>' },
+      { num: 14, content: '                <span class="comment"># 左右子树组合数相乘</span>' },
+      { num: 15, content: '                dp[nodes] += dp[left] * dp[right]' },
+      { num: 16, content: '        ' },
+      { num: 17, content: '        <span class="keyword">return</span> dp[n]' }
+    ];
+
+    // 步骤与代码行映射
+    const steps = [
+      { title: "初始化 DP 数组", desc: "创建 dp 数组，dp[i] 表示 i 个节点能构成的 BST 数量。空树 dp[0]=1，单节点 dp[1]=1。", line: 4, state: "dp = [1, 1, 0, 0, ..., 0]" },
+      { title: "外层循环：nodes = 2", desc: "计算 2 个节点能构成多少种 BST。", line: 9, state: "nodes = 2, dp = [1, 1, 0, ...]" },
+      { title: "内层循环：root = 1", desc: "以 1 为根，左子树 0 个节点，右子树 1 个节点。方案数 = dp[0] × dp[1] = 1", line: 11, state: "left=0, right=1, dp[2] += 1×1 = 1" },
+      { title: "内层循环：root = 2", desc: "以 2 为根，左子树 1 个节点，右子树 0 个节点。方案数 = dp[1] × dp[0] = 1", line: 11, state: "left=1, right=0, dp[2] += 1×1 = 2" },
+      { title: "完成 nodes=2", desc: "2 个节点共有 2 种 BST 结构。", line: 15, state: "dp[2] = 2" },
+      { title: "外层循环：nodes = 3", desc: "计算 3 个节点能构成多少种 BST。", line: 9, state: "nodes = 3" },
+      { title: "root = 1：左0右2", desc: "以 1 为根，左子树 0 节点，右子树 2 节点。方案 = dp[0]×dp[2] = 2", line: 15, state: "dp[3] += 1×2 = 2" },
+      { title: "root = 2：左1右1", desc: "以 2 为根，左右各 1 节点。方案 = dp[1]×dp[1] = 1", line: 15, state: "dp[3] += 1×1 = 3" },
+      { title: "root = 3：左2右0", desc: "以 3 为根，左子树 2 节点，右子树 0 节点。方案 = dp[2]×dp[0] = 2", line: 15, state: "dp[3] += 2×1 = 5" },
+      { title: "返回结果 dp[3] = 5", desc: "3 个节点共有 5 种不同的二叉搜索树！", line: 17, state: "return 5" }
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach(line => {
+      const div = document.createElement('div');
+      div.className = 'code-line';
+      div.dataset.line = line.num;
+      div.innerHTML = `<span class="line-number">${line.num}</span><span>${line.content}</span>`;
+      div.addEventListener('click', () => highlightStepByLine(line.num));
+      codeBlock.appendChild(div);
+    });
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const div = document.createElement('div');
+      div.className = 'viz-step';
+      div.dataset.step = idx;
+      div.innerHTML = `
+        <h4>步骤 ${idx + 1}: ${step.title}</h4>
+        <p>${step.desc}</p>
+        <div class="state">${step.state}</div>
+      `;
+      div.addEventListener('click', () => highlightStep(idx));
+      vizSteps.appendChild(div);
+    });
+
+    let activeStep = -1;
+
+    function highlightStep(idx) {
+      // 清除之前的高亮
+      document.querySelectorAll('.viz-step').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+      
+      activeStep = idx;
+      const step = steps[idx];
+      
+      // 高亮步骤
+      document.querySelector(`.viz-step[data-step="${idx}"]`).classList.add('active');
+      
+      // 高亮对应代码行
+      const codeLine = document.querySelector(`.code-line[data-line="${step.line}"]`);
+      if (codeLine) {
+        codeLine.classList.add('active');
+        codeLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    function highlightStepByLine(lineNum) {
+      // 找到包含这一行的步骤（取第一个匹配的）
+      const stepIdx = steps.findIndex(s => s.line === lineNum);
+      if (stepIdx !== -1) {
+        highlightStep(stepIdx);
+        // 滚动到对应步骤
+        document.querySelector(`.viz-step[data-step="${stepIdx}"]`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    // 默认高亮第一步
+    highlightStep(0);
+  </script>
+</body>
+</html>

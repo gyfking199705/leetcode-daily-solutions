@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #84 - 柱状图中最大的矩形</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --secondary: #8b5cf6;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --text: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --accent: #22d3ee;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1100px; 
+      margin: 0 auto; 
+      padding: 40px 20px;
+      line-height: 1.7;
+    }
+    h1 { 
+      font-size: 2.2rem; 
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+    .subtitle { color: var(--text-secondary); font-size: 1rem; margin-bottom: 32px; }
+    .badge { 
+      display: inline-block; 
+      padding: 4px 12px; 
+      border-radius: 20px; 
+      font-size: 0.85rem; 
+      font-weight: 600;
+      margin-right: 8px;
+    }
+    .badge-hard { background: #ef4444; color: white; }
+    .badge-tag { background: var(--surface); color: var(--accent); border: 1px solid var(--primary); }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px;
+      border: 1px solid #334155;
+    }
+    .section h2 { 
+      color: var(--primary); 
+      font-size: 1.3rem;
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .problem-desc {
+      background: var(--bg);
+      padding: 20px;
+      border-radius: 12px;
+      border-left: 4px solid var(--primary);
+    }
+    .example {
+      background: #0d1117;
+      padding: 16px 20px;
+      border-radius: 10px;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .example-label { color: var(--accent); font-weight: 600; margin-bottom: 8px; }
+    .chart-container {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 4px;
+      padding: 30px 20px;
+      background: var(--bg);
+      border-radius: 12px;
+      margin: 20px 0;
+      min-height: 180px;
+    }
+    .bar {
+      width: 40px;
+      background: linear-gradient(180deg, var(--primary), var(--secondary));
+      border-radius: 4px 4px 0 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 8px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      transition: all 0.3s;
+    }
+    .bar.highlight {
+      background: linear-gradient(180deg, var(--success), #16a34a);
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+    }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 20px; 
+      overflow-x: auto;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 3px 0; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      border-radius: 4px;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.25); 
+      border-left: 3px solid var(--primary); 
+      margin-left: -3px;
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 40px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1.2fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 900px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    .viz-steps { 
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 16px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    .viz-step { 
+      padding: 14px 16px; 
+      margin: 8px 0; 
+      border-radius: 10px; 
+      background: #334155; 
+      cursor: pointer; 
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .viz-step:hover { 
+      border-color: var(--secondary);
+      transform: translateX(4px);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.2);
+    }
+    .viz-step .step-title {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .viz-step .step-desc {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+    .viz-step .step-state {
+      margin-top: 8px;
+      padding: 8px 12px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 20px; 
+      border: 1px solid #475569; 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block;
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+    }
+    .problem-card .problem-num {
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .problem-card .problem-title {
+      font-weight: 600;
+      margin: 8px 0;
+    }
+    .problem-card .problem-tag {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    .complexity-table th,
+    .complexity-table td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid #334155;
+    }
+    .complexity-table th {
+      color: var(--accent);
+      font-weight: 600;
+      background: var(--bg);
+    }
+    .complexity-table td code {
+      background: var(--bg);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+      color: var(--success);
+    }
+    .keyword { color: #ff7b72; } 
+    .function { color: #d2a8ff; } 
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; } 
+    .comment { color: #8b949e; font-style: italic; } 
+    .class { color: #ffa657; }
+    .var { color: #79c0ff; }
+    .operator { color: #ff7b72; }
+    
+    .algo-idea {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+      border: 1px solid var(--primary);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .algo-idea h3 {
+      color: var(--primary);
+      margin-top: 0;
+    }
+    .algo-idea ul {
+      margin: 12px 0;
+      padding-left: 20px;
+    }
+    .algo-idea li {
+      margin: 8px 0;
+      color: var(--text-secondary);
+    }
+    .algo-idea strong {
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #84 - 柱状图中最大的矩形</h1>
+  <div class="subtitle">
+    <span class="badge badge-hard">Hard</span>
+    <span class="badge badge-tag">单调栈</span>
+    <span class="badge badge-tag">数组</span>
+    <span class="badge badge-tag">栈</span>
+  </div>
+
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <div class="problem-desc">
+      <p>给定 <em>n</em> 个非负整数，用来表示柱状图中各个柱子的高度。每个柱子彼此相邻，且宽度为 1 。</p>
+      <p>求在该柱状图中，能够勾勒出来的矩形的最大面积。</p>
+    </div>
+    
+    <div class="chart-container">
+      <div class="bar" style="height: 40px;">2</div>
+      <div class="bar" style="height: 20px;">1</div>
+      <div class="bar" style="height: 100px;">5</div>
+      <div class="bar" style="height: 120px;">6</div>
+      <div class="bar" style="height: 40px;">2</div>
+      <div class="bar" style="height: 60px;">3</div>
+    </div>
+    <p style="text-align: center; color: var(--text-secondary);">输入: heights = [2,1,5,6,2,3] &nbsp;|&nbsp; 输出: 10</p>
+
+    <div class="example">
+      <div class="example-label">示例 1:</div>
+      <div><strong>输入:</strong> heights = [2,1,5,6,2,3]</div>
+      <div><strong>输出:</strong> 10</div>
+      <div><strong>解释:</strong> 最大的矩形为图中阴影区域，面积为 10 (5 × 2)</div>
+    </div>
+
+    <div class="example">
+      <div class="example-label">示例 2:</div>
+      <div><strong>输入:</strong> heights = [2,4]</div>
+      <div><strong>输出:</strong> 4</div>
+    </div>
+
+    <div class="algo-idea">
+      <h3>💡 核心思路 - 单调栈</h3>
+      <ul>
+        <li><strong>关键观察：</strong>对于每个柱子，以它为高的最大矩形 = 它的高度 × 左右能延伸的最大宽度</li>
+        <li><strong>宽度边界：</strong>左边第一个比它矮的柱子，右边第一个比它矮的柱子</li>
+        <li><strong>单调栈作用：</strong>维护一个单调递增的栈，栈中存的是柱子的下标</li>
+        <li><strong>出栈时机：</strong>当遇到比栈顶小的柱子时，栈顶柱子的右边界确定了</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>🎬 算法执行过程可视化</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 16px;">👇 点击左侧步骤或右侧代码行，查看对应关系</p>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3 style="margin-top: 0; color: var(--accent);">Python 实现 - 单调栈</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <tr>
+        <th>复杂度类型</th>
+        <th>结果</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>时间复杂度</td>
+        <td><code>O(n)</code></td>
+        <td>每个柱子最多入栈出栈各一次</td>
+      </tr>
+      <tr>
+        <td>空间复杂度</td>
+        <td><code>O(n)</code></td>
+        <td>栈的空间，最坏情况下存储所有下标</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>🔗 类似题目推荐</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/trapping-rain-water/" class="problem-card" target="_blank">
+        <div class="problem-num">#42</div>
+        <div class="problem-title">接雨水</div>
+        <div class="problem-tag">双指针 / 动态规划 / 单调栈</div>
+      </a>
+      <a href="https://leetcode.cn/problems/maximal-rectangle/" class="problem-card" target="_blank">
+        <div class="problem-num">#85</div>
+        <div class="problem-title">最大矩形</div>
+        <div class="problem-tag">单调栈 / 动态规划</div>
+      </a>
+      <a href="https://leetcode.cn/problems/sliding-window-maximum/" class="problem-card" target="_blank">
+        <div class="problem-num">#239</div>
+        <div class="problem-title">滑动窗口最大值</div>
+        <div class="problem-tag">单调队列 / 双端队列</div>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    // 代码内容
+    const codeLines = [
+      { line: 1, code: '<span class="keyword">def</span> <span class="function">largestRectangleArea</span>(<span class="var">heights</span>):', indent: 0 },
+      { line: 2, code: '    <span class="var">n</span> = <span class="function">len</span>(<span class="var">heights</span>)', indent: 1 },
+      { line: 3, code: '    <span class="var">stack</span> = []  <span class="comment"># 单调递增栈，存下标</span>', indent: 1 },
+      { line: 4, code: '    <span class="var">max_area</span> = <span class="number">0</span>', indent: 1 },
+      { line: 5, code: '    ', indent: 1 },
+      { line: 6, code: '    <span class="keyword">for</span> <span class="var">i</span> <span class="keyword">in</span> <span class="function">range</span>(<span class="var">n</span>):  <span class="comment"># 遍历每个柱子</span>', indent: 1 },
+      { line: 7, code: '        <span class="comment"># 当前柱子小于栈顶，确定栈顶柱子的右边界</span>', indent: 2 },
+      { line: 8, code: '        <span class="keyword">while</span> <span class="var">stack</span> <span class="keyword">and</span> <span class="var">heights</span>[<span class="var">i</span>] <span class="operator">&lt;</span> <span class="var">heights</span>[<span class="var">stack</span>[-<span class="number">1</span>]]:', indent: 2 },
+      { line: 9, code: '            <span class="var">h</span> = <span class="var">heights</span>[<span class="var">stack</span>.<span class="function">pop</span>()]  <span class="comment"># 出栈柱子的高度</span>', indent: 3 },
+      { line: 10, code: '            <span class="comment"># 计算宽度：右边界i - 左边界stack[-1] - 1</span>', indent: 3 },
+      { line: 11, code: '            <span class="var">w</span> = <span class="var">i</span> <span class="keyword">if not</span> <span class="var">stack</span> <span class="keyword">else</span> <span class="var">i</span> - <span class="var">stack</span>[-<span class="number">1</span>] - <span class="number">1</span>', indent: 3 },
+      { line: 12, code: '            <span class="var">max_area</span> = <span class="function">max</span>(<span class="var">max_area</span>, <span class="var">h</span> * <span class="var">w</span>)', indent: 3 },
+      { line: 13, code: '        <span class="var">stack</span>.<span class="function">append</span>(<span class="var">i</span>)  <span class="comment"># 当前索引入栈</span>', indent: 2 },
+      { line: 14, code: '    ', indent: 1 },
+      { line: 15, code: '    <span class="comment"># 处理栈中剩余元素（右边界为n）</span>', indent: 1 },
+      { line: 16, code: '    <span class="keyword">while</span> <span class="var">stack</span>:', indent: 1 },
+      { line: 17, code: '        <span class="var">h</span> = <span class="var">heights</span>[<span class="var">stack</span>.<span class="function">pop</span>()]', indent: 2 },
+      { line: 18, code: '        <span class="var">w</span> = <span class="var">n</span> <span class="keyword">if not</span> <span class="var">stack</span> <span class="keyword">else</span> <span class="var">n</span> - <span class="var">stack</span>[-<span class="number">1</span>] - <span class="number">1</span>', indent: 2 },
+      { line: 19, code: '        <span class="var">max_area</span> = <span class="function">max</span>(<span class="var">max_area</span>, <span class="var">h</span> * <span class="var">w</span>)', indent: 2 },
+      { line: 20, code: '    ', indent: 1 },
+      { line: 21, code: '    <span class="keyword">return</span> <span class="var">max_area</span>', indent: 1 },
+    ];
+
+    // 步骤与代码行映射
+    const steps = [
+      { title: "初始化", desc: "创建空栈和max_area变量", line: 3, state: "stack = [], max_area = 0" },
+      { title: "i=0, height=2", desc: "栈为空，直接入栈", line: 13, state: "stack = [0]" },
+      { title: "i=1, height=1", desc: "1<2，栈顶出栈，计算面积", line: 8, state: "h=2, w=1, area=2" },
+      { title: "更新max_area", desc: "max(0, 2) = 2", line: 12, state: "max_area = 2" },
+      { title: "i=1入栈", desc: "栈为空，直接入栈", line: 13, state: "stack = [1]" },
+      { title: "i=2, height=5", desc: "5>1，直接入栈", line: 13, state: "stack = [1, 2]" },
+      { title: "i=3, height=6", desc: "6>5，直接入栈", line: 13, state: "stack = [1, 2, 3]" },
+      { title: "i=4, height=2", desc: "2<6，栈顶出栈", line: 8, state: "h=6, w=1 (4-2-1), area=6" },
+      { title: "更新max_area", desc: "max(2, 6) = 6", line: 12, state: "max_area = 6" },
+      { title: "继续比较", desc: "2<5，继续出栈", line: 8, state: "h=5, w=2 (4-1-1), area=10" },
+      { title: "更新max_area", desc: "max(6, 10) = 10 ✓", line: 12, state: "max_area = 10" },
+      { title: "i=4入栈", desc: "5>1，直接入栈", line: 13, state: "stack = [1, 4]" },
+      { title: "i=5, height=3", desc: "3>2，直接入栈", line: 13, state: "stack = [1, 4, 5]" },
+      { title: "遍历结束，处理剩余", desc: "栈中还有元素", line: 16, state: "stack = [1, 4, 5], n=6" },
+      { title: "出栈5，h=3", desc: "w=6-4-1=1, area=3", line: 18, state: "area = 3, max_area保持10" },
+      { title: "出栈4，h=2", desc: "w=6-1-1=4, area=8", line: 18, state: "area = 8, max_area保持10" },
+      { title: "出栈1，h=1", desc: "w=6 (栈空), area=6", line: 18, state: "area = 6, max_area保持10" },
+      { title: "返回结果", desc: "最大矩形面积为10", line: 21, state: "return 10" },
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach(({ line, code, indent }) => {
+      const div = document.createElement('div');
+      div.className = 'code-line';
+      div.dataset.line = line;
+      div.innerHTML = `<span class="line-number">${line}</span><span style="padding-left:${indent * 20}px">${code}</span>`;
+      div.addEventListener('click', () => highlightStepByLine(line));
+      codeBlock.appendChild(div);
+    });
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const div = document.createElement('div');
+      div.className = 'viz-step';
+      div.dataset.step = idx;
+      div.dataset.line = step.line;
+      div.innerHTML = `
+        <div class="step-title">${step.title}</div>
+        <div class="step-desc">${step.desc}</div>
+        <div class="step-state">${step.state}</div>
+      `;
+      div.addEventListener('click', () => highlightStep(idx));
+      vizSteps.appendChild(div);
+    });
+
+    let activeStep = -1;
+
+    function highlightStep(stepIdx) {
+      // 清除之前的高亮
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      
+      activeStep = stepIdx;
+      const step = steps[stepIdx];
+      
+      // 高亮步骤
+      const stepEl = document.querySelector(`.viz-step[data-step="${stepIdx}"]`);
+      if (stepEl) {
+        stepEl.classList.add('active');
+        stepEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      
+      // 高亮代码行
+      const lineEl = document.querySelector(`.code-line[data-line="${step.line}"]`);
+      if (lineEl) {
+        lineEl.classList.add('active');
+        lineEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    function highlightStepByLine(lineNum) {
+      // 找到对应步骤
+      const stepIdx = steps.findIndex(s => s.line === lineNum);
+      if (stepIdx !== -1) {
+        highlightStep(stepIdx);
+      } else {
+        // 只高亮代码行
+        document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+        const lineEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+        if (lineEl) lineEl.classList.add('active');
+      }
+    }
+
+    // 默认高亮第一步
+    highlightStep(0);
+  </script>
+</body>
+</html>

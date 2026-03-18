@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #114 - 二叉树展开为链表</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --primary-light: #818cf8;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --surface-light: #334155;
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1100px; 
+      margin: 0 auto; 
+      padding: 40px 20px;
+      line-height: 1.6;
+    }
+    h1 { 
+      font-size: 2rem; 
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle { 
+      color: var(--text-muted); 
+      font-size: 0.95rem;
+      margin-bottom: 30px;
+    }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px;
+      border: 1px solid rgba(99, 102, 241, 0.1);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      font-size: 1.3rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .difficulty { 
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+    .difficulty.medium { background: var(--warning); color: #000; }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 20px; 
+      overflow-x: auto;
+      border: 1px solid #30363d;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 3px 0;
+      cursor: pointer; 
+      transition: all 0.2s;
+      border-radius: 4px;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.25); 
+      border-left: 3px solid var(--primary);
+      margin-left: -3px;
+      padding-left: 3px;
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 40px; 
+      text-align: right; 
+      padding-right: 16px;
+      user-select: none;
+      font-size: 0.85rem;
+    }
+    .code-content { 
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 0.9rem;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1.2fr; 
+      gap: 24px; 
+      margin: 20px 0;
+    }
+    @media (max-width: 900px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    .viz-steps { 
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    .viz-step { 
+      padding: 14px 16px;
+      margin: 8px 0; 
+      border-radius: 10px; 
+      background: var(--surface-light); 
+      cursor: pointer; 
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .viz-step:hover { 
+      background: rgba(99, 102, 241, 0.15);
+      transform: translateX(4px);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.2);
+    }
+    .viz-step h4 {
+      margin: 0 0 6px 0;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+    .viz-step p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .step-num {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 24px;
+      font-size: 0.8rem;
+      margin-right: 8px;
+    }
+    .viz-step.active .step-num {
+      background: var(--success);
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 18px; 
+      border: 1px solid #475569; 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block;
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.15);
+    }
+    .problem-card h4 {
+      margin: 0 0 8px 0;
+      color: var(--primary-light);
+    }
+    .problem-card p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      background: rgba(99, 102, 241, 0.2);
+      color: var(--primary-light);
+      border-radius: 4px;
+      font-size: 0.75rem;
+      margin-top: 8px;
+    }
+    .tree-viz {
+      background: #0d1117;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      font-family: monospace;
+      margin: 16px 0;
+    }
+    .tree-node {
+      display: inline-block;
+      padding: 8px 16px;
+      background: var(--surface-light);
+      border-radius: 8px;
+      margin: 4px;
+      border: 2px solid #475569;
+    }
+    .tree-node.active {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.3);
+    }
+    .arrow {
+      color: var(--text-muted);
+      margin: 0 8px;
+    }
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    .complexity-table th, .complexity-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--surface-light);
+    }
+    .complexity-table th {
+      color: var(--primary-light);
+      font-weight: 600;
+    }
+    .complexity-table td code {
+      background: rgba(99, 102, 241, 0.2);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+    .highlight-box {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(34, 197, 94, 0.1));
+      border-left: 4px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 12px 12px 0;
+      margin: 16px 0;
+    }
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; }
+    .class { color: #ffa657; }
+    .operator { color: #ff7b72; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--surface-light); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #114 - 二叉树展开为链表</h1>
+  <p class="subtitle">Flatten Binary Tree to Linked List <span class="difficulty medium">Medium</span></p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给你二叉树的根结点 <code>root</code>，请你将它展开为一个单链表：</p>
+    <ul style="color: var(--text-muted);">
+      <li>展开后的单链表应该与二叉树 <strong>先序遍历</strong> 顺序相同</li>
+      <li>链表中的节点使用相同的 <code>TreeNode</code> 类，其中 <code>right</code> 子指针指向链表中下一个节点，左子指针始终为 <code>null</code></li>
+      <li>展开后的单链表应始终保持原二叉树的相对顺序</li>
+    </ul>
+    <div class="highlight-box">
+      <strong>💡 核心考点：</strong>二叉树的前序遍历 + 链表指针操作 + 原地修改（空间优化）
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="tree-viz" id="treeViz">
+      <div>当前处理的节点：<span class="tree-node" id="currNode">1</span></div>
+      <div style="margin-top: 12px;">
+        <span id="treeStructure" style="color: var(--text-muted);">
+          1 → 2 → 3 → 4 → 5 → 6
+        </span>
+      </div>
+    </div>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3 style="color: var(--primary-light); margin-bottom: 12px;">🐍 Python 实现（O(1)空间）</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <tr>
+        <th>解法</th>
+        <th>时间复杂度</th>
+        <th>空间复杂度</th>
+        <th>特点</th>
+      </tr>
+      <tr>
+        <td>前序遍历 + 重建</td>
+        <td><code>O(N)</code></td>
+        <td><code>O(N)</code></td>
+        <td>需要额外数组存储节点</td>
+      </tr>
+      <tr style="background: rgba(99, 102, 241, 0.1);">
+        <td><strong>O(1)空间迭代 ⭐推荐</strong></td>
+        <td><code>O(N)</code></td>
+        <td><code>O(1)</code></td>
+        <td>原地修改，利用右子树前驱节点</td>
+      </tr>
+      <tr>
+        <td>递归（右-左-根）</td>
+        <td><code>O(N)</code></td>
+        <td><code>O(H)</code></td>
+        <td>递归栈空间，逆向前序遍历</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>🎯 解题思路详解</h2>
+    <h3 style="color: var(--primary-light);">方法一：O(1)空间迭代法（Morris遍历思想）</h3>
+    <p>核心思想：对于当前节点，如果它有左子树，找到左子树的最右节点（即左子树先序遍历的最后一个节点），将当前节点的右子树接到这个最右节点的右指针上，然后把左子树移到右边。</p>
+    
+    <h3 style="color: var(--primary-light); margin-top: 24px;">方法二：递归法（逆向思维）</h3>
+    <p>按照 <strong>右-左-根</strong> 的顺序遍历（逆向前序遍历），使用一个全局变量 <code>prev</code> 记录上一个访问的节点，每次将当前节点的右指针指向 <code>prev</code>，左指针置空。</p>
+
+    <div class="highlight-box" style="margin-top: 20px;">
+      <strong>🔑 关键洞察：</strong><br>
+      对于节点1，其左子树先序遍历的最后一个节点，正好应该指向节点1原来的右子树的头节点。<br>
+      即：左子树最右节点 → 右子树头节点
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/construct-binary-tree-from-preorder-and-inorder-traversal/" class="problem-card" target="_blank">
+        <h4>#105 从前序与中序遍历序列构造二叉树</h4>
+        <p>利用前序遍历性质构造二叉树</p>
+        <span class="tag">二叉树</span>
+        <span class="tag">递归</span>
+      </a>
+      <a href="https://leetcode.cn/problems/populating-next-right-pointers-in-each-node/" class="problem-card" target="_blank">
+        <h4>#116 填充每个节点的下一个右侧节点指针</h4>
+        <p>层序遍历变形，连接同层节点</p>
+        <span class="tag">BFS</span>
+        <span class="tag">链表</span>
+      </a>
+      <a href="https://leetcode.cn/problems/convert-sorted-list-to-binary-search-tree/" class="problem-card" target="_blank">
+        <h4>#109 有序链表转换二叉搜索树</h4>
+        <p>链表与二叉树的相互转换</p>
+        <span class="tag">链表</span>
+        <span class="tag">分治</span>
+      </a>
+      <a href="https://leetcode.cn/problems/recover-binary-search-tree/" class="problem-card" target="_blank">
+        <h4>#99 恢复二叉搜索树</h4>
+        <p>Morris遍历经典应用，O(1)空间</p>
+        <span class="tag">Morris</span>
+        <span class="tag">BST</span>
+      </a>
+      <a href="https://leetcode.cn/problems/invert-binary-tree/" class="problem-card" target="_blank">
+        <h4>#226 翻转二叉树</h4>
+        <p>二叉树递归基础题，必会</p>
+        <span class="tag">递归</span>
+        <span class="tag">DFS</span>
+      </a>
+      <a href="https://leetcode.cn/problems/binary-tree-preorder-traversal/" class="problem-card" target="_blank">
+        <h4>#144 二叉树的前序遍历</h4>
+        <p>本题基础，理解前序遍历顺序</p>
+        <span class="tag">遍历</span>
+        <span class="tag">迭代</span>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    // 代码行数据
+    const codeLines = [
+      { num: 1, content: '<span class="keyword">class</span> <span class="class">Solution</span>:' },
+      { num: 2, content: '    <span class="keyword">def</span> <span class="function">flatten</span>(self, root: Optional[TreeNode]) -> <span class="keyword">None</span>:' },
+      { num: 3, content: '        <span class="string">"""原地将二叉树展开为链表，O(1)空间复杂度"""</span>' },
+      { num: 4, content: '        curr = root' },
+      { num: 5, content: '        <span class="keyword">while</span> curr:' },
+      { num: 6, content: '            <span class="keyword">if</span> curr.left:' },
+      { num: 7, content: '                <span class="comment"># 找到左子树的最右节点（前驱节点）</span>' },
+      { num: 8, content: '                predecessor = curr.left' },
+      { num: 9, content: '                <span class="keyword">while</span> predecessor.right:' },
+      { num: 10, content: '                    predecessor = predecessor.right' },
+      { num: 11, content: '                ' },
+      { num: 12, content: '                <span class="comment"># 将当前右子树接到前驱节点的右边</span>' },
+      { num: 13, content: '                predecessor.right = curr.right' },
+      { num: 14, content: '                ' },
+      { num: 15, content: '                <span class="comment"># 将左子树移到右边，左子树置空</span>' },
+      { content: '                curr.right = curr.left' },
+      { num: 17, content: '                curr.left = <span class="keyword">None</span>' },
+      { num: 18, content: '            ' },
+      { num: 19, content: '            <span class="comment"># 继续处理下一个节点</span>' },
+      { num: 20, content: '            curr = curr.right' },
+    ];
+
+    // 步骤与代码行映射
+    const steps = [
+      { title: "初始化指针", desc: "curr指向根节点，开始遍历", line: 4, state: { curr: 1, action: "开始遍历" } },
+      { title: "检查左子树", desc: "当前节点1有左子树(节点2)，进入处理逻辑", line: 6, state: { curr: 1, hasLeft: true } },
+      { title: "寻找前驱节点", desc: "从左子树根节点2开始，沿着右指针找到最右节点4", line: 8, state: { predecessor: 2 } },
+      { title: "继续找最右节点", desc: "节点2有右子树，继续向右移动", line: 9, state: { predecessor: 2 } },
+      { title: "到达最右节点", desc: "predecessor到达节点4，它是左子树先序遍历的最后一个节点", line: 10, state: { predecessor: 4 } },
+      { title: "连接右子树", desc: "将当前右子树(5→6)接到节点4的右边", line: 13, state: { "4.right": "5→6" } },
+      { title: "左子树移到右边", desc: "将左子树(2→3→4)移到当前节点的右指针", line: 16, state: { "1.right": "2→3→4→5→6" } },
+      { title: "左子树置空", desc: "当前节点的左指针置为null", line: 17, state: { "1.left": null } },
+      { title: "移动到下一个节点", desc: "curr移动到右子节点2，继续处理", line: 20, state: { curr: 2 } },
+      { title: "节点2无左子树", desc: "节点2没有左子树，直接向右移动", line: 6, state: { curr: 2, skip: true } },
+      { title: "移动到节点3", desc: "curr = 3，继续检查左子树", line: 20, state: { curr: 3 } },
+      { title: "节点3无左子树", desc: "节点3是叶子节点，直接跳过", line: 6, state: { curr: 3, skip: true } },
+      { title: "继续向右", desc: "依次处理节点4、5、6，均无左子树", line: 20, state: { curr: "4→5→6" } },
+      { title: "遍历完成", desc: "curr为null，链表展开完成：1→2→3→4→5→6", line: 5, state: { done: true } },
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach((line, idx) => {
+      const div = document.createElement('div');
+      div.className = 'code-line';
+      div.dataset.line = line.num || 16;
+      div.innerHTML = `<span class="line-number">${line.num || 16}</span><span class="code-content">${line.content}</span>`;
+      div.onclick = () => highlightStepByLine(line.num || 16);
+      codeBlock.appendChild(div);
+    });
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const div = document.createElement('div');
+      div.className = 'viz-step';
+      div.dataset.index = idx;
+      div.dataset.line = step.line;
+      div.innerHTML = `
+        <h4><span class="step-num">${idx + 1}</span>${step.title}</h4>
+        <p>${step.desc}</p>
+      `;
+      div.onclick = () => highlightStep(idx);
+      vizSteps.appendChild(div);
+    });
+
+    let currentStep = -1;
+
+    function highlightStep(index) {
+      // 更新步骤高亮
+      document.querySelectorAll('.viz-step').forEach((el, i) => {
+        el.classList.toggle('active', i === index);
+      });
+      
+      // 更新代码高亮
+      const step = steps[index];
+      document.querySelectorAll('.code-line').forEach(el => {
+        el.classList.toggle('active', parseInt(el.dataset.line) === step.line);
+      });
+
+      // 更新树可视化
+      updateTreeViz(step);
+      
+      currentStep = index;
+    }
+
+    function highlightStepByLine(lineNum) {
+      const stepIndex = steps.findIndex(s => s.line === lineNum);
+      if (stepIndex !== -1) {
+        highlightStep(stepIndex);
+        // 滚动到对应步骤
+        vizSteps.children[stepIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    function updateTreeViz(step) {
+      const currNodeEl = document.getElementById('currNode');
+      const treeEl = document.getElementById('treeStructure');
+      
+      if (step.state.curr) {
+        currNodeEl.textContent = step.state.curr;
+        currNodeEl.classList.add('active');
+      }
+      
+      if (step.state.done) {
+        treeEl.innerHTML = '<span style="color: var(--success);">✓ 1 → 2 → 3 → 4 → 5 → 6（展开完成）</span>';
+      }
+    }
+
+    // 默认高亮第一步
+    highlightStep(0);
+  </script>
+</body>
+</html>

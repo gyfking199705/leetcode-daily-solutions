@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #70 - 爬楼梯</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --secondary: #8b5cf6;
+      --accent: #ec4899;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --surface-2: #334155;
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    body { 
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+      background: linear-gradient(135deg, var(--bg) 0%, #1a1f3d 100%); 
+      color: var(--text); 
+      max-width: 1100px; 
+      margin: 0 auto; 
+      padding: 40px 20px;
+      line-height: 1.6;
+    }
+    h1 { 
+      font-size: 2.5rem; 
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin-bottom: 30px;
+    }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: transform 0.2s;
+    }
+    .section:hover {
+      transform: translateY(-2px);
+      border-color: rgba(99, 102, 241, 0.3);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-right: 8px;
+    }
+    .tag-easy { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+    .tag-medium { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+    .tag-hard { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 0;
+      overflow-x: auto;
+      border: 1px solid #21262d;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 4px 16px; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.25); 
+      border-left-color: var(--primary);
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 45px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    .code-content {
+      font-family: 'SF Mono', Monaco, monospace;
+      white-space: pre;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1.2fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 768px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    .viz-steps {
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    .viz-step { 
+      padding: 14px 16px; 
+      margin: 8px 0; 
+      border-radius: 10px; 
+      background: var(--surface-2); 
+      cursor: pointer; 
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .viz-step:hover { 
+      background: rgba(99, 102, 241, 0.15);
+      transform: translateX(5px);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.25);
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+    }
+    .viz-step-title {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .viz-step-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .viz-state {
+      margin-top: 10px;
+      padding: 10px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+      font-family: 'SF Mono', monospace;
+      font-size: 0.85rem;
+    }
+    .viz-state-label {
+      color: var(--accent);
+      margin-bottom: 5px;
+    }
+    .dp-array {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .dp-cell {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--surface-2);
+      border-radius: 8px;
+      border: 2px solid transparent;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .dp-cell.active {
+      background: var(--primary);
+      border-color: var(--secondary);
+      transform: scale(1.1);
+    }
+    .dp-cell.highlight {
+      background: var(--accent);
+      border-color: #f472b6;
+    }
+    .code-container h3 {
+      margin-top: 0;
+      color: var(--secondary);
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 20px; 
+      border: 1px solid #475569; 
+      transition: all 0.3s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block;
+      position: relative;
+      overflow: hidden;
+    }
+    .problem-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      transform: scaleX(0);
+      transition: transform 0.3s;
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-5px);
+      box-shadow: 0 10px 40px rgba(99, 102, 241, 0.2);
+    }
+    .problem-card:hover::before {
+      transform: scaleX(1);
+    }
+    .problem-card h4 {
+      margin: 0 0 10px 0;
+      color: var(--primary);
+    }
+    .problem-card p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; }
+    .class { color: #ffa657; }
+    .builtin { color: #7ee787; }
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    .complexity-table th, .complexity-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--surface-2);
+    }
+    .complexity-table th {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .complexity-table tr:hover {
+      background: rgba(255,255,255,0.02);
+    }
+    .formula {
+      background: rgba(99, 102, 241, 0.1);
+      padding: 16px 20px;
+      border-radius: 10px;
+      margin: 15px 0;
+      border-left: 4px solid var(--primary);
+      font-family: 'SF Mono', monospace;
+    }
+    .fibonacci-viz {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 20px;
+      background: var(--bg);
+      border-radius: 12px;
+      margin: 15px 0;
+      flex-wrap: wrap;
+    }
+    .fib-node {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--surface-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      border: 2px solid var(--primary);
+      transition: all 0.3s;
+    }
+    .fib-arrow {
+      color: var(--primary);
+      font-size: 1.5rem;
+    }
+    .fib-formula {
+      color: var(--accent);
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #70 - 爬楼梯</h1>
+  <p class="subtitle">
+    <span class="tag tag-easy">Easy</span>
+    动态规划经典入门题 | 斐波那契数列 | 空间优化技巧
+  </p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>假设你正在爬楼梯。需要 <code>n</code> 阶你才能到达楼顶。</p>
+    <p>每次你可以爬 <strong>1</strong> 或 <strong>2</strong> 个台阶。你有多少种不同的方法可以爬到楼顶呢？</p>
+    
+    <div style="margin-top: 20px; padding: 15px; background: var(--bg); border-radius: 10px;">
+      <strong>示例 1：</strong>
+      <pre style="background: transparent; border: none; margin: 10px 0;"><code>输入：n = 2
+输出：2
+解释：有两种方法可以爬到楼顶。
+1. 1 阶 + 1 阶
+2. 2 阶</code></pre>
+      
+      <strong>示例 2：</strong>
+      <pre style="background: transparent; border: none; margin: 10px 0;"><code>输入：n = 3
+输出：3
+解释：有三种方法可以爬到楼顶。
+1. 1 阶 + 1 阶 + 1 阶
+2. 1 阶 + 2 阶
+3. 2 阶 + 1 阶</code></pre>
+    </div>
+    
+    <p style="margin-top: 15px;"><strong>提示：</strong><code>1 <= n <= 45</code></p>
+  </div>
+  
+  <div class="section">
+    <h2>💡 核心思路</h2>
+    <p>这道题的精髓在于发现<strong>状态转移方程</strong>：</p>
+    
+    <div class="formula">
+      <strong>dp[i] = dp[i-1] + dp[i-2]</strong>
+    </div>
+    
+    <p>含义：<strong>到达第 i 阶的方法数 = 从 i-1 阶跨1步的方法数 + 从 i-2 阶跨2步的方法数</strong></p>
+    
+    <div class="fibonacci-viz">
+      <div class="fib-node">dp[i-2]</div>
+      <span class="fib-arrow">+</span>
+      <div class="fib-node">dp[i-1]</div>
+      <span class="fib-arrow">=</span>
+      <div class="fib-node" style="background: var(--primary);">dp[i]</div>
+    </div>
+    
+    <p>这正是<strong>斐波那契数列</strong>的定义！所以这道题本质上是求斐波那契数列的第 n 项。</p>
+    
+    <div style="margin-top: 20px;">
+      <strong>边界条件：</strong>
+      <ul>
+        <li><code>dp[0] = 1</code>：到达地面有1种方法（不爬）</li>
+        <li><code>dp[1] = 1</code>：到达第1阶只有1种方法（跨1步）</li>
+      </ul>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>🐍 Python 实现（空间优化版）</h3>
+        <pre><code id="codeBlock">
+<div class="code-line" data-line="1"><span class="line-number">1</span><span class="code-content"><span class="keyword">class</span> <span class="class">Solution</span>:</span></div>
+<div class="code-line" data-line="2"><span class="line-number">2</span><span class="code-content">    <span class="keyword">def</span> <span class="function">climbStairs</span>(<span class="builtin">self</span>, n: <span class="builtin">int</span>) -> <span class="builtin">int</span>:</span></div>
+<div class="code-line" data-line="3"><span class="line-number">3</span><span class="code-content">        <span class="comment"># 边界处理：只有1阶时直接返回</span></span></div>
+<div class="code-line" data-line="4"><span class="line-number">4</span><span class="code-content">        <span class="keyword">if</span> n <= <span class="number">1</span>:</span></div>
+<div class="code-line" data-line="5"><span class="line-number">5</span><span class="code-content">            <span class="keyword">return</span> <span class="number">1</span></span></div>
+<div class="code-line" data-line="6"><span class="line-number">6</span><span class="code-content">        </span></div>
+<div class="code-line" data-line="7"><span class="line-number">7</span><span class="code-content">        <span class="comment"># 只保留前两个状态，空间复杂度 O(1)</span></span></div>
+<div class="code-line" data-line="8"><span class="line-number">8</span><span class="code-content">        prev2, prev1 = <span class="number">1</span>, <span class="number">1</span>  <span class="comment"># dp[0] 和 dp[1]</span></span></div>
+<div class="code-line" data-line="9"><span class="line-number">9</span><span class="code-content">        </span></div>
+<div class="code-line" data-line="10"><span class="line-number">10</span><span class="code-content">        <span class="comment"># 从第2阶开始递推</span></span></div>
+<div class="code-line" data-line="11"><span class="line-number">11</span><span class="code-content">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="builtin">range</span>(<span class="number">2</span>, n + <span class="number">1</span>):</span></div>
+<div class="code-line" data-line="12"><span class="line-number">12</span><span class="code-content">            <span class="comment"># 当前阶数 = 前一阶方法数 + 前两阶方法数</span></span></div>
+<div class="code-line" data-line="13"><span class="line-number">13</span><span class="code-content">            current = prev1 + prev2</span></div>
+<div class="code-line" data-line="14"><span class="line-number">14</span><span class="code-content">            prev2 = prev1       <span class="comment"># 更新前两阶</span></span></div>
+<div class="code-line" data-line="15"><span class="line-number">15</span><span class="code-content">            prev1 = current     <span class="comment"># 更新前一阶</span></span></div>
+<div class="code-line" data-line="16"><span class="line-number">16</span><span class="code-content">        </span></div>
+<div class="code-line" data-line="17"><span class="line-number">17</span><span class="code-content">        <span class="keyword">return</span> prev1</span></div>
+        </code></pre>
+        
+        <div style="margin-top: 20px; padding: 15px; background: var(--bg); border-radius: 10px;">
+          <strong style="color: var(--success);">✨ 空间优化技巧</strong>
+          <p style="margin: 10px 0 0 0; color: var(--text-muted);">
+            由于 dp[i] 只依赖 dp[i-1] 和 dp[i-2]，我们不需要保存整个数组，
+            只需用两个变量滚动更新，将空间复杂度从 O(n) 降到 O(1)！
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <tr>
+        <th>解法</th>
+        <th>时间复杂度</th>
+        <th>空间复杂度</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>动态规划（数组版）</td>
+        <td>O(n)</td>
+        <td>O(n)</td>
+        <td>使用 dp 数组保存所有状态</td>
+      </tr>
+      <tr style="background: rgba(99, 102, 241, 0.1);">
+        <td><strong>动态规划（优化版）</strong></td>
+        <td><strong>O(n)</strong></td>
+        <td><strong>O(1)</strong></td>
+        <td><strong>推荐！只保留前两个状态</strong></td>
+      </tr>
+      <tr>
+        <td>矩阵快速幂</td>
+        <td>O(log n)</td>
+        <td>O(1)</td>
+        <td>利用斐波那契通项公式，面试装逼用</td>
+      </tr>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/fibonacci-number/" class="problem-card" target="_blank">
+        <h4>509. 斐波那契数</h4>
+        <p>同样的递推公式，更纯粹的斐波那契练习</p>
+      </a>
+      <a href="https://leetcode.cn/problems/min-cost-climbing-stairs/" class="problem-card" target="_blank">
+        <h4>746. 使用最小花费爬楼梯</h4>
+        <p>爬楼梯进阶版，加入「花费」维度的 DP</p>
+      </a>
+      <a href="https://leetcode.cn/problems/house-robber/" class="problem-card" target="_blank">
+        <h4>198. 打家劫舍</h4>
+        <p>相邻元素不能同时选，类似的 DP 思路</p>
+      </a>
+      <a href="https://leetcode.cn/problems/tribonacci-number/" class="problem-card" target="_blank">
+        <h4>1137. 第 N 个泰波那契数</h4>
+        <p>T(n) = T(n-1) + T(n-2) + T(n-3)，三步爬楼梯</p>
+      </a>
+      <a href="https://leetcode.cn/problems/unique-paths/" class="problem-card" target="_blank">
+        <h4>62. 不同路径</h4>
+        <p>二维网格上的动态规划，核心思想相通</p>
+      </a>
+      <a href="https://leetcode.cn/problems/decode-ways/" class="problem-card" target="_blank">
+        <h4>91. 解码方法</h4>
+        <p>数字解码，类似爬楼梯的「1步或2步」逻辑</p>
+      </a>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📝 解题套路总结</h2>
+    <div style="display: grid; gap: 15px;">
+      <div style="padding: 15px; background: var(--bg); border-radius: 10px;">
+        <strong style="color: var(--primary);">1️⃣ 找状态</strong>
+        <p style="margin: 8px 0 0 0; color: var(--text-muted);">
+          定义 <code>dp[i]</code> 为「到达第 i 阶的方法数」，这是问题的子结构
+        </p>
+      </div>
+      <div style="padding: 15px; background: var(--bg); border-radius: 10px;">
+        <strong style="color: var(--primary);">2️⃣ 找转移</strong>
+        <p style="margin: 8px 0 0 0; color: var(--text-muted);">
+          思考最后一步是怎么来的：可能是从 i-1 跨1步，或从 i-2 跨2步
+        </p>
+      </div>
+      <div style="padding: 15px; background: var(--bg); border-radius: 10px;">
+        <strong style="color: var(--primary);">3️⃣ 找边界</strong>
+        <p style="margin: 8px 0 0 0; color: var(--text-muted);">
+          <code>dp[0]=1, dp[1]=1</code>，递推从这里开始
+        </p>
+      </div>
+      <div style="padding: 15px; background: var(--bg); border-radius: 10px;">
+        <strong style="color: var(--primary);">4️⃣ 空间优化</strong>
+        <p style="margin: 8px 0 0 0; color: var(--text-muted);">
+          如果转移只依赖前 k 个状态，考虑用滚动变量代替数组
+        </p>
+      </div>
+    </div>
+  </div>
+  
+  <footer style="text-align: center; padding: 30px; color: var(--text-muted); font-size: 0.9rem;">
+    <p>Generated by Kimi Claw | 2026-03-17</p>
+    <p>每日一题，日拱一卒</p>
+  </footer>
+  
+  <script>
+    // 步骤与代码行映射
+    const steps = [
+      {
+        title: "🚀 初始化阶段",
+        desc: "处理边界情况，当 n <= 1 时直接返回1",
+        line: 4,
+        state: { n: "2~45", prev2: "-", prev1: "-" },
+        dpArray: [1, 1]
+      },
+      {
+        title: "🔧 设置初始状态",
+        desc: "prev2 = dp[0] = 1, prev1 = dp[1] = 1",
+        line: 8,
+        state: { prev2: "1", prev1: "1" },
+        dpArray: [1, 1]
+      },
+      {
+        title: "🔄 开始循环",
+        desc: "i = 2，计算第2阶的方法数",
+        line: 11,
+        state: { i: "2", prev2: "1", prev1: "1" },
+        dpArray: [1, 1, "?"]
+      },
+      {
+        title: "✨ 状态转移",
+        desc: "current = prev1 + prev2 = 1 + 1 = 2",
+        line: 13,
+        state: { current: "2" },
+        dpArray: [1, 1, 2]
+      },
+      {
+        title: "📥 更新 prev2",
+        desc: "prev2 = prev1 = 1（prev2 现在代表 dp[1]）",
+        line: 14,
+        state: { prev2: "1 → 1", prev1: "1" },
+        dpArray: [1, 1, 2]
+      },
+      {
+        title: "📥 更新 prev1",
+        desc: "prev1 = current = 2（prev1 现在代表 dp[2]）",
+        line: 15,
+        state: { prev2: "1", prev1: "1 → 2" },
+        dpArray: [1, 1, 2]
+      },
+      {
+        title: "🔄 下一轮循环",
+        desc: "i = 3，计算第3阶的方法数",
+        line: 11,
+        state: { i: "3", prev2: "1", prev1: "2" },
+        dpArray: [1, 1, 2, "?"]
+      },
+      {
+        title: "✨ 状态转移",
+        desc: "current = prev1 + prev2 = 2 + 1 = 3",
+        line: 13,
+        state: { current: "3" },
+        dpArray: [1, 1, 2, 3]
+      },
+      {
+        title: "📥 更新变量",
+        desc: "prev2 = 2, prev1 = 3",
+        line: 14,
+        state: { prev2: "1 → 2", prev1: "2 → 3" },
+        dpArray: [1, 1, 2, 3]
+      },
+      {
+        title: "🏁 返回结果",
+        desc: "循环结束，prev1 就是 dp[n]，返回答案",
+        line: 17,
+        state: { result: "prev1 = dp[n]" },
+        dpArray: [1, 1, 2, 3, 5, 8, 13]
+      }
+    ];
+
+    // 生成步骤HTML
+    const vizStepsContainer = document.getElementById('vizSteps');
+    
+    steps.forEach((step, index) => {
+      const stepDiv = document.createElement('div');
+      stepDiv.className = 'viz-step';
+      stepDiv.dataset.index = index;
+      stepDiv.dataset.line = step.line;
+      
+      let stateHtml = '';
+      if (step.state) {
+        stateHtml = '<div class="viz-state">';
+        stateHtml += '<div class="viz-state-label">📊 变量状态</div>';
+        Object.entries(step.state).forEach(([key, value]) => {
+          stateHtml += `<div>${key}: <span style="color: var(--success);">${value}</span></div>`;
+        });
+        
+        // 添加 DP 数组可视化
+        if (step.dpArray) {
+          stateHtml += '<div style="margin-top: 10px;">dp数组:</div>';
+          stateHtml += '<div class="dp-array">';
+          step.dpArray.forEach((val, i) => {
+            const isActive = val !== "?";
+            const isLast = i === step.dpArray.length - 1;
+            stateHtml += `<div class="dp-cell ${isActive ? 'active' : ''} ${isLast && isActive ? 'highlight' : ''}">${val}</div>`;
+          });
+          stateHtml += '</div>';
+        }
+        
+        stateHtml += '</div>';
+      }
+      
+      stepDiv.innerHTML = `
+        <div class="viz-step-title">${step.title}</div>
+        <div class="viz-step-desc">${step.desc}</div>
+        <div style="margin-top: 8px; font-size: 0.8rem; color: var(--accent);">→ 代码行 ${step.line}</div>
+        ${stateHtml}
+      `;
+      
+      stepDiv.addEventListener('click', () => activateStep(index));
+      vizStepsContainer.appendChild(stepDiv);
+    });
+
+    // 代码行点击事件
+    document.querySelectorAll('.code-line').forEach(line => {
+      line.addEventListener('click', () => {
+        const lineNum = parseInt(line.dataset.line);
+        const stepIndex = steps.findIndex(s => s.line === lineNum);
+        if (stepIndex !== -1) {
+          activateStep(stepIndex);
+        }
+      });
+    });
+
+    // 激活步骤
+    function activateStep(index) {
+      // 清除之前的高亮
+      document.querySelectorAll('.viz-step').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+      
+      // 高亮当前步骤
+      const step = steps[index];
+      const stepEl = document.querySelector(`.viz-step[data-index="${index}"]`);
+      const codeLine = document.querySelector(`.code-line[data-line="${step.line}"]`);
+      
+      if (stepEl) {
+        stepEl.classList.add('active');
+        stepEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      if (codeLine) {
+        codeLine.classList.add('active');
+      }
+    }
+
+    // 默认激活第一步
+    activateStep(0);
+  </script>
+</body>
+</html>

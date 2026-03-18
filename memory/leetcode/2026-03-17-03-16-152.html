@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeetCode 152 | 乘积最大子数组 - 交互式精讲</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style type="text/tailwindcss">
+        @layer base {
+            body {
+                font-family: 'Inter', sans-serif;
+                background-color: #0f172a;
+                color: #e2e8f0;
+            }
+            .font-mono {
+                font-family: 'JetBrains Mono', monospace;
+            }
+        }
+        @layer components {
+            .code-line {
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .code-line.active {
+                background: linear-gradient(90deg, rgba(99, 102, 241, 0.15) 0%, transparent 100%);
+                border-left: 3px solid #6366f1;
+            }
+            .code-line:hover:not(.active) {
+                background: rgba(255, 255, 255, 0.03);
+            }
+            .step-card {
+                transition: all 0.3s ease;
+                cursor: pointer;
+            }
+            .step-card:hover {
+                transform: translateX(4px);
+                border-color: #6366f1;
+            }
+            .step-card.active {
+                background: rgba(99, 102, 241, 0.1);
+                border-color: #6366f1;
+                box-shadow: 0 0 20px rgba(99, 102, 241, 0.15);
+            }
+            .syntax-keyword { color: #c084fc; }
+            .syntax-function { color: #60a5fa; }
+            .syntax-string { color: #4ade80; }
+            .syntax-number { color: #fb923c; }
+            .syntax-comment { color: #64748b; font-style: italic; }
+            .syntax-class { color: #f472b6; }
+            .cell-value {
+                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .cell-value.highlight {
+                transform: scale(1.1);
+                box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+            }
+            .array-cell {
+                transition: all 0.3s ease;
+            }
+            .array-cell.current {
+                background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+                transform: translateY(-4px);
+                box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+            }
+            .glow-text {
+                text-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+            }
+            .progress-bar {
+                transition: width 0.5s ease;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Header -->
+    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center font-bold text-xl shadow-lg shadow-indigo-500/20">
+                        152
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-white">乘积最大子数组</h1>
+                        <p class="text-sm text-slate-400">Maximum Product Subarray</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 bg-yellow-500/10 text-yellow-400 text-sm font-medium rounded-full border border-yellow-500/20">
+                        Medium
+                    </span>
+                    <span class="px-3 py-1 bg-indigo-500/10 text-indigo-400 text-sm font-medium rounded-full border border-indigo-500/20">
+                        动态规划
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Problem Description -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+                <span class="w-1 h-6 bg-indigo-500 rounded-full"></span>
+                题目描述
+            </h2>
+            <div class="bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
+                <p class="text-slate-300 leading-relaxed mb-4">
+                    给你一个整数数组 <code class="bg-slate-700 px-2 py-0.5 rounded text-indigo-300 font-mono">nums</code> ，请你找出数组中乘积最大的非空连续子数组（该子数组中至少包含一个数字），并返回该子数组所对应的乘积。
+                </p>
+                <p class="text-slate-300 leading-relaxed">
+                    测试用例的答案是一个 <strong class="text-white">32-位</strong> 整数。
+                </p>
+                
+                <div class="mt-6 grid md:grid-cols-2 gap-4">
+                    <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700">
+                        <p class="text-sm text-slate-400 mb-2">示例 1:</p>
+                        <pre class="font-mono text-sm text-slate-300">
+输入: nums = [2,3,-2,4]
+输出: 6
+解释: 子数组 [2,3] 有最大乘积 6。</pre>
+                    </div>
+                    <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700">
+                        <p class="text-sm text-slate-400 mb-2">示例 2:</p>
+                        <pre class="font-mono text-sm text-slate-300">
+输入: nums = [-2,0,-1]
+输出: 0
+解释: 结果不能为 2, 因为 [-2,-1] 不是子数组。</pre>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex flex-wrap gap-2">
+                    <span class="text-xs text-slate-500">约束条件:</span>
+                    <code class="text-xs bg-slate-700 px-2 py-1 rounded text-slate-300 font-mono">1 ≤ nums.length ≤ 2 × 10⁴</code>
+                    <code class="text-xs bg-slate-700 px-2 py-1 rounded text-slate-300 font-mono">-10 ≤ nums[i] ≤ 10</code>
+                    <code class="text-xs bg-slate-700 px-2 py-1 rounded text-slate-300 font-mono">nums 的任何前缀或后缀的乘积都保证在一个 32 位整数范围内</code>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Insight -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+                <span class="w-1 h-6 bg-indigo-500 rounded-full"></span>
+                核心考点
+            </h2>
+            <div class="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-2xl p-6 border border-indigo-500/20">
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 bg-indigo-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-white mb-2">为什么要同时维护最大值和最小值？</h3>
+                        <p class="text-slate-300 leading-relaxed">
+                            这道题的关键在于同时维护「以当前元素结尾的最大乘积」和「最小乘积」。
+                            因为<span class="text-indigo-400 font-semibold">负数乘以最小值会变成最大值</span>！
+                            例如：当前数为 -2，之前的最小乘积是 -10，那么它们的乘积 20 可能变成新的最大值。
+                        </p>
+                        <div class="mt-4 flex gap-4">
+                            <div class="px-4 py-2 bg-slate-800/50 rounded-lg border border-slate-700">
+                                <span class="text-xs text-slate-400 block">最大乘积</span>
+                                <span class="text-green-400 font-mono font-semibold">max_ending_here</span>
+                            </div>
+                            <div class="px-4 py-2 bg-slate-800/50 rounded-lg border border-slate-700">
+                                <span class="text-xs text-slate-400 block">最小乘积</span>
+                                <span class="text-red-400 font-mono font-semibold">min_ending_here</span>
+                            </div>
+                            <div class="px-4 py-2 bg-slate-800/50 rounded-lg border border-slate-700">
+                                <span class="text-xs text-slate-400 block">全局最大</span>
+                                <span class="text-yellow-400 font-mono font-semibold">max_so_far</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Visualization -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+                <span class="w-1 h-6 bg-indigo-500 rounded-full"></span>
+                交互式可视化
+            </h2>
+            
+            <div class="grid lg:grid-cols-2 gap-6">
+                <!-- Steps Panel -->
+                <div class="bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold text-white">算法步骤</h3>
+                        <div class="flex gap-2">
+                            <button onclick="resetVisualization()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm text-white transition-colors">
+                                重置
+                            </button>
+                            <button onclick="autoPlay()" id="playBtn" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm text-white transition-colors flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
+                                </svg>
+                                自动演示
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-3" id="stepsContainer">
+                        <div class="step-card p-4 rounded-xl border border-slate-700 bg-slate-900/30" data-step="0" onclick="goToStep(0)">
+                            <div class="flex items-center gap-3">
+                                <span class="w-6 h-6 rounded-full bg-slate-700 text-xs flex items-center justify-center text-slate-300 font-mono">1</span>
+                                <div>
+                                    <p class="text-sm font-medium text-white">初始化变量</p>
+                                    <p class="text-xs text-slate-400 mt-1">设置 max_so_far = nums[0], max_ending = nums[0], min_ending = nums[0]</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="step-card p-4 rounded-xl border border-slate-700 bg-slate-900/30" data-step="1" onclick="goToStep(1)">
+                            <div class="flex items-center gap-3">
+                                <span class="w-6 h-6 rounded-full bg-slate-700 text-xs flex items-center justify-center text-slate-300 font-mono">2</span>
+                                <div>
+                                    <p class="text-sm font-medium text-white">遍历数组 (从索引 1 开始)</p>
+                                    <p class="text-xs text-slate-400 mt-1">for i in range(1, len(nums))</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="step-card p-4 rounded-xl border border-slate-700 bg-slate-900/30" data-step="2" onclick="goToStep(2)">
+                            <div class="flex items-center gap-3">
+                                <span class="w-6 h-6 rounded-full bg-slate-700 text-xs flex items-center justify-center text-slate-300 font-mono">3</span>
+                                <div>
+                                    <p class="text-sm font-medium text-white">遇到负数，交换最大/最小值</p>
+                                    <p class="text-xs text-slate-400 mt-1">if nums[i] < 0: swap(max_ending, min_ending)</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="step-card p-4 rounded-xl border border-slate-700 bg-slate-900/30" data-step="3" onclick="goToStep(3)">
+                            <div class="flex items-center gap-3">
+                                <span class="w-6 h-6 rounded-full bg-slate-700 text-xs flex items-center justify-center text-slate-300 font-mono">4</span>
+                                <div>
+                                    <p class="text-sm font-medium text-white">更新当前最大/最小乘积</p>
+                                    <p class="text-xs text-slate-400 mt-1">max_ending = max(nums[i], max_ending * nums[i])</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="step-card p-4 rounded-xl border border-slate-700 bg-slate-900/30" data-step="4" onclick="goToStep(4)">
+                            <div class="flex items-center gap-3">
+                                <span class="w-6 h-6 rounded-full bg-slate-700 text-xs flex items-center justify-center text-slate-300 font-mono">5</span>
+                                <div>
+                                    <p class="text-sm font-medium text-white">更新全局最大值</p>
+                                    <p class="text-xs text-slate-400 mt-1">max_so_far = max(max_so_far, max_ending)</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="step-card p-4 rounded-xl border border-slate-700 bg-slate-900/30" data-step="5" onclick="goToStep(5)">
+                            <div class="flex items-center gap-3">
+                                <span class="w-6 h-6 rounded-full bg-slate-700 text-xs flex items-center justify-center text-slate-300 font-mono">6</span>
+                                <div>
+                                    <p class="text-sm font-medium text-white">返回结果</p>
+                                    <p class="text-xs text-slate-400 mt-1">return max_so_far</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="mt-4 h-1 bg-slate-700 rounded-full overflow-hidden">
+                        <div id="progressBar" class="progress-bar h-full bg-gradient-to-r from-indigo-500 to-purple-500" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Code Panel -->
+                <div class="bg-slate-800/50 rounded-2xl border border-slate-700 overflow-hidden">
+                    <div class="bg-slate-900/50 px-4 py-3 border-b border-slate-700 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
+                        </div>
+                        <span class="text-xs text-slate-500 font-mono">solution.py</span>
+                    </div>
+                    <div class="p-4 font-mono text-sm overflow-x-auto">
+                        <div class="code-line px-2 py-1 rounded flex" data-line="1">
+                            <span class="text-slate-600 select-none w-8 text-right mr-4">1</span>
+                            <span><span class="syntax-keyword">class</span> <span class="syntax-class">Solution</span>:</span>
+                        </div>
+                        <div class="code-line px-2 py-1 rounded flex" data-line="2">
+                            <span class="text-slate-600 select-none w-8 text-right mr-4">2</span>
+                            <span>    <span class="syntax-keyword">def</span> <span class="syntax-function">maxProduct</span>(<span class="syntax-keyword">self</span>, nums: List[<span class="syntax-keyword">int</span>]) -> <span class="syntax-keyword">int</span>:</span>
+                        </div>
+                        <div class="code-line px-2 py-1 rounded flex" data-line="3">
+                            <span class="text-slate-600 select-none w-8 text-right mr-4">3</span>
+                            <span>        <span class="syntax-comment"># 处理边界情况</span></span>
+                        </div>
+                        <div class="code-line px-2 py-1 rounded flex" data-line="4">
+                            <span class="text-slate-600 select-none w-8 text-right mr-4">4</span>
+                            <span>        <span class="syntax-keyword">if</span> <span class="syntax-keyword">not</span> nums:</span>
+                        </div>
+                        <div class="code-line px-2 py-1 rounded flex" data-line="5">
+                            <span class="text-slate-600 select-none w-8 text-right mr-4">5</span>
+                            <span>            <span class="syntax-keyword">return</span> <span class="syntax-number">0</span></span>
+                        </div>
+                        <div class="code-line px-2 py-1 rounded flex" data-line="6">
+                            <span class="text-slate-600 select-none w-8 text-right mr-4">6</span>
+                            <span></span>
+                        </div>
+                        <div class="code-line px-2 py-1 rounded flex" data-line="7">
+                            <span class="text-slate-600 select-none w-8 text-right mr-4">7</span>
+                            <span>        <span class="syntax-comment"># 初始化：max_so_far 记录全局最大乘积</span></span>
+                        </div>
+                        <div class="code-line px-2 py-1 rounded flex" data-line="8">
+                            <span class="text-slate-600 select-none w-8 text-right mr-4">8</span>
+                            <span>        <span class="syntax-comment"># max_ending: 以当前元素结尾的最大乘积</span></span>
+                        </div>
+                        <div class="code-line px-2 py-1 rounded flex" data-line="9">
+                            <span class="text-slate-600 select-none w-8 text-right mr-4">9</span>
+                            <span>        <span class="syntax-comment"># min_ending: 以当前元素结尾的最小乘积（关键！）</span></span>
+                        </div>
+                        <div class="code-line px-2 py-1 rounded flex" data-line="10">
+                            <span class="text-slate-600 select-none w-8 text-right mr-4">10</span>
+                            <span>        max_so_far = max_ending = min_ending = nums[<span class="syntax-number">0</span>]</span>
+                        </div>
+                        <div class="code-line px-2 py-1 rounded flex" data-line="11">
+                            <span class="text-slate-600 select-none w-8 text-right mr-4">11</span>
+                            <span></span>
+                        </div>
+                        <div class="code-line px-2 py-1 rounded flex" data-line="12">
+                            <span class="text-slate-600 select-none w-8 text-right mr-4">12</span>
+                            <span>        <span class="syntax-comment"># 从第二个元素开始遍历</span></span>
+                        </div>
+                        <div class="code-line px-2 py-1 rounded flex" data-line="13">
+                            <span class="text-slate-600 select-none w-8 text-right mr-4">13</span>
+                            <span>        <span class="syntax-keyword">for</span> i <span class="syntax-keyword">in</span> <span class="syntax-function">range</span>(<span class="syntax-number">1</span>, <span class="syntax-function">len</span>(nums)):</span>
+                        </div>
+                        <div class="code-line px-2 py-1 rounded flex" data-line="14">
+                            <span class="text-slate-600 select-none w-8 text-right mr-4">14</span>
+                            <span>            <span class="syntax-comment"># 关键点：如果当前数是负数，交换 max_ending 和 min_ending</span></span>
+                        </div>
+                        <div class="code-line px-2 py-1 rounded flex" data-line="15">
+                            <span class="text-slate-600 select-none w-8 text-right mr-4">15</span>
+                            <span>            <span class="syntax-comment"># 原因：负数 * 最小值 = 最大值</span></span>
+                        </div>
+                        <div class="code-line px-2 py-1 rounded flex" data-line="16">
+                            <span class="text-slate-600 select-none w-8 text-right mr-4">16</span>
+                            <span>            <span class="syntax-keyword">if</span> nums[i] < <span class="syntax-number">0</span>:</span>
+                        </div>
+                        <div class="code-line px-2 py-1 rounded flex" data-line="17">
+                            <span class="text-slate-600 select-none w-8 text-right mr-4">17</span>
+                            <span>                max_ending, min_ending = min_ending, max_ending</span>
+                        </div>
+                        <div class="code-line px-2 py-1 rounded flex" data-line="18">
+                            <span class="text-slate-600 select-none w-8 text-right mr-4">18</span>
+                            <span></span>
+                        </div>
+                        <div class="code-line px-2 py-1 rounded flex" data-line="19">
+                            <span class="text-slate-600 select-none w-8 text-right mr-4">19</span>
+                            <span>            <span class="syntax-comment"># 更新以当前元素结尾的最大/最小乘积</span></span>
+                        </div>
+                        <div class="code-line px-2 py-1 rounded flex" data-line="20">
+                            <span class="text-slate-600 select-none w-8 text-right mr-4">20</span>
+                            <span>            <span class="syntax-comment"># 选择：单独当前元素 OR 继续延伸子数组</span></span>
+                        </div>
+                        <div class="code-line px-2 py-1 rounded flex" data-line="21">
+                            <span class="text-slate-600 select-none w-8 text-right mr-4">21</span>
+                            <span>            max_ending = <span class="syntax-function">max</span>(nums[i], max_ending * nums[i])</span>
+                        </div>
+                        <div class="code-line px-2 py-1 rounded flex" data-line="22">
+                            <span class="text-slate-600 select-none w-8 text-right mr-4">22</span>
+                            <span>            min_ending = <span class="syntax-function">min</span>(nums[i], min_ending * nums[i])</span>
+                        </div>
+                        <div class="code-line px-2 py-1 rounded flex" data-line="23">
+                            <span class="text-slate-600 select-none w-8 text-right mr-4">23</span>
+                            <span></span>
+                        </div>
+                        <div class="code-line px-2 py-1 rounded flex" data-line="24">
+                            <span class="text-slate-600 select-none w-8 text-right mr-4">24</span>
+                            <span>            <span class="syntax-comment"># 更新全局最大乘积</span></span>
+                        </div>
+                        <div class="code-line px-2 py-1 rounded flex" data-line="25">
+                            <span class="text-slate-600 select-none w-8 text-right mr-4">25</span>
+                            <span>            max_so_far = <span class="syntax-function">max</span>(max_so_far, max_ending)</span>
+                        </div>
+                        <div class="code-line px-2 py-1 rounded flex" data-line="26">
+                            <span class="text-slate-600 select-none w-8 text-right mr-4">26</span>
+                            <span></span>
+                        </div>
+                        <div class="code-line px-2 py-1 rounded flex" data-line="27">
+                            <span class="text-slate-600 select-none w-8 text-right mr-4">27</span>
+                            <span>        <span class="syntax-keyword">return</span> max_so_far</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visualization Area -->
+            <div class="mt-6 bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-semibold text-white">示例演示: nums = [2, 3, -2, 4]</h3>
+                    <div class="flex gap-2 text-sm">
+                        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-indigo-500"></span> 当前元素</span>
+                        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-green-500/50"></span> 最大值</span>
+                        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-red-500/50"></span> 最小值</span>
+                    </div>
+                </div>
+                
+                <!-- Array Display -->
+                <div class="flex justify-center mb-6">
+                    <div class="flex gap-2" id="arrayDisplay">
+                        <div class="array-cell w-14 h-14 bg-slate-700 rounded-xl flex items-center justify-center text-xl font-bold" data-idx="0">2</div>
+                        <div class="array-cell w-14 h-14 bg-slate-700 rounded-xl flex items-center justify-center text-xl font-bold" data-idx="1">3</div>
+                        <div class="array-cell w-14 h-14 bg-slate-700 rounded-xl flex items-center justify-center text-xl font-bold" data-idx="2">-2</div>
+                        <div class="array-cell w-14 h-14 bg-slate-700 rounded-xl flex items-center justify-center text-xl font-bold" data-idx="3">4</div>
+                    </div>
+                </div>
+
+                <!-- State Display -->
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700 text-center">
+                        <p class="text-xs text-slate-400 mb-2">max_so_far (全局最大)</p>
+                        <p class="text-2xl font-bold text-yellow-400 font-mono" id="displayMaxSoFar">-</p>
+                    </div>
+                    <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700 text-center">
+                        <p class="text-xs text-slate-400 mb-2">max_ending (当前最大)</p>
+                        <p class="text-2xl font-bold text-green-400 font-mono" id="displayMaxEnding">-</p>
+                    </div>
+                    <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700 text-center">
+                        <p class="text-xs text-slate-400 mb-2">min_ending (当前最小)</p>
+                        <p class="text-2xl font-bold text-red-400 font-mono" id="displayMinEnding">-</p>
+                    </div>
+                </div>
+
+                <!-- Explanation -->
+                <div class="mt-4 p-4 bg-slate-900/30 rounded-xl border border-slate-700">
+                    <p class="text-sm text-slate-300" id="stepExplanation">点击上方步骤或播放按钮开始演示...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Complexity Analysis -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+                <span class="w-1 h-6 bg-indigo-500 rounded-full"></span>
+                复杂度分析
+            </h2>
+            <div class="bg-slate-800/50 rounded-2xl overflow-hidden border border-slate-700">
+                <table class="w-full">
+                    <thead class="bg-slate-900/50">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-slate-300">复杂度类型</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-slate-300">复杂度</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-slate-300">说明</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-700">
+                        <tr class="hover:bg-slate-700/30 transition-colors">
+                            <td class="px-6 py-4 text-sm font-medium text-white">时间复杂度</td>
+                            <td class="px-6 py-4"><code class="bg-indigo-500/10 text-indigo-400 px-2 py-1 rounded font-mono">O(n)</code></td>
+                            <td class="px-6 py-4 text-sm text-slate-400">只需遍历数组一次，每个元素处理时间为 O(1)</td>
+                        </tr>
+                        <tr class="hover:bg-slate-700/30 transition-colors">
+                            <td class="px-6 py-4 text-sm font-medium text-white">空间复杂度</td>
+                            <td class="px-6 py-4"><code class="bg-green-500/10 text-green-400 px-2 py-1 rounded font-mono">O(1)</code></td>
+                            <td class="px-6 py-4 text-sm text-slate-400">只使用了常数额外空间（3 个变量）</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Similar Problems -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+                <span class="w-1 h-6 bg-indigo-500 rounded-full"></span>
+                类似题目推荐
+            </h2>
+            <div class="grid md:grid-cols-3 gap-4">
+                <a href="https://leetcode.cn/problems/maximum-subarray/" target="_blank" class="group bg-slate-800/50 rounded-xl p-5 border border-slate-700 hover:border-indigo-500/50 transition-all hover:shadow-lg hover:shadow-indigo-500/10">
+                    <div class="flex items-start justify-between mb-3">
+                        <span class="text-xs font-mono text-slate-500">#53</span>
+                        <span class="px-2 py-0.5 bg-green-500/10 text-green-400 text-xs rounded-full">Easy</span>
+                    </div>
+                    <h3 class="font-semibold text-white group-hover:text-indigo-400 transition-colors mb-2">最大子数组和</h3>
+                    <p class="text-sm text-slate-400">Maximum Subarray (Kadane's Algorithm)</p>
+                    <div class="mt-3 flex items-center gap-1 text-xs text-indigo-400">
+                        <span>去刷题</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                        </svg>
+                    </div>
+                </a>
+
+                <a href="https://leetcode.cn/problems/maximum-product-of-three-numbers/" target="_blank" class="group bg-slate-800/50 rounded-xl p-5 border border-slate-700 hover:border-indigo-500/50 transition-all hover:shadow-lg hover:shadow-indigo-500/10">
+                    <div class="flex items-start justify-between mb-3">
+                        <span class="text-xs font-mono text-slate-500">#628</span>
+                        <span class="px-2 py-0.5 bg-green-500/10 text-green-400 text-xs rounded-full">Easy</span>
+                    </div>
+                    <h3 class="font-semibold text-white group-hover:text-indigo-400 transition-colors mb-2">三个数的最大乘积</h3>
+                    <p class="text-sm text-slate-400">Maximum Product of Three Numbers</p>
+                    <div class="mt-3 flex items-center gap-1 text-xs text-indigo-400">
+                        <span>去刷题</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                        </svg>
+                    </div>
+                </a>
+
+                <a href="https://leetcode.cn/problems/subarray-product-less-than-k/" target="_blank" class="group bg-slate-800/50 rounded-xl p-5 border border-slate-700 hover:border-indigo-500/50 transition-all hover:shadow-lg hover:shadow-indigo-500/10">
+                    <div class="flex items-start justify-between mb-3">
+                        <span class="text-xs font-mono text-slate-500">#713</span>
+                        <span class="px-2 py-0.5 bg-yellow-500/10 text-yellow-400 text-xs rounded-full">Medium</span>
+                    </div>
+                    <h3 class="font-semibold text-white group-hover:text-indigo-400 transition-colors mb-2">乘积小于 K 的子数组</h3>
+                    <p class="text-sm text-slate-400">Subarray Product Less Than K</p>
+                    <div class="mt-3 flex items-center gap-1 text-xs text-indigo-400">
+                        <span>去刷题</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                        </svg>
+                    </div>
+                </a>
+
+                <a href="https://leetcode.cn/problems/house-robber/" target="_blank" class="group bg-slate-800/50 rounded-xl p-5 border border-slate-700 hover:border-indigo-500/50 transition-all hover:shadow-lg hover:shadow-indigo-500/10">
+                    <div class="flex items-start justify-between mb-3">
+                        <span class="text-xs font-mono text-slate-500">#198</span>
+                        <span class="px-2 py-0.5 bg-yellow-500/10 text-yellow-400 text-xs rounded-full">Medium</span>
+                    </div>
+                    <h3 class="font-semibold text-white group-hover:text-indigo-400 transition-colors mb-2">打家劫舍</h3>
+                    <p class="text-sm text-slate-400">House Robber (经典 DP)</p>
+                    <div class="mt-3 flex items-center gap-1 text-xs text-indigo-400">
+                        <span>去刷题</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                        </svg>
+                    </div>
+                </a>
+
+                <a href="https://leetcode.cn/problems/best-time-to-buy-and-sell-stock/" target="_blank" class="group bg-slate-800/50 rounded-xl p-5 border border-slate-700 hover:border-indigo-500/50 transition-all hover:shadow-lg hover:shadow-indigo-500/10">
+                    <div class="flex items-start justify-between mb-3">
+                        <span class="text-xs font-mono text-slate-500">#121</span>
+                        <span class="px-2 py-0.5 bg-green-500/10 text-green-400 text-xs rounded-full">Easy</span>
+                    </div>
+                    <h3 class="font-semibold text-white group-hover:text-indigo-400 transition-colors mb-2">买卖股票的最佳时机</h3>
+                    <p class="text-sm text-slate-400">Best Time to Buy and Sell Stock</p>
+                    <div class="mt-3 flex items-center gap-1 text-xs text-indigo-400">
+                        <span>去刷题</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                        </svg>
+                    </div>
+                </a>
+
+                <a href="https://leetcode.cn/problems/continuous-subarray-sum/" target="_blank" class="group bg-slate-800/50 rounded-xl p-5 border border-slate-700 hover:border-indigo-500/50 transition-all hover:shadow-lg hover:shadow-indigo-500/10">
+                    <div class="flex items-start justify-between mb-3">
+                        <span class="text-xs font-mono text-slate-500">#523</span>
+                        <span class="px-2 py-0.5 bg-yellow-500/10 text-yellow-400 text-xs rounded-full">Medium</span>
+                    </div>
+                    <h3 class="font-semibold text-white group-hover:text-indigo-400 transition-colors mb-2">连续的子数组和</h3>
+                    <p class="text-sm text-slate-400">Continuous Subarray Sum</p>
+                    <div class="mt-3 flex items-center gap-1 text-xs text-indigo-400">
+                        <span>去刷题</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                        </svg>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+                <span class="w-1 h-6 bg-indigo-500 rounded-full"></span>
+                总结
+            </h2>
+            <div class="bg-gradient-to-r from-slate-800/50 to-slate-800/30 rounded-2xl p-6 border border-slate-700">
+                <div class="space-y-4">
+                    <div class="flex items-start gap-3">
+                        <div class="w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span class="text-indigo-400 text-sm font-bold">1</span>
+                        </div>
+                        <p class="text-slate-300">这道题是 <strong class="text-white">Kadane 算法</strong>的变形，核心在于同时维护最大和最小值。</p>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <div class="w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span class="text-indigo-400 text-sm font-bold">2</span>
+                        </div>
+                        <p class="text-slate-300">当遇到负数时，交换 max_ending 和 min_ending，因为负数能将最小值"翻转"成最大值。</p>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <div class="w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span class="text-indigo-400 text-sm font-bold">3</span>
+                        </div>
+                        <p class="text-slate-300">每次更新时考虑「单独当前元素」或「继续延伸子数组」两种情况。</p>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <div class="w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span class="text-indigo-400 text-sm font-bold">4</span>
+                        </div>
+                        <p class="text-slate-300">时间复杂度 O(n)，空间复杂度 O(1)，是动态规划中的经典问题。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-6 text-center text-slate-500 text-sm">
+            <p>LeetCode 152 - Maximum Product Subarray | 交互式精讲</p>
+        </div>
+    </footer>
+
+    <script>
+        // Visualization Data
+        const nums = [2, 3, -2, 4];
+        const steps = [
+            {
+                lines: [10],
+                arrayIdx: null,
+                maxSoFar: 2,
+                maxEnding: 2,
+                minEnding: 2,
+                explanation: "初始化：max_so_far = max_ending = min_ending = nums[0] = 2"
+            },
+            {
+                lines: [13],
+                arrayIdx: 1,
+                maxSoFar: 2,
+                maxEnding: 2,
+                minEnding: 2,
+                explanation: "开始遍历，i = 1，当前元素 nums[1] = 3"
+            },
+            {
+                lines: [16, 17],
+                arrayIdx: 1,
+                maxSoFar: 2,
+                maxEnding: 2,
+                minEnding: 2,
+                explanation: "nums[1] = 3 > 0，不是负数，不需要交换 max_ending 和 min_ending"
+            },
+            {
+                lines: [21],
+                arrayIdx: 1,
+                maxSoFar: 2,
+                maxEnding: 6,
+                minEnding: 3,
+                explanation: "更新 max_ending = max(3, 2×3) = max(3, 6) = 6；min_ending = min(3, 2×3) = 3"
+            },
+            {
+                lines: [25],
+                arrayIdx: 1,
+                maxSoFar: 6,
+                maxEnding: 6,
+                minEnding: 3,
+                explanation: "更新全局最大值：max_so_far = max(2, 6) = 6"
+            },
+            {
+                lines: [13],
+                arrayIdx: 2,
+                maxSoFar: 6,
+                maxEnding: 6,
+                minEnding: 3,
+                explanation: "继续遍历，i = 2，当前元素 nums[2] = -2"
+            },
+            {
+                lines: [16, 17],
+                arrayIdx: 2,
+                maxSoFar: 6,
+                maxEnding: 3,
+                minEnding: 6,
+                explanation: "⚠️ 关键点！nums[2] = -2 < 0，是负数！交换 max_ending(6) 和 min_ending(3)"
+            },
+            {
+                lines: [21, 22],
+                arrayIdx: 2,
+                maxSoFar: 6,
+                maxEnding: -2,
+                minEnding: -12,
+                explanation: "更新：max_ending = max(-2, 3×(-2)) = -2；min_ending = min(-2, 6×(-2)) = -12"
+            },
+            {
+                lines: [25],
+                arrayIdx: 2,
+                maxSoFar: 6,
+                maxEnding: -2,
+                minEnding: -12,
+                explanation: "max_so_far = max(6, -2) = 6，全局最大值保持不变"
+            },
+            {
+                lines: [13],
+                arrayIdx: 3,
+                maxSoFar: 6,
+                maxEnding: -2,
+                minEnding: -12,
+                explanation: "继续遍历，i = 3，当前元素 nums[3] = 4"
+            },
+            {
+                lines: [16, 17],
+                arrayIdx: 3,
+                maxSoFar: 6,
+                maxEnding: -2,
+                minEnding: -12,
+                explanation: "nums[3] = 4 > 0，不是负数，不需要交换"
+            },
+            {
+                lines: [21, 22],
+                arrayIdx: 3,
+                maxSoFar: 6,
+                maxEnding: 4,
+                minEnding: -48,
+                explanation: "更新：max_ending = max(4, -2×4) = 4；min_ending = min(4, -12×4) = -48"
+            },
+            {
+                lines: [25],
+                arrayIdx: 3,
+                maxSoFar: 6,
+                maxEnding: 4,
+                minEnding: -48,
+                explanation: "max_so_far = max(6, 4) = 6，最终结果保持为 6"
+            },
+            {
+                lines: [27],
+                arrayIdx: null,
+                maxSoFar: 6,
+                maxEnding: 4,
+                minEnding: -48,
+                explanation: "遍历结束，返回 max_so_far = 6。子数组 [2,3] 的乘积最大。"
+            }
+        ];
+
+        let currentStep = -1;
+        let autoPlayInterval = null;
+
+        function goToStep(stepIndex) {
+            if (stepIndex < 0 || stepIndex >= steps.length) return;
+            
+            currentStep = stepIndex;
+            const step = steps[stepIndex];
+
+            // Update step cards
+            document.querySelectorAll('.step-card').forEach((card, idx) => {
+                card.classList.remove('active');
+                if (idx === Math.min(Math.floor(stepIndex / 2.5), 5)) {
+                    card.classList.add('active');
+                }
+            });
+
+            // Update code lines
+            document.querySelectorAll('.code-line').forEach(line => {
+                line.classList.remove('active');
+            });
+            step.lines.forEach(lineNum => {
+                const line = document.querySelector(`[data-line="${lineNum}"]`);
+                if (line) line.classList.add('active');
+            });
+
+            // Update array display
+            document.querySelectorAll('.array-cell').forEach((cell, idx) => {
+                cell.classList.remove('current');
+                if (step.arrayIdx === idx) {
+                    cell.classList.add('current');
+                }
+            });
+
+            // Update displays with animation
+            updateDisplay('displayMaxSoFar', step.maxSoFar);
+            updateDisplay('displayMaxEnding', step.maxEnding);
+            updateDisplay('displayMinEnding', step.minEnding);
+
+            // Update explanation
+            const expEl = document.getElementById('stepExplanation');
+            expEl.style.opacity = '0';
+            setTimeout(() => {
+                expEl.textContent = step.explanation;
+                expEl.style.opacity = '1';
+            }, 150);
+
+            // Update progress bar
+            const progress = ((stepIndex + 1) / steps.length) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+        }
+
+        function updateDisplay(elementId, value) {
+            const el = document.getElementById(elementId);
+            el.style.transform = 'scale(1.2)';
+            el.textContent = value;
+            setTimeout(() => {
+                el.style.transform = 'scale(1)';
+            }, 200);
+        }
+
+        function resetVisualization() {
+            currentStep = -1;
+            stopAutoPlay();
+            
+            document.querySelectorAll('.step-card').forEach(card => card.classList.remove('active'));
+            document.querySelectorAll('.code-line').forEach(line => line.classList.remove('active'));
+            document.querySelectorAll('.array-cell').forEach(cell => cell.classList.remove('current'));
+            
+            document.getElementById('displayMaxSoFar').textContent = '-';
+            document.getElementById('displayMaxEnding').textContent = '-';
+            document.getElementById('displayMinEnding').textContent = '-';
+            document.getElementById('stepExplanation').textContent = '点击上方步骤或播放按钮开始演示...';
+            document.getElementById('progressBar').style.width = '0%';
+        }
+
+        function autoPlay() {
+            if (autoPlayInterval) {
+                stopAutoPlay();
+                return;
+            }
+
+            const btn = document.getElementById('playBtn');
+            btn.innerHTML = `
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                暂停
+            `;
+
+            if (currentStep >= steps.length - 1) {
+                currentStep = -1;
+            }
+
+            autoPlayInterval = setInterval(() => {
+                if (currentStep < steps.length - 1) {
+                    goToStep(currentStep + 1);
+                } else {
+                    stopAutoPlay();
+                }
+            }, 1500);
+        }
+
+        function stopAutoPlay() {
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+            }
+            const btn = document.getElementById('playBtn');
+            btn.innerHTML = `
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
+                </svg>
+                自动演示
+            `;
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                if (currentStep < steps.length - 1) goToStep(currentStep + 1);
+            } else if (e.key === 'ArrowLeft') {
+                if (currentStep > 0) goToStep(currentStep - 1);
+            } else if (e.key === ' ') {
+                e.preventDefault();
+                autoPlay();
+            }
+        });
+
+        // Initialize first step on load
+        goToStep(0);
+    </script>
+</body>
+</html>

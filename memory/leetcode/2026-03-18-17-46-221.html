@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode 221 - 最大正方形</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --secondary: #8b5cf6;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --border: #475569;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+    body { 
+      font-family: 'Segoe UI', system-ui, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.7;
+    }
+    h1 { 
+      font-size: 2.2rem; 
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px; 
+      border: 1px solid var(--border);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      font-size: 1.3rem;
+    }
+    .difficulty {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-left: 12px;
+    }
+    .difficulty.medium { background: #f59e0b33; color: #f59e0b; }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 20px; 
+      overflow-x: auto;
+      font-size: 0.95rem;
+      line-height: 1.8;
+      margin: 0;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 2px 0; 
+      cursor: pointer; 
+      transition: background 0.2s; 
+      border-left: 3px solid transparent;
+      margin-left: -3px;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.3); 
+      border-left-color: #6366f1;
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 40px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+      font-family: monospace;
+    }
+    .line-content {
+      flex: 1;
+      font-family: 'Consolas', 'Monaco', monospace;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1.2fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 768px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    .viz-steps {
+      max-height: 450px;
+      overflow-y: auto;
+    }
+    .viz-step { 
+      padding: 14px 16px; 
+      margin: 8px 0; 
+      border-radius: 10px; 
+      background: #334155; 
+      cursor: pointer; 
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .viz-step:hover { 
+      background: #3d4a5c;
+      transform: translateX(4px);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.3); 
+    }
+    .viz-step h4 {
+      margin: 0 0 6px 0;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+    .viz-step p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .viz-step .state {
+      margin-top: 8px;
+      padding: 8px 10px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: #a5d6ff;
+    }
+    .matrix-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+      margin: 12px 0;
+      max-width: 200px;
+    }
+    .matrix-cell {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #1e293b;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .matrix-cell.active { background: var(--primary); }
+    .matrix-cell.highlight { background: var(--success); }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 16px; 
+      border: 1px solid var(--border); 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block;
+      cursor: pointer;
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.2);
+    }
+    .problem-card h4 {
+      margin: 0 0 8px 0;
+      color: var(--primary);
+      font-size: 1rem;
+    }
+    .problem-card p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; font-style: italic; }
+    .class { color: #ffa657; }
+    .builtin { color: #79c0ff; }
+    .operator { color: #ff7b72; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+    }
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .highlight-box {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+      border: 1px solid var(--primary);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin: 16px 0;
+    }
+    .highlight-box strong {
+      color: var(--primary);
+    }
+    .code-container h3 {
+      margin-top: 0;
+      margin-bottom: 12px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .step-legend {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    .legend-dot.current { background: var(--primary); }
+    .legend-dot.max { background: var(--success); }
+  </style>
+</head>
+<body>
+  <h1>LeetCode 221 - 最大正方形</h1>
+  <p class="subtitle">动态规划经典问题，二维DP解决最大正方形面积 <span class="difficulty medium">Medium</span></p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>在一个由 <code>'0'</code> 和 <code>'1'</code> 组成的二维矩阵内，找到只包含 <code>'1'</code> 的最大正方形，并返回其面积。</p>
+    
+    <div class="highlight-box">
+      <strong>示例：</strong><br>
+      输入：matrix = [["1","0","1","0","0"],["1","0","1","1","1"],["1","1","1","1","1"],["1","0","0","1","0"]]<br>
+      输出：4<br>
+      解释：最大的正方形边长为 2，面积为 4
+    </div>
+    
+    <p><strong>核心洞察：</strong>以 <code>matrix[i][j]</code> 为右下角的最大正方形边长，取决于其左、上、左上三个方向的正方形边长的<strong>最小值</strong> + 1。</p>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="step-legend">
+      <div class="legend-item"><div class="legend-dot current"></div>当前遍历位置</div>
+      <div class="legend-item"><div class="legend-dot max"></div>当前最大边长</div>
+    </div>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre id="codeBlock"></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table>
+      <tr>
+        <th>指标</th>
+        <th>值</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>时间复杂度</td>
+        <td><code>O(m × n)</code></td>
+        <td>遍历整个矩阵一次</td>
+      </tr>
+      <tr>
+        <td>空间复杂度</td>
+        <td><code>O(m × n)</code> / <code>O(n)</code></td>
+        <td>DP数组，可优化为滚动数组</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>💡 关键思路</h2>
+    <ul>
+      <li><strong>状态定义：</strong><code>dp[i][j]</code> 表示以 <code>(i, j)</code> 为右下角的只包含 1 的最大正方形边长</li>
+      <li><strong>状态转移：</strong>如果 <code>matrix[i][j] == '1'</code>，则<br>
+        <code>dp[i][j] = min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]) + 1</code></li>
+      <li><strong>初始条件：</strong>第一行和第一列的 <code>dp</code> 值等于 <code>matrix</code> 对应值（0 或 1）</li>
+      <li><strong>空间优化：</strong>由于只依赖上一行和当前行，可用滚动数组将空间复杂度降至 <code>O(n)</code></li>
+    </ul>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转 LeetCode）</h2>
+    <div class="problem-grid">
+      <a class="problem-card" href="https://leetcode.cn/problems/maximal-rectangle/" target="_blank">
+        <h4>85. 最大矩形</h4>
+        <p>Hard · 基于本题扩展，求最大矩形面积</p>
+      </a>
+      <a class="problem-card" href="https://leetcode.cn/problems/count-square-submatrices-with-all-ones/" target="_blank">
+        <h4>1277. 统计全为 1 的正方形子矩阵</h4>
+        <p>Medium · 统计所有正方形，而非最大</p>
+      </a>
+      <a class="problem-card" href="https://leetcode.cn/problems/largest-plus-sign/" target="_blank">
+        <h4>764. 最大加号标志</h4>
+        <p>Medium · 四个方向的 DP 扩展</p>
+      </a>
+      <a class="problem-card" href="https://leetcode.cn/problems/number-of-corner-rectangles/" target="_blank">
+        <h4>750. 角矩形的数量</h4>
+        <p>Medium · 组合计数 + 矩形检测</p>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    // Python 代码
+    const codeLines = [
+      { line: 1, content: '<span class="keyword">class</span> <span class="class">Solution</span>:' },
+      { line: 2, content: '    <span class="keyword">def</span> <span class="function">maximalSquare</span>(<span class="keyword">self</span>, matrix: List[List[<span class="class">str</span>]]) -> <span class="class">int</span>:' },
+      { line: 3, content: '        <span class="keyword">if</span> <span class="keyword">not</span> matrix <span class="keyword">or</span> <span class="keyword">not</span> matrix[<span class="number">0</span>]:' },
+      { line: 4, content: '            <span class="keyword">return</span> <span class="number">0</span>' },
+      { line: 5, content: '        ' },
+      { line: 6, content: '        rows, cols = <span class="builtin">len</span>(matrix), <span class="builtin">len</span>(matrix[<span class="number">0</span>])' },
+      { line: 7, content: '        <span class="comment"># dp[i][j] 表示以 (i,j) 为右下角的最大正方形边长</span>' },
+      { line: 8, content: '        dp = [[<span class="number">0</span>] * cols <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="builtin">range</span>(rows)]' },
+      { line: 9, content: '        max_side = <span class="number">0</span>  <span class="comment"># 记录最大边长</span>' },
+      { line: 10, content: '        ' },
+      { line: 11, content: '        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="builtin">range</span>(rows):' },
+      { line: 12, content: '            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="builtin">range</span>(cols):' },
+      { line: 13, content: '                <span class="keyword">if</span> matrix[i][j] == <span class="string">"1"</span>:' },
+      { line: 14, content: '                    <span class="keyword">if</span> i == <span class="number">0</span> <span class="keyword">or</span> j == <span class="number">0</span>:' },
+      { line: 15, content: '                        <span class="comment"># 第一行或第一列，只能形成边长为1的正方形</span>' },
+      { line: 16, content: '                        dp[i][j] = <span class="number">1</span>' },
+      { line: 17, content: '                    <span class="keyword">else</span>:' },
+      { line: 18, content: '                        <span class="comment"># 状态转移：取左、上、左上三个方向的最小值 + 1</span>' },
+      { line: 19, content: '                        dp[i][j] = <span class="builtin">min</span>(dp[i-<span class="number">1</span>][j], dp[i][j-<span class="number">1</span>], dp[i-<span class="number">1</span>][j-<span class="number">1</span>]) + <span class="number">1</span>' },
+      { line: 20, content: '                    ' },
+      { line: 21, content: '                    max_side = <span class="builtin">max</span>(max_side, dp[i][j])' },
+      { line: 22, content: '        ' },
+      { line: 23, content: '        <span class="keyword">return</span> max_side * max_side  <span class="comment"># 返回面积</span>' },
+    ];
+
+    // 步骤与代码行映射
+    const steps = [
+      { 
+        title: "初始化", 
+        desc: "检查空矩阵，获取行列数，创建DP数组", 
+        line: 8, 
+        state: "dp = 全0矩阵, max_side = 0"
+      },
+      { 
+        title: "遍历矩阵 - (0,0)", 
+        desc: "matrix[0][0]='1'，第一行/列直接设为1", 
+        line: 16, 
+        state: "dp[0][0] = 1, max_side = 1"
+      },
+      { 
+        title: "遍历矩阵 - (0,2)", 
+        desc: "matrix[0][2]='1'，第一行直接设为1", 
+        line: 16, 
+        state: "dp[0][2] = 1"
+      },
+      { 
+        title: "遍历矩阵 - (1,0)", 
+        desc: "matrix[1][0]='1'，第一列直接设为1", 
+        line: 16, 
+        state: "dp[1][0] = 1"
+      },
+      { 
+        title: "遍历矩阵 - (1,2)", 
+        desc: "matrix[1][2]='1'，检查左、上、左上最小值为0", 
+        line: 19, 
+        state: "dp[1][2] = min(0,0,0)+1 = 1"
+      },
+      { 
+        title: "遍历矩阵 - (1,3)", 
+        desc: "matrix[1][3]='1'，左、上、左上均为1，可扩展", 
+        line: 19, 
+        state: "dp[1][3] = min(1,1,1)+1 = 2, max_side = 2"
+      },
+      { 
+        title: "遍历矩阵 - (2,1)", 
+        desc: "matrix[2][1]='1'，检查三个方向", 
+        line: 19, 
+        state: "dp[2][1] = min(1,1,0)+1 = 1"
+      },
+      { 
+        title: "遍历矩阵 - (2,2)", 
+        desc: "关键位置！左=2, 上=1, 左上=1，取最小", 
+        line: 19, 
+        state: "dp[2][2] = min(2,1,1)+1 = 2"
+      },
+      { 
+        title: "遍历矩阵 - (2,3)", 
+        desc: "matrix[2][3]='1'，三个方向均有值，可扩展", 
+        line: 19, 
+        state: "dp[2][3] = min(2,2,2)+1 = 3, max_side = 3 ⚠️ 等等，验证一下..."
+      },
+      { 
+        title: "验证 (2,3)", 
+        desc: "实际matrix[2][3]='1'，左=2, 上=1, 左上=1", 
+        line: 19, 
+        state: "dp[2][3] = min(2,1,1)+1 = 2"
+      },
+      { 
+        title: "遍历矩阵 - (2,4)", 
+        desc: "matrix[2][4]='1'，左=2, 上=1, 左上=2", 
+        line: 19, 
+        state: "dp[2][4] = min(2,1,2)+1 = 2, max_side 保持 2"
+      },
+      { 
+        title: "返回结果", 
+        desc: "遍历完成，最大边长为2，面积为4", 
+        line: 23, 
+        state: "return 2 * 2 = 4"
+      }
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeBlock.innerHTML = codeLines.map(l => `
+      <div class="code-line" data-line="${l.line}" onclick="highlightStep(${l.line})">
+        <span class="line-number">${l.line}</span>
+        <span class="line-content">${l.content}</span>
+      </div>
+    `).join('');
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    vizSteps.innerHTML = steps.map((s, idx) => `
+      <div class="viz-step" data-step="${idx}" data-line="${s.line}" onclick="highlightLine(${idx}, ${s.line})">
+        <h4>${s.title}</h4>
+        <p>${s.desc}</p>
+        <div class="state">${s.state}</div>
+      </div>
+    `).join('');
+
+    // 高亮函数
+    function highlightLine(stepIdx, lineNum) {
+      // 移除所有active
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      
+      // 添加active
+      document.querySelector(`.viz-step[data-step="${stepIdx}"]`)?.classList.add('active');
+      document.querySelector(`.code-line[data-line="${lineNum}"]`)?.classList.add('active');
+      
+      // 滚动到可视区域
+      document.querySelector(`.code-line[data-line="${lineNum}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function highlightStep(lineNum) {
+      // 找到对应的步骤
+      const stepIdx = steps.findIndex(s => s.line === lineNum);
+      if (stepIdx !== -1) {
+        highlightLine(stepIdx, lineNum);
+        document.querySelector(`.viz-step[data-step="${stepIdx}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    // 默认高亮第一个
+    highlightLine(0, 8);
+  </script>
+</body>
+</html>

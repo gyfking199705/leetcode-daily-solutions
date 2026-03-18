@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #540 - 有序数组中的单一元素</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --primary-light: #818cf8;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --surface-light: #334155;
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --border: #475569;
+    }
+    * { box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1100px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.7;
+    }
+    h1 { 
+      font-size: 2.2rem; 
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin-bottom: 32px;
+    }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px;
+      border: 1px solid rgba(99, 102, 241, 0.1);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section h2 span {
+      font-size: 1.2rem;
+    }
+    .problem-meta {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .badge {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .badge-difficulty-medium {
+      background: rgba(245, 158, 11, 0.2);
+      color: var(--warning);
+    }
+    .badge-topic {
+      background: rgba(99, 102, 241, 0.2);
+      color: var(--primary-light);
+    }
+    .badge-oj {
+      background: rgba(34, 197, 94, 0.2);
+      color: var(--success);
+    }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 0;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+    }
+    code {
+      font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', Monaco, monospace;
+      font-size: 0.95rem;
+    }
+    .code-block {
+      padding: 20px;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 3px 16px;
+      cursor: pointer; 
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.25); 
+      border-left-color: var(--primary);
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 45px; 
+      text-align: right; 
+      padding-right: 16px;
+      user-select: none;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1.2fr; 
+      gap: 24px; 
+      margin: 24px 0;
+    }
+    @media (max-width: 900px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    .viz-steps {
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    .viz-step { 
+      padding: 14px 16px; 
+      margin: 8px 0; 
+      border-radius: 10px; 
+      background: var(--surface-light); 
+      cursor: pointer; 
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .viz-step:hover {
+      background: rgba(99, 102, 241, 0.1);
+      border-color: rgba(99, 102, 241, 0.3);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.2);
+    }
+    .viz-step-title {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .viz-step-desc {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .viz-step-state {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-family: monospace;
+    }
+    .viz-step-state span {
+      color: var(--primary-light);
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 18px; 
+      border: 1px solid var(--border); 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block; 
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.15);
+    }
+    .problem-card h4 {
+      margin: 0 0 8px 0;
+      color: var(--primary-light);
+    }
+    .problem-card p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; }
+    .class { color: #ffa657; }
+    .variable { color: #ffa657; }
+    .operator { color: #ff7b72; }
+    .table-container {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+    }
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      color: var(--primary-light);
+      font-weight: 600;
+      background: rgba(99, 102, 241, 0.1);
+    }
+    td {
+      color: var(--text);
+    }
+    tr:hover td {
+      background: rgba(255,255,255,0.03);
+    }
+    .highlight-box {
+      background: rgba(99, 102, 241, 0.1);
+      border-left: 4px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 8px 8px 0;
+      margin: 16px 0;
+    }
+    .highlight-box p {
+      margin: 0;
+    }
+    .highlight-box strong {
+      color: var(--primary-light);
+    }
+    .array-viz {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin: 16px 0;
+      flex-wrap: wrap;
+    }
+    .array-element {
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--surface-light);
+      border-radius: 8px;
+      font-weight: 600;
+      border: 2px solid transparent;
+      transition: all 0.3s;
+    }
+    .array-element.highlight {
+      background: rgba(99, 102, 241, 0.3);
+      border-color: var(--primary);
+    }
+    .array-element.single {
+      background: rgba(34, 197, 94, 0.3);
+      border-color: var(--success);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+      50% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+    }
+    .array-label {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .algo-insight {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(129, 140, 248, 0.1) 100%);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .algo-insight h3 {
+      margin-top: 0;
+      color: var(--primary-light);
+    }
+    .algo-insight ul {
+      margin: 10px 0;
+    }
+    .algo-insight li {
+      margin: 8px 0;
+      color: var(--text-muted);
+    }
+    .algo-insight strong {
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #540 - 有序数组中的单一元素</h1>
+  <p class="subtitle">Single Element in a Sorted Array | 二分查找 · 位运算</p>
+  
+  <div class="problem-meta">
+    <span class="badge badge-difficulty-medium">Medium</span>
+    <span class="badge badge-topic">二分查找</span>
+    <span class="badge badge-topic">位运算</span>
+    <span class="badge badge-oj">通过率: 60%+</span>
+  </div>
+
+  <div class="section">
+    <h2><span>📋</span> 题目描述</h2>
+    <p>给你一个仅由整数组成的有序数组，其中每个元素都会出现两次，唯有一个数只会出现一次。</p>
+    <p>请你找出并返回那个只出现了一次的元素。</p>
+    <p>你设计的解决方案必须满足 O(log n) 时间复杂度和 O(1) 空间复杂度。</p>
+    
+    <div class="highlight-box">
+      <p><strong>示例 1：</strong></p>
+      <p>输入: nums = [1,1,2,3,3,4,4,8,8]</p>
+      <p>输出: 2</p>
+    </div>
+    
+    <div class="highlight-box">
+      <p><strong>示例 2：</strong></p>
+      <p>输入: nums = [3,3,7,7,10,11,11]</p>
+      <p>输出: 10</p>
+    </div>
+
+    <div class="algo-insight">
+      <h3>🎯 核心考点</h3>
+      <ul>
+        <li><strong>二分查找的本质</strong>：不是找目标值，而是找「状态发生变化的边界」</li>
+        <li><strong>观察规律</strong>：单一元素出现之前，成对元素的第一个在偶数索引；出现之后，成对元素的第一个在奇数索引</li>
+        <li><strong>边界处理</strong>：数组长度为1的特殊情况</li>
+      </ul>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2><span>🎬</span> 算法执行可视化</h2>
+    <p style="color: var(--text-muted); margin-bottom: 16px;">点击左侧步骤或右侧代码行，查看执行过程的对应关系</p>
+    
+    <div class="array-viz" id="arrayViz">
+      <div><div class="array-element" data-idx="0">1</div><div class="array-label">0</div></div>
+      <div><div class="array-element" data-idx="1">1</div><div class="array-label">1</div></div>
+      <div><div class="array-element" data-idx="2">2</div><div class="array-label">2</div></div>
+      <div><div class="array-element" data-idx="3">3</div><div class="array-label">3</div></div>
+      <div><div class="array-element" data-idx="4">3</div><div class="array-label">4</div></div>
+      <div><div class="array-element" data-idx="5">4</div><div class="array-label">5</div></div>
+      <div><div class="array-element" data-idx="6">4</div><div class="array-label">6</div></div>
+      <div><div class="array-element" data-idx="7">8</div><div class="array-label">7</div></div>
+      <div><div class="array-element" data-idx="8">8</div><div class="array-label">8</div></div>
+    </div>
+    
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3 style="margin-top: 0; color: var(--primary-light);">Python 实现 - 二分查找</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2><span>📊</span> 复杂度分析</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>方法</th>
+            <th>时间复杂度</th>
+            <th>空间复杂度</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>线性扫描</td>
+            <td>O(n)</td>
+            <td>O(1)</td>
+            <td>不满足题目要求，但可作为对拍验证</td>
+          </tr>
+          <tr style="background: rgba(99, 102, 241, 0.1);">
+            <td><strong>二分查找</strong> ✅</td>
+            <td><strong>O(log n)</strong></td>
+            <td><strong>O(1)</strong></td>
+            <td>最优解，利用有序数组特性</td>
+          </tr>
+          <tr>
+            <td>位运算（异或）</td>
+            <td>O(n)</td>
+            <td>O(1)</td>
+            <td>巧妙解法，但时间复杂度不满足要求</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2><span>💡</span> 进阶解法：位运算</h2>
+    <p>利用异或运算的性质：a ^ a = 0, a ^ 0 = a，成对的数字异或后会抵消，剩下唯一的单一元素。</p>
+    <pre class="code-block"><code><span class="keyword">class</span> <span class="class">Solution</span>:
+    <span class="keyword">def</span> <span class="function">singleNonDuplicate</span>(<span class="variable">self</span>, nums: List[<span class="keyword">int</span>]) -> <span class="keyword">int</span>:
+        result = <span class="number">0</span>
+        <span class="keyword">for</span> num <span class="keyword">in</span> nums:
+            result ^= num
+        <span class="keyword">return</span> result</code></pre>
+    <p style="color: var(--text-muted); margin-top: 12px;">虽然时间复杂度为 O(n)，但这是通用的「找唯一出现奇数次的元素」的解法，值得掌握。</p>
+  </div>
+  
+  <div class="section">
+    <h2><span>🔗</span> 类似题目推荐</h2>
+    <div class="problem-grid">
+      <a class="problem-card" href="https://leetcode.cn/problems/binary-search/" target="_blank">
+        <h4>#704 二分查找</h4>
+        <p>最基础的二分查找模板题</p>
+      </a>
+      <a class="problem-card" href="https://leetcode.cn/problems/find-first-and-last-position-of-element-in-sorted-array/" target="_blank">
+        <h4>#34 查找元素的首尾位置</h4>
+        <p>二分查找找边界的经典题</p>
+      </a>
+      <a class="problem-card" href="https://leetcode.cn/problems/search-in-rotated-sorted-array/" target="_blank">
+        <h4>#33 搜索旋转排序数组</h4>
+        <p>二分查找的变体，需判断哪半边有序</p>
+      </a>
+      <a class="problem-card" href="https://leetcode.cn/problems/find-minimum-in-rotated-sorted-array/" target="_blank">
+        <h4>#153 寻找旋转排序数组最小值</h4>
+        <p>旋转数组二分查找的经典题</p>
+      </a>
+      <a class="problem-card" href="https://leetcode.cn/problems/single-number/" target="_blank">
+        <h4>#136 只出现一次的数字</h4>
+        <p>位运算异或的经典入门题</p>
+      </a>
+      <a class="problem-card" href="https://leetcode.cn/problems/find-peak-element/" target="_blank">
+        <h4>#162 寻找峰值</h4>
+        <p>二分查找找局部最大值的变形</p>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2><span>📝</span> 解题心得</h2>
+    <div class="algo-insight">
+      <h3>易错点提醒</h3>
+      <ul>
+        <li><strong>索引越界</strong>：检查 mid+1 是否越界，或改用 mid-1 比较</li>
+        <li><strong>边界移动</strong>：确定 mid 在哪一边后，正确收缩左右边界</li>
+        <li><strong>偶数奇数判断</strong>：index % 2 == 0 表示偶数索引，反之为奇数</li>
+      </ul>
+    </div>
+    <div class="algo-insight">
+      <h3>模板记忆法</h3>
+      <p style="color: var(--text-muted);">二分查找的核心框架：</p>
+      <pre class="code-block" style="margin-top: 10px;"><code><span class="keyword">while</span> left < right:      <span class="comment"># 注意是 < 不是 <=</span>
+    mid = (left + right) // <span class="number">2</span>
+    <span class="keyword">if</span> 条件满足:          <span class="comment"># 单一元素在右半部分</span>
+        left = mid + <span class="number">1</span>
+    <span class="keyword">else</span>:                <span class="comment"># 单一元素在左半部分（含mid）</span>
+        right = mid
+<span class="keyword">return</span> nums[left]       <span class="comment"># 最终 left == right</span></code></pre>
+    </div>
+  </div>
+  
+  <script>
+    // 步骤与代码行映射
+    const steps = [
+      {
+        title: "初始化左右指针", 
+        desc: "left=0, right=len(nums)-1，确定搜索范围", 
+        line: 2,
+        state: "left=0, right=8, mid待计算",
+        highlightIdx: []
+      },
+      {
+        title: "计算中间索引", 
+        desc: "mid = (left + right) // 2 = 4，指向元素3", 
+        line: 3,
+        state: "left=0, right=8, mid=4, nums[4]=3",
+        highlightIdx: [4]
+      },
+      {
+        title: "判断配对位置（核心逻辑）", 
+        desc: "检查nums[mid]是否与右边相等：nums[4]=3, nums[5]=4，不相等", 
+        line: 4,
+        state: "nums[4]=3, nums[5]=4，配对在左边",
+        highlightIdx: [4, 5]
+      },
+      {
+        title: "确定搜索方向", 
+        desc: "mid是偶数索引(4)，但nums[4]!=nums[5]，说明单一元素在左边（含mid）", 
+        line: 5,
+        state: "索引4是偶数，但配对不连续，单一元素在左",
+        highlightIdx: [0,1,2,3,4]
+      },
+      {
+        title: "收缩右边界", 
+        desc: "right = mid = 4，继续在左半部分搜索", 
+        line: 6,
+        state: "left=0, right=4, 新搜索范围[0,4]",
+        highlightIdx: [0,1,2,3,4]
+      },
+      {
+        title: "新一轮二分", 
+        desc: "mid = (0+4)//2 = 2，指向元素2", 
+        line: 3,
+        state: "left=0, right=4, mid=2, nums[2]=2",
+        highlightIdx: [2]
+      },
+      {
+        title: "检查配对", 
+        desc: "nums[2]=2, nums[3]=3，不相等；但索引2是偶数，配对应在右边", 
+        line: 4,
+        state: "索引2是偶数，nums[2]!=nums[3]，单一元素在左",
+        highlightIdx: [2, 3]
+      },
+      {
+        title: "继续收缩", 
+        desc: "right = mid = 2", 
+        line: 6,
+        state: "left=0, right=2, 搜索范围[0,2]",
+        highlightIdx: [0,1,2]
+      },
+      {
+        title: "再计算mid", 
+        desc: "mid = (0+2)//2 = 1，指向元素1", 
+        line: 3,
+        state: "left=0, right=2, mid=1, nums[1]=1",
+        highlightIdx: [1]
+      },
+      {
+        title: "找到配对！", 
+        desc: "nums[1]=1, nums[2]=2，不相等；索引1是奇数，配对应在左边", 
+        line: 7,
+        state: "索引1是奇数，但nums[1]!=nums[0]，说明单一元素在右边",
+        highlightIdx: [0, 1, 2]
+      },
+      {
+        title: "收缩左边界", 
+        desc: "left = mid + 1 = 2", 
+        line: 8,
+        state: "left=2, right=2, 循环结束",
+        highlightIdx: [2]
+      },
+      {
+        title: "返回结果", 
+        desc: "left == right == 2，nums[2]=2 就是单一元素！", 
+        line: 9,
+        state: "结果: 2 ✓",
+        highlightIdx: [2]
+      }
+    ];
+
+    // Python代码行
+    const codeLines = [
+      {num: 1, code: '<span class="keyword">class</span> <span class="class">Solution</span>:'},
+      {num: 2, code: '    <span class="keyword">def</span> <span class="function">singleNonDuplicate</span>(<span class="variable">self</span>, nums: List[<span class="keyword">int</span>]) -> <span class="keyword">int</span>:'},
+      {num: 3, code: '        left, right = <span class="number">0</span>, <span class="function">len</span>(nums) - <span class="number">1</span>'},
+      {num: 4, code: '        <span class="keyword">while</span> left < right:'},
+      {num: 5, code: '            mid = (left + right) // <span class="number">2</span>'},
+      {num: 6, code: '            <span class="comment"># 确保mid是偶数索引（成对的第一个位置）</span>'},
+      {num: 7, code: '            <span class="keyword">if</span> mid % <span class="number">2</span> == <span class="number">1</span>:'},
+      {num: 8, code: '                mid -= <span class="number">1</span>'},
+      {num: 9, code: '            <span class="comment"># 检查当前偶数索引是否与下一个相等</span>'},
+      {num: 10, code: '            <span class="keyword">if</span> nums[mid] == nums[mid + <span class="number">1</span>]:'},
+      {num: 11, code: '                <span class="comment"># 相等说明单一元素在右边</span>'},
+      {num: 12, code: '                left = mid + <span class="number">2</span>'},
+      {num: 13, code: '            <span class="keyword">else</span>:'},
+      {num: 14, code: '                <span class="comment"># 不相等说明单一元素就是mid或在左边</span>'},
+      {num: 15, code: '                right = mid'},
+      {num: 16, code: '        <span class="keyword">return</span> nums[left]'},
+    ];
+
+    // 生成步骤HTML
+    const stepsContainer = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const div = document.createElement('div');
+      div.className = 'viz-step';
+      div.dataset.idx = idx;
+      div.innerHTML = `
+        <div class="viz-step-title">步骤 ${idx + 1}: ${step.title}</div>
+        <div class="viz-step-desc">${step.desc}</div>
+        <div class="viz-step-state">状态: <span>${step.state}</span></div>
+      `;
+      div.addEventListener('click', () => activateStep(idx));
+      stepsContainer.appendChild(div);
+    });
+
+    // 生成代码HTML
+    const codeContainer = document.getElementById('codeBlock');
+    codeLines.forEach((line, idx) => {
+      const div = document.createElement('div');
+      div.className = 'code-line';
+      div.dataset.line = line.num;
+      div.innerHTML = `
+        <span class="line-number">${line.num}</span>
+        <span class="code-content">${line.code}</span>
+      `;
+      div.addEventListener('click', () => {
+        // 找到包含这行代码的步骤
+        const stepIdx = steps.findIndex(s => s.line === line.num);
+        if (stepIdx !== -1) activateStep(stepIdx);
+      });
+      codeContainer.appendChild(div);
+    });
+
+    let activeStep = -1;
+
+    function activateStep(idx) {
+      // 清除之前的高亮
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.array-element').forEach(el => {
+        el.classList.remove('highlight', 'single');
+      });
+
+      activeStep = idx;
+      const step = steps[idx];
+
+      // 高亮步骤
+      document.querySelector(`.viz-step[data-idx="${idx}"]`).classList.add('active');
+
+      // 高亮代码行
+      const codeLine = document.querySelector(`.code-line[data-line="${step.line}"]`);
+      if (codeLine) codeLine.classList.add('active');
+
+      // 高亮数组元素
+      step.highlightIdx.forEach(i => {
+        const el = document.querySelector(`.array-element[data-idx="${i}"]`);
+        if (el) el.classList.add('highlight');
+      });
+
+      // 最后一步高亮结果
+      if (idx === steps.length - 1) {
+        const el = document.querySelector(`.array-element[data-idx="2"]`);
+        if (el) el.classList.add('single');
+      }
+
+      // 滚动到可视区域
+      document.querySelector(`.viz-step[data-idx="${idx}"]`).scrollIntoView({behavior: 'smooth', block: 'nearest'});
+    }
+
+    // 默认激活第一步
+    activateStep(0);
+  </script>
+</body>
+</html>

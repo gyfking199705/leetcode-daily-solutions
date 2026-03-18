@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>LeetCode #295 - 数据流的中位数</title>
+  <style>
+    :root { --primary: #6366f1; --bg: #0f172a; --surface: #1e293b; --text: #f1f5f9; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+    .section { background: var(--surface); border-radius: 16px; padding: 28px; margin-bottom: 24px; }
+    .section h2 { color: var(--primary); margin-top: 0; }
+    pre { background: #0d1117; border-radius: 12px; padding: 20px; overflow-x: auto; font-size: 14px; }
+    .code-line { display: flex; padding: 3px 0; cursor: pointer; transition: background 0.2s; }
+    .code-line:hover { background: rgba(255,255,255,0.08); }
+    .code-line.active { background: rgba(99, 102, 241, 0.35); border-left: 3px solid #818cf8; margin-left: -3px; }
+    .line-number { color: #6b7280; min-width: 32px; text-align: right; padding-right: 16px; font-size: 13px; }
+    .viz-container { display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; margin: 20px 0; }
+    .viz-step { padding: 14px; margin: 10px 0; border-radius: 10px; background: #334155; cursor: pointer; border: 2px solid transparent; transition: all 0.25s; }
+    .viz-step:hover { transform: translateX(4px); }
+    .viz-step.active { border-color: var(--primary); background: rgba(99, 102, 241, 0.25); box-shadow: 0 0 15px rgba(99,102,241,0.3); }
+    .viz-step h4 { margin: 0 0 6px 0; color: #e2e8f0; }
+    .viz-step p { margin: 0; font-size: 14px; color: #94a3b8; }
+    .heap-visual { display: flex; gap: 12px; margin-top: 12px; align-items: center; flex-wrap: wrap; }
+    .heap-box { padding: 8px 14px; border-radius: 6px; font-family: monospace; font-size: 13px; }
+    .max-heap { background: #f97316; color: white; }
+    .min-heap { background: #22c55e; color: white; }
+    .arrow { font-size: 18px; color: #94a3b8; }
+    .problem-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 20px; }
+    .problem-card { background: var(--bg); border-radius: 12px; padding: 18px; border: 1px solid #475569; transition: all 0.2s; text-decoration: none; color: inherit; display: block; }
+    .problem-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 10px 25px rgba(99,102,241,0.2); }
+    .problem-card h4 { margin: 0 0 8px 0; color: #e2e8f0; }
+    .problem-card p { margin: 0; font-size: 13px; color: #94a3b8; }
+    .tag { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; margin-right: 6px; }
+    .tag-hard { background: #dc2626; }
+    .tag-medium { background: #f59e0b; }
+    .tag-easy { background: #10b981; }
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    th, td { padding: 14px; text-align: left; border-bottom: 1px solid #475569; }
+    th { color: var(--primary); font-weight: 600; }
+    .complexity-good { color: #22c55e; }
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; }
+    .class { color: #ffa657; }
+    .state-box { background: #1e293b; padding: 12px; border-radius: 8px; margin-top: 10px; font-family: monospace; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>🎯 LeetCode #295 - 数据流的中位数</h1>
+  <p style="color: #94a3b8; margin-top: -10px;">难度：<span class="tag tag-hard">Hard</span> 方法：双堆（最大堆+最小堆）</p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>中位数是有序整数列表中的中间值。如果列表的大小是偶数，则没有中间值，中位数是两个中间值的平均值。</p>
+    <p style="margin-top: 12px;">设计一个支持以下两种操作的数据结构：</p>
+    <ul style="line-height: 1.8;">
+      <li><code>void addNum(int num)</code> - 从数据流中添加一个整数到数据结构中。</li>
+      <li><code>double findMedian()</code> - 返回目前所有元素的中位数。</li>
+    </ul>
+    <p style="margin-top: 16px; color: #94a3b8;"><strong>示例：</strong></p>
+    <pre style="background: #0f172a; padding: 16px; font-size: 13px;">
+["MedianFinder","addNum","addNum","findMedian","addNum","findMedian"]
+[[],[1],[2],[],[3],[]]
+
+输出：[null,null,null,1.5,null,2.0]
+
+解释：
+MedianFinder medianFinder = new MedianFinder();
+medianFinder.addNum(1);    // arr = [1]
+medianFinder.addNum(2);    // arr = [1, 2]
+medianFinder.findMedian(); // 返回 1.5 ((1+2)/2)
+medianFinder.addNum(3);    // arr = [1, 2, 3]
+medianFinder.findMedian(); // 返回 2.0</pre>
+  </div>
+  
+  <div class="section">
+    <h2>🧠 核心思路：双堆平衡法</h2>
+    <p>使用<strong>最大堆</strong>存储较小的一半数，<strong>最小堆</strong>存储较大的一半数。</p>
+    <ul style="line-height: 1.8; margin-top: 12px;">
+      <li>最大堆的堆顶是较小部分的最大值</li>
+      <li>最小堆的堆顶是较大部分的最小值</li>
+      <li><strong>关键性质</strong>：最大堆的大小 = 最小堆的大小，或只多1</li>
+      <li>奇数个数：中位数 = 最大堆顶</li>
+      <li>偶数个数：中位数 = (最大堆顶 + 最小堆顶) / 2</li>
+    </ul>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table>
+      <tr><th>操作</th><th>时间复杂度</th><th>空间复杂度</th><th>说明</th></tr>
+      <tr>
+        <td><code>addNum</code></td>
+        <td class="complexity-good">O(log n)</td>
+        <td>O(n)</td>
+        <td>堆的插入操作</td>
+      </tr>
+      <tr>
+        <td><code>findMedian</code></td>
+        <td class="complexity-good">O(1)</td>
+        <td>O(n)</td>
+        <td>直接取堆顶</td>
+      </tr>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a class="problem-card" href="https://leetcode.cn/problems/find-median-from-data-stream/" target="_blank">
+        <h4>#295 数据流的中位数</h4>
+        <p>🔴 当前题目 | 双堆 | 设计</p>
+      </a>
+      <a class="problem-card" href="https://leetcode.cn/problems/sliding-window-median/" target="_blank">
+        <h4>#480 滑动窗口中位数</h4>
+        <p>🔴 Hard | 双堆 + 延迟删除 | 滑动窗口</p>
+      </a>
+      <a class="problem-card" href="https://leetcode.cn/problems/ipo/" target="_blank">
+        <h4>#502 IPO</h4>
+        <p>🟡 Medium | 双堆贪心 | 项目选择</p>
+      </a>
+      <a class="problem-card" href="https://leetcode.cn/problems/find-k-pairs-with-smallest-sums/" target="_blank">
+        <h4>#373 查找和最小的 K 对数字</h4>
+        <p>🟡 Medium | 最小堆 | 多路归并</p>
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // Python代码，每行包装
+    const codeLines = [
+      { num: 1, code: '<span class="keyword">import</span> heapq' },
+      { num: 2, code: '' },
+      { num: 3, code: '<span class="class">class</span> <span class="function">MedianFinder</span>:' },
+      { num: 4, code: '    <span class="keyword">def</span> <span class="function">__init__</span>(self):' },
+      { num: 5, code: '        <span class="comment"># 最大堆存储较小的一半（Python用负数模拟）</span>' },
+      { num: 6, code: '        self.max_heap = []  <span class="comment"># 存负数</span>' },
+      { num: 7, code: '        <span class="comment"># 最小堆存储较大的一半</span>' },
+      { num: 8, code: '        self.min_heap = []' },
+      { num: 9, code: '' },
+      { num: 10, code: '    <span class="keyword">def</span> <span class="function">addNum</span>(self, num: <span class="class">int</span>) -> <span class="keyword">None</span>:' },
+      { num: 11, code: '        <span class="keyword">if</span> <span class="keyword">not</span> self.max_heap <span class="keyword">or</span> num <= -self.max_heap[<span class="number">0</span>]:' },
+      { num: 12, code: '            heapq.heappush(self.max_heap, -num)' },
+      { num: 13, code: '        <span class="keyword">else</span>:' },
+      { num: 14, code: '            heapq.heappush(self.min_heap, num)' },
+      { num: 15, code: '        ' },
+      { num: 16, code: '        <span class="comment"># 平衡两堆大小：max_heap 最多比 min_heap 多1</span>' },
+      { num: 17, code: '        <span class="keyword">if</span> <span class="class">len</span>(self.max_heap) > <span class="class">len</span>(self.min_heap) + <span class="number">1</span>:' },
+      { num: 18, code: '            val = -heapq.heappop(self.max_heap)' },
+      { num: 19, code: '            heapq.heappush(self.min_heap, val)' },
+      { num: 20, code: '        <span class="keyword">elif</span> <span class="class">len</span>(self.max_heap) < <span class="class">len</span>(self.min_heap):' },
+      { num: 21, code: '            val = heapq.heappop(self.min_heap)' },
+      { num: 22, code: '            heapq.heappush(self.max_heap, -val)' },
+      { num: 23, code: '' },
+      { num: 24, code: '    <span class="keyword">def</span> <span class="function">findMedian</span>(self) -> <span class="class">float</span>:' },
+      { num: 25, code: '        <span class="keyword">if</span> <span class="class">len</span>(self.max_heap) > <span class="class">len</span>(self.min_heap):' },
+      { num: 26, code: '            <span class="keyword">return</span> <span class="class">float</span>(-self.max_heap[<span class="number">0</span>])' },
+      { num: 27, code: '        <span class="keyword">else</span>:' },
+      { num: 28, code: '            <span class="keyword">return</span> (-self.max_heap[<span class="number">0</span>] + self.min_heap[<span class="number">0</span>]) / <span class="number">2</span>' },
+    ];
+
+    // 步骤与代码行映射
+    const steps = [
+      { 
+        title: "初始化：创建两个堆", 
+        desc: "max_heap(大根堆)存较小数，min_heap(小根堆)存较大数",
+        line: 4,
+        state: { max_heap: "[]", min_heap: "[]", balance: "平衡" }
+      },
+      { 
+        title: "添加第一个数 1", 
+        desc: "max_heap为空，直接放入max_heap",
+        line: 11,
+        state: { max_heap: "[-1]", min_heap: "[]", action: "1放入max_heap" }
+      },
+      { 
+        title: "检查堆平衡", 
+        desc: "max_heap大小1，min_heap大小0，满足|差|≤1",
+        line: 17,
+        state: { max_heap: "[-1]", min_heap: "[]", balance: "已平衡" }
+      },
+      { 
+        title: "添加第二个数 2", 
+        desc: "2 > max_heap顶(1)，放入min_heap",
+        line: 14,
+        state: { max_heap: "[-1]", min_heap: "[2]", action: "2放入min_heap" }
+      },
+      { 
+        title: "检查堆平衡", 
+        desc: "两堆大小相等(1:1)，无需调整",
+        line: 20,
+        state: { max_heap: "[-1]", min_heap: "[2]", balance: "已平衡" }
+      },
+      { 
+        title: "查询中位数", 
+        desc: "两堆大小相等，取堆顶平均: (1+2)/2 = 1.5",
+        line: 28,
+        state: { max_heap顶: "1", min_heap顶: "2", median: "1.5" }
+      },
+      { 
+        title: "添加第三个数 3", 
+        desc: "3 > max_heap顶(1)，先放入min_heap",
+        line: 14,
+        state: { max_heap: "[-1]", min_heap: "[2,3]", action: "3放入min_heap" }
+      },
+      { 
+        title: "堆不平衡！需要调整", 
+        desc: "min_heap(2个) > max_heap(1个)，从min_heap移一个到max_heap",
+        line: 20,
+        state: { imbalance: "min_heap多1", action: "开始平衡" }
+      },
+      { 
+        title: "平衡：min_heap移出最小值 2", 
+        desc: "弹出min_heap堆顶2",
+        line: 21,
+        state: { max_heap: "[-1]", min_heap: "[3] → pop 2", action: "取出2" }
+      },
+      { 
+        title: "平衡：放入max_heap", 
+        desc: "将2的负数-2压入max_heap",
+        line: 22,
+        state: { max_heap: "[-1,-2] → [-2,-1]", min_heap: "[3]", balance: "已平衡" }
+      },
+      { 
+        title: "再次查询中位数", 
+        desc: "max_heap更大，直接取max_heap顶: 2",
+        line: 26,
+        state: { max_heap顶: "2", min_heap顶: "3", median: "2.0" }
+      },
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach(line => {
+      const div = document.createElement('div');
+      div.className = 'code-line';
+      div.dataset.line = line.num;
+      div.innerHTML = `<span class="line-number">${line.num}</span><span>${line.code || '&nbsp;'}</span>`;
+      div.onclick = () => highlightStepByLine(line.num);
+      codeBlock.appendChild(div);
+    });
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const div = document.createElement('div');
+      div.className = 'viz-step';
+      div.dataset.idx = idx;
+      div.dataset.line = step.line;
+      div.innerHTML = `
+        <h4>步骤 ${idx + 1}: ${step.title}</h4>
+        <p>${step.desc}</p>
+        ${step.state ? `<div class="state-box">${Object.entries(step.state).map(([k,v]) => `${k}: ${v}`).join('<br>')}</div>` : ''}
+      `;
+      div.onclick = () => highlightStep(idx);
+      vizSteps.appendChild(div);
+    });
+
+    let currentStep = -1;
+
+    function highlightStep(idx) {
+      currentStep = idx;
+      // 清除所有高亮
+      document.querySelectorAll('.viz-step').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+      
+      // 高亮当前步骤
+      const stepEl = document.querySelector(`.viz-step[data-idx="${idx}"]`);
+      if (stepEl) {
+        stepEl.classList.add('active');
+        stepEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      
+      // 高亮对应代码行
+      const lineNum = steps[idx].line;
+      const lineEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+      if (lineEl) {
+        lineEl.classList.add('active');
+        lineEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    function highlightStepByLine(lineNum) {
+      const stepIdx = steps.findIndex(s => s.line === lineNum);
+      if (stepIdx !== -1) {
+        highlightStep(stepIdx);
+      }
+    }
+
+    // 默认高亮第一步
+    highlightStep(0);
+  </script>
+</body>
+</html>

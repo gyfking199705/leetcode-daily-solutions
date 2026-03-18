@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <title>LeetCode #20 - 有效的括号</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --secondary: #a855f7;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --error: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    body { 
+      font-family: system-ui, -apple-system, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1200px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.6;
+    }
+    h1 { font-size: 2rem; margin-bottom: 8px; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .subtitle { color: var(--text-muted); margin-bottom: 32px; }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px; 
+      border: 1px solid var(--border);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-right: 8px;
+    }
+    .tag-easy { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+    .tag-medium { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+    .tag-hard { background: rgba(239, 68, 68, 0.2); color: var(--error); }
+    
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 0; 
+      overflow-x: auto;
+      border: 1px solid #30363d;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 3px 16px; 
+      cursor: pointer; 
+      transition: all 0.15s;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 14px;
+    }
+    .code-line:hover { background: rgba(255,255,255,0.03); }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.25); 
+      border-left: 3px solid var(--primary); 
+      margin-left: -3px;
+      padding-left: 13px;
+    }
+    .code-line.error { 
+      background: rgba(239, 68, 68, 0.2); 
+      border-left: 3px solid var(--error); 
+      margin-left: -3px;
+      padding-left: 13px;
+    }
+    .code-line.success { 
+      background: rgba(34, 197, 94, 0.2); 
+      border-left: 3px solid var(--success); 
+      margin-left: -3px;
+      padding-left: 13px;
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 40px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+    }
+    
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1.2fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 900px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    
+    .viz-steps {
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    .viz-step { 
+      padding: 14px 16px; 
+      margin: 10px 0; 
+      border-radius: 10px; 
+      background: #334155; 
+      cursor: pointer; 
+      border: 2px solid transparent; 
+      transition: all 0.2s;
+    }
+    .viz-step:hover { 
+      background: #3d4a5c;
+      transform: translateX(4px);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.2);
+    }
+    .viz-step.success {
+      border-color: var(--success);
+      background: rgba(34, 197, 94, 0.15);
+    }
+    .viz-step.error {
+      border-color: var(--error);
+      background: rgba(239, 68, 68, 0.15);
+    }
+    .step-title { font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .step-desc { font-size: 0.9rem; color: var(--text-muted); }
+    .step-state { 
+      margin-top: 8px; 
+      font-family: monospace; 
+      font-size: 0.85rem; 
+      background: rgba(0,0,0,0.3);
+      padding: 6px 10px;
+      border-radius: 6px;
+    }
+    .step-state .label { color: var(--secondary); }
+    .step-state .value { color: var(--primary); }
+    
+    .stack-visual {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      margin: 10px 0;
+    }
+    .stack-item {
+      width: 50px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      animation: slideIn 0.3s ease;
+    }
+    .stack-empty {
+      width: 50px;
+      height: 40px;
+      border: 2px dashed var(--border);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+    @keyframes slideIn {
+      from { transform: translateY(-10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 18px; 
+      border: 1px solid var(--border); 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block; 
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.15);
+    }
+    .problem-card h4 { margin: 0 0 8px 0; color: var(--primary); }
+    .problem-card p { margin: 0; font-size: 0.9rem; color: var(--text-muted); }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th { color: var(--primary); font-weight: 600; }
+    td { color: var(--text-muted); }
+    tr:hover td { color: var(--text); }
+    
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; }
+    .class { color: #ffa657; }
+    .operator { color: #ff7b72; }
+    
+    .example-box {
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin: 12px 0;
+      font-family: monospace;
+    }
+    .example-box .input { color: var(--text-muted); }
+    .example-box .output { color: var(--success); }
+    
+    .insight-box {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
+      border-left: 4px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 12px 12px 0;
+      margin: 16px 0;
+    }
+    .insight-box h4 { margin: 0 0 8px 0; color: var(--primary); }
+    .insight-box ul { margin: 0; padding-left: 20px; }
+    .insight-box li { margin: 6px 0; color: var(--text-muted); }
+    
+    .input-display {
+      background: rgba(99, 102, 241, 0.1);
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 1.2rem;
+      margin-bottom: 16px;
+      border: 1px solid var(--primary);
+    }
+    .char {
+      display: inline-block;
+      padding: 2px 6px;
+      margin: 0 2px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+    .char.active {
+      background: var(--primary);
+      color: white;
+      font-weight: bold;
+    }
+    .char.matched {
+      background: var(--success);
+      color: white;
+    }
+    .char.error {
+      background: var(--error);
+      color: white;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: none;
+      background: var(--primary);
+      color: white;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: #5558e0; }
+    .btn-secondary {
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { background: var(--border); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #20 - 有效的括号</h1>
+  <p class="subtitle">
+    <span class="tag tag-easy">Easy</span>
+    栈 · 字符串 · 经典基础题
+  </p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给定一个只包括 <code>'('</code>、<code>')'</code>、<code>'{'</code>、<code>'}'</code>、<code>'['</code>、<code>']'</code> 的字符串 <code>s</code>，判断字符串是否有效。</p>
+    <p style="margin-top: 16px;"><strong>有效字符串需满足：</strong></p>
+    <ol style="color: var(--text-muted);">
+      <li>左括号必须用相同类型的右括号闭合。</li>
+      <li>左括号必须以正确的顺序闭合。</li>
+      <li>每个右括号都有一个对应的相同类型的左括号。</li>
+    </ol>
+    
+    <div class="example-box">
+      <div class="input">输入: s = <span class="string">"()[]{}"</span></div>
+      <div class="output">输出: true</div>
+    </div>
+    <div class="example-box">
+      <div class="input">输入: s = <span class="string">"(]"</span></div>
+      <div class="output">输出: false</div>
+    </div>
+    <div class="example-box">
+      <div class="input">输入: s = <span class="string">"([)]"</span></div>
+      <div class="output">输出: false</div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>💡 核心思路</h2>
+    <div class="insight-box">
+      <h4>🎯 栈的应用场景</h4>
+      <ul>
+        <li><strong>后进先出 (LIFO)</strong>：最后遇到的左括号，应该最先被闭合</li>
+        <li>遇到左括号 → <strong>压入栈中</strong></li>
+        <li>遇到右括号 → 与栈顶元素<strong>配对检查</strong>，匹配则弹出</li>
+        <li>最终栈为空 → 所有括号都正确闭合</li>
+      </ul>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程可视化</h2>
+    <p style="color: var(--text-muted); margin-bottom: 16px;">点击步骤或代码行查看对应关系，以 <code>"()[]{}"</code> 为例：</p>
+    
+    <div class="input-display" id="inputDisplay">
+      <span class="char">(</span><span class="char">)</span><span class="char">[</span><span class="char">]</span><span class="char">{</span><span class="char">}</span>
+    </div>
+    
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps"></div>
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>维度</th>
+          <th>复杂度</th>
+          <th>说明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>时间复杂度</td>
+          <td><strong>O(n)</strong></td>
+          <td>只需遍历字符串一次</td>
+        </tr>
+        <tr>
+          <td>空间复杂度</td>
+          <td><strong>O(n)</strong></td>
+          <td>最坏情况下栈存储所有左括号</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/minimum-add-to-make-parentheses-valid/" class="problem-card" target="_blank">
+        <h4>921. 使括号有效的最少添加</h4>
+        <p>只包含'('和')'，计算最少添加多少个括号使其有效</p>
+      </a>
+      <a href="https://leetcode.cn/problems/minimum-remove-to-make-valid-parentheses/" class="problem-card" target="_blank">
+        <h4>1249. 移除无效的括号</h4>
+        <p>删除最少数量的无效括号使输入字符串有效</p>
+      </a>
+      <a href="https://leetcode.cn/problems/score-of-parentheses/" class="problem-card" target="_blank">
+        <h4>856. 括号的分数</h4>
+        <p>计算平衡括号字符串的分数，嵌套括号有特殊规则</p>
+      </a>
+      <a href="https://leetcode.cn/problems/longest-valid-parentheses/" class="problem-card" target="_blank">
+        <h4>32. 最长有效括号</h4>
+        <p>找到最长有效（匹配）括号子串的长度</p>
+      </a>
+      <a href="https://leetcode.cn/problems/valid-parenthesis-string/" class="problem-card" target="_blank">
+        <h4>678. 有效的括号字符串</h4>
+        <p>包含'('、')'和通配符'*'，'*'可视为左/右括号或空</p>
+      </a>
+      <a href="https://leetcode.cn/problems/remove-outermost-parentheses/" class="problem-card" target="_blank">
+        <h4>1021. 删除最外层的括号</h4>
+        <p>删除每个原语分解中最外层的括号</p>
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // Python代码
+    const pythonCode = [
+      { line: 1, code: '<span class="keyword">class</span> <span class="class">Solution</span>:' },
+      { line: 2, code: '    <span class="keyword">def</span> <span class="function">isValid</span>(<span class="keyword">self</span>, s: <span class="class">str</span>) -> <span class="class">bool</span>:' },
+      { line: 3, code: '        stack = []  <span class="comment"># 用列表模拟栈</span>' },
+      { line: 4, code: '        mapping = {<span class="string">\')\'</span>: <span class="string">\'(\'</span>, <span class="string">\']\'</span>: <span class="string">\'[\'</span>, <span class="string">\'}\'</span>: <span class="string">\'{\'</span>}' },
+      { line: 5, code: '        ' },
+      { line: 6, code: '        <span class="keyword">for</span> char <span class="keyword">in</span> s:' },
+      { line: 7, code: '            <span class="keyword">if</span> char <span class="keyword">in</span> mapping:  <span class="comment"># 是右括号</span>' },
+      { line: 8, code: '                <span class="comment"># 栈为空或栈顶不匹配，无效</span>' },
+      { line: 9, code: '                <span class="keyword">if</span> <span class="keyword">not</span> stack <span class="keyword">or</span> stack[-<span class="number">1</span>] != mapping[char]:' },
+      { line: 10, code: '                    <span class="keyword">return</span> <span class="keyword">False</span>' },
+      { line: 11, code: '                stack.pop()  <span class="comment"># 匹配成功，弹出栈顶</span>' },
+      { line: 12, code: '            <span class="keyword">else</span>:' },
+      { line: 13, code: '                stack.append(char)  <span class="comment"># 左括号入栈</span>' },
+      { line: 14, code: '        ' },
+      { line: 15, code: '        <span class="keyword">return</span> <span class="keyword">not</span> stack  <span class="comment"># 栈为空则全部匹配</span>' }
+    ];
+    
+    // 步骤定义
+    const steps = [
+      { 
+        title: "初始化", 
+        desc: "创建空栈和括号映射表", 
+        line: 4, 
+        state: { stack: "[]", char: "-", action: "初始化" },
+        stack: [],
+        charIndex: -1
+      },
+      { 
+        title: "遍历 '('", 
+        desc: "左括号，压入栈中", 
+        line: 13, 
+        state: { stack: "['(']", char: "'('", action: "左括号入栈" },
+        stack: ['('],
+        charIndex: 0
+      },
+      { 
+        title: "遍历 ')'", 
+        desc: "右括号，与栈顶'('匹配成功，弹出", 
+        line: 11, 
+        state: { stack: "[]", char: "')'", action: "匹配弹出" },
+        stack: [],
+        charIndex: 1
+      },
+      { 
+        title: "遍历 '['", 
+        desc: "左括号，压入栈中", 
+        line: 13, 
+        state: { stack: "['[']", char: "'['", action: "左括号入栈" },
+        stack: ['['],
+        charIndex: 2
+      },
+      { 
+        title: "遍历 ']'", 
+        desc: "右括号，与栈顶'['匹配成功，弹出", 
+        line: 11, 
+        state: { stack: "[]", char: "']'", action: "匹配弹出" },
+        stack: [],
+        charIndex: 3
+      },
+      { 
+        title: "遍历 '{'", 
+        desc: "左括号，压入栈中", 
+        line: 13, 
+        state: { stack: "['{']", char: "'{'", action: "左括号入栈" },
+        stack: ['{'],
+        charIndex: 4
+      },
+      { 
+        title: "遍历 '}'", 
+        desc: "右括号，与栈顶'{'匹配成功，弹出", 
+        line: 11, 
+        state: { stack: "[]", char: "'}'", action: "匹配弹出" },
+        stack: [],
+        charIndex: 5
+      },
+      { 
+        title: "遍历结束", 
+        desc: "栈为空，所有括号匹配成功，返回True", 
+        line: 15, 
+        state: { stack: "[]", result: "True", action: "验证通过" },
+        stack: [],
+        charIndex: 5,
+        isSuccess: true
+      }
+    ];
+    
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    pythonCode.forEach(({ line, code }) => {
+      const lineDiv = document.createElement('div');
+      lineDiv.className = 'code-line';
+      lineDiv.dataset.line = line;
+      lineDiv.innerHTML = `<span class="line-number">${line}</span><span>${code}</span>`;
+      lineDiv.addEventListener('click', () => selectByLine(line));
+      codeBlock.appendChild(lineDiv);
+    });
+    
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, index) => {
+      const stepDiv = document.createElement('div');
+      stepDiv.className = 'viz-step' + (step.isSuccess ? ' success' : '');
+      stepDiv.dataset.index = index;
+      
+      let stackHtml = '';
+      if (step.stack.length === 0) {
+        stackHtml = '<div class="stack-empty">空</div>';
+      } else {
+        step.stack.slice().reverse().forEach(item => {
+          stackHtml += `<div class="stack-item">${item}</div>`;
+        });
+      }
+      
+      stepDiv.innerHTML = `
+        <div class="step-title">${step.title}</div>
+        <div class="step-desc">${step.desc}</div>
+        <div class="stack-visual">${stackHtml}</div>
+        <div class="step-state">
+          <span class="label">栈:</span> <span class="value">${step.state.stack}</span>
+          ${step.state.char !== '-' ? `<br><span class="label">当前字符:</span> <span class="value">${step.state.char}</span>` : ''}
+          ${step.state.result ? `<br><span class="label">结果:</span> <span class="value" style="color: var(--success);">${step.state.result}</span>` : ''}
+        </div>
+      `;
+      stepDiv.addEventListener('click', () => selectStep(index));
+      vizSteps.appendChild(stepDiv);
+    });
+    
+    let currentStep = -1;
+    
+    function selectStep(index) {
+      currentStep = index;
+      const step = steps[index];
+      
+      // 高亮步骤
+      document.querySelectorAll('.viz-step').forEach((el, i) => {
+        el.classList.toggle('active', i === index);
+      });
+      
+      // 高亮代码行
+      document.querySelectorAll('.code-line').forEach(el => {
+        el.classList.remove('active');
+        if (parseInt(el.dataset.line) === step.line) {
+          el.classList.add('active');
+        }
+      });
+      
+      // 高亮输入字符
+      document.querySelectorAll('.char').forEach((el, i) => {
+        el.classList.remove('active', 'matched');
+        if (i === step.charIndex) {
+          el.classList.add('active');
+        } else if (i < step.charIndex) {
+          el.classList.add('matched');
+        }
+      });
+      
+      // 滚动到视图
+      vizSteps.children[index].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    function selectByLine(lineNum) {
+      const stepIndex = steps.findIndex(s => s.line === lineNum);
+      if (stepIndex !== -1) {
+        selectStep(stepIndex);
+      }
+    }
+    
+    // 默认选中第一步
+    selectStep(0);
+  </script>
+</body>
+</html>

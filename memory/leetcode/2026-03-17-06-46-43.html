@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #43 - 字符串相乘</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --primary-light: #818cf8;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --surface-light: #334155;
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    body { 
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.7;
+    }
+    h1 { 
+      font-size: 2.5rem; 
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin-bottom: 32px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-right: 8px;
+    }
+    .badge-medium { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+    .badge-tag { background: var(--surface-light); color: var(--text-muted); }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px; 
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .problem-desc {
+      font-size: 1.05rem;
+      color: #e2e8f0;
+    }
+    .example-box {
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin: 16px 0;
+      border-left: 4px solid var(--primary);
+    }
+    .example-box strong { color: var(--primary-light); }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 20px; 
+      overflow-x: auto;
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 3px 0; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      border-radius: 4px;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.25); 
+      border-left: 3px solid var(--primary); 
+      margin-left: -3px;
+      padding-left: 3px;
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 40px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    .code-content {
+      font-family: 'SF Mono', Monaco, monospace;
+      white-space: pre;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1.2fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 768px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    .viz-steps {
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    .viz-step { 
+      padding: 14px 16px; 
+      margin: 10px 0; 
+      border-radius: 10px; 
+      background: var(--surface-light); 
+      cursor: pointer; 
+      border: 2px solid transparent; 
+      transition: all 0.2s;
+    }
+    .viz-step:hover {
+      border-color: rgba(99, 102, 241, 0.3);
+      transform: translateX(4px);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.2);
+    }
+    .viz-step .step-title {
+      font-weight: 600;
+      color: var(--primary-light);
+      margin-bottom: 4px;
+    }
+    .viz-step .step-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .viz-step .step-state {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      font-family: 'SF Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--text);
+    }
+    .code-container h3 {
+      margin-top: 0;
+      margin-bottom: 12px;
+      color: var(--primary-light);
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 18px; 
+      border: 1px solid var(--surface-light); 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block;
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15);
+    }
+    .problem-card .p-num {
+      font-size: 0.85rem;
+      color: var(--primary);
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .problem-card .p-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .problem-card .p-method {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    th, td {
+      padding: 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--surface-light);
+    }
+    th {
+      color: var(--primary-light);
+      font-weight: 600;
+    }
+    .complexity-good { color: var(--success); }
+    .complexity-mid { color: var(--warning); }
+    .keyword { color: #ff7b72; } 
+    .function { color: #d2a8ff; } 
+    .string { color: #a5d6ff; } 
+    .number { color: #79c0ff; } 
+    .comment { color: #8b949e; font-style: italic; } 
+    .class { color: #ffa657; }
+    .operator { color: #ff7b72; }
+    .builtin { color: #79c0ff; }
+    .visualization-area {
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 16px 0;
+      font-family: 'SF Mono', monospace;
+    }
+    .num-display {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 8px 0;
+      font-size: 1.1rem;
+    }
+    .num-label { color: var(--text-muted); min-width: 80px; }
+    .num-value { 
+      background: var(--surface-light); 
+      padding: 8px 16px; 
+      border-radius: 8px;
+      letter-spacing: 4px;
+    }
+    .num-value.highlight {
+      background: rgba(99, 102, 241, 0.3);
+      border: 2px solid var(--primary);
+    }
+    .arrow { color: var(--primary); font-size: 1.5rem; }
+    .insight-box {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 16px 0;
+    }
+    .insight-box h4 {
+      margin: 0 0 12px 0;
+      color: var(--primary-light);
+    }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #43 - 字符串相乘</h1>
+  <p class="subtitle">Multiply Strings</p>
+  
+  <div style="margin-bottom: 24px;">
+    <span class="badge badge-medium">🟡 Medium</span>
+    <span class="badge badge-tag">模拟</span>
+    <span class="badge badge-tag">字符串</span>
+    <span class="badge badge-tag">数学</span>
+  </div>
+
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <div class="problem-desc">
+      <p>给定两个以字符串形式表示的非负整数 <code>num1</code> 和 <code>num2</code>，返回它们的乘积，也以字符串形式表示。</p>
+      <p><strong>注意：</strong>不能使用任何内置的 BigInteger 库或直接将输入转换为整数。</p>
+    </div>
+    
+    <div class="example-box">
+      <strong>示例 1：</strong><br>
+      输入：num1 = "2", num2 = "3"<br>
+      输出："6"
+    </div>
+    
+    <div class="example-box">
+      <strong>示例 2：</strong><br>
+      输入：num1 = "123", num2 = "456"<br>
+      输出："56088"
+    </div>
+
+    <div class="insight-box">
+      <h4>💡 核心思路</h4>
+      <p>模拟我们在小学学习的竖式乘法过程：将 num2 的每一位与 num1 相乘，然后将所有部分积相加。关键优化是利用一个结果数组直接累加所有部分积，避免中间字符串拼接。</p>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    
+    <div class="visualization-area" id="vizDisplay">
+      <div class="num-display">
+        <span class="num-label">num1:</span>
+        <span class="num-value" id="disp-num1">"123"</span>
+      </div>
+      <div class="num-display">
+        <span class="num-label">num2:</span>
+        <span class="num-value" id="disp-num2">"456"</span>
+      </div>
+      <div style="margin: 12px 0; border-top: 1px solid var(--surface-light);"></div>
+      <div class="num-display">
+        <span class="num-label">结果:</span>
+        <span class="num-value" id="disp-result">"56088"</span>
+      </div>
+      <div id="step-detail" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--surface-light); color: var(--text-muted);">
+        点击左侧步骤查看详细执行过程
+      </div>
+    </div>
+
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre><code id="codeBlock">
+        </code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>维度</th>
+          <th>复杂度</th>
+          <th>说明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>时间复杂度</td>
+          <td class="complexity-mid">O(m × n)</td>
+          <td>m 和 n 分别是两个字符串的长度，需要双重循环遍历</td>
+        </tr>
+        <tr>
+          <td>空间复杂度</td>
+          <td class="complexity-mid">O(m + n)</td>
+          <td>结果数组长度为 m + n（两个数相乘最多 m+n 位）</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/add-strings/" class="problem-card" target="_blank">
+        <div class="p-num">#415</div>
+        <div class="p-title">字符串相加</div>
+        <div class="p-method">模拟加法 / 双指针</div>
+      </a>
+      <a href="https://leetcode.cn/problems/add-binary/" class="problem-card" target="_blank">
+        <div class="p-num">#67</div>
+        <div class="p-title">二进制求和</div>
+        <div class="p-method">模拟 / 位运算</div>
+      </a>
+      <a href="https://leetcode.cn/problems/multiply-strings/" class="problem-card" target="_blank">
+        <div class="p-num">#2</div>
+        <div class="p-title">两数相加</div>
+        <div class="p-method">链表 / 模拟加法</div>
+      </a>
+      <a href="https://leetcode.cn/problems/powx-n/" class="problem-card" target="_blank">
+        <div class="p-num">#50</div>
+        <div class="p-title">Pow(x, n)</div>
+        <div class="p-method">快速幂 / 递归</div>
+      </a>
+      <a href="https://leetcode.cn/problems/plus-one/" class="problem-card" target="_blank">
+        <div class="p-num">#66</div>
+        <div class="p-title">加一</div>
+        <div class="p-method">数组 / 进位处理</div>
+      </a>
+      <a href="https://leetcode.cn/problems/basic-calculator-ii/" class="problem-card" target="_blank">
+        <div class="p-num">#227</div>
+        <div class="p-title">基本计算器 II</div>
+        <div class="p-method">栈 / 数学运算</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>🎯 面试考点</h2>
+    <ul>
+      <li><strong>字符串处理：</strong>理解字符与数字的转换，以及大数表示方式</li>
+      <li><strong>数学模拟：</strong>能否将小学竖式乘法转化为代码逻辑</li>
+      <li><strong>边界情况：</strong>处理前导零、空字符串、零值等特殊情况</li>
+      <li><strong>空间优化：</strong>使用结果数组直接累加，避免中间字符串</li>
+    </ul>
+  </div>
+  
+  <script>
+    // 代码内容
+    const codeLines = [
+      { num: 1, code: '<span class="keyword">class</span> <span class="class">Solution</span>:' },
+      { num: 2, code: '    <span class="keyword">def</span> <span class="function">multiply</span>(<span class="builtin">self</span>, num1: <span class="builtin">str</span>, num2: <span class="builtin">str</span>) -> <span class="builtin">str</span>:' },
+      { num: 3, code: '        <span class="comment"># 处理特殊情况：任何数与"0"相乘都是"0"</span>' },
+      { num: 4, code: '        <span class="keyword">if</span> num1 == <span class="string">"0"</span> <span class="keyword">or</span> num2 == <span class="string">"0"</span>:' },
+      { num: 5, code: '            <span class="keyword">return</span> <span class="string">"0"</span>' },
+      { num: 6, code: '        ' },
+      { num: 7, code: '        m, n = <span class="builtin">len</span>(num1), <span class="builtin">len</span>(num2)' },
+      { num: 8, code: '        <span class="comment"># 结果数组：两个数相乘最多 m+n 位</span>' },
+      { num: 9, code: '        result = [<span class="number">0</span>] * (m + n)' },
+      { num: 10, code: '        ' },
+      { num: 11, code: '        <span class="comment"># 竖式乘法：从低位到高位</span>' },
+      { num: 12, code: '        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="builtin">range</span>(m - <span class="number">1</span>, -<span class="number">1</span>, -<span class="number">1</span>):' },
+      { num: 13, code: '            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="builtin">range</span>(n - <span class="number">1</span>, -<span class="number">1</span>, -<span class="number">1</span>):' },
+      { num: 14, code: '                <span class="comment"># 当前位的乘积</span>' },
+      { num: 15, code: '                mul = (<span class="builtin">ord</span>(num1[i]) - <span class="builtin">ord</span>(<span class="string">"0"</span>)) * (<span class="builtin">ord</span>(num2[j]) - <span class="builtin">ord</span>(<span class="string">"0"</span>))' },
+      { num: 16, code: '                ' },
+      { num: 17, code: '                <span class="comment"># 当前位在结果数组中的位置</span>' },
+      { num: 18, code: '                p1, p2 = i + j, i + j + <span class="number">1</span>' },
+      { num: 19, code: '                ' },
+      { num: 20, code: '                <span class="comment"># 加上之前的进位</span>' },
+      { num: 21, code: '                total = mul + result[p2]' },
+      { num: 22, code: '                ' },
+      { num: 23, code: '                <span class="comment"># 更新结果数组</span>' },
+      { num: 24, code: '                result[p2] = total % <span class="number">10</span>  <span class="comment"># 当前位</span>' },
+      { num: 25, code: '                result[p1] += total // <span class="number">10</span>  <span class="comment"># 进位加到高位</span>' },
+      { num: 26, code: '        ' },
+      { num: 27, code: '        <span class="comment"># 转换为字符串，跳过前导零</span>' },
+      { num: 28, code: '        i = <span class="number">0</span>' },
+      { num: 29, code: '        <span class="keyword">while</span> i &lt; <span class="builtin">len</span>(result) <span class="keyword">and</span> result[i] == <span class="number">0</span>:' },
+      { num: 30, code: '            i += <span class="number">1</span>' },
+      { num: 31, code: '        ' },
+      { num: 32, code: '        <span class="keyword">return</span> <span class="string">""</span>.join(<span class="builtin">map</span>(<span class="builtin">str</span>, result[i:]))' }
+    ];
+
+    // 步骤与代码行映射
+    const steps = [
+      {title: "初始化与边界处理", desc: "检查num1或num2是否为\"0\"，提前返回", line: 4, state: {num1: "\"123\"", num2: "\"456\"", result: "[0,0,0,0,0,0]", detail: "两个数都不是0，继续执行"}},
+      {title: "创建结果数组", desc: "长度为m+n，最多m+n位数", line: 9, state: {m: 3, n: 3, result: "[0, 0, 0, 0, 0, 0]", detail: "6个零，准备存储最终结果"}},
+      {title: "外层循环-i=2(个位)", desc: "处理num1的个位'3'", line: 12, state: {i: 2, digit1: "'3'=3", detail: "从num1的个位开始，向高位遍历"}},
+      {title: "内层循环-j=2(个位)", desc: "num1[2]='3' × num2[2]='6'", line: 15, state: {mul: "3×6=18", p1: 4, p2: 5, detail: "3和6相乘得18，结果存到位置4和5"}},
+      {title: "更新结果数组", desc: "result[5]=8, result[4]+=1", line: 24, state: {result: "[0, 0, 0, 1, 8, 0]→不对，修正：[0,0,0,0,1,8]", detail: "当前位放8，进位1加到高位"}},
+      {title: "内层循环-j=1(十位)", desc: "num1[2]='3' × num2[1]='5'", line: 15, state: {mul: "3×5=15", p1: 3, p2: 4, detail: "加上之前的进位1，total=16"}},
+      {title: "更新结果数组", desc: "result[4]=6, result[3]+=1", line: 24, state: {result: "[0, 0, 0, 1, 6, 8]", detail: "当前位6，进位1"}},
+      {title: "内层循环-j=0(百位)", desc: "num1[2]='3' × num2[0]='4'", line: 15, state: {mul: "3×4=12", p1: 2, p2: 3, detail: "加上进位1，total=13"}},
+      {title: "更新结果数组", desc: "result[3]=3, result[2]+=1", line: 24, state: {result: "[0, 0, 1, 3, 6, 8]", detail: "num1个位处理完成，result=[0,0,1,3,6,8]"}},
+      {title: "外层循环-i=1(十位)", desc: "处理num1的十位'2'", line: 12, state: {i: 1, digit1: "'2'=2", detail: "num1的十位是2，继续乘num2各位"}},
+      {title: "内层循环-j=2(个位)", desc: "num1[1]='2' × num2[2]='6'", line: 15, state: {mul: "2×6=12", p1: 3, p2: 4, detail: "result[4]当前是6，total=12+6=18"}},
+      {title: "更新结果数组", desc: "result[4]=8, result[3]+=1", line: 24, state: {result: "[0, 0, 1, 4, 8, 8]", detail: "result[3]从3变成4"}},
+      {title: "内层循环-j=1(十位)", desc: "num1[1]='2' × num2[1]='5'", line: 15, state: {mul: "2×5=10", p1: 2, p2: 3, detail: "result[3]当前是4，total=10+4=14"}},
+      {title: "更新结果数组", desc: "result[3]=4, result[2]+=1", line: 24, state: {result: "[0, 0, 2, 4, 8, 8]", detail: "result[3]取4，进位1加到result[2]"}},
+      {title: "内层循环-j=0(百位)", desc: "num1[1]='2' × num2[0]='4'", line: 15, state: {mul: "2×4=8", p1: 1, p2: 2, detail: "result[2]当前是2，total=8+2=10"}},
+      {title: "更新结果数组", desc: "result[2]=0, result[1]+=1", line: 24, state: {result: "[0, 1, 0, 4, 8, 8]", detail: "num1十位处理完成"}},
+      {title: "外层循环-i=0(百位)", desc: "处理num1的百位'1'", line: 12, state: {i: 0, digit1: "'1'=1", detail: "最后一轮外层循环"}},
+      {title: "内层循环完成", desc: "i=0时重复上述过程", line: 25, state: {result: "[0, 5, 6, 0, 8, 8]", detail: "处理完num1[0]='1'与num2各数的乘积"}},
+      {title: "去除前导零", desc: "跳过开头的0，从索引1开始", line: 29, state: {i: 1, detail: "result[0]=0是前导零，跳过"}},
+      {title: "返回结果", desc: "将[5,6,0,8,8]转换为字符串", line: 32, state: {output: "\"56088\"", detail: "最终结果正确！"}}
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach(line => {
+      const div = document.createElement('div');
+      div.className = 'code-line';
+      div.dataset.line = line.num;
+      div.innerHTML = `<span class="line-number">${line.num}</span><span class="code-content">${line.code}</span>`;
+      div.addEventListener('click', () => highlightStepByLine(line.num));
+      codeBlock.appendChild(div);
+    });
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const div = document.createElement('div');
+      div.className = 'viz-step';
+      div.dataset.step = idx;
+      div.dataset.line = step.line;
+      div.innerHTML = `
+        <div class="step-title">${step.title}</div>
+        <div class="step-desc">${step.desc}</div>
+        <div class="step-state" style="display:none"></div>
+      `;
+      div.addEventListener('click', () => highlightStep(idx));
+      vizSteps.appendChild(div);
+    });
+
+    let currentStep = -1;
+
+    function highlightStep(stepIdx) {
+      // 清除之前的高亮
+      document.querySelectorAll('.viz-step').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+      
+      if (stepIdx < 0 || stepIdx >= steps.length) return;
+      
+      currentStep = stepIdx;
+      const step = steps[stepIdx];
+      
+      // 高亮步骤
+      const stepEl = document.querySelector(`.viz-step[data-step="${stepIdx}"]`);
+      if (stepEl) {
+        stepEl.classList.add('active');
+        stepEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      
+      // 高亮代码行
+      const lineEl = document.querySelector(`.code-line[data-line="${step.line}"]`);
+      if (lineEl) {
+        lineEl.classList.add('active');
+        lineEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      // 更新可视化区域
+      updateVizDisplay(step);
+    }
+
+    function highlightStepByLine(lineNum) {
+      const stepIdx = steps.findIndex(s => s.line === lineNum);
+      if (stepIdx !== -1) {
+        highlightStep(stepIdx);
+      }
+    }
+
+    function updateVizDisplay(step) {
+      const detailEl = document.getElementById('step-detail');
+      let html = '';
+      if (step.state.detail) {
+        html = `<strong style="color:var(--primary-light)">当前操作：</strong>${step.state.detail}`;
+      }
+      if (step.state.result) {
+        html += `<br><br><strong>result数组：</strong> [${step.state.result}]`;
+      }
+      detailEl.innerHTML = html;
+    }
+
+    // 默认高亮第一步
+    highlightStep(0);
+  </script>
+</body>
+</html>

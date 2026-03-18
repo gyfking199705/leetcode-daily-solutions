@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #20 - 有效的括号</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #e8e8e8;
+      line-height: 1.7;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      padding: 40px 20px;
+      background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+      border-radius: 16px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    }
+    
+    h1 {
+      font-size: 2.5em;
+      background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+    
+    .subtitle {
+      color: #a0a0a0;
+      font-size: 1.1em;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: 600;
+      margin: 5px;
+    }
+    
+    .easy { background: #00b894; color: white; }
+    .medium { background: #fdcb6e; color: #2d3436; }
+    .hard { background: #e17055; color: white; }
+    .tag { background: #74b9ff; color: #2d3436; }
+    
+    .section {
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 25px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    h2 {
+      color: #00d4ff;
+      font-size: 1.5em;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .problem-desc {
+      background: rgba(0,212,255,0.1);
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #00d4ff;
+    }
+    
+    .example {
+      background: rgba(255,255,255,0.08);
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+    }
+    
+    .example-title {
+      color: #fdcb6e;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    
+    .code-block {
+      background: #0d1117;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 20px 0;
+    }
+    
+    .code-header {
+      background: #161b22;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #30363d;
+    }
+    
+    .code-lang {
+      color: #8b949e;
+      font-size: 0.85em;
+    }
+    
+    pre {
+      padding: 20px;
+      overflow-x: auto;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 0.95em;
+      line-height: 1.6;
+    }
+    
+    code {
+      color: #e6edf3;
+    }
+    
+    .line-num {
+      display: inline-block;
+      width: 30px;
+      color: #484f58;
+      text-align: right;
+      margin-right: 15px;
+      user-select: none;
+    }
+    
+    /* Syntax highlighting */
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .comment { color: #8b949e; }
+    .number { color: #79c0ff; }
+    .class-name { color: #ffa657; }
+    .boolean { color: #ff7b72; }
+    
+    .visualization {
+      background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%);
+      border-radius: 12px;
+      padding: 25px;
+      margin: 20px 0;
+    }
+    
+    .viz-title {
+      text-align: center;
+      color: #fdcb6e;
+      font-size: 1.1em;
+      margin-bottom: 20px;
+    }
+    
+    .stack-container {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+    
+    .stack-box {
+      background: rgba(0,0,0,0.3);
+      border: 2px solid #00d4ff;
+      border-radius: 8px;
+      padding: 15px;
+      min-width: 120px;
+      text-align: center;
+    }
+    
+    .stack-label {
+      color: #a0a0a0;
+      font-size: 0.85em;
+      margin-bottom: 10px;
+    }
+    
+    .stack-items {
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 5px;
+      min-height: 150px;
+    }
+    
+    .stack-item {
+      background: linear-gradient(90deg, #00d4ff, #0099cc);
+      padding: 8px 15px;
+      border-radius: 4px;
+      font-weight: bold;
+      animation: pushIn 0.3s ease;
+    }
+    
+    @keyframes pushIn {
+      from { transform: translateY(-10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .input-display {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    
+    .char-box {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px;
+      font-size: 1.2em;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    
+    .char-box.active {
+      background: #00d4ff;
+      color: #1a1a2e;
+      transform: scale(1.1);
+    }
+    
+    .char-box.matched {
+      background: #00b894;
+      color: white;
+    }
+    
+    .char-box.error {
+      background: #e17055;
+      color: white;
+    }
+    
+    .arrow {
+      color: #fdcb6e;
+      font-size: 1.5em;
+      margin: 0 10px;
+    }
+    
+    .process-step {
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      padding: 15px;
+      margin: 10px 0;
+      border-left: 3px solid #74b9ff;
+    }
+    
+    .step-num {
+      color: #74b9ff;
+      font-weight: bold;
+    }
+    
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    
+    .complexity-table th,
+    .complexity-table td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .complexity-table th {
+      background: rgba(0,212,255,0.2);
+      color: #00d4ff;
+    }
+    
+    .complexity-table tr:hover {
+      background: rgba(255,255,255,0.05);
+    }
+    
+    .complexity-good {
+      color: #00b894;
+      font-weight: bold;
+    }
+    
+    .accordion {
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+    
+    .accordion-header {
+      padding: 15px 20px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.3s;
+    }
+    
+    .accordion-header:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    
+    .accordion-icon {
+      transition: transform 0.3s;
+    }
+    
+    .accordion.active .accordion-icon {
+      transform: rotate(180deg);
+    }
+    
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    
+    .accordion.active .accordion-content {
+      max-height: 2000px;
+    }
+    
+    .accordion-body {
+      padding: 0 20px 20px;
+    }
+    
+    .related-problems {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+    }
+    
+    .problem-card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: all 0.3s;
+    }
+    
+    .problem-card:hover {
+      transform: translateY(-3px);
+      border-color: #00d4ff;
+      box-shadow: 0 5px 20px rgba(0,212,255,0.2);
+    }
+    
+    .problem-num {
+      color: #00d4ff;
+      font-size: 0.9em;
+      margin-bottom: 5px;
+    }
+    
+    .problem-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .problem-tag {
+      font-size: 0.8em;
+      color: #a0a0a0;
+    }
+    
+    .key-point {
+      background: linear-gradient(90deg, rgba(0,212,255,0.2), transparent);
+      padding: 15px 20px;
+      border-radius: 8px;
+      margin: 15px 0;
+      border-left: 4px solid #00d4ff;
+    }
+    
+    .key-point-title {
+      color: #00d4ff;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    footer {
+      text-align: center;
+      padding: 30px;
+      color: #6c757d;
+      font-size: 0.9em;
+    }
+    
+    .animation-demo {
+      background: #0d1117;
+      border-radius: 12px;
+      padding: 25px;
+      margin: 20px 0;
+    }
+    
+    .demo-title {
+      text-align: center;
+      color: #fdcb6e;
+      margin-bottom: 20px;
+    }
+    
+    .frame {
+      border: 2px solid #30363d;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 10px 0;
+      background: rgba(255,255,255,0.02);
+    }
+    
+    .frame-header {
+      color: #8b949e;
+      font-size: 0.85em;
+      margin-bottom: 10px;
+    }
+    
+    .highlight { background: rgba(253,203,110,0.3); padding: 2px 6px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>LeetCode #20</h1>
+      <div class="subtitle">有效的括号 · Valid Parentheses</div>
+      <div style="margin-top: 20px;">
+        <span class="badge easy">Easy</span>
+        <span class="badge tag">栈</span>
+        <span class="badge tag">字符串</span>
+      </div>
+    </header>
+
+    <div class="section">
+      <h2>📋 题目描述</h2>
+      <div class="problem-desc">
+        <p>给定一个只包括 <code>'('</code>，<code>')'</code>，<code>'{'</code>，<code>'}'</code>，<code>'['</code>，<code>']'</code> 的字符串 <code>s</code>，判断字符串是否有效。</p>
+        <br>
+        <p><strong>有效字符串需满足：</strong></p>
+        <ol style="margin-left: 20px; margin-top: 10px;">
+          <li>左括号必须用相同类型的右括号闭合。</li>
+          <li>左括号必须以正确的顺序闭合。</li>
+          <li>每个右括号都有一个对应的相同类型的左括号。</li>
+        </ol>
+      </div>
+      
+      <div class="example">
+        <div class="example-title">示例 1:</div>
+        <p><strong>输入:</strong> <code>s = "()"</code></p>
+        <p><strong>输出:</strong> <code>true</code></p>
+      </div>
+      
+      <div class="example">
+        <div class="example-title">示例 2:</div>
+        <p><strong>输入:</strong> <code>s = "()[]{}"</code></p>
+        <p><strong>输出:</strong> <code>true</code></p>
+      </div>
+      
+      <div class="example">
+        <div class="example-title">示例 3:</div>
+        <p><strong>输入:</strong> <code>s = "(]"</code></p>
+        <p><strong>输出:</strong> <code>false</code></p>
+        <p><strong>解释:</strong> 左括号 <code>'('</code> 没有被正确闭合（应该是 <code>')'</code> 而不是 <code>']'</code>）</p>
+      </div>
+      
+      <div class="example">
+        <div class="example-title">示例 4:</div>
+        <p><strong>输入:</strong> <code>s = "([)]"</code></p>
+        <p><strong>输出:</strong> <code>false</code></p>
+        <p><strong>解释:</strong> 括号交叉，顺序不正确</p>
+      </div>
+      
+      <div class="example">
+        <div class="example-title">示例 5:</div>
+        <p><strong>输入:</strong> <code>s = "{[]}"</code></p>
+        <p><strong>输出:</strong> <code>true</code></p>
+        <p><strong>解释:</strong> 嵌套括号，正确闭合</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>💡 解题思路</h2>
+      
+      <div class="key-point">
+        <div class="key-point-title">🎯 核心思想</div>
+        <p>遇到<strong>左括号就入栈</strong>，遇到<strong>右括号就与栈顶匹配</strong>。栈的「后进先出」特性完美契合括号的「就近匹配」规则。</p>
+      </div>
+      
+      <div class="accordion active">
+        <div class="accordion-header">
+          <span>算法执行过程可视化</span>
+          <span class="accordion-icon">▼</span>
+        </div>
+        <div class="accordion-content">
+          <div class="accordion-body">
+            <div class="animation-demo">
+              <div class="demo-title">示例：s = "{[()]}"</div>
+              
+              <div class="frame">
+                <div class="frame-header">步骤 1: 读取 '{' (左括号)</div>
+                <div class="input-display">
+                  <div class="char-box">{</div>
+                  <div class="char-box">[</div>
+                  <div class="char-box">(</div>
+                  <div class="char-box">)</div>
+                  <div class="char-box">]</div>
+                  <div class="char-box">}</div>
+                </div>
+                <p>是左括号，<span class="highlight">入栈</span></p>
+                <div class="stack-container">
+                  <div class="stack-box">
+                    <div class="stack-label">栈状态</div>
+                    <div class="stack-items">
+                      <div class="stack-item">{</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="frame">
+                <div class="frame-header">步骤 2: 读取 '[' (左括号)</div>
+                <div class="input-display">
+                  <div class="char-box active">[</div>
+                </div>
+                <p>是左括号，<span class="highlight">入栈</span></p>
+                <div class="stack-container">
+                  <div class="stack-box">
+                    <div class="stack-label">栈状态</div>
+                    <div class="stack-items">
+                      <div class="stack-item">{</div>
+                      <div class="stack-item">[</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="frame">
+                <div class="frame-header">步骤 3: 读取 '(' (左括号)</div>
+                <div class="input-display">
+                  <div class="char-box active">(</div>
+                </div>
+                <p>是左括号，<span class="highlight">入栈</span></p>
+                <div class="stack-container">
+                  <div class="stack-box">
+                    <div class="stack-label">栈状态</div>
+                    <div class="stack-items">
+                      <div class="stack-item">{</div>
+                      <div class="stack-item">[</div>
+                      <div class="stack-item">(</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="frame">
+                <div class="frame-header">步骤 4: 读取 ')' (右括号)</div>
+                <div class="input-display">
+                  <div class="char-box active">)</div>
+                </div>
+                <p>是右括号，<span class="highlight">与栈顶 '(' 匹配</span> ✓，出栈</p>
+                <div class="stack-container">
+                  <div class="stack-box">
+                    <div class="stack-label">栈状态</div>
+                    <div class="stack-items">
+                      <div class="stack-item">{</div>
+                      <div class="stack-item">[</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="frame">
+                <div class="frame-header">步骤 5: 读取 ']' (右括号)</div>
+                <div class="input-display">
+                  <div class="char-box active">]</div>
+                </div>
+                <p>是右括号，<span class="highlight">与栈顶 '[' 匹配</span> ✓，出栈</p>
+                <div class="stack-container">
+                  <div class="stack-box">
+                    <div class="stack-label">栈状态</div>
+                    <div class="stack-items">
+                      <div class="stack-item">{</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="frame">
+                <div class="frame-header">步骤 6: 读取 '}' (右括号)</div>
+                <div class="input-display">
+                  <div class="char-box active">}</div>
+                </div>
+                <p>是右括号，<span class="highlight">与栈顶 '{' 匹配</span> ✓，出栈</p>
+                <div class="stack-container">
+                  <div class="stack-box">
+                    <div class="stack-label">栈状态</div>
+                    <div class="stack-items">
+                      <div style="color: #666; font-style: italic;">(空)</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="frame" style="border-color: #00b894;">
+                <div class="frame-header" style="color: #00b894;">✓ 最终结果</div>
+                <p>字符串遍历完毕，<strong>栈为空</strong>，返回 <code>true</code></p>
+              </div>
+            </div>
+            
+            <div class="animation-demo">
+              <div class="demo-title">反例：s = "([)]" (匹配失败)</div>
+              
+              <div class="frame">
+                <div class="frame-header">步骤 1-2: '(' '[' 入栈</div>
+                <div class="stack-container">
+                  <div class="stack-box">
+                    <div class="stack-label">栈状态</div>
+                    <div class="stack-items">
+                      <div class="stack-item">(</div>
+                      <div class="stack-item">[</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="frame" style="border-color: #e17055;">
+                <div class="frame-header" style="color: #e17055;">步骤 3: 读取 ')'</div>
+                <p>栈顶是 '['，但读取到 ')'，<span class="highlight">不匹配！</span></p>
+                <div class="stack-container">
+                  <div class="stack-box" style="border-color: #e17055;">
+                    <div class="stack-label">期望: ')' 匹配 '('</div>
+                    <div class="stack-items">
+                      <div class="stack-item" style="background: #e17055;">(</div>
+                      <div class="stack-item" style="background: #fdcb6e;">[ ← 栈顶</div>
+                    </div>
+                  </div>
+                </div>
+                <p style="color: #e17055; margin-top: 10px;">❌ 直接返回 false</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="accordion">
+        <div class="accordion-header">
+          <span>详细算法步骤</span>
+          <span class="accordion-icon">▼</span>
+        </div>
+        <div class="accordion-content">
+          <div class="accordion-body">
+            <div class="process-step">
+              <span class="step-num">步骤 1:</span> 初始化一个空栈，建立括号映射表：')'→'(', ']'→'[', '}'→'{'
+            </div>
+            <div class="process-step">
+              <span class="step-num">步骤 2:</span> 遍历字符串中的每个字符
+            </div>
+            <div class="process-step">
+              <span class="step-num">步骤 3:</span> 如果遇到左括号 '(' '[' '{'，直接入栈
+            </div>
+            <div class="process-step">
+              <span class="step-num">步骤 4:</span> 如果遇到右括号：
+              <ul style="margin-left: 20px; margin-top: 8px;">
+                <li>若栈为空 → 返回 false（没有匹配的左括号）</li>
+                <li>弹出栈顶元素，检查是否与当前右括号匹配</li>
+                <li>若不匹配 → 返回 false</li>
+              </ul>
+            </div>
+            <div class="process-step">
+              <span class="step-num">步骤 5:</span> 遍历结束后，检查栈是否为空
+              <ul style="margin-left: 20px; margin-top: 8px;">
+                <li>栈为空 → 所有括号都匹配成功，返回 true</li>
+                <li>栈非空 → 有左括号未闭合，返回 false</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>📝 代码实现</h2>
+      
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">Python3</span>
+          <span style="color: #8b949e; font-size: 0.85em;">时间: O(n) | 空间: O(n)</span>
+        </div>
+        <pre><code><span class="line-num">1</span><span class="keyword">class</span> <span class="class-name">Solution</span>:
+<span class="line-num">2</span>    <span class="keyword">def</span> <span class="function">isValid</span>(<span class="keyword">self</span>, s: <span class="keyword">str</span>) -> <span class="keyword">bool</span>:
+<span class="line-num">3</span>        <span class="comment"># 括号映射表：右括号 -> 对应的左括号</span>
+<span class="line-num">4</span>        bracket_map = {<span class="string">')'</span>: <span class="string">'('</span>, <span class="string">']'</span>: <span class="string">'['</span>, <span class="string">'}'</span>: <span class="string">'{'</span>}
+<span class="line-num">5</span>        
+<span class="line-num">6</span>        <span class="comment"># 用列表模拟栈</span>
+<span class="line-num">7</span>        stack = []
+<span class="line-num">8</span>        
+<span class="line-num">9</span>        <span class="comment"># 遍历每个字符</span>
+<span class="line-num">10</span>        <span class="keyword">for</span> char <span class="keyword">in</span> s:
+<span class="line-num">11</span>            <span class="keyword">if</span> char <span class="keyword">in</span> bracket_map:
+<span class="line-num">12</span>                <span class="comment"># 遇到右括号</span>
+<span class="line-num">13</span>                <span class="keyword">if</span> <span class="keyword">not</span> stack:
+<span class="line-num">14</span>                    <span class="comment"># 栈为空，没有可匹配的左括号</span>
+<span class="line-num">15</span>                    <span class="keyword">return</span> <span class="boolean">False</span>
+<span class="line-num">16</span>                
+<span class="line-num">17</span>                <span class="comment"># 弹出栈顶并检查是否匹配</span>
+<span class="line-num">18</span>                top = stack.pop()
+<span class="line-num">19</span>                <span class="keyword">if</span> top != bracket_map[char]:
+<span class="line-num">20</span>                    <span class="comment"># 不匹配</span>
+<span class="line-num">21</span>                    <span class="keyword">return</span> <span class="boolean">False</span>
+<span class="line-num">22</span>            <span class="keyword">else</span>:
+<span class="line-num">23</span>                <span class="comment"># 遇到左括号，入栈</span>
+<span class="line-num">24</span>                stack.append(char)
+<span class="line-num">25</span>        
+<span class="line-num">26</span>        <span class="comment"># 栈为空说明全部匹配成功</span>
+<span class="line-num">27</span>        <span class="keyword">return</span> <span class="keyword">len</span>(stack) == <span class="number">0</span></code></pre>
+      </div>
+      
+      <div class="key-point">
+        <div class="key-point-title">💡 代码技巧</div>
+        <ul style="margin-left: 20px;">
+          <li><strong>哈希表优化：</strong>用字典存储右括号到左括号的映射，避免多个if判断</li>
+          <li><strong>提前返回：</strong>发现不匹配立即返回false，无需继续遍历</li>
+          <li><strong>边界处理：</strong>检查栈是否为空（避免pop空栈错误）</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>📊 复杂度分析</h2>
+      <table class="complexity-table">
+        <thead>
+          <tr>
+            <th>维度</th>
+            <th>复杂度</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>时间复杂度</strong></td>
+            <td class="complexity-good">O(n)</td>
+            <td>只需遍历字符串一次，n为字符串长度</td>
+          </tr>
+          <tr>
+            <td><strong>空间复杂度</strong></td>
+            <td class="complexity-good">O(n)</td>
+            <td>最坏情况下栈需要存储所有左括号（如"((((..."）</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="key-point">
+        <div class="key-point-title">🎯 最优性说明</div>
+        <p>时间复杂度 O(n) 是<strong>理论下限</strong>——我们必须检查每个字符至少一次才能确定有效性。空间复杂度 O(n) 在最坏情况下不可避免。</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>🔗 类似题目推荐</h2>
+      <div class="related-problems">
+        <div class="problem-card">
+          <div class="problem-num">LeetCode #32</div>
+          <div class="problem-title">最长有效括号</div>
+          <div class="problem-tag">栈 / 动态规划 · Hard</div>
+        </div>
+        <div class="problem-card">
+          <div class="problem-num">LeetCode #71</div>
+          <div class="problem-title">简化路径</div>
+          <div class="problem-tag">栈 · Medium</div>
+        </div>
+        <div class="problem-card">
+          <div class="problem-num">LeetCode #150</div>
+          <div class="problem-title">逆波兰表达式求值</div>
+          <div class="problem-tag">栈 · Medium</div>
+        </div>
+        <div class="problem-card">
+          <div class="problem-num">LeetCode #155</div>
+          <div class="problem-title">最小栈</div>
+          <div class="problem-tag">栈设计 · Medium</div>
+        </div>
+        <div class="problem-card">
+          <div class="problem-num">LeetCode #224</div>
+          <div class="problem-title">基本计算器</div>
+          <div class="problem-tag">栈 · Hard</div>
+        </div>
+        <div class="problem-card">
+          <div class="problem-num">LeetCode #394</div>
+          <div class="problem-title">字符串解码</div>
+          <div class="problem-tag">栈 · Medium</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>🎓 面试要点</h2>
+      <div class="accordion active">
+        <div class="accordion-header">
+          <span>常考追问</span>
+          <span class="accordion-icon">▼</span>
+        </div>
+        <div class="accordion-content">
+          <div class="accordion-body">
+            <div class="process-step">
+              <span class="step-num">Q1:</span> 如果只有小括号，可以优化吗？<br>
+              <strong>A:</strong> 可以用计数器替代栈，空间优化到 O(1)。遇到 '(' 计数+1，')' 计数-1，过程中不能为负，最终必须为0。
+            </div>
+            <div class="process-step">
+              <span class="step-num">Q2:</span> 如何找到不匹配的位置？<br>
+              <strong>A:</strong> 记录遍历索引，失败时返回当前索引。或用栈存储 (索引, 字符) 元组。
+            </div>
+            <div class="process-step">
+              <span class="step-num">Q3:</span> 字符串很长时的优化？<br>
+              <strong>A:</strong> 可以先检查长度是否为偶数（奇数直接返回false）；也可以预分配栈空间避免动态扩容。
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>Generated by Kimi Claw · LeetCode 每日精讲</p>
+      <p style="margin-top: 10px; font-size: 0.85em;">2026-03-16 06:16</p>
+    </footer>
+  </div>
+  
+  <script>
+    // 简单的折叠面板交互
+    document.querySelectorAll('.accordion-header').forEach(header => {
+      header.addEventListener('click', () => {
+        header.parentElement.classList.toggle('active');
+      });
+    });
+  </script>
+</body>
+</html>

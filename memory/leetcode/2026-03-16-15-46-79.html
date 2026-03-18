@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #79 - 单词搜索</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --secondary: #8b5cf6;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; }
+    body { 
+      font-family: 'Segoe UI', system-ui, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1100px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.7;
+    }
+    h1 { 
+      font-size: 2.2rem; 
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+    .subtitle { color: var(--text-muted); margin-bottom: 30px; }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px;
+      border: 1px solid rgba(99, 102, 241, 0.1);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-right: 8px;
+    }
+    .tag-medium { background: #f59e0b22; color: #f59e0b; }
+    .tag-dfs { background: #6366f122; color: #818cf8; }
+    .tag-backtrack { background: #22c55e22; color: #4ade80; }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      overflow-x: auto;
+      margin: 0;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 3px 16px; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 14px;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.25); 
+      border-left: 3px solid var(--primary); 
+      margin-left: -3px;
+      padding-left: 19px;
+    }
+    .code-line.highlight-step {
+      background: rgba(34, 197, 94, 0.15);
+      border-left: 3px solid var(--success);
+      margin-left: -3px;
+      padding-left: 19px;
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 36px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+    }
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; }
+    .class { color: #ffa657; }
+    .boolean { color: #ff7b72; }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1.2fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    .viz-steps { 
+      max-height: 500px; 
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+    .viz-steps::-webkit-scrollbar { width: 6px; }
+    .viz-steps::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+    .viz-step { 
+      padding: 14px 16px; 
+      margin: 10px 0; 
+      border-radius: 10px; 
+      background: #334155; 
+      cursor: pointer; 
+      border: 2px solid transparent;
+      transition: all 0.25s;
+    }
+    .viz-step:hover { 
+      background: #3d4b5f;
+      transform: translateX(4px);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.2);
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.15);
+    }
+    .viz-step-title { 
+      font-weight: 600; 
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .viz-step-desc { 
+      font-size: 0.9rem; 
+      color: var(--text-muted);
+    }
+    .step-line { 
+      font-size: 0.75rem; 
+      color: var(--primary);
+      margin-top: 6px;
+      font-family: monospace;
+    }
+    .board-container {
+      display: grid;
+      grid-template-columns: repeat(4, 50px);
+      gap: 4px;
+      margin: 16px 0;
+      justify-content: center;
+    }
+    .board-cell {
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #334155;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1.2rem;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+    }
+    .board-cell.current {
+      background: var(--primary);
+      border-color: #818cf8;
+      transform: scale(1.1);
+      box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+    }
+    .board-cell.visited {
+      background: var(--success);
+      border-color: #4ade80;
+      opacity: 0.8;
+    }
+    .board-cell.backtrack {
+      background: var(--danger);
+      border-color: #f87171;
+      opacity: 0.6;
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 18px; 
+      border: 1px solid #475569; 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block;
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.15);
+    }
+    .problem-id {
+      font-size: 0.85rem;
+      color: var(--primary);
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .problem-title {
+      font-weight: 600;
+      font-size: 1.05rem;
+      margin-bottom: 8px;
+    }
+    .problem-meta {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    .complexity-table th, .complexity-table td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid #334155;
+    }
+    .complexity-table th {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .complexity-good { color: var(--success); font-weight: 600; }
+    .highlight-box {
+      background: rgba(99, 102, 241, 0.1);
+      border-left: 4px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 10px 10px 0;
+      margin: 16px 0;
+    }
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+      background: var(--primary);
+      color: white;
+    }
+    .btn:hover {
+      background: #5558e0;
+      transform: translateY(-2px);
+    }
+    .btn-secondary {
+      background: #334155;
+    }
+    .btn-secondary:hover {
+      background: #3d4b5f;
+    }
+    .state-display {
+      background: #0d1117;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-family: monospace;
+      font-size: 0.9rem;
+      margin-top: 12px;
+    }
+    .state-var { color: var(--success); }
+    .state-val { color: var(--warning); }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #79 - 单词搜索</h1>
+  <p class="subtitle">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-dfs">DFS</span>
+    <span class="tag tag-backtrack">Backtracking</span>
+  </p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给定一个 <code>m x n</code> 二维字符网格 <code>board</code> 和一个字符串单词 <code>word</code> 。如果 <code>word</code> 存在于网格中，返回 <code>true</code>；否则，返回 <code>false</code>。</p>
+    <p>单词必须按照字母顺序，通过相邻的单元格内的字母构成，其中「相邻」单元格是那些水平相邻或垂直相邻的单元格。同一个单元格内的字母不允许被重复使用。</p>
+    
+    <div class="highlight-box">
+      <strong>核心考点：</strong>二维回溯 + DFS + 剪枝优化。这是回溯算法在二维网格上的经典应用，也是面试高频题。
+    </div>
+    
+    <p><strong>示例：</strong></p>
+    <pre style="background: #0d1117; padding: 16px; border-radius: 8px;">
+board = [
+  ['A','B','C','E'],
+  ['S','F','C','S'],
+  ['A','D','E','E']
+]
+word = "ABCCED"
+
+输出: true
+解释: 单词 "ABCCED" 可以从 board[0][0] -> [0][1] -> [0][2] -> [1][2] -> [2][2] -> [2][1] 找到
+    </pre>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行双向联动）</h2>
+    
+    <div class="controls">
+      <button class="btn" onclick="startAnimation()">▶ 播放演示</button>
+      <button class="btn btn-secondary" onclick="resetAnimation()">⟲ 重置</button>
+      <button class="btn btn-secondary" onclick="nextStep()">下一帧 →</button>
+    </div>
+    
+    <div class="viz-container">
+      <div>
+        <div class="board-container" id="board">
+          <!-- 棋盘由JS生成 -->
+        </div>
+        <div class="state-display" id="stateDisplay">
+          <span class="state-var">current_word:</span> <span class="state-val" id="currWord">""</span><br>
+          <span class="state-var">position:</span> <span class="state-val" id="currPos">-</span><br>
+          <span class="state-var">index:</span> <span class="state-val" id="currIdx">0</span>
+        </div>
+        <div class="viz-steps" id="vizSteps">
+          <!-- 步骤由JS生成 -->
+        </div>
+      </div>
+      
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre><code id="codeBlock">
+        </code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>⏱️ 复杂度分析</h2>
+    <table class="complexity-table">
+      <tr>
+        <th>复杂度类型</th>
+        <th>值</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>时间复杂度</td>
+        <td class="complexity-good">O(m × n × 4^L)</td>
+        <td>L为单词长度，每个格子最多4个方向探索</td>
+      </tr>
+      <tr>
+        <td>空间复杂度</td>
+        <td class="complexity-good">O(L)</td>
+        <td>递归栈深度，最坏为单词长度</td>
+      </tr>
+    </table>
+    
+    <div class="highlight-box">
+      <strong>剪枝优化技巧：</strong>如果单词首字母在board中出现次数很少，可以从这些位置开始；搜索前先判断board中各字符数量是否足够组成word。
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转 LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/unique-paths/" target="_blank" class="problem-card">
+        <div class="problem-id">#62 不同路径</div>
+        <div class="problem-title">Unique Paths</div>
+        <div class="problem-meta">动态规划 / 组合数学 · Medium</div>
+      </a>
+      <a href="https://leetcode.cn/problems/sudoku-solver/" target="_blank" class="problem-card">
+        <div class="problem-id">#37 解数独</div>
+        <div class="problem-title">Sudoku Solver</div>
+        <div class="problem-meta">回溯 / 二维DFS · Hard</div>
+      </a>
+      <a href="https://leetcode.cn/problems/n-queens/" target="_blank" class="problem-card">
+        <div class="problem-id">#51 N皇后</div>
+        <div class="problem-title">N-Queens</div>
+        <div class="problem-meta">回溯经典 · Hard</div>
+      </a>
+      <a href="https://leetcode.cn/problems/permutations/" target="_blank" class="problem-card">
+        <div class="problem-id">#46 全排列</div>
+        <div class="problem-title">Permutations</div>
+        <div class="problem-meta">回溯入门 · Medium</div>
+      </a>
+      <a href="https://leetcode.cn/problems/combination-sum/" target="_blank" class="problem-card">
+        <div class="problem-id">#39 组合总和</div>
+        <div class="problem-title">Combination Sum</div>
+        <div class="problem-meta">回溯+剪枝 · Medium</div>
+      </a>
+      <a href="https://leetcode.cn/problems/palindrome-partitioning/" target="_blank" class="problem-card">
+        <div class="problem-id">#131 分割回文串</div>
+        <div class="problem-title">Palindrome Partitioning</div>
+        <div class="problem-meta">回溯 · Medium</div>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    // 代码行数据
+    const codeLines = [
+      {line: 1, code: '<span class="keyword">class</span> <span class="class">Solution</span>:'},
+      {line: 2, code: '    <span class="keyword">def</span> <span class="function">exist</span>(<span class="keyword">self</span>, board: List[List[<span class="class">str</span>]], word: <span class="class">str</span>) -> <span class="class">bool</span>:'},
+      {line: 3, code: '        m, n = <span class="function">len</span>(board), <span class="function">len</span>(board[<span class="number">0</span>])'},
+      {line: 4, code: '        L = <span class="function">len</span>(word)'},
+      {line: 5, code: ''},
+      {line: 6, code: '        <span class="keyword">def</span> <span class="function">dfs</span>(i: <span class="class">int</span>, j: <span class="class">int</span>, k: <span class="class">int</span>) -> <span class="class">bool</span>:'},
+      {line: 7, code: '            <span class="comment"># 单词全部匹配完成</span>'},
+      {line: 8, code: '            <span class="keyword">if</span> k == L:'},
+      {line: 9, code: '                <span class="keyword">return</span> <span class="boolean">True</span>'},
+      {line: 10, code: '            <span class="comment"># 边界检查 + 字母不匹配</span>'},
+      {line: 11, code: '            <span class="keyword">if</span> i < <span class="number">0</span> <span class="keyword">or</span> i >= m <span class="keyword">or</span> j < <span class="number">0</span> <span class="keyword">or</span> j >= n:'},
+      {line: 12, code: '                <span class="keyword">return</span> <span class="boolean">False</span>'},
+      {line: 13, code: '            <span class="keyword">if</span> board[i][j] != word[k]:'},
+      {line: 14, code: '                <span class="keyword">return</span> <span class="boolean">False</span>'},
+      {line: 15, code: '            '},
+      {line: 16, code: '            <span class="comment"># 标记已访问，避免重复使用</span>'},
+      {line: 17, code: '            temp = board[i][j]'},
+      {line: 18, code: '            board[i][j] = <span class="string">"#"</span>'},
+      {line: 19, code: '            '},
+      {line: 20, code: '            <span class="comment"># 四个方向探索</span>'},
+      {line: 21, code: '            found = (dfs(i+<span class="number">1</span>, j, k+<span class="number">1</span>) <span class="keyword">or</span>'},
+      {line: 22, code: '                     dfs(i-<span class="number">1</span>, j, k+<span class="number">1</span>) <span class="keyword">or</span>'},
+      {line: 23, code: '                     dfs(i, j+<span class="number">1</span>, k+<span class="number">1</span>) <span class="keyword">or</span>'},
+      {line: 24, code: '                     dfs(i, j-<span class="number">1</span>, k+<span class="number">1</span>))'},
+      {line: 25, code: '            '},
+      {line: 26, code: '            <span class="comment"># 回溯：恢复现场</span>'},
+      {line: 27, code: '            board[i][j] = temp'},
+      {line: 28, code: '            <span class="keyword">return</span> found'},
+      {line: 29, code: '        '},
+      {line: 30, code: '        <span class="comment"># 从每个格子出发尝试</span>'},
+      {line: 31, code: '        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(m):'},
+      {line: 32, code: '            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="function">range</span>(n):'},
+      {line: 33, code: '                <span class="keyword">if</span> dfs(i, j, <span class="number">0</span>):'},
+      {line: 34, code: '                    <span class="keyword">return</span> <span class="boolean">True</span>'},
+      {line: 35, code: '        <span class="keyword">return</span> <span class="boolean">False</span>'},
+    ];
+
+    // 演示步骤数据（搜索 "SEE" 路径）
+    const steps = [
+      {title: "初始化", desc: "设置网格尺寸 m=3, n=4，单词长度 L=3", line: 3, state: {word: "SEE", matched: "", pos: "-"}},
+      {title: "外层循环", desc: "从 board[0][0] = 'A' 开始尝试", line: 31, state: {word: "SEE", matched: "", pos: "(0,0)='A'"}},
+      {title: "首字母检查", desc: "board[0][0]='A' ≠ word[0]='S'，不匹配，返回False", line: 13, state: {word: "SEE", matched: "", pos: "(0,0)"}},
+      {title: "尝试下一个", desc: "移动到 board[0][1] = 'B'", line: 32, state: {word: "SEE", matched: "", pos: "(0,1)='B'"}},
+      {title: "继续搜索", desc: "遍历多个格子直到找到 'S'...", line: 31, state: {word: "SEE", matched: "", pos: "搜索中..."}},
+      {title: "找到起点", desc: "board[1][0] = 'S' 匹配 word[0]！", line: 13, state: {word: "SEE", matched: "S", pos: "(1,0)"}},
+      {title: "标记访问", desc: "将 board[1][0] 标记为 '#' 防止重复使用", line: 18, state: {word: "SEE", matched: "S", pos: "(1,0)"}},
+      {title: "向下探索", desc: "检查 board[2][0] = 'A'，匹配 word[1]='E'？否", line: 21, state: {word: "SEE", matched: "S", pos: "(2,0)='A'"}},
+      {title: "向上探索", desc: "检查 board[0][0] = 'A'，不匹配 'E'", line: 22, state: {word: "SEE", matched: "S", pos: "(0,0)"}},
+      {title: "向右探索", desc: "检查 board[1][1] = 'F'，不匹配 'E'", line: 23, state: {word: "SEE", matched: "S", pos: "(1,1)"}},
+      {title: "向左探索", desc: "j-1 = -1 越界，返回 False", line: 24, state: {word: "SEE", matched: "S", pos: "越界"}},
+      {title: "回溯", desc: "board[1][0] 四周都没有匹配，恢复为 'S'", line: 27, state: {word: "SEE", matched: "", pos: "回溯"}},
+      {title: "新起点", desc: "尝试 board[1][3] = 'S'，匹配 word[0]！", line: 33, state: {word: "SEE", matched: "S", pos: "(1,3)"}},
+      {title: "标记访问", desc: "标记 board[1][3] 为 '#'", line: 18, state: {word: "SEE", matched: "S", pos: "(1,3)"}},
+      {title: "向右探索", desc: "j+1 = 4 越界", line: 23, state: {word: "SEE", matched: "S", pos: "越界"}},
+      {title: "向左探索", desc: "检查 board[1][2] = 'C'，不匹配 'E'", line: 24, state: {word: "SEE", matched: "S", pos: "(1,2)"}},
+      {title: "向上探索", desc: "检查 board[0][3] = 'E'，匹配 word[1]！", line: 22, state: {word: "SEE", matched: "SE", pos: "(0,3)"}},
+      {title: "标记访问", desc: "标记 board[0][3] 为 '#'", line: 18, state: {word: "SEE", matched: "SE", pos: "(0,3)"}},
+      {title: "递归深入", desc: "从 (0,3) 继续匹配 word[2] = 'E'", line: 21, state: {word: "SEE", matched: "SE", pos: "(0,3)"}},
+      {title: "向下探索", desc: "检查 board[1][3] 已被标记为 '#'，不匹配", line: 21, state: {word: "SEE", matched: "SE", pos: "(1,3)='#'"}},
+      {title: "向左探索", desc: "检查 board[0][2] = 'C'，不匹配 'E'", line: 24, state: {word: "SEE", matched: "SE", pos: "(0,2)"}},
+      {title: "回溯", desc: "(0,3) 无法继续，恢复为 'E'", line: 27, state: {word: "SEE", matched: "S", pos: "回溯"}},
+      {title: "向下探索", desc: "从 (1,3) 向下检查 board[2][3] = 'E'，匹配！", line: 21, state: {word: "SEE", matched: "SE", pos: "(2,3)"}},
+      {title: "标记访问", desc: "标记 board[2][3] 为 '#'", line: 18, state: {word: "SEE", matched: "SE", pos: "(2,3)"}},
+      {title: "继续匹配", desc: "匹配 word[2] = 'E'，k=2，需要检查四周", line: 21, state: {word: "SEE", matched: "SE", pos: "(2,3)"}},
+      {title: "向左探索", desc: "检查 board[2][2] = 'E'，匹配 word[2]！", line: 24, state: {word: "SEE", matched: "SEE", pos: "(2,2)"}},
+      {title: "成功！", desc: "k+1=3 == L=3，单词全部匹配完成！", line: 9, state: {word: "SEE", matched: "SEE ✓", pos: "完成！"}},
+      {title: "返回结果", desc: "返回 True，函数结束", line: 34, state: {word: "SEE", matched: "SEE ✓", pos: "返回 True"}},
+    ];
+
+    // 棋盘状态序列（对应每个步骤）
+    const boardStates = [
+      [['A','B','C','E'],['S','F','C','S'],['A','D','E','E']], // 初始
+      [['A','B','C','E'],['S','F','C','S'],['A','D','E','E']], // 尝试(0,0)
+      [['A','B','C','E'],['S','F','C','S'],['A','D','E','E']], // 不匹配
+      [['A','B','C','E'],['S','F','C','S'],['A','D','E','E']], // 尝试(0,1)
+      [['A','B','C','E'],['S','F','C','S'],['A','D','E','E']], // 搜索中
+      [['A','B','C','E'],['S','F','C','S'],['A','D','E','E']], // 找到S在(1,0)
+      [['A','B','C','E'],['#','F','C','S'],['A','D','E','E']], // 标记(1,0)
+      [['A','B','C','E'],['#','F','C','S'],['A','D','E','E']], // 检查(2,0)
+      [['A','B','C','E'],['#','F','C','S'],['A','D','E','E']], // 检查(0,0)
+      [['A','B','C','E'],['#','F','C','S'],['A','D','E','E']], // 检查(1,1)
+      [['A','B','C','E'],['#','F','C','S'],['A','D','E','E']], // 越界
+      [['A','B','C','E'],['S','F','C','S'],['A','D','E','E']], // 回溯恢复
+      [['A','B','C','E'],['S','F','C','#'],['A','D','E','E']], // 新起点(1,3)
+      [['A','B','C','E'],['S','F','C','#'],['A','D','E','E']], // 标记(1,3)
+      [['A','B','C','E'],['S','F','C','#'],['A','D','E','E']], // 越界
+      [['A','B','C','E'],['S','F','C','#'],['A','D','E','E']], // 检查(1,2)
+      [['A','B','C','E'],['S','F','C','#'],['A','D','E','E']], // 找到(0,3)
+      [['A','B','C','#'],['S','F','C','#'],['A','D','E','E']], // 标记(0,3)
+      [['A','B','C','#'],['S','F','C','#'],['A','D','E','E']], // 递归深入
+      [['A','B','C','#'],['S','F','C','#'],['A','D','E','E']], // (1,3)是#
+      [['A','B','C','#'],['S','F','C','#'],['A','D','E','E']], // (0,2)不匹配
+      [['A','B','C','E'],['S','F','C','#'],['A','D','E','E']], // 回溯(0,3)
+      [['A','B','C','E'],['S','F','C','#'],['A','D','E','E']], // 找到(2,3)
+      [['A','B','C','E'],['S','F','C','#'],['A','D','E','#']], // 标记(2,3)
+      [['A','B','C','E'],['S','F','C','#'],['A','D','E','#']], // 继续匹配
+      [['A','B','C','E'],['S','F','C','#'],['A','D','#','#']], // 找到(2,2)！
+      [['A','B','C','E'],['S','F','C','#'],['A','D','#','#']], // 成功！
+      [['A','B','C','E'],['S','F','C','S'],['A','D','E','E']], // 返回
+    ];
+
+    const currPositions = [
+      null, [0,0], null, [0,1], null, [1,0], [1,0], [2,0], [0,0], [1,1], null, [1,0],
+      [1,3], [1,3], null, [1,2], [0,3], [0,3], [0,3], [1,3], [0,2], [0,3], [2,3], [2,3], [2,3], [2,2], [2,2], null
+    ];
+
+    let currentStep = 0;
+    let animationInterval = null;
+
+    // 渲染代码块
+    function renderCode() {
+      const codeBlock = document.getElementById('codeBlock');
+      codeBlock.innerHTML = codeLines.map(l => `
+        <div class="code-line" data-line="${l.line}" onclick="highlightLine(${l.line})">
+          <span class="line-number">${l.line}</span>
+          <span>${l.code}</span>
+        </div>
+      `).join('');
+    }
+
+    // 渲染步骤
+    function renderSteps() {
+      const stepsContainer = document.getElementById('vizSteps');
+      stepsContainer.innerHTML = steps.map((s, idx) => `
+        <div class="viz-step" data-step="${idx}" onclick="goToStep(${idx})">
+          <div class="viz-step-title">步骤 ${idx + 1}: ${s.title}</div>
+          <div class="viz-step-desc">${s.desc}</div>
+          <div class="step-line">→ 对应代码行: ${s.line}</div>
+        </div>
+      `).join('');
+    }
+
+    // 渲染棋盘
+    function renderBoard(stepIdx) {
+      const board = document.getElementById('board');
+      const state = boardStates[stepIdx] || boardStates[0];
+      const curr = currPositions[stepIdx];
+      
+      let html = '';
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 4; j++) {
+          let className = 'board-cell';
+          if (curr && curr[0] === i && curr[1] === j) {
+            className += ' current';
+          } else if (state[i][j] === '#') {
+            className += ' visited';
+          }
+          html += `<div class="${className}">${state[i][j]}</div>`;
+        }
+      }
+      board.innerHTML = html;
+      
+      // 更新状态显示
+      const s = steps[stepIdx] || steps[0];
+      document.getElementById('currWord').textContent = `"${s.state.matched}"`;
+      document.getElementById('currPos').textContent = s.state.pos;
+      document.getElementById('currIdx').textContent = s.state.matched.length;
+    }
+
+    // 高亮步骤
+    function highlightStep(idx) {
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(el => {
+        el.classList.remove('active');
+        el.classList.remove('highlight-step');
+      });
+      
+      const stepEl = document.querySelector(`.viz-step[data-step="${idx}"]`);
+      if (stepEl) stepEl.classList.add('active');
+      
+      const step = steps[idx];
+      const lineEl = document.querySelector(`.code-line[data-line="${step.line}"]`);
+      if (lineEl) lineEl.classList.add('highlight-step');
+      
+      // 滚动到视图
+      if (stepEl) stepEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      
+      renderBoard(idx);
+      currentStep = idx;
+    }
+
+    // 高亮代码行
+    function highlightLine(line) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      
+      const lineEl = document.querySelector(`.code-line[data-line="${line}"]`);
+      if (lineEl) lineEl.classList.add('active');
+      
+      // 找到对应步骤
+      const stepIdx = steps.findIndex(s => s.line === line);
+      if (stepIdx !== -1) {
+        const stepEl = document.querySelector(`.viz-step[data-step="${stepIdx}"]`);
+        if (stepEl) stepEl.classList.add('active');
+      }
+    }
+
+    // 跳转到步骤
+    function goToStep(idx) {
+      highlightStep(idx);
+    }
+
+    // 动画控制
+    function startAnimation() {
+      resetAnimation();
+      animationInterval = setInterval(() => {
+        if (currentStep < steps.length - 1) {
+          highlightStep(currentStep + 1);
+        } else {
+          clearInterval(animationInterval);
+        }
+      }, 1200);
+    }
+
+    function resetAnimation() {
+      if (animationInterval) clearInterval(animationInterval);
+      highlightStep(0);
+    }
+
+    function nextStep() {
+      if (currentStep < steps.length - 1) {
+        highlightStep(currentStep + 1);
+      }
+    }
+
+    // 初始化
+    renderCode();
+    renderSteps();
+    highlightStep(0);
+  </script>
+</body>
+</html>

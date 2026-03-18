@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #136 - 只出现一次的数字</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --primary-light: #818cf8;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --surface-light: #334155;
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --border: #475569;
+    }
+    * { box-sizing: border-box; }
+    body { 
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.7;
+    }
+    h1 { 
+      font-size: 2.2rem; 
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle { 
+      color: var(--text-muted); 
+      margin-bottom: 32px; 
+      font-size: 1.1rem;
+    }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px; 
+      border: 1px solid var(--border);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 1.3rem;
+    }
+    .section h3 {
+      color: var(--text);
+      margin-top: 24px;
+      margin-bottom: 12px;
+      font-size: 1.1rem;
+    }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      overflow-x: auto; 
+      margin: 16px 0;
+    }
+    .code-block {
+      font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 4px 20px; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.3); 
+      border-left: 3px solid var(--primary); 
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 50px; 
+      text-align: right; 
+      padding-right: 20px; 
+      user-select: none;
+    }
+    .line-content { flex: 1; }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1.2fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 768px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    .viz-steps { 
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 16px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    .viz-step { 
+      padding: 14px 16px; 
+      margin: 10px 0; 
+      border-radius: 10px; 
+      background: var(--surface-light); 
+      cursor: pointer; 
+      border: 2px solid transparent; 
+      transition: all 0.2s;
+    }
+    .viz-step:hover {
+      background: var(--border);
+      transform: translateX(4px);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.25); 
+    }
+    .viz-step .step-title {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .viz-step .step-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .viz-step .step-state {
+      font-size: 0.85rem;
+      font-family: monospace;
+      background: var(--bg);
+      padding: 6px 10px;
+      border-radius: 6px;
+      color: var(--primary-light);
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 18px; 
+      border: 1px solid var(--border); 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block; 
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.15);
+    }
+    .problem-card .problem-num {
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+    }
+    .problem-card .problem-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .problem-card .problem-method {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .difficulty-easy { color: #22c55e; }
+    .difficulty-medium { color: #f59e0b; }
+    .difficulty-hard { color: #ef4444; }
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; }
+    .class { color: #ffa657; }
+    .operator { color: #79c0ff; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      background: var(--bg);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: var(--surface-light);
+      font-weight: 600;
+      color: var(--primary-light);
+    }
+    tr:last-child td { border-bottom: none; }
+    .tip-box {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(99, 102, 241, 0.05));
+      border: 1px solid var(--primary);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .tip-box h4 {
+      color: var(--primary);
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+    .bit-viz {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0;
+      font-family: monospace;
+    }
+    .bit-cell {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      text-align: center;
+      min-width: 40px;
+    }
+    .bit-cell.highlight {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.2);
+    }
+    .bit-cell .bit-val { font-size: 1.1rem; font-weight: 600; }
+    .bit-cell .bit-name { font-size: 0.75rem; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #136 - 只出现一次的数字</h1>
+  <p class="subtitle">难度: <span class="difficulty-easy">Easy</span> | 方法: 位运算（异或 XOR）</p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给你一个 <strong>非空</strong> 整数数组 <code>nums</code> ，除了某个元素只出现一次以外，其余每个元素均出现两次。找出那个只出现了一次的元素。</p>
+    <p><strong>必须设计并实现线性时间复杂度的算法来解决此问题，且该算法只使用常量额外空间。</strong></p>
+    
+    <h3>示例</h3>
+    <table>
+      <tr>
+        <th>输入</th>
+        <th>输出</th>
+        <th>解释</th>
+      </tr>
+      <tr>
+        <td><code>[2, 2, 1]</code></td>
+        <td><code>1</code></td>
+        <td>2出现两次，1出现一次</td>
+      </tr>
+      <tr>
+        <td><code>[4, 1, 2, 1, 2]</code></td>
+        <td><code>4</code></td>
+        <td>1和2各出现两次，4出现一次</td>
+      </tr>
+      <tr>
+        <td><code>[1]</code></td>
+        <td><code>1</code></td>
+        <td>只有一个元素</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="tip-box">
+    <h4>💡 核心考点</h4>
+    <p>这道题的关键在于利用 <strong>异或运算（XOR）</strong> 的两个重要性质：</p>
+    <ul>
+      <li><code>a ^ a = 0</code> — 任何数与自己异或结果为0</li>
+      <li><code>a ^ 0 = a</code> — 任何数与0异或结果为自身</li>
+      <li><code>a ^ b = b ^ a</code> — 交换律</li>
+    </ul>
+    <p>因此，将所有数字异或在一起，成对出现的数字会相互抵消，最终结果就是只出现一次的数字！</p>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <p style="color: var(--text-muted); margin-bottom: 16px;">示例: <code>nums = [4, 1, 2, 1, 2]</code></p>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre class="code-block"><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table>
+      <tr>
+        <th>方案</th>
+        <th>时间复杂度</th>
+        <th>空间复杂度</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>哈希表</td>
+        <td>O(n)</td>
+        <td>O(n)</td>
+        <td>用Counter统计频率，不满足常数空间</td>
+      </tr>
+      <tr>
+        <td>排序</td>
+        <td>O(n log n)</td>
+        <td>O(1)</td>
+        <td>排序后检查相邻元素，时间复杂度不达标</td>
+      </tr>
+      <tr style="background: rgba(99, 102, 241, 0.15);">
+        <td><strong>异或运算</strong></td>
+        <td><strong>O(n)</strong></td>
+        <td><strong>O(1)</strong></td>
+        <td><strong>✅ 最优解，满足所有约束</strong></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/single-number-ii/" class="problem-card" target="_blank">
+        <div class="problem-num">#137 <span class="difficulty-medium">Medium</span></div>
+        <div class="problem-title">只出现一次的数字 II</div>
+        <div class="problem-method">位运算（每个数字出现3次）</div>
+      </a>
+      <a href="https://leetcode.cn/problems/single-number-iii/" class="problem-card" target="_blank">
+        <div class="problem-num">#260 <span class="difficulty-medium">Medium</span></div>
+        <div class="problem-title">只出现一次的数字 III</div>
+        <div class="problem-method">位运算（两个数字各出现1次）</div>
+      </a>
+      <a href="https://leetcode.cn/problems/find-the-duplicate-number/" class="problem-card" target="_blank">
+        <div class="problem-num">#287 <span class="difficulty-medium">Medium</span></div>
+        <div class="problem-title">寻找重复数</div>
+        <div class="problem-method">快慢指针 / 二分查找</div>
+      </a>
+      <a href="https://leetcode.cn/problems/missing-number/" class="problem-card" target="_blank">
+        <div class="problem-num">#268 <span class="difficulty-easy">Easy</span></div>
+        <div class="problem-title">丢失的数字</div>
+        <div class="problem-method">异或运算 / 数学求和</div>
+      </a>
+      <a href="https://leetcode.cn/problems/find-the-difference/" class="problem-card" target="_blank">
+        <div class="problem-num">#389 <span class="difficulty-easy">Easy</span></div>
+        <div class="problem-title">找不同</div>
+        <div class="problem-method">异或运算 / 计数</div>
+      </a>
+      <a href="https://leetcode.cn/problems/number-of-1-bits/" class="problem-card" target="_blank">
+        <div class="problem-num">#191 <span class="difficulty-easy">Easy</span></div>
+        <div class="problem-title">位1的个数</div>
+        <div class="problem-method">位运算（汉明重量）</div>
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // 步骤与代码行映射
+    const steps = [
+      {title: "初始化结果变量", desc: "result初始化为0（XOR的单位元）", line: 4, state: "result = 0"},
+      {title: "遍历第一个元素 4", desc: "0 ^ 4 = 4", line: 5, state: "result = 4"},
+      {title: "遍历第二个元素 1", desc: "4 ^ 1 = 5（二进制: 100 ^ 001 = 101）", line: 5, state: "result = 5"},
+      {title: "遍历第三个元素 2", desc: "5 ^ 2 = 7（二进制: 101 ^ 010 = 111）", line: 5, state: "result = 7"},
+      {title: "遍历第四个元素 1", desc: "7 ^ 1 = 6（1的第二次出现，部分抵消）", line: 5, state: "result = 6"},
+      {title: "遍历第五个元素 2", desc: "6 ^ 2 = 4（2的第二次出现，完全抵消）", line: 5, state: "result = 4"},
+      {title: "返回最终结果", desc: "result = 4，即为只出现一次的数字", line: 6, state: "result = 4 ✓"}
+    ];
+
+    const codeLines = [
+      {num: 1, text: '<span class="keyword">from</span> typing <span class="keyword">import</span> List'},
+      {num: 2, text: ''},
+      {num: 3, text: '<span class="keyword">class</span> <span class="class">Solution</span>:'},
+      {num: 4, text: '    <span class="keyword">def</span> <span class="function">singleNumber</span>(<span class="keyword">self</span>, nums: List[<span class="keyword">int</span>]) <span class="operator">-></span> <span class="keyword">int</span>:'},
+      {num: 5, text: '        result <span class="operator">=</span> <span class="number">0</span>'},
+      {num: 6, text: '        <span class="keyword">for</span> num <span class="keyword">in</span> nums:'},
+      {num: 7, text: '            result <span class="operator">^=</span> num  <span class="comment"># 等价于: result = result ^ num</span>'},
+      {num: 8, text: '        <span class="keyword">return</span> result'},
+      {num: 9, text: ''},
+      {num: 10, text: '<span class="comment"># 简洁写法（一行版本）</span>'},
+      {num: 11, text: '<span class="keyword">class</span> <span class="class">Solution</span>:'},
+      {num: 12, text: '    <span class="keyword">def</span> <span class="function">singleNumber</span>(<span class="keyword">self</span>, nums: List[<span class="keyword">int</span>]) <span class="operator">-></span> <span class="keyword">int</span>:'},
+      {num: 13, text: '        <span class="keyword">return</span> <span class="function">reduce</span>(<span class="keyword">lambda</span> x, y: x <span class="operator">^</span> y, nums)'}
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeBlock.innerHTML = codeLines.map(line => 
+      `<div class="code-line" data-line="${line.num}">
+        <span class="line-number">${line.num}</span>
+        <span class="line-content">${line.text}</span>
+      </div>`
+    ).join('');
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    vizSteps.innerHTML = steps.map((step, idx) => `
+      <div class="viz-step" data-idx="${idx}" data-line="${step.line}">
+        <div class="step-title">步骤 ${idx + 1}: ${step.title}</div>
+        <div class="step-desc">${step.desc}</div>
+        <div class="step-state">${step.state}</div>
+      </div>
+    `).join('');
+
+    // 交互逻辑
+    let activeStep = null;
+    let activeLine = null;
+
+    function highlightStep(idx) {
+      // 清除之前的高亮
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      
+      // 高亮新步骤
+      const stepEl = document.querySelector(`.viz-step[data-idx="${idx}"]`);
+      const lineEl = document.querySelector(`.code-line[data-line="${steps[idx].line}"]`);
+      
+      if (stepEl) {
+        stepEl.classList.add('active');
+        stepEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      if (lineEl) {
+        lineEl.classList.add('active');
+        lineEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      
+      activeStep = idx;
+    }
+
+    function highlightLine(lineNum) {
+      // 找到对应的步骤
+      const stepIdx = steps.findIndex(s => s.line === lineNum);
+      if (stepIdx !== -1) {
+        highlightStep(stepIdx);
+      } else {
+        // 只高亮代码行
+        document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+        const lineEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+        if (lineEl) lineEl.classList.add('active');
+      }
+    }
+
+    // 绑定步骤点击事件
+    document.querySelectorAll('.viz-step').forEach(el => {
+      el.addEventListener('click', () => {
+        const idx = parseInt(el.dataset.idx);
+        highlightStep(idx);
+      });
+    });
+
+    // 绑定代码行点击事件
+    document.querySelectorAll('.code-line').forEach(el => {
+      el.addEventListener('click', () => {
+        const lineNum = parseInt(el.dataset.line);
+        highlightLine(lineNum);
+      });
+    });
+
+    // 默认高亮第一步
+    highlightStep(0);
+  </script>
+</body>
+</html>

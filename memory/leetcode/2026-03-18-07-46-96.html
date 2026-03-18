@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #96 - 不同的二叉搜索树</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --secondary: #8b5cf6;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --surface-light: #334155;
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --accent: #22d3ee;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: 'Segoe UI', system-ui, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.7;
+    }
+    h1 { font-size: 2.2rem; margin-bottom: 8px; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .subtitle { color: var(--text-muted); font-size: 1rem; margin-bottom: 30px; }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      font-size: 1.3rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .problem-desc {
+      background: rgba(99, 102, 241, 0.1);
+      border-left: 4px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 12px 12px 0;
+      margin: 16px 0;
+    }
+    .example-box {
+      background: var(--bg);
+      border: 1px solid var(--surface-light);
+      border-radius: 12px;
+      padding: 16px;
+      margin: 12px 0;
+      font-family: 'Consolas', monospace;
+    }
+    .example-title { color: var(--accent); font-size: 0.9rem; margin-bottom: 8px; }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 20px; 
+      overflow-x: auto;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 3px 0; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      border-radius: 4px;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.08); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.25); 
+      border-left: 3px solid var(--primary); 
+      margin-left: -3px;
+      padding-left: 3px;
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 45px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+      font-size: 0.85rem;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1.2fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 768px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    .viz-steps {
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 16px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    .viz-step { 
+      padding: 14px 16px; 
+      margin: 10px 0; 
+      border-radius: 10px; 
+      background: var(--surface-light); 
+      cursor: pointer; 
+      border: 2px solid transparent;
+      transition: all 0.25s;
+    }
+    .viz-step:hover { 
+      transform: translateX(4px);
+      border-color: rgba(99, 102, 241, 0.3);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.2);
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.15);
+    }
+    .step-title { font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .step-desc { font-size: 0.9rem; color: var(--text-muted); }
+    .step-state { 
+      font-size: 0.8rem; 
+      color: var(--accent); 
+      margin-top: 8px;
+      font-family: monospace;
+      background: rgba(34, 211, 238, 0.1);
+      padding: 6px 10px;
+      border-radius: 6px;
+    }
+    .code-container h3 { 
+      color: var(--text-muted); 
+      font-size: 0.95rem; 
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    .complexity-table th, .complexity-table td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--surface-light);
+    }
+    .complexity-table th {
+      color: var(--primary);
+      font-weight: 600;
+      background: rgba(99, 102, 241, 0.1);
+    }
+    .complexity-table tr:hover {
+      background: rgba(255,255,255,0.02);
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-right: 8px;
+    }
+    .badge-medium { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
+    .badge-dp { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 20px; 
+      border: 1px solid var(--surface-light); 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block; 
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.15);
+    }
+    .problem-num { color: var(--primary); font-weight: 700; font-size: 0.9rem; }
+    .problem-title { font-weight: 600; margin: 8px 0; }
+    .problem-method { font-size: 0.85rem; color: var(--text-muted); }
+    .insight-box {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1));
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+      border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+    .insight-title { color: var(--accent); font-weight: 600; margin-bottom: 10px; }
+    .catalan-formula {
+      font-family: 'Times New Roman', serif;
+      font-size: 1.3rem;
+      text-align: center;
+      padding: 20px;
+      background: var(--bg);
+      border-radius: 12px;
+      margin: 16px 0;
+      color: var(--accent);
+    }
+    /* Syntax highlighting */
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; font-style: italic; }
+    .class { color: #ffa657; }
+    .decorator { color: #f0883e; }
+    .operator { color: #ff7b72; }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #96 - 不同的二叉搜索树</h1>
+  <p class="subtitle">Unique Binary Search Trees · 动态规划 · 卡特兰数</p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <div class="problem-desc">
+      <p>给你一个整数 <code>n</code> ，求恰由 <code>n</code> 个节点组成且节点值从 <code>1</code> 到 <code>n</code> 互不相同的 <strong>二叉搜索树</strong> 有多少种？返回满足题意的二叉搜索树的种数。</p>
+    </div>
+    
+    <div class="example-box">
+      <div class="example-title">示例 1:</div>
+      <div>输入: n = 3</div>
+      <div>输出: 5</div>
+    </div>
+    
+    <div class="example-box">
+      <div class="example-title">示例 2:</div>
+      <div>输入: n = 1</div>
+      <div>输出: 1</div>
+    </div>
+    
+    <div class="insight-box">
+      <div class="insight-title">💡 核心思路</div>
+      <p>对于 BST，<strong>中序遍历必定是递增序列</strong>。当选择数字 <code>i</code> 作为根节点时：</p>
+      <ul style="margin: 12px 0 0 20px; color: var(--text-muted);">
+        <li>左子树由 <code>[1, i-1]</code> 构成，有 <code>G(i-1)</code> 种可能</li>
+        <li>右子树由 <code>[i+1, n]</code> 构成，有 <code>G(n-i)</code> 种可能</li>
+        <li>以 i 为根的 BST 总数 = G(i-1) × G(n-i)</li>
+      </ul>
+      <p style="margin-top: 12px; color: var(--text-muted);">这就是著名的 <strong>卡特兰数 (Catalan Number)</strong>！</p>
+    </div>
+    
+    <div class="catalan-formula">
+      G(n) = Σ G(i-1) × G(n-i)  (i 从 1 到 n)
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre><code id="codeBlock">
+<!-- 代码行由JS生成 -->
+        </code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <tr>
+        <th>方案</th>
+        <th>时间复杂度</th>
+        <th>空间复杂度</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>动态规划</td>
+        <td>O(n²)</td>
+        <td>O(n)</td>
+        <td>标准DP解法，自底向上填表</td>
+      </tr>
+      <tr>
+        <td>数学公式</td>
+        <td>O(n)</td>
+        <td>O(1)</td>
+        <td>利用卡特兰数递推公式 C(2n,n)/(n+1)</td>
+      </tr>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/unique-binary-search-trees-ii/" class="problem-card" target="_blank">
+        <span class="problem-num">#95</span>
+        <span class="badge badge-medium">Medium</span>
+        <div class="problem-title">不同的二叉搜索树 II</div>
+        <div class="problem-method">分治 / 递归 — 要求返回所有具体的树结构</div>
+      </a>
+      <a href="https://leetcode.cn/problems/validate-binary-search-tree/" class="problem-card" target="_blank">
+        <span class="problem-num">#98</span>
+        <span class="badge badge-medium">Medium</span>
+        <div class="problem-title">验证二叉搜索树</div>
+        <div class="problem-method">递归 / 中序遍历 — BST的经典验证问题</div>
+      </a>
+      <a href="https://leetcode.cn/problems/construct-binary-search-tree-from-preorder-traversal/" class="problem-card" target="_blank">
+        <span class="problem-num">#1008</span>
+        <span class="badge badge-medium">Medium</span>
+        <div class="problem-title">前序遍历构造二叉搜索树</div>
+        <div class="problem-method">递归 / 单调栈 — 利用BST性质优化</div>
+      </a>
+      <a href="https://leetcode.cn/problems/binary-search-tree-iterator/" class="problem-card" target="_blank">
+        <span class="problem-num">#173</span>
+        <span class="badge badge-medium">Medium</span>
+        <div class="problem-title">二叉搜索树迭代器</div>
+        <div class="problem-method">栈 / 中序遍历 — BST迭代器设计</div>
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // 代码内容
+    const codeLines = [
+      { num: 1,  code: '<span class="keyword">class</span> <span class="class">Solution</span>:' },
+      { num: 2,  code: '    <span class="keyword">def</span> <span class="function">numTrees</span>(self, n: <span class="keyword">int</span>) -> <span class="keyword">int</span>:' },
+      { num: 3,  code: '        <span class="comment"># dp[i] 表示 i 个节点能组成的 BST 数量</span>' },
+      { num: 4,  code: '        dp = [<span class="number">0</span>] * (n + <span class="number">1</span>)' },
+      { num: 5,  code: '        ' },
+      { num: 6,  code: '        <span class="comment"># 基本情况：空树也是一种 BST</span>' },
+      { num: 7,  code: '        dp[<span class="number">0</span>] = <span class="number">1</span>' },
+      { num: 8,  code: '        ' },
+      { num: 9,  code: '        <span class="comment"># 填充 dp 表，计算 1 到 n 个节点的 BST 数量</span>' },
+      { num: 10, code: '        <span class="keyword">for</span> nodes <span class="keyword">in</span> <span class="function">range</span>(<span class="number">1</span>, n + <span class="number">1</span>):' },
+      { num: 11, code: '            total = <span class="number">0</span>' },
+      { num: 12, code: '            ' },
+      { num: 13, code: '            <span class="comment"># 枚举每个数字作为根节点</span>' },
+      { num: 14, code: '            <span class="keyword">for</span> root <span class="keyword">in</span> <span class="function">range</span>(<span class="number">1</span>, nodes + <span class="number">1</span>):' },
+      { num: 15, code: '                left_trees = dp[root - <span class="number">1</span>]   <span class="comment"># 左子树数量</span>' },
+      { num: 16, code: '                right_trees = dp[nodes - root] <span class="comment"># 右子树数量</span>' },
+      { num: 17, code: '                total += left_trees * right_trees' },
+      { num: 18, code: '            ' },
+      { num: 19, code: '            dp[nodes] = total' },
+      { num: 20, code: '        ' },
+      { num: 21, code: '        <span class="keyword">return</span> dp[n]' }
+    ];
+
+    // 步骤与代码行映射
+    const steps = [
+      {
+        title: "🚀 初始化 DP 数组",
+        desc: "创建 dp 数组，dp[i] 将存储 i 个节点能组成的 BST 数量",
+        line: 4,
+        state: "dp = [0, 0, 0, ..., 0] (长度 n+1)"
+      },
+      {
+        title: "🌱 设置基础情况",
+        desc: "空树也算一种 BST，所以 dp[0] = 1。这是递归/DP的终止条件",
+        line: 7,
+        state: "dp[0] = 1"
+      },
+      {
+        title: "🔄 外层循环：节点数",
+        desc: "从 1 个节点开始，逐步计算到 n 个节点的 BST 数量",
+        line: 10,
+        state: "当前计算: nodes = 3"
+      },
+      {
+        title: "⭕ 初始化当前总数",
+        desc: "对于当前节点数，重新开始统计所有可能的 BST 数量",
+        line: 11,
+        state: "total = 0"
+      },
+      {
+        title: "🌳 内层循环：选择根节点",
+        desc: "枚举 1 到 nodes 的每个数字作为根节点",
+        line: 14,
+        state: "假设 root = 2 (作为根节点)"
+      },
+      {
+        title: "🌿 计算左子树数量",
+        desc: "选择 root=2 时，左子树由 [1] 构成，共 root-1 = 1 个节点",
+        line: 15,
+        state: "left_trees = dp[1] = 1"
+      },
+      {
+        title: "🌿 计算右子树数量",
+        desc: "右子树由 [3] 构成，共 nodes-root = 1 个节点",
+        line: 16,
+        state: "right_trees = dp[1] = 1"
+      },
+      {
+        title: "✨ 累加组合数",
+        desc: "乘法原理：左子树的每种可能 × 右子树的每种可能",
+        line: 17,
+        state: "total += 1 × 1 = 1"
+      },
+      {
+        title: "📝 保存结果",
+        desc: "将 nodes 个节点的 BST 总数存入 dp[nodes]",
+        line: 19,
+        state: "dp[3] = 5 (所有根节点情况累加)"
+      },
+      {
+        title: "🎯 返回最终答案",
+        desc: "dp[n] 即为 n 个节点能组成的不同 BST 的总数",
+        line: 21,
+        state: "return dp[3] = 5"
+      }
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeBlock.innerHTML = codeLines.map(line => 
+      `<div class="code-line" data-line="${line.num}">` +
+      `<span class="line-number">${line.num}</span>` +
+      `<span class="code-content">${line.code}</span>` +
+      `</div>`
+    ).join('');
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    vizSteps.innerHTML = steps.map((step, idx) => 
+      `<div class="viz-step" data-step="${idx}" data-line="${step.line}">` +
+      `<div class="step-title">${step.title}</div>` +
+      `<div class="step-desc">${step.desc}</div>` +
+      `<div class="step-state">${step.state}</div>` +
+      `</div>`
+    ).join('');
+
+    // 交互逻辑
+    let activeStep = null;
+    let activeLine = null;
+
+    function highlightStep(stepIdx) {
+      // 清除之前的高亮
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      
+      // 高亮当前步骤
+      const stepEl = document.querySelector(`.viz-step[data-step="${stepIdx}"]`);
+      if (stepEl) {
+        stepEl.classList.add('active');
+        stepEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        activeStep = stepIdx;
+        
+        // 高亮对应代码行
+        const lineNum = stepEl.dataset.line;
+        const lineEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+        if (lineEl) {
+          lineEl.classList.add('active');
+          lineEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          activeLine = parseInt(lineNum);
+        }
+      }
+    }
+
+    function highlightLine(lineNum) {
+      // 清除之前的高亮
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      
+      // 高亮代码行
+      const lineEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+      if (lineEl) {
+        lineEl.classList.add('active');
+        activeLine = lineNum;
+        
+        // 查找对应的步骤
+        const stepEl = document.querySelector(`.viz-step[data-line="${lineNum}"]`);
+        if (stepEl) {
+          stepEl.classList.add('active');
+          stepEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          activeStep = parseInt(stepEl.dataset.step);
+        }
+      }
+    }
+
+    // 绑定事件
+    document.querySelectorAll('.viz-step').forEach((el, idx) => {
+      el.addEventListener('click', () => highlightStep(idx));
+    });
+
+    document.querySelectorAll('.code-line').forEach(el => {
+      el.addEventListener('click', () => highlightLine(parseInt(el.dataset.line)));
+    });
+
+    // 默认高亮第一步
+    highlightStep(0);
+  </script>
+</body>
+</html>

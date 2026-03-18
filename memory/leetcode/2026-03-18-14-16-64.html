@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #64 - 最小路径和</title>
+  <style>
+    :root { 
+      --primary: #10b981; 
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --text: #f1f5f9; 
+      --secondary: #64748b;
+    }
+    body { 
+      font-family: 'Segoe UI', system-ui, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.7;
+    }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px; 
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 12px;
+    }
+    .tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-right: 8px;
+    }
+    .tag-difficulty { background: #f59e0b; color: #000; }
+    .tag-method { background: var(--primary); color: #fff; }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 20px; 
+      overflow-x: auto; 
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 14px;
+      border: 1px solid #30363d;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 4px 0; 
+      cursor: pointer; 
+      transition: all 0.2s; 
+      border-radius: 4px;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+    }
+    .code-line.active { 
+      background: rgba(16, 185, 129, 0.25); 
+      border-left: 4px solid var(--primary); 
+      margin-left: -4px;
+      padding-left: 4px;
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 40px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+      font-size: 12px;
+    }
+    .code-content { flex: 1; }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1.2fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    .viz-steps { 
+      max-height: 450px; 
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+    .viz-steps::-webkit-scrollbar { width: 6px; }
+    .viz-steps::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+    .viz-step { 
+      padding: 14px; 
+      margin: 10px 0; 
+      border-radius: 10px; 
+      background: #334155; 
+      cursor: pointer; 
+      border: 2px solid transparent;
+      transition: all 0.25s;
+    }
+    .viz-step:hover { 
+      background: #3d4e66;
+      transform: translateX(4px);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(16, 185, 129, 0.15);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+    }
+    .viz-step-title { 
+      font-weight: 600; 
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+    .viz-step-desc { 
+      font-size: 13px; 
+      color: #94a3b8;
+    }
+    .viz-step-state {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed #475569;
+      font-family: monospace;
+      font-size: 12px;
+    }
+    .code-container h3 {
+      margin-top: 0;
+      color: var(--secondary);
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 16px; 
+      border: 1px solid #475569; 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block;
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.2);
+    }
+    .problem-card h4 { 
+      margin: 0 0 8px 0; 
+      color: var(--primary);
+    }
+    .problem-card p { 
+      margin: 0; 
+      font-size: 13px; 
+      color: #94a3b8;
+    }
+    .grid-viz {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 12px 0;
+      max-width: 200px;
+    }
+    .grid-cell {
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 16px;
+      transition: all 0.3s;
+    }
+    .grid-cell.normal { background: #334155; }
+    .grid-cell.current { 
+      background: var(--primary); 
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+    }
+    .grid-cell.path { 
+      background: #059669;
+      border: 2px solid #34d399;
+    }
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    .complexity-table th, .complexity-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #475569;
+    }
+    .complexity-table th {
+      color: var(--primary);
+      font-weight: 600;
+      background: rgba(16, 185, 129, 0.1);
+    }
+    .complexity-table td code {
+      background: #0d1117;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+    .highlight-box {
+      background: rgba(16, 185, 129, 0.1);
+      border-left: 4px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 8px 8px 0;
+      margin: 16px 0;
+    }
+    .keyword { color: #ff7b72; } 
+    .function { color: #d2a8ff; } 
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; } 
+    .comment { color: #8b949e; } 
+    .class { color: #ffa657; }
+    .operator { color: #ff7b72; }
+    @media (max-width: 768px) {
+      .viz-container { grid-template-columns: 1fr; }
+      .problem-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div style="text-align: center; margin-bottom: 30px;">
+    <h1 style="margin: 0; font-size: 2.5em;">LeetCode #64</h1>
+    <h2 style="margin: 10px 0; color: var(--text);">最小路径和</h2>
+    <div style="margin-top: 16px;">
+      <span class="tag tag-difficulty">Medium</span>
+      <span class="tag tag-method">动态规划</span>
+      <span class="tag tag-method">矩阵DP</span>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给定一个包含非负整数的 <code>m x n</code> 网格 <code>grid</code>，请找出一条从<strong>左上角</strong>到<strong>右下角</strong>的路径，使得路径上的数字总和为最小。</p>
+    <p><strong>说明：</strong>每次只能向下或者向右移动一步。</p>
+    
+    <div class="highlight-box">
+      <strong>示例：</strong><br>
+      输入：grid = [[1,3,1],[1,5,1],[4,2,1]]<br>
+      输出：7<br>
+      解释：因为路径 1→3→1→1→1 的总和最小。
+    </div>
+    
+    <p><strong>提示：</strong></p>
+    <ul>
+      <li><code>1 &lt;= m, n &lt;= 200</code></li>
+      <li><code>0 &lt;= grid[i][j] &lt;= 200</code></li>
+    </ul>
+  </div>
+  
+  <div class="section">
+    <h2>💡 核心思路</h2>
+    <p>这是一个经典的<strong>动态规划</strong>问题。关键观察：</p>
+    <ul>
+      <li>到达某个格子 <code>(i,j)</code> 只能从 <strong>上方</strong> <code>(i-1,j)</code> 或 <strong>左方</strong> <code>(i,j-1)</code> 过来</li>
+      <li>因此，到 <code>(i,j)</code> 的最小路径和 = <code>grid[i][j]</code> + min(从上面来的最小和, 从左面来的最小和)</li>
+    </ul>
+    <div class="highlight-box">
+      <strong>状态转移方程：</strong><br>
+      <code>dp[i][j] = grid[i][j] + min(dp[i-1][j], dp[i][j-1])</code>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="grid-viz" id="gridViz">
+      <div class="grid-cell path" id="cell-0-0">1</div>
+      <div class="grid-cell path" id="cell-0-1">3</div>
+      <div class="grid-cell normal" id="cell-0-2">1</div>
+      <div class="grid-cell normal" id="cell-1-0">1</div>
+      <div class="grid-cell path" id="cell-1-1">5</div>
+      <div class="grid-cell path" id="cell-1-2">1</div>
+      <div class="grid-cell normal" id="cell-2-0">4</div>
+      <div class="grid-cell normal" id="cell-2-1">2</div>
+      <div class="grid-cell path" id="cell-2-2">1</div>
+    </div>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>Python 实现（空间优化版）</h3>
+        <pre id="codeBlock"></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <tr>
+        <th>方案</th>
+        <th>时间复杂度</th>
+        <th>空间复杂度</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>二维DP</td>
+        <td><code>O(m×n)</code></td>
+        <td><code>O(m×n)</code></td>
+        <td>创建完整的dp数组</td>
+      </tr>
+      <tr>
+        <td><strong>一维DP（推荐）</strong></td>
+        <td><code>O(m×n)</code></td>
+        <td><code>O(n)</code></td>
+        <td>只用一维数组，滚动更新</td>
+      </tr>
+      <tr>
+        <td>原地修改</td>
+        <td><code>O(m×n)</code></td>
+        <td><code>O(1)</code></td>
+        <td>直接修改输入数组（不推荐）</td>
+      </tr>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/triangle/" class="problem-card" target="_blank">
+        <h4>#120 三角形最小路径和</h4>
+        <p>类似的矩阵DP，但路径方向是从上到下</p>
+      </a>
+      <a href="https://leetcode.cn/problems/unique-paths/" class="problem-card" target="_blank">
+        <h4>#62 不同路径</h4>
+        <p>基础网格DP，计算路径数量而非最小和</p>
+      </a>
+      <a href="https://leetcode.cn/problems/dungeon-game/" class="problem-card" target="_blank">
+        <h4>#174 地下城游戏</h4>
+        <p>反向DP，从终点倒推到起点</p>
+      </a>
+      <a href="https://leetcode.cn/problems/minimum-falling-path-sum/" class="problem-card" target="_blank">
+        <h4>#931 下降路径最小和</h4>
+        <p>允许从三个方向（左下、正下、右下）移动</p>
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // Python代码，按行分割用于高亮
+    const codeLines = [
+      { line: 1, content: '<span class="keyword">class</span> <span class="class">Solution</span>:' },
+      { line: 2, content: '    <span class="keyword">def</span> <span class="function">minPathSum</span>(self, grid: List[List[<span class="keyword">int</span>]]) -> <span class="keyword">int</span>:' },
+      { line: 3, content: '        m, n = <span class="function">len</span>(grid), <span class="function">len</span>(grid[<span class="number">0</span>])' },
+      { line: 4, content: '        ' },
+      { line: 5, content: '        <span class="comment"># 一维DP数组，dp[j]表示到当前行第j列的最小路径和</span>' },
+      { line: 6, content: '        dp = [<span class="number">0</span>] * n' },
+      { line: 7, content: '        ' },
+      { line: 8, content: '        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(m):' },
+      { line: 9, content: '            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="function">range</span>(n):' },
+      { line: 10, content: '                <span class="keyword">if</span> i == <span class="number">0</span> <span class="keyword">and</span> j == <span class="number">0</span>:' },
+      { line: 11, content: '                    <span class="comment"># 起点</span>' },
+      { line: 12, content: '                    dp[j] = grid[i][j]' },
+      { line: 13, content: '                <span class="keyword">elif</span> i == <span class="number">0</span>:' },
+      { line: 14, content: '                    <span class="comment"># 第一行，只能从左边来</span>' },
+      { line: 15, content: '                    dp[j] = dp[j - <span class="number">1</span>] + grid[i][j]' },
+      { line: 16, content: '                <span class="keyword">elif</span> j == <span class="number">0</span>:' },
+      { line: 17, content: '                    <span class="comment"># 第一列，只能从上面来</span>' },
+      { line: 18, content: '                    dp[j] = dp[j] + grid[i][j]' },
+      { line: 19, content: '                <span class="keyword">else</span>:' },
+      { line: 20, content: '                    <span class="comment"># 其他位置，取上方和左方的最小值</span>' },
+      { line: 21, content: '                    dp[j] = <span class="function">min</span>(dp[j], dp[j - <span class="number">1</span>]) + grid[i][j]' },
+      { line: 22, content: '        ' },
+      { line: 23, content: '        <span class="keyword">return</span> dp[n - <span class="number">1</span>]' }
+    ];
+
+    // 步骤与代码行映射
+    const steps = [
+      { title: "初始化", desc: "获取网格尺寸 m×n，创建一维DP数组", line: 3, state: "dp = [0, 0, 0]" },
+      { title: "处理起点 (0,0)", desc: "dp[0] = grid[0][0] = 1", line: 10, state: "dp = [1, 0, 0]" },
+      { title: "第一行：处理 (0,1)", desc: "只能从左边来：dp[1] = dp[0] + 3 = 4", line: 15, state: "dp = [1, 4, 0]" },
+      { title: "第一行：处理 (0,2)", desc: "只能从左边来：dp[2] = dp[1] + 1 = 5", line: 15, state: "dp = [1, 4, 5]" },
+      { title: "第二行：处理 (1,0)", desc: "只能从上面来：dp[0] = dp[0] + 1 = 2", line: 18, state: "dp = [2, 4, 5]" },
+      { title: "第二行：处理 (1,1)", desc: "取min(上方=4, 左方=2)+5 = 7", line: 21, state: "dp = [2, 7, 5]" },
+      { title: "第二行：处理 (1,2)", desc: "取min(上方=5, 左方=7)+1 = 6", line: 21, state: "dp = [2, 7, 6]" },
+      { title: "第三行：处理 (2,0)", desc: "只能从上面来：dp[0] = 2 + 4 = 6", line: 18, state: "dp = [6, 7, 6]" },
+      { title: "第三行：处理 (2,1)", desc: "取min(上方=7, 左方=6)+2 = 8", line: 21, state: "dp = [6, 8, 6]" },
+      { title: "第三行：处理 (2,2)", desc: "取min(上方=6, 左方=8)+1 = 7 ✅", line: 21, state: "dp = [6, 8, 7]" },
+      { title: "返回结果", desc: "返回 dp[n-1] = dp[2] = 7", line: 23, state: "答案 = 7" }
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach(({ line, content }) => {
+      const lineDiv = document.createElement('div');
+      lineDiv.className = 'code-line';
+      lineDiv.dataset.line = line;
+      lineDiv.innerHTML = `<span class="line-number">${line}</span><span class="code-content">${content}</span>`;
+      lineDiv.addEventListener('click', () => activateStepByLine(line));
+      codeBlock.appendChild(lineDiv);
+    });
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, index) => {
+      const stepDiv = document.createElement('div');
+      stepDiv.className = 'viz-step';
+      stepDiv.dataset.index = index;
+      stepDiv.dataset.line = step.line;
+      stepDiv.innerHTML = `
+        <div class="viz-step-title">${step.title}</div>
+        <div class="viz-step-desc">${step.desc}</div>
+        <div class="viz-step-state">${step.state}</div>
+      `;
+      stepDiv.addEventListener('click', () => activateStep(index));
+      vizSteps.appendChild(stepDiv);
+    });
+
+    let activeStep = -1;
+
+    function activateStep(index) {
+      // 清除之前的高亮
+      document.querySelectorAll('.viz-step').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+      
+      activeStep = index;
+      const step = steps[index];
+      
+      // 高亮步骤
+      const stepEl = document.querySelector(`.viz-step[data-index="${index}"]`);
+      if (stepEl) {
+        stepEl.classList.add('active');
+        stepEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      
+      // 高亮对应代码行
+      const lineEl = document.querySelector(`.code-line[data-line="${step.line}"]`);
+      if (lineEl) lineEl.classList.add('active');
+      
+      // 更新网格可视化
+      updateGridViz(index);
+    }
+
+    function activateStepByLine(line) {
+      const stepIndex = steps.findIndex(s => s.line === line);
+      if (stepIndex !== -1) activateStep(stepIndex);
+    }
+
+    function updateGridViz(stepIndex) {
+      // 重置所有格子
+      document.querySelectorAll('.grid-cell').forEach(cell => {
+        cell.className = 'grid-cell normal';
+      });
+      
+      // 根据步骤高亮当前处理的格子
+      const highlightMap = [
+        [],           // 初始化
+        [[0,0]],      // (0,0)
+        [[0,1]],      // (0,1)
+        [[0,2]],      // (0,2)
+        [[1,0]],      // (1,0)
+        [[1,1]],      // (1,1)
+        [[1,2]],      // (1,2)
+        [[2,0]],      // (2,0)
+        [[2,1]],      // (2,1)
+        [[2,2]],      // (2,2)
+        []            // 返回
+      ];
+      
+      if (highlightMap[stepIndex]) {
+        highlightMap[stepIndex].forEach(([r, c]) => {
+          const cell = document.getElementById(`cell-${r}-${c}`);
+          if (cell) cell.className = 'grid-cell current';
+        });
+      }
+      
+      // 始终高亮最优路径
+      const pathCells = [[0,0], [0,1], [1,1], [1,2], [2,2]];
+      pathCells.forEach(([r, c]) => {
+        const cell = document.getElementById(`cell-${r}-${c}`);
+        if (cell && !cell.classList.contains('current')) {
+          cell.className = 'grid-cell path';
+        }
+      });
+    }
+
+    // 默认激活第一个步骤
+    activateStep(0);
+  </script>
+</body>
+</html>

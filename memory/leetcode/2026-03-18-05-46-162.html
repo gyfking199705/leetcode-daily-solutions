@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>LeetCode #162 - 寻找峰值</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --secondary: #8b5cf6;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --surface-light: #334155;
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 40px 20px;
+      line-height: 1.6;
+    }
+    h1 { font-size: 2rem; margin-bottom: 8px; }
+    .subtitle { color: var(--text-muted); margin-bottom: 32px; }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    .tag-medium { background: var(--warning); color: #1a1a1a; }
+    .tag-method { background: var(--secondary); color: white; }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 20px; 
+      overflow-x: auto;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 2px 0; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+      border-left-color: var(--text-muted);
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.3); 
+      border-left: 3px solid var(--primary);
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 40px; 
+      text-align: right; 
+      padding-right: 16px;
+      user-select: none;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    .viz-steps { 
+      max-height: 450px; 
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+    .viz-steps::-webkit-scrollbar { width: 6px; }
+    .viz-steps::-webkit-scrollbar-thumb { background: var(--surface-light); border-radius: 3px; }
+    .viz-step { 
+      padding: 16px; 
+      margin: 12px 0; 
+      border-radius: 12px; 
+      background: var(--surface-light); 
+      cursor: pointer; 
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .viz-step:hover { 
+      transform: translateX(4px);
+      border-color: var(--text-muted);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.2);
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+    }
+    .viz-step h4 { margin: 0 0 8px 0; color: var(--primary); font-size: 0.95rem; }
+    .viz-step p { margin: 0; color: var(--text-muted); font-size: 0.9rem; }
+    .viz-step .array-state {
+      margin-top: 12px;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .array-item {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .array-item.index { color: var(--text-muted); font-size: 0.75rem; background: transparent; }
+    .array-item.highlight { background: var(--primary); color: white; box-shadow: 0 0 10px rgba(99, 102, 241, 0.5); }
+    .array-item.mid { background: var(--warning); color: #1a1a1a; }
+    .array-item.boundary { border: 2px solid var(--success); color: var(--success); }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 20px; 
+      border: 1px solid #475569; 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block;
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(99, 102, 241, 0.2);
+    }
+    .problem-card h4 { margin: 0 0 8px 0; color: var(--primary); }
+    .problem-card p { margin: 0; color: var(--text-muted); font-size: 0.9rem; }
+    .keyword { color: #ff7b72; } 
+    .function { color: #d2a8ff; } 
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; } 
+    .comment { color: #8b949e; } 
+    .class { color: #ffa657; }
+    .table-container { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+    th, td { padding: 14px 18px; text-align: left; border-bottom: 1px solid var(--surface-light); }
+    th { background: var(--bg); color: var(--primary); font-weight: 600; }
+    tr:hover { background: rgba(255,255,255,0.02); }
+    .highlight-box {
+      background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.1));
+      border-left: 4px solid var(--primary);
+      padding: 20px 24px;
+      border-radius: 0 12px 12px 0;
+      margin: 20px 0;
+    }
+    .problem-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 20px; }
+    @media (max-width: 768px) {
+      .viz-container { grid-template-columns: 1fr; }
+      .problem-grid { grid-template-columns: 1fr; }
+    }
+    .algo-flow {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 24px 0;
+      padding: 20px;
+      background: var(--bg);
+      border-radius: 12px;
+    }
+    .algo-step {
+      padding: 12px 20px;
+      background: var(--surface-light);
+      border-radius: 10px;
+      text-align: center;
+    }
+    .algo-arrow { color: var(--primary); font-size: 1.5rem; }
+    .algo-step.active { background: var(--primary); color: white; }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #162 - 寻找峰值 <span class="tag tag-medium">Medium</span></h1>
+  <p class="subtitle">二分查找的经典变体：利用题目条件缩小搜索范围</p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>峰值元素是指其值严格大于左右相邻值的元素。</p>
+    <p>给你一个整数数组 <code>nums</code>，找到峰值元素并返回其索引。数组可能包含多个峰值，在这种情况下，返回 <strong>任何一个峰值</strong> 所在位置即可。</p>
+    <p>你可以假设 <code>nums[-1] = nums[n] = -∞</code> 。也就是说，数组两端的元素都可以视为峰值（只要它比相邻元素大）。</p>
+    <p>你必须实现时间复杂度为 <code>O(log n)</code> 的算法来解决此问题。</p>
+    
+    <div class="highlight-box">
+      <strong>示例：</strong><br>
+      输入：nums = [1,2,3,1]<br>
+      输出：2<br>
+      解释：3 是峰值元素，你的函数应该返回其索引 2。
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>💡 核心思想</h2>
+    <p>这道题的关键在于理解<strong>「只要找到一个上升的方向，就一定能找到一个峰值」</strong>。</p>
+    <p>如果 <code>nums[mid] < nums[mid+1]</code>，说明右边存在上升，右边一定有峰值。<br>
+    如果 <code>nums[mid] > nums[mid+1]</code>，说明左边更大或相等，左边一定有峰值。</p>
+    
+    <div class="algo-flow">
+      <div class="algo-step">left = 0</div>
+      <span class="algo-arrow">→</span>
+      <div class="algo-step">right = n-1</div>
+      <span class="algo-arrow">→</span>
+      <div class="algo-step">取 mid</div>
+      <span class="algo-arrow">→</span>
+      <div class="algo-step">比较 mid 与 mid+1</div>
+      <span class="algo-arrow">→</span>
+      <div class="algo-step">缩小区间</div>
+      <span class="algo-arrow">→</span>
+      <div class="algo-step">返回 left</div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <div class="table-container">
+      <table>
+        <tr>
+          <th>复杂度类型</th>
+          <th>值</th>
+          <th>说明</th>
+        </tr>
+        <tr>
+          <td>时间复杂度</td>
+          <td><code>O(log n)</code></td>
+          <td>二分查找，每次将搜索区间减半</td>
+        </tr>
+        <tr>
+          <td>空间复杂度</td>
+          <td><code>O(1)</code></td>
+          <td>只使用了常数额外空间</td>
+        </tr>
+        <tr>
+          <td>比较次数</td>
+          <td><code>⌈log₂n⌉</code></td>
+          <td>最多进行 log₂n 次比较</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🎯 为什么这种方法有效？</h2>
+    <div class="highlight-box">
+      <strong>关键证明：</strong><br><br>
+      假设 <code>nums[mid] < nums[mid+1]</code>，我们选择向右边搜索。<br><br>
+      1. 如果右边一直上升直到数组末尾，由于 <code>nums[n] = -∞</code>，最后一个元素就是峰值。<br><br>
+      2. 如果右边某处开始下降，那个转折点就是峰值。<br><br>
+      因此，<strong>只要存在上升，就必然存在峰值</strong>。
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/find-minimum-in-rotated-sorted-array/" target="_blank" class="problem-card">
+        <h4>#153 寻找旋转排序数组中的最小值</h4>
+        <p>同样是二分查找变体，寻找旋转点</p>
+      </a>
+      <a href="https://leetcode.cn/problems/search-in-rotated-sorted-array/" target="_blank" class="problem-card">
+        <h4>#33 搜索旋转排序数组</h4>
+        <p>旋转数组的二分查找，先判断哪半边有序</p>
+      </a>
+      <a href="https://leetcode.cn/problems/binary-search/" target="_blank" class="problem-card">
+        <h4>#704 二分查找</h4>
+        <p>基础二分查找模板，理解边界处理</p>
+      </a>
+      <a href="https://leetcode.cn/problems/find-first-and-last-position-of-element-in-sorted-array/" target="_blank" class="problem-card">
+        <h4>#34 在排序数组中查找元素的第一个和最后一个位置</h4>
+        <p>二分查找找左右边界</p>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    // 代码行数据
+    const codeLines = [
+      { line: 1, content: '<span class="keyword">class</span> <span class="class">Solution</span>:' },
+      { line: 2, content: '    <span class="keyword">def</span> <span class="function">findPeakElement</span>(<span class="keyword">self</span>, nums: List[<span class="keyword">int</span>]) -> <span class="keyword">int</span>:' },
+      { line: 3, content: '        <span class="comment"># 初始化左右边界</span>' },
+      { line: 4, content: '        left, right = <span class="number">0</span>, <span class="function">len</span>(nums) - <span class="number">1</span>' },
+      { line: 5, content: '        ' },
+      { line: 6, content: '        <span class="keyword">while</span> left < right:  <span class="comment"># 注意：不是 <=</span>' },
+      { line: 7, content: '            <span class="comment"># 计算中点，防止溢出</span>' },
+      { line: 8, content: '            mid = left + (right - left) // <span class="number">2</span>' },
+      { line: 9, content: '            ' },
+      { line: 10, content: '            <span class="comment"># 比较 mid 和 mid+1</span>' },
+      { line: 11, content: '            <span class="keyword">if</span> nums[mid] < nums[mid + <span class="number">1</span>]:' },
+      { line: 12, content: '                <span class="comment"># 右边上升，峰值在右半边</span>' },
+      { line: 13, content: '                left = mid + <span class="number">1</span>' },
+      { line: 14, content: '            <span class="keyword">else</span>:' },
+      { line: 15, content: '                <span class="comment"># 左边更大，峰值在左半边（包含mid）</span>' },
+      { line: 16, content: '                right = mid' },
+      { line: 17, content: '        ' },
+      { line: 18, content: '        <span class="comment"># left == right，找到峰值</span>' },
+      { line: 19, content: '        <span class="keyword">return</span> left' }
+    ];
+
+    // 可视化步骤数据 - 示例数组 [1, 2, 3, 1]
+    const steps = [
+      {
+        title: "初始化边界",
+        desc: "left = 0, right = 3，搜索整个数组",
+        line: 4,
+        highlight: [],
+        mid: -1,
+        left: 0,
+        right: 3
+      },
+      {
+        title: "第1轮：计算 mid",
+        desc: "mid = 0 + (3-0)//2 = 1，指向元素 2",
+        line: 8,
+        highlight: [0, 1, 2, 3],
+        mid: 1,
+        left: 0,
+        right: 3
+      },
+      {
+        title: "第1轮：比较 nums[1] 和 nums[2]",
+        desc: "nums[1]=2 < nums[2]=3，右边上升！峰值在右边",
+        line: 11,
+        highlight: [0, 1, 2, 3],
+        mid: 1,
+        left: 0,
+        right: 3
+      },
+      {
+        title: "第1轮：缩小区间到右半边",
+        desc: "left = mid + 1 = 2，新区间 [2, 3]",
+        line: 13,
+        highlight: [2, 3],
+        mid: 1,
+        left: 2,
+        right: 3
+      },
+      {
+        title: "第2轮：计算 mid",
+        desc: "mid = 2 + (3-2)//2 = 2，指向元素 3",
+        line: 8,
+        highlight: [2, 3],
+        mid: 2,
+        left: 2,
+        right: 3
+      },
+      {
+        title: "第2轮：比较 nums[2] 和 nums[3]",
+        desc: "nums[2]=3 > nums[3]=1，左边更大！峰值在左边",
+        line: 14,
+        highlight: [2, 3],
+        mid: 2,
+        left: 2,
+        right: 3
+      },
+      {
+        title: "第2轮：缩小区间到左半边",
+        desc: "right = mid = 2，新区间 [2, 2]",
+        line: 16,
+        highlight: [2],
+        mid: 2,
+        left: 2,
+        right: 2
+      },
+      {
+        title: "循环结束，找到峰值！",
+        desc: "left == right == 2，返回索引 2，峰值元素是 3",
+        line: 19,
+        highlight: [2],
+        mid: 2,
+        left: 2,
+        right: 2
+      }
+    ];
+
+    const array = [1, 2, 3, 1];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach(({line, content}) => {
+      const div = document.createElement('div');
+      div.className = 'code-line';
+      div.dataset.line = line;
+      div.innerHTML = `<span class="line-number">${line}</span><span>${content}</span>`;
+      div.addEventListener('click', () => activateStepByLine(line));
+      codeBlock.appendChild(div);
+    });
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const div = document.createElement('div');
+      div.className = 'viz-step';
+      div.dataset.idx = idx;
+      
+      // 生成数组可视化
+      let arrayHtml = '<div class="array-state">';
+      array.forEach((val, i) => {
+        let classes = 'array-item';
+        if (i === step.mid) classes += ' mid';
+        else if (step.highlight.includes(i)) classes += ' highlight';
+        if (i < step.left || i > step.right) classes += ' boundary';
+        arrayHtml += `<div class="${classes}">${val}</div>`;
+      });
+      arrayHtml += '</div><div class="array-state">';
+      array.forEach((_, i) => {
+        let classes = 'array-item index';
+        if (i === step.mid) classes += ' mid';
+        arrayHtml += `<div class="${classes}">${i}</div>`;
+      });
+      arrayHtml += '</div>';
+      
+      div.innerHTML = `
+        <h4>${step.title}</h4>
+        <p>${step.desc}</p>
+        ${arrayHtml}
+      `;
+      div.addEventListener('click', () => activateStep(idx));
+      vizSteps.appendChild(div);
+    });
+
+    // 激活步骤
+    function activateStep(idx) {
+      // 清除之前的高亮
+      document.querySelectorAll('.viz-step').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+      
+      // 高亮当前步骤
+      const stepEl = document.querySelector(`.viz-step[data-idx="${idx}"]`);
+      if (stepEl) {
+        stepEl.classList.add('active');
+        stepEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      
+      // 高亮对应代码行
+      const step = steps[idx];
+      const lineEl = document.querySelector(`.code-line[data-line="${step.line}"]`);
+      if (lineEl) {
+        lineEl.classList.add('active');
+        lineEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    // 通过代码行激活步骤
+    function activateStepByLine(line) {
+      const idx = steps.findIndex(s => s.line === line);
+      if (idx !== -1) {
+        activateStep(idx);
+      }
+    }
+
+    // 默认激活第一步
+    activateStep(0);
+  </script>
+</body>
+</html>

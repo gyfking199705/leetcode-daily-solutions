@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #309 - 最佳买卖股票时机含冷冻期</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --text: #f1f5f9;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+    body { 
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1100px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.7;
+    }
+    h1 { font-size: 2rem; margin-bottom: 8px; }
+    .subtitle { color: #94a3b8; font-size: 0.95rem; margin-bottom: 24px; }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .difficulty {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-left: 12px;
+    }
+    .difficulty.medium { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 20px; 
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 14px;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 3px 0; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      border-radius: 4px;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.25); 
+      border-left: 3px solid var(--primary);
+      margin-left: -3px;
+      padding-left: 3px;
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 40px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1.2fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 768px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    .viz-steps { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 16px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    .viz-step { 
+      padding: 14px; 
+      margin: 10px 0; 
+      border-radius: 10px; 
+      background: #334155; 
+      cursor: pointer; 
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .viz-step:hover { 
+      background: #3d4d63;
+      transform: translateX(4px);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.25);
+    }
+    .viz-step-title {
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+    .viz-step-desc {
+      font-size: 0.9rem;
+      color: #cbd5e1;
+    }
+    .state-box {
+      background: rgba(99, 102, 241, 0.1);
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-top: 10px;
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+    .state-label {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 18px; 
+      border: 1px solid #475569; 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block; 
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 8px 16px rgba(99, 102, 241, 0.15);
+    }
+    .problem-card h4 { margin: 0 0 8px 0; color: var(--primary); }
+    .problem-card p { margin: 0; font-size: 0.9rem; color: #94a3b8; }
+    .keyword { color: #ff7b72; } 
+    .function { color: #d2a8ff; } 
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; } 
+    .comment { color: #8b949e; } 
+    .class { color: #ffa657; }
+    .var { color: #79c0ff; }
+    .operator { color: #ff7b72; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #334155;
+    }
+    th {
+      background: var(--bg);
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .complexity-good { color: var(--success); }
+    .highlight-box {
+      background: rgba(99, 102, 241, 0.1);
+      border-left: 4px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 12px 12px 0;
+      margin: 16px 0;
+    }
+    .dp-table {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin: 16px 0;
+    }
+    .dp-cell {
+      background: var(--bg);
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-family: monospace;
+    }
+    .dp-cell.header {
+      background: var(--primary);
+      font-weight: 600;
+    }
+    .example-box {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid var(--success);
+      border-radius: 12px;
+      padding: 16px;
+      margin: 12px 0;
+    }
+    .example-title {
+      color: var(--success);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .state-diagram {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      margin: 24px 0;
+      flex-wrap: wrap;
+    }
+    .state-node {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-weight: 600;
+      position: relative;
+    }
+    .state-node.hold {
+      background: rgba(239, 68, 68, 0.2);
+      border: 3px solid var(--danger);
+    }
+    .state-node.sold {
+      background: rgba(34, 197, 94, 0.2);
+      border: 3px solid var(--success);
+    }
+    .state-node.rest {
+      background: rgba(99, 102, 241, 0.2);
+      border: 3px solid var(--primary);
+    }
+    .state-arrow {
+      font-size: 1.5rem;
+      color: #64748b;
+    }
+    .arrow-label {
+      position: absolute;
+      font-size: 0.7rem;
+      color: #94a3b8;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #309 <span class="difficulty medium">Medium</span></h1>
+  <p class="subtitle">最佳买卖股票时机含冷冻期 | Best Time to Buy and Sell Stock with Cooldown</p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给定一个整数数组 <code>prices</code>，其中第 <code>i</code> 个元素代表了某只股票第 <code>i</code> 天的价格。</p>
+    <p>设计一个算法来计算你所能获取的最大利润。你可以尽可能地完成更多的交易（多次买卖一支股票），但有以下限制：</p>
+    <ul>
+      <li>卖出股票后，你无法在第二天买入股票（即冷冻期为1天）</li>
+      <li>你不能同时参与多笔交易（必须在再次购买前出售掉之前的股票）</li>
+    </ul>
+    
+    <div class="example-box">
+      <div class="example-title">示例</div>
+      <p><strong>输入：</strong>prices = [1, 2, 3, 0, 2]</p>
+      <p><strong>输出：</strong>3</p>
+      <p><strong>解释：</strong></p>
+      <ul>
+        <li>第1天买入，第2天卖出 → 利润 = 2-1 = 1</li>
+        <li>第2天（卖出后）进入冷冻期，第3天不能买入</li>
+        <li>第4天买入，第5天卖出 → 利润 = 2-0 = 2</li>
+        <li>总利润 = 1 + 2 = 3</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>🧠 核心思路：状态机DP</h2>
+    <p>这道题的关键在于理解「冷冻期」带来的状态转移变化。我们需要用<strong>状态机</strong>的思想来建模每一天的可能状态。</p>
+    
+    <div class="highlight-box">
+      <strong>三种状态定义：</strong>
+      <ul>
+        <li><strong style="color:#ef4444">持有股票 (hold)</strong>：当天结束时持有股票</li>
+        <li><strong style="color:#22c55e">卖出股票 (sold)</strong>：当天卖出股票（下一天进入冷冻期）</li>
+        <li><strong style="color:#6366f1">冷冻期/不持有 (rest)</strong>：当天不持有股票且不在冷冻期</li>
+      </ul>
+    </div>
+
+    <div class="state-diagram">
+      <div class="state-node hold">
+        <span>hold</span>
+        <span style="font-size:0.75rem;color:#94a3b8">持有</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;">
+        <span class="state-arrow">→</span>
+        <span style="font-size:0.7rem;color:#94a3b8">卖出</span>
+      </div>
+      <div class="state-node sold">
+        <span>sold</span>
+        <span style="font-size:0.75rem;color:#94a3b8">卖出</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;">
+        <span class="state-arrow">→</span>
+        <span style="font-size:0.7rem;color:#94a3b8">冷却</span>
+      </div>
+      <div class="state-node rest">
+        <span>rest</span>
+        <span style="font-size:0.75rem;color:#94a3b8">不持有</span>
+      </div>
+    </div>
+
+    <h3>状态转移方程</h3>
+    <table>
+      <tr>
+        <th>状态</th>
+        <th>转移来源</th>
+        <th>方程</th>
+      </tr>
+      <tr>
+        <td><span style="color:#ef4444">hold[i]</span></td>
+        <td>前一天持有 或 前一天不持有今天买入</td>
+        <td><code>max(hold[i-1], rest[i-1] - prices[i])</code></td>
+      </tr>
+      <tr>
+        <td><span style="color:#22c55e">sold[i]</span></td>
+        <td>前一天持有，今天卖出</td>
+        <td><code>hold[i-1] + prices[i]</code></td>
+      </tr>
+      <tr>
+        <td><span style="color:#6366f1">rest[i]</span></td>
+        <td>前一天卖出(冷冻结束) 或 前一天就不持有</td>
+        <td><code>max(sold[i-1], rest[i-1])</code></td>
+      </tr>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程可视化</h2>
+    <p style="color:#94a3b8;font-size:0.9rem;">点击左侧步骤或右侧代码行，查看对应关系和高亮状态</p>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3 style="margin-top:0;">Python 实现</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>⏱️ 复杂度分析</h2>
+    <table>
+      <tr>
+        <th>指标</th>
+        <th>复杂度</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>时间复杂度</td>
+        <td class="complexity-good">O(n)</td>
+        <td>只需遍历一次价格数组，每天的状态转移是 O(1)</td>
+      </tr>
+      <tr>
+        <td>空间复杂度</td>
+        <td class="complexity-good">O(1)</td>
+        <td>只需保存前一天的状态，可以优化为常数空间</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>💡 关键点总结</h2>
+    <div class="highlight-box">
+      <ol>
+        <li><strong>状态机建模</strong>：将问题抽象为有限状态机是解题核心</li>
+        <li><strong>冷冻期处理</strong>：sold 状态只能转移到 rest，不能直接买入</li>
+        <li><strong>空间优化</strong>：由于只依赖前一天状态，可用滚动变量优化到 O(1)</li>
+        <li><strong>初始化</strong>：第0天 hold = -prices[0]，sold = 0（不可能），rest = 0</li>
+      </ol>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/best-time-to-buy-and-sell-stock/" class="problem-card" target="_blank">
+        <h4>#121 买卖股票的最佳时机</h4>
+        <p>只能买卖一次，最简单的股票DP入门题</p>
+      </a>
+      <a href="https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-ii/" class="problem-card" target="_blank">
+        <h4>#122 买卖股票的最佳时机 II</h4>
+        <p>可以无限次交易，无冷冻期，更简单</p>
+      </a>
+      <a href="https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-iii/" class="problem-card" target="_blank">
+        <h4>#123 买卖股票的最佳时机 III</h4>
+        <p>最多完成两笔交易，状态机扩展</p>
+      </a>
+      <a href="https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-iv/" class="problem-card" target="_blank">
+        <h4>#188 买卖股票的最佳时机 IV</h4>
+        <p>最多k笔交易，通用股票DP框架</p>
+      </a>
+      <a href="https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/" class="problem-card" target="_blank">
+        <h4>#714 买卖股票的最佳时机含手续费</h4>
+        <p>每次交易有手续费，类似冷冻期处理</p>
+      </a>
+      <a href="https://leetcode.cn/problems/house-robber/" class="problem-card" target="_blank">
+        <h4>#198 打家劫舍</h4>
+        <p>类似的DP状态转移思想，相邻不能选</p>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📚 扩展思考</h2>
+    <ul>
+      <li>如果冷冻期变成 k 天，状态机应该如何调整？</li>
+      <li>如何输出具体的交易方案（买卖日期）而不仅仅是最大利润？</li>
+      <li>能否用贪心算法解决这道题？为什么？</li>
+    </ul>
+  </div>
+  
+  <script>
+    // Python代码
+    const pythonCode = `class Solution:
+    def maxProfit(self, prices: List[int]) -> int:
+        n = len(prices)
+        if n < 2:
+            return 0
+        
+        # 三个状态：持有、卖出、不持有（冷冻期后）
+        hold = -prices[0]   # 第0天买入
+        sold = 0            # 第0天不可能卖出
+        rest = 0            # 第0天不操作
+        
+        for i in range(1, n):
+            prev_hold = hold
+            prev_sold = sold
+            prev_rest = rest
+            
+            # 今天持有 = max(昨天持有, 昨天不持有今天买入)
+            hold = max(prev_hold, prev_rest - prices[i])
+            
+            # 今天卖出 = 昨天持有 + 今天价格
+            sold = prev_hold + prices[i]
+            
+            # 今天不持有 = max(昨天卖出, 昨天不持有)
+            rest = max(prev_sold, prev_rest)
+        
+        # 最大利润不可能在持有状态
+        return max(sold, rest)`;
+
+    // 步骤与代码行映射
+    const steps = [
+      {title: "初始化状态", desc: "第0天：hold=-prices[0]（买入），sold=0（不可能），rest=0（不操作）", line: 6, state: {hold: "-prices[0]", sold: "0", rest: "0"}},
+      {title: "遍历价格数组", desc: "从第1天开始遍历，维护三个状态", line: 10, state: {i: "1 to n-1"}},
+      {title: "保存前一天状态", desc: "用临时变量保存前一天的状态值，用于计算", line: 11, state: {prev_hold: "hold", prev_sold: "sold", prev_rest: "rest"}},
+      {title: "更新hold状态", desc: "今天持有 = max(昨天继续持有, 昨天不持有今天买入)", line: 15, state: {hold: "max(prev_hold, prev_rest - prices[i])"}},
+      {title: "更新sold状态", desc: "今天卖出 = 昨天持有 + 今天价格（卖出获得利润）", line: 18, state: {sold: "prev_hold + prices[i]"}},
+      {title: "更新rest状态", desc: "今天不持有 = max(昨天卖出进入冷冻期结束, 昨天就不持有)", line: 21, state: {rest: "max(prev_sold, prev_rest)"}},
+      {title: "返回结果", desc: "最大利润只能在sold或rest状态，不可能在hold状态（还有股票没卖）", line: 24, state: {result: "max(sold, rest)"}}
+    ];
+
+    // 渲染代码
+    function renderCode() {
+      const codeBlock = document.getElementById('codeBlock');
+      const lines = pythonCode.split('\n');
+      codeBlock.innerHTML = lines.map((line, idx) => 
+        `<div class="code-line" data-line="${idx + 1}">
+          <span class="line-number">${idx + 1}</span>
+          <span>${highlightSyntax(escapeHtml(line))}</span>
+        </div>`
+      ).join('');
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function highlightSyntax(line) {
+      return line
+        .replace(/\b(def|class|return|if|for|in|max)\b/g, '<span class="keyword">$1</span>')
+        .replace(/\b(self|prices|hold|sold|rest|prev_hold|prev_sold|prev_rest|n|i)\b/g, '<span class="var">$1</span>')
+        .replace(/\b(Solution|List|int)\b/g, '<span class="class">$1</span>')
+        .replace(/#.*/g, match => `<span class="comment">${match}</span>`)
+        .replace(/\d+/g, '<span class="number">$&</span>');
+    }
+
+    // 渲染步骤
+    function renderSteps() {
+      const container = document.getElementById('vizSteps');
+      container.innerHTML = steps.map((step, idx) => `
+        <div class="viz-step" data-step="${idx}" data-line="${step.line}">
+          <div class="viz-step-title">步骤 ${idx + 1}: ${step.title}</div>
+          <div class="viz-step-desc">${step.desc}</div>
+          ${step.state ? `<div class="state-box"><span class="state-label">状态:</span> ${JSON.stringify(step.state).replace(/["{}]/g, '').replace(/:/g, ': ').replace(/,/g, ', ')}</div>` : ''}
+        </div>
+      `).join('');
+    }
+
+    // 高亮对应关系
+    function highlightPair(stepIdx, lineNum) {
+      // 清除所有高亮
+      document.querySelectorAll('.viz-step').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+      
+      // 高亮步骤
+      const stepEl = document.querySelector(`.viz-step[data-step="${stepIdx}"]`);
+      if (stepEl) {
+        stepEl.classList.add('active');
+        stepEl.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+      }
+      
+      // 高亮代码行
+      const lineEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+      if (lineEl) {
+        lineEl.classList.add('active');
+        lineEl.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+      }
+    }
+
+    // 绑定事件
+    function bindEvents() {
+      // 步骤点击
+      document.querySelectorAll('.viz-step').forEach(step => {
+        step.addEventListener('click', () => {
+          const stepIdx = parseInt(step.dataset.step);
+          const lineNum = parseInt(step.dataset.line);
+          highlightPair(stepIdx, lineNum);
+        });
+      });
+
+      // 代码行点击
+      document.querySelectorAll('.code-line').forEach(line => {
+        line.addEventListener('click', () => {
+          const lineNum = parseInt(line.dataset.line);
+          const step = steps.find(s => s.line === lineNum);
+          if (step) {
+            const stepIdx = steps.indexOf(step);
+            highlightPair(stepIdx, lineNum);
+          }
+        });
+      });
+    }
+
+    // 初始化
+    renderCode();
+    renderSteps();
+    bindEvents();
+  </script>
+</body>
+</html>

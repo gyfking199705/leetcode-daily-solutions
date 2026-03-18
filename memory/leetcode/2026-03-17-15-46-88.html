@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #88 - 合并两个有序数组</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --text: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.7;
+    }
+    h1 { font-size: 2rem; margin-bottom: 8px; }
+    .subtitle { color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 24px; }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px; 
+    }
+    .section h2 { 
+      color: var(--primary); 
+      font-size: 1.3rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .problem-desc { font-size: 1.05rem; line-height: 1.8; }
+    .highlight { color: var(--primary); font-weight: 600; }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 20px; 
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 14px;
+    }
+    .code-block { margin-top: 16px; }
+    .code-line { 
+      display: flex; 
+      padding: 3px 0; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+    .code-line:hover { background: rgba(255,255,255,0.05); }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.25); 
+      border-left-color: var(--primary);
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 45px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+      font-size: 12px;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 768px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    .viz-steps { 
+      max-height: 400px; 
+      overflow-y: auto; 
+    }
+    .viz-step { 
+      padding: 14px 16px; 
+      margin: 10px 0; 
+      border-radius: 10px; 
+      background: #334155; 
+      cursor: pointer; 
+      border: 2px solid transparent; 
+      transition: all 0.2s;
+    }
+    .viz-step:hover { background: #3d4b5e; }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.25);
+    }
+    .viz-step h4 { 
+      color: var(--primary); 
+      font-size: 0.95rem; 
+      margin-bottom: 6px;
+    }
+    .viz-step p { 
+      color: var(--text-secondary); 
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .array-viz { 
+      display: flex; 
+      gap: 6px; 
+      margin: 12px 0; 
+      flex-wrap: wrap;
+    }
+    .array-item { 
+      width: 44px; 
+      height: 44px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      border-radius: 8px; 
+      font-weight: 600; 
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    .array-item.nums1 { background: var(--primary); color: white; }
+    .array-item.nums2 { background: var(--warning); color: #0f172a; }
+    .array-item.empty { background: #334155; color: var(--text-secondary); border: 2px dashed #475569; }
+    .array-item.current { box-shadow: 0 0 0 3px var(--success); }
+    .problem-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+      gap: 16px; 
+      margin-top: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 18px; 
+      border: 1px solid #475569; 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block; 
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.15);
+    }
+    .problem-card h4 { color: var(--primary); margin-bottom: 6px; font-size: 1rem; }
+    .problem-card p { color: var(--text-secondary); font-size: 0.9rem; }
+    .tag {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      margin-right: 8px;
+    }
+    .tag-easy { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+    .tag-medium { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+    .tag-hard { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    .complexity-table th, .complexity-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #334155;
+    }
+    .complexity-table th { color: var(--primary); font-weight: 600; }
+    .complexity-table td { color: var(--text-secondary); }
+    .syntax-keyword { color: #ff7b72; }
+    .syntax-function { color: #d2a8ff; }
+    .syntax-string { color: #a5d6ff; }
+    .syntax-number { color: #79c0ff; }
+    .syntax-comment { color: #8b949e; font-style: italic; }
+    .syntax-class { color: #ffa657; }
+    .idea-box {
+      background: rgba(99, 102, 241, 0.1);
+      border-left: 4px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 10px 10px 0;
+      margin: 16px 0;
+    }
+    .idea-box h4 { color: var(--primary); margin-bottom: 8px; }
+    .step-indicator {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 16px 0;
+      padding: 12px 16px;
+      background: var(--bg);
+      border-radius: 10px;
+    }
+    .pointer-tag {
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .pointer-p { background: var(--primary); color: white; }
+    .pointer-i { background: var(--success); color: white; }
+    .pointer-j { background: var(--warning); color: #0f172a; }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #88 - 合并两个有序数组</h1>
+  <p class="subtitle">Merge Sorted Array | 双指针从后往前 | Easy</p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <div class="problem-desc">
+      <p>给你两个按 <strong>非递减顺序</strong> 排列的整数数组 <code>nums1</code> 和 <code>nums2</code>，另有两个整数 <code>m</code> 和 <code>n</code> ，分别表示 <code>nums1</code> 和 <code>nums2</code> 中的元素数目。</p>
+      <br>
+      <p>请你 <strong>合并</strong> <code>nums2</code> 到 <code>nums1</code> 中，使合并后的数组同样按 <strong>非递减顺序</strong> 排列。</p>
+      <br>
+      <p><strong>注意：</strong>最终，合并后数组不应由函数返回，而是存储在数组 <code>nums1</code> 中。为了应对这种情况，<code>nums1</code> 的初始长度为 <code>m + n</code>，其中前 <code>m</code> 个元素表示应合并的元素，后 <code>n</code> 个元素为 <code>0</code> ，应忽略。<code>nums2</code> 的长度为 <code>n</code>。</p>
+    </div>
+    
+    <div class="idea-box">
+      <h4>💡 核心考点</h4>
+      <p>双指针从后往前填充，避免覆盖未处理的元素。时间复杂度O(m+n)，空间复杂度O(1)。</p>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 16px;">点击左侧步骤或右侧代码行，查看对应关系</p>
+    
+    <div class="step-indicator">
+      <span>当前状态：</span>
+      <span class="pointer-tag pointer-p">p = 放置位置</span>
+      <span class="pointer-tag pointer-i">i = nums1有效末尾</span>
+      <span class="pointer-tag pointer-j">j = nums2末尾</span>
+    </div>
+    
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3 style="margin-bottom: 12px; color: var(--text-secondary);">Python 实现</h3>
+        <pre class="code-block"><code id="codeBlock">
+        </code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <thead>
+        <tr>
+          <th>指标</th>
+          <th>值</th>
+          <th>说明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>时间复杂度</td>
+          <td><span style="color: var(--success);">O(m + n)</span></td>
+          <td>每个元素只被处理一次</td>
+        </tr>
+        <tr>
+          <td>空间复杂度</td>
+          <td><span style="color: var(--success);">O(1)</span></td>
+          <td>原地修改，仅使用三个指针变量</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>🎯 关键思路</h2>
+    <div class="idea-box">
+      <h4>为什么从后往前？</h4>
+      <p>如果从前往后合并，较大的元素会覆盖 <code>nums1</code> 中尚未比较的元素。从后往前则不会覆盖任何有效数据，因为 <code>nums1</code> 后面预留的空间正好是 <code>nums2</code> 的大小。</p>
+    </div>
+    <div class="idea-box">
+      <h4>边界情况</h4>
+      <p>当 <code>nums2</code> 还有剩余元素时（<code>j >= 0</code>），需要继续填充到 <code>nums1</code> 前面。当 <code>nums1</code> 剩余但 <code>nums2</code> 已空时，不需要处理，因为已经在正确位置。</p>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/merge-two-sorted-lists/" class="problem-card" target="_blank">
+        <span class="tag tag-easy">Easy</span>
+        <h4>21. 合并两个有序链表</h4>
+        <p>链表的归并，类似的双指针思想</p>
+      </a>
+      <a href="https://leetcode.cn/problems/sort-an-array/" class="problem-card" target="_blank">
+        <span class="tag tag-medium">Medium</span>
+        <h4>912. 排序数组</h4>
+        <p>归并排序的合并过程就是本题</p>
+      </a>
+      <a href="https://leetcode.cn/problems/find-first-and-last-position-of-element-in-sorted-array/" class="problem-card" target="_blank">
+        <span class="tag tag-medium">Medium</span>
+        <h4>34. 查找元素位置</h4>
+        <p>二分查找在有序数组中的应用</p>
+      </a>
+      <a href="https://leetcode.cn/problems/remove-duplicates-from-sorted-array/" class="problem-card" target="_blank">
+        <span class="tag tag-easy">Easy</span>
+        <h4>26. 删除有序数组重复项</h4>
+        <p>双指针在有序数组中的经典应用</p>
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    const codeLines = [
+      { line: '<span class="syntax-keyword">class</span> <span class="syntax-class">Solution</span>:', num: 1 },
+      { line: '    <span class="syntax-keyword">def</span> <span class="syntax-function">merge</span>(self, nums1: List[<span class="syntax-keyword">int</span>], m: <span class="syntax-keyword">int</span>, nums2: List[<span class="syntax-keyword">int</span>], n: <span class="syntax-keyword">int</span>) -> <span class="syntax-keyword">None</span>:', num: 2 },
+      { line: '        <span class="syntax-comment"># p 指向合并后数组的末尾</span>', num: 3 },
+      { line: '        p = m + n - <span class="syntax-number">1</span>', num: 4 },
+      { line: '        <span class="syntax-comment"># i 指向 nums1 有效元素末尾</span>', num: 5 },
+      { line: '        i = m - <span class="syntax-number">1</span>', num: 6 },
+      { line: '        <span class="syntax-comment"># j 指向 nums2 末尾</span>', num: 7 },
+      { line: '        j = n - <span class="syntax-number">1</span>', num: 8 },
+      { line: '        ', num: 9 },
+      { line: '        <span class="syntax-keyword">while</span> j >= <span class="syntax-number">0</span>: <span class="syntax-comment"># nums2 还有元素需要合并</span>', num: 10 },
+      { line: '            <span class="syntax-keyword">if</span> i >= <span class="syntax-number">0</span> <span class="syntax-keyword">and</span> nums1[i] > nums2[j]:', num: 11 },
+      { line: '                <span class="syntax-comment"># nums1 元素更大，放到位置 p</span>', num: 12 },
+      { line: '                nums1[p] = nums1[i]', num: 13 },
+      { line: '                i -= <span class="syntax-number">1</span>', num: 14 },
+      { line: '            <span class="syntax-keyword">else</span>:', num: 15 },
+      { line: '                <span class="syntax-comment"># nums2 元素更大，放到位置 p</span>', num: 16 },
+      { line: '                nums1[p] = nums2[j]', num: 17 },
+      { line: '                j -= <span class="syntax-number">1</span>', num: 18 },
+      { line: '            p -= <span class="syntax-number">1</span>', num: 19 },
+      { line: '        <span class="syntax-comment"># nums2 已全部合并，任务完成</span>', num: 20 },
+    ];
+
+    const steps = [
+      {title: "初始化指针", desc: "p=5(nums1末尾), i=2(nums1有效末尾), j=2(nums2末尾)", line: 4, state: {p: 5, i: 2, j: 2, nums1: [1,2,3,0,0,0], nums2: [2,5,6]}},
+      {title: "第1次比较", desc: "nums1[2]=3 > nums2[2]=6? 否，放6到位置5", line: 10, state: {p: 5, i: 2, j: 2, nums1: [1,2,3,0,0,6], nums2: [2,5,6]}},
+      {title: "更新指针", desc: "j减1变为1，p减1变为4", line: 17, state: {p: 4, i: 2, j: 1, nums1: [1,2,3,0,0,6], nums2: [2,5,6]}},
+      {title: "第2次比较", desc: "nums1[2]=3 > nums2[1]=5? 否，放5到位置4", line: 10, state: {p: 4, i: 2, j: 1, nums1: [1,2,3,0,5,6], nums2: [2,5,6]}},
+      {title: "更新指针", desc: "j减1变为0，p减1变为3", line: 18, state: {p: 3, i: 2, j: 0, nums1: [1,2,3,0,5,6], nums2: [2,5,6]}},
+      {title: "第3次比较", desc: "nums1[2]=3 > nums2[0]=2? 是，放3到位置3", line: 11, state: {p: 3, i: 2, j: 0, nums1: [1,2,3,3,5,6], nums2: [2,5,6]}},
+      {title: "更新指针", desc: "i减1变为1，p减1变为2", line: 13, state: {p: 2, i: 1, j: 0, nums1: [1,2,3,3,5,6], nums2: [2,5,6]}},
+      {title: "第4次比较", desc: "nums1[1]=2 > nums2[0]=2? 否，放2到位置2", line: 10, state: {p: 2, i: 1, j: 0, nums1: [1,2,2,3,5,6], nums2: [2,5,6]}},
+      {title: "更新指针", desc: "j减1变为-1，循环结束", line: 18, state: {p: 1, i: 1, j: -1, nums1: [1,2,2,3,5,6], nums2: [2,5,6]}},
+      {title: "合并完成", desc: "最终数组 [1,2,2,3,5,6] 已排序", line: 20, state: {p: 1, i: 1, j: -1, nums1: [1,2,2,3,5,6], nums2: [2,5,6]}},
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach(({line, num}) => {
+      const div = document.createElement('div');
+      div.className = 'code-line';
+      div.dataset.line = num;
+      div.innerHTML = `<span class="line-number">${num}</span><span>${line}</span>`;
+      div.onclick = () => selectByLine(num);
+      codeBlock.appendChild(div);
+    });
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const div = document.createElement('div');
+      div.className = 'viz-step';
+      div.dataset.idx = idx;
+      div.innerHTML = `
+        <h4>步骤 ${idx + 1}: ${step.title}</h4>
+        <p>${step.desc}</p>
+        ${renderArrayViz(step.state)}
+      `;
+      div.onclick = () => selectByStep(idx);
+      vizSteps.appendChild(div);
+    });
+
+    function renderArrayViz(state) {
+      const nums1Html = state.nums1.map((v, i) => {
+        let cls = 'nums1';
+        if (i > m - 1 + n - 1 - state.p && state.p >= 0) cls += ' current';
+        return `<div class="array-item ${cls}">${v}</div>`;
+      }).join('');
+      const nums2Html = state.nums2.map((v, i) => {
+        let cls = 'nums2';
+        if (i === state.j) cls += ' current';
+        return `<div class="array-item ${cls}">${v}</div>`;
+      }).join('');
+      return `
+        <div class="array-viz">${nums1Html}</div>
+        <div style="font-size: 12px; color: var(--text-secondary);">nums1 (p=${state.p}, i=${state.i})</div>
+        <div class="array-viz">${nums2Html}</div>
+        <div style="font-size: 12px; color: var(--text-secondary);">nums2 (j=${state.j})</div>
+      `;
+    }
+
+    const m = 3, n = 3;
+    let currentStep = -1;
+
+    function selectByStep(idx) {
+      currentStep = idx;
+      updateUI();
+    }
+
+    function selectByLine(lineNum) {
+      // 找到包含该代码行的步骤
+      const stepIdx = steps.findIndex(s => s.line === lineNum);
+      if (stepIdx !== -1) {
+        currentStep = stepIdx;
+        updateUI();
+      }
+    }
+
+    function updateUI() {
+      // 更新步骤高亮
+      document.querySelectorAll('.viz-step').forEach((el, idx) => {
+        el.classList.toggle('active', idx === currentStep);
+      });
+      
+      // 更新代码行高亮
+      document.querySelectorAll('.code-line').forEach(el => {
+        const line = parseInt(el.dataset.line);
+        const isActive = currentStep >= 0 && steps[currentStep].line === line;
+        el.classList.toggle('active', isActive);
+      });
+
+      // 滚动到可视区域
+      if (currentStep >= 0) {
+        const activeStep = document.querySelector(`.viz-step[data-idx="${currentStep}"]`);
+        if (activeStep) activeStep.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        
+        const activeLine = document.querySelector(`.code-line[data-line="${steps[currentStep].line}"]`);
+        if (activeLine) activeLine.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    // 默认选中第一步
+    selectByStep(0);
+  </script>
+</body>
+</html>

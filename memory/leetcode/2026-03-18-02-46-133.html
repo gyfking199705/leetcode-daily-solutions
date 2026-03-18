@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #133 - 克隆图</title>
+  <style>
+    :root { --primary: #6366f1; --bg: #0f172a; --surface: #1e293b; --text: #f1f5f9; --success: #22c55e; --warning: #f59e0b; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); max-width: 1000px; margin: 0 auto; padding: 40px 20px; line-height: 1.6; }
+    .section { background: var(--surface); border-radius: 16px; padding: 28px; margin-bottom: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+    .section h2 { color: var(--primary); margin-top: 0; font-size: 1.5rem; }
+    .difficulty { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; margin-left: 12px; }
+    .difficulty.medium { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
+    pre { background: #0d1117; border-radius: 12px; padding: 20px; overflow-x: auto; margin: 16px 0; border: 1px solid #30363d; }
+    code { font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace; font-size: 14px; }
+    .code-line { display: flex; padding: 3px 0; cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; }
+    .code-line:hover { background: rgba(255,255,255,0.05); }
+    .code-line.active { background: rgba(99, 102, 241, 0.3); border-left-color: #6366f1; }
+    .line-number { color: #484f58; min-width: 45px; text-align: right; padding-right: 16px; user-select: none; font-size: 12px; }
+    .code-content { flex: 1; white-space: pre; }
+    .viz-container { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 20px 0; }
+    @media (max-width: 768px) { .viz-container { grid-template-columns: 1fr; } }
+    .viz-steps { max-height: 500px; overflow-y: auto; }
+    .viz-step { padding: 14px; margin: 10px 0; border-radius: 10px; background: #334155; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+    .viz-step:hover { transform: translateX(4px); }
+    .viz-step.active { border-color: var(--primary); background: rgba(99, 102, 241, 0.25); box-shadow: 0 0 15px rgba(99, 102, 241, 0.3); }
+    .viz-step h4 { margin: 0 0 6px 0; color: var(--primary); font-size: 0.95rem; }
+    .viz-step p { margin: 0; font-size: 0.85rem; color: #94a3b8; }
+    .state-table { margin-top: 8px; font-size: 0.8rem; }
+    .state-table td { padding: 2px 8px; color: #22c55e; }
+    .problem-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .problem-card { background: var(--bg); border-radius: 12px; padding: 20px; border: 1px solid #475569; transition: all 0.2s; text-decoration: none; color: inherit; display: block; }
+    .problem-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.3); }
+    .problem-card h3 { margin: 0 0 8px 0; color: var(--primary); font-size: 1.1rem; }
+    .problem-card p { margin: 0; font-size: 0.9rem; color: #94a3b8; }
+    .problem-card .tag { display: inline-block; padding: 2px 8px; border-radius: 6px; background: rgba(99, 102, 241, 0.2); font-size: 0.75rem; margin-top: 8px; color: #a5b4fc; }
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #334155; }
+    th { color: var(--primary); font-weight: 600; }
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; }
+    .class { color: #ffa657; }
+    .var { color: #79c0ff; }
+    .graph-viz { background: var(--bg); border-radius: 12px; padding: 20px; margin: 16px 0; text-align: center; }
+    .node { display: inline-block; width: 50px; height: 50px; line-height: 50px; border-radius: 50%; background: var(--primary); margin: 10px; font-weight: bold; font-size: 14px; }
+    .node.new { background: var(--success); animation: pulse 1s ease-in-out; }
+    .arrow { color: var(--primary); font-size: 20px; margin: 0 10px; }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #133 <span class="difficulty medium">Medium</span></h1>
+  <h2 style="color: var(--text); margin-top: -10px; font-size: 1.3rem;">克隆图</h2>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给你无向 <strong>连通</strong> 图中一个节点的引用，请你返回该图的 <strong>深拷贝</strong>（克隆）。</p>
+    <p>图中的每个节点都包含它的值 <code>val</code>（<code>int</code>） 和其邻居的列表（<code>list[Node]</code>）。</p>
+    <div style="background: var(--bg); padding: 16px; border-radius: 8px; margin: 16px 0;">
+      <p style="margin: 0;"><strong>测试用例格式：</strong></p>
+      <p style="margin: 8px 0 0 0; color: #94a3b8;">简单起见，每个节点的值都和它的索引相同。例如，第一个节点值为 1（<code>val = 1</code>），第二个节点值为 2（<code>val = 2</code>），以此类推。该图在测试用例中使用邻接列表表示。</p>
+    </div>
+    <p><strong>邻接列表</strong>是用于表示有限图的无序列表的集合。每个列表都描述了图中节点的邻居集。</p>
+    <p>给定节点将始终是图中的第一个节点（值为 1）。你必须返回 <strong>给定节点的拷贝</strong> 作为对克隆图的引用。</p>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <div class="viz-step active" data-line="13" onclick="highlightStep(0)">
+          <h4>步骤1: 入口检查</h4>
+          <p>检查输入节点是否为None，边界情况处理</p>
+        </div>
+        <div class="viz-step" data-line="15" onclick="highlightStep(1)">
+          <h4>步骤2: 创建映射表</h4>
+          <p>初始化visited字典，存储原节点到新节点的映射</p>
+        </div>
+        <div class="viz-step" data-line="16" onclick="highlightStep(2)">
+          <h4>步骤3: 初始化队列</h4>
+          <p>从起始节点开始BFS，将原节点加入队列</p>
+        </div>
+        <div class="viz-step" data-line="17" onclick="highlightStep(3)">
+          <h4>步骤4: 克隆首节点</h4>
+          <p>克隆起始节点，存入映射表</p>
+          <table class="state-table"><tr><td>visited[1] = Node(1)</td></tr></table>
+        </div>
+        <div class="viz-step" data-line="20" onclick="highlightStep(4)">
+          <h4>步骤5: BFS循环开始</h4>
+          <p>取出队列中的原节点进行处理</p>
+        </div>
+        <div class="viz-step" data-line="22" onclick="highlightStep(5)">
+          <h4>步骤6: 遍历邻居</h4>
+          <p>遍历当前节点的所有邻居节点</p>
+        </div>
+        <div class="viz-step" data-line="24" onclick="highlightStep(6)">
+          <h4>步骤7: 检查是否已访问</h4>
+          <p>如果邻居未被访问，创建克隆并加入队列</p>
+        </div>
+        <div class="viz-step" data-line="25" onclick="highlightStep(7)">
+          <h4>步骤8: 克隆邻居节点</h4>
+          <p>为新发现的邻居创建克隆节点</p>
+        </div>
+        <div class="viz-step" data-line="26" onclick="highlightStep(8)">
+          <h4>步骤9: 加入队列</h4>
+          <p>将原邻居节点加入队列，后续处理其连接</p>
+        </div>
+        <div class="viz-step" data-line="29" onclick="highlightStep(9)">
+          <h4>步骤10: 添加邻居连接</h4>
+          <p>在克隆节点上添加克隆邻居的引用</p>
+        </div>
+        <div class="viz-step" data-line="32" onclick="highlightStep(10)">
+          <h4>步骤11: 返回结果</h4>
+          <p>返回起始节点的克隆，图克隆完成</p>
+        </div>
+      </div>
+      <div class="code-container">
+        <h3>Python 实现 (BFS)</h3>
+        <pre><code id="codeBlock">
+<div class="code-line" data-step="0" onclick="highlightLine(0)"><span class="line-number">1</span><span class="code-content"><span class="comment">"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val = 0, neighbors = None):
+        self.val = val
+        self.neighbors = neighbors if neighbors is not None else []
+"""</span></span></div>
+<div class="code-line" onclick="highlightLine(-1)"><span class="line-number">8</span><span class="code-content"></span></div>
+<div class="code-line" data-step="0" onclick="highlightLine(0)"><span class="line-number">9</span><span class="code-content"><span class="keyword">class</span> <span class="class">Solution</span>:</span></div>
+<div class="code-line" data-step="0" onclick="highlightLine(0)"><span class="line-number">10</span><span class="code-content">    <span class="keyword">def</span> <span class="function">cloneGraph</span>(<span class="var">self</span>, <span class="var">node</span>: <span class="string">'Node'</span>) -> <span class="string">'Node'</span>:</span></div>
+<div class="code-line" onclick="highlightLine(-1)"><span class="line-number">11</span><span class="code-content">        <span class="comment"># BFS 解法：广度优先遍历</span></span></div>
+<div class="code-line" onclick="highlightLine(-1)"><span class="line-number">12</span><span class="code-content">        </span></div>
+<div class="code-line active" data-step="0" onclick="highlightLine(0)"><span class="line-number">13</span><span class="code-content">        <span class="keyword">if</span> <span class="keyword">not</span> <span class="var">node</span>:</span></div>
+<div class="code-line" data-step="0" onclick="highlightLine(0)"><span class="line-number">14</span><span class="code-content">            <span class="keyword">return</span> <span class="var">None</span></span></div>
+<div class="code-line" onclick="highlightLine(-1)"><span class="line-number">15</span><span class="code-content">        </span></div>
+<div class="code-line" data-step="1" onclick="highlightLine(1)"><span class="line-number">16</span><span class="code-content">        <span class="var">visited</span> = {}  <span class="comment"># 原节点 -> 克隆节点映射</span></span></div>
+<div class="code-line" data-step="2" onclick="highlightLine(2)"><span class="line-number">17</span><span class="code-content">        <span class="var">queue</span> = [<span class="var">node</span>]</span></div>
+<div class="code-line" data-step="3" onclick="highlightLine(3)"><span class="line-number">18</span><span class="code-content">        <span class="var">visited</span>[<span class="var">node</span>] = <span class="class">Node</span>(<span class="var">node</span>.val)</span></div>
+<div class="code-line" onclick="highlightLine(-1)"><span class="line-number">19</span><span class="code-content">        </span></div>
+<div class="code-line" data-step="4" onclick="highlightLine(4)"><span class="line-number">20</span><span class="code-content">        <span class="keyword">while</span> <span class="var">queue</span>:</span></div>
+<div class="code-line" data-step="4" onclick="highlightLine(4)"><span class="line-number">21</span><span class="code-content">            <span class="var">curr</span> = <span class="var">queue</span>.pop(<span class="number">0</span>)</span></div>
+<div class="code-line" data-step="5" onclick="highlightLine(5)"><span class="line-number">22</span><span class="code-content">            <span class="keyword">for</span> <span class="var">neighbor</span> <span class="keyword">in</span> <span class="var">curr</span>.neighbors:</span></div>
+<div class="code-line" onclick="highlightLine(-1)"><span class="line-number">23</span><span class="code-content">                <span class="comment"># 如果邻居未被访问，创建克隆</span></span></div>
+<div class="code-line" data-step="6" onclick="highlightLine(6)"><span class="line-number">24</span><span class="code-content">                <span class="keyword">if</span> <span class="var">neighbor</span> <span class="keyword">not</span> <span class="keyword">in</span> <span class="var">visited</span>:</span></div>
+<div class="code-line" data-step="7" onclick="highlightLine(7)"><span class="line-number">25</span><span class="code-content">                    <span class="var">visited</span>[<span class="var">neighbor</span>] = <span class="class">Node</span>(<span class="var">neighbor</span>.val)</span></div>
+<div class="code-line" data-step="8" onclick="highlightLine(8)"><span class="line-number">26</span><span class="code-content">                    <span class="var">queue</span>.append(<span class="var">neighbor</span>)</span></div>
+<div class="code-line" onclick="highlightLine(-1)"><span class="line-number">27</span><span class="code-content">                </span></div>
+<div class="code-line" data-step="9" onclick="highlightLine(9)"><span class="line-number">28</span><span class="code-content">                <span class="comment"># 在克隆节点上建立连接</span></span></div>
+<div class="code-line" data-step="9" onclick="highlightLine(9)"><span class="line-number">29</span><span class="code-content">                <span class="var">visited</span>[<span class="var">curr</span>].neighbors.append(<span class="var">visited</span>[<span class="var">neighbor</span>])</span></div>
+<div class="code-line" onclick="highlightLine(-1)"><span class="line-number">30</span><span class="code-content">        </span></div>
+<div class="code-line" data-step="10" onclick="highlightLine(10)"><span class="line-number">31</span><span class="code-content">        <span class="keyword">return</span> <span class="var">visited</span>[<span class="var">node</span>]</span></div>
+        </code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>🧠 核心思路</h2>
+    <p><strong>深拷贝</strong>意味着创建全新的节点对象，而不是引用原节点。图可能包含环，因此必须记录已访问节点避免无限循环。</p>
+    <table>
+      <tr><th>方法</th><th>数据结构</th><th>核心思想</th></tr>
+      <tr><td>BFS</td><td>队列 + 哈希表</td><td>层序遍历，克隆节点并建立连接</td></tr>
+      <tr><td>DFS</td><td>递归 + 哈希表</td><td>递归遍历，回溯时建立连接</td></tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table>
+      <tr><th>指标</th><th>值</th><th>说明</th></tr>
+      <tr><td>时间复杂度</td><td>O(N + M)</td><td>N为节点数，M为边数，每个节点和边访问一次</td></tr>
+      <tr><td>空间复杂度</td><td>O(N)</td><td>visited哈希表存储N个克隆节点，队列最多O(N)</td></tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/copy-list-with-random-pointer/" target="_blank" class="problem-card">
+        <h3>#138 复制带随机指针的链表</h3>
+        <p>链表的深拷贝，类似思想</p>
+        <span class="tag">哈希表 / 链表</span>
+      </a>
+      <a href="https://leetcode.cn/problems/clone-n-ary-tree/" target="_blank" class="problem-card">
+        <h3>#1490 克隆 N 叉树</h3>
+        <p>树的深拷贝，结构更简单</p>
+        <span class="tag">树 / DFS</span>
+      </a>
+      <a href="https://leetcode.cn/problems/number-of-islands/" target="_blank" class="problem-card">
+        <h3>#200 岛屿数量</h3>
+        <p>图的遍历，连通分量计数</p>
+        <span class="tag">图 / BFS / DFS</span>
+      </a>
+      <a href="https://leetcode.cn/problems/course-schedule/" target="_blank" class="problem-card">
+        <h3>#207 课程表</h3>
+        <p>有向图的遍历与环检测</p>
+        <span class="tag">拓扑排序 / 图</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📝 DFS 实现（替代方案）</h2>
+    <pre><code><span class="keyword">class</span> <span class="class">Solution</span>:
+    <span class="keyword">def</span> <span class="function">cloneGraph</span>(<span class="var">self</span>, <span class="var">node</span>: <span class="string">'Node'</span>) -> <span class="string">'Node'</span>:
+        <span class="keyword">if</span> <span class="keyword">not</span> <span class="var">node</span>:
+            <span class="keyword">return</span> <span class="var">None</span>
+        
+        <span class="var">visited</span> = {}
+        
+        <span class="keyword">def</span> <span class="function">dfs</span>(<span class="var">original</span>):
+            <span class="keyword">if</span> <span class="var">original</span> <span class="keyword">in</span> <span class="var">visited</span>:
+                <span class="keyword">return</span> <span class="var">visited</span>[<span class="var">original</span>]
+            
+            <span class="comment"># 克隆当前节点（不处理邻居）</span>
+            <span class="var">clone</span> = <span class="class">Node</span>(<span class="var">original</span>.val)
+            <span class="var">visited</span>[<span class="var">original</span>] = <span class="var">clone</span>
+            
+            <span class="comment"># 递归克隆所有邻居</span>
+            <span class="keyword">for</span> <span class="var">neighbor</span> <span class="keyword">in</span> <span class="var">original</span>.neighbors:
+                <span class="var">clone</span>.neighbors.append(<span class="var">dfs</span>(<span class="var">neighbor</span>))
+            
+            <span class="keyword">return</span> <span class="var">clone</span>
+        
+        <span class="keyword">return</span> <span class="var">dfs</span>(<span class="var">node</span>)</code></pre>
+  </div>
+
+  <script>
+    const stepElements = document.querySelectorAll('.viz-step');
+    const lineElements = document.querySelectorAll('.code-line');
+    
+    function highlightStep(index) {
+      // 更新步骤高亮
+      stepElements.forEach((el, i) => {
+        el.classList.toggle('active', i === index);
+      });
+      // 更新代码行高亮
+      lineElements.forEach(el => {
+        const stepAttr = el.getAttribute('data-step');
+        el.classList.toggle('active', stepAttr === String(index));
+      });
+    }
+    
+    function highlightLine(stepIndex) {
+      if (stepIndex < 0) return;
+      highlightStep(stepIndex);
+      // 滚动到对应步骤
+      const stepEl = stepElements[stepIndex];
+      if (stepEl) stepEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    // 初始化：高亮第一步
+    highlightStep(0);
+  </script>
+</body>
+</html>

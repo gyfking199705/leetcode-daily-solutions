@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>LeetCode #122 - 买卖股票的最佳时机 II</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --primary-light: #818cf8;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --surface-light: #334155;
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --border: #475569;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    body { 
+      font-family: 'Segoe UI', system-ui, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1100px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.7;
+    }
+    h1 { 
+      font-size: 2rem; 
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      margin-bottom: 30px;
+      font-size: 1.1rem;
+    }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px; 
+      border: 1px solid var(--border);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-right: 8px;
+    }
+    .tag-medium { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+    .tag-greedy { background: rgba(34, 197, 94, 0.2); color: #86efac; }
+    .tag-dp { background: rgba(99, 102, 241, 0.2); color: #a5b4fc; }
+    
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 20px; 
+      overflow-x: auto;
+      margin: 0;
+    }
+    code { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 0.9rem; }
+    .code-line { 
+      display: flex; 
+      padding: 3px 0; 
+      cursor: pointer; 
+      transition: all 0.2s; 
+      border-left: 3px solid transparent;
+      margin-left: -3px;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+      border-left-color: var(--border);
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.25); 
+      border-left-color: var(--primary);
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 45px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+      font-size: 0.85rem;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 800px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    .viz-steps { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 16px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .viz-step { 
+      padding: 14px; 
+      margin: 8px 0; 
+      border-radius: 10px; 
+      background: var(--surface-light); 
+      cursor: pointer; 
+      border: 2px solid transparent; 
+      transition: all 0.2s;
+    }
+    .viz-step:hover { 
+      border-color: var(--border);
+      transform: translateX(4px);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.2); 
+    }
+    .viz-step-title {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .viz-step-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .viz-step-state {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border);
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: var(--primary-light);
+    }
+    .code-container h3 {
+      margin: 0 0 12px 0;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 18px; 
+      border: 1px solid var(--border); 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block; 
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.15);
+    }
+    .problem-card h4 {
+      margin: 0 0 8px 0;
+      color: var(--primary-light);
+    }
+    .problem-card p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .problem-card .difficulty {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+    }
+    .difficulty-easy { background: rgba(34, 197, 94, 0.2); color: #86efac; }
+    .difficulty-medium { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+    .difficulty-hard { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+    
+    .keyword { color: #ff7b72; } 
+    .function { color: #d2a8ff; } 
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; } 
+    .comment { color: #8b949e; } 
+    .class { color: #ffa657; }
+    .operator { color: #ff7b72; }
+    .builtin { color: #79c0ff; }
+    
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    .complexity-table th,
+    .complexity-table td {
+      padding: 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .complexity-table th {
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+    .complexity-table td {
+      font-family: monospace;
+    }
+    .complexity-good { color: var(--success); }
+    
+    .example-box {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin: 12px 0;
+      border-left: 3px solid var(--primary);
+    }
+    .example-box strong {
+      color: var(--primary-light);
+    }
+    
+    .insight-box {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 16px 0;
+    }
+    .insight-box h4 {
+      margin: 0 0 10px 0;
+      color: var(--primary-light);
+    }
+    
+    .price-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      height: 120px;
+      padding: 20px;
+      background: var(--bg);
+      border-radius: 10px;
+      margin: 16px 0;
+    }
+    .price-bar {
+      flex: 1;
+      background: var(--primary);
+      border-radius: 4px 4px 0 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding-bottom: 8px;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .price-bar.profit { background: var(--success); }
+    .price-bar.loss { background: #ef4444; }
+    .price-bar-label {
+      position: absolute;
+      bottom: -20px;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #122 - 买卖股票的最佳时机 II</h1>
+  <p class="subtitle">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-greedy">贪心算法</span>
+    <span class="tag tag-dp">动态规划</span>
+  </p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给你一个整数数组 <code>prices</code> ，其中 <code>prices[i]</code> 表示某支股票第 <code>i</code> 天的价格。</p>
+    <p>在每一天，你可以决定是否购买和/或出售股票。你在任何时候 <strong>最多</strong> 只能持有 <strong>一股</strong> 股票。你也可以先购买，然后在 <strong>同一天</strong> 出售。</p>
+    <p>返回你能获得的 <strong>最大</strong> 利润。</p>
+    
+    <div class="example-box">
+      <strong>示例 1：</strong><br>
+      输入：prices = [7,1,5,3,6,4]<br>
+      输出：7<br>
+      解释：在第 2 天（价格=1）买入，第 3 天（价格=5）卖出，利润=5-1=4；<br>
+      然后在第 4 天（价格=3）买入，第 5 天（价格=6）卖出，利润=6-3=3；<br>
+      总利润=4+3=7
+    </div>
+    
+    <div class="example-box">
+      <strong>示例 2：</strong><br>
+      输入：prices = [1,2,3,4,5]<br>
+      输出：4<br>
+      解释：在第 1 天买入，第 5 天卖出，利润=5-1=4
+    </div>
+    
+    <div class="example-box">
+      <strong>示例 3：</strong><br>
+      输入：prices = [7,6,4,3,1]<br>
+      输出：0<br>
+      解释：价格持续下跌，不交易利润最大
+    </div>
+  </div>
+  
+  <div class="insight-box">
+    <h4>💡 核心洞察</h4>
+    <p>这道题的关键在于：由于可以<strong>同一天买卖</strong>且<strong>无交易次数限制</strong>，我们可以把连续上涨的「一段交易」拆成「多次单日交易」，效果完全相同！</p>
+    <p>因此，<strong>只要今天比昨天贵，就可以昨天买今天卖</strong>，把所有上涨段的利润都赚走。</p>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="price-chart" id="priceChart">
+      <div class="price-bar" style="height: 70%">7</div>
+      <div class="price-bar profit" style="height: 10%">1</div>
+      <div class="price-bar profit" style="height: 50%">5</div>
+      <div class="price-bar" style="height: 30%">3</div>
+      <div class="price-bar profit" style="height: 60%">6</div>
+      <div class="price-bar" style="height: 40%">4</div>
+    </div>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>Python 实现（贪心法）</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <tr>
+        <th>维度</th>
+        <th>贪心法</th>
+        <th>动态规划法</th>
+      </tr>
+      <tr>
+        <td>时间复杂度</td>
+        <td class="complexity-good">O(n)</td>
+        <td class="complexity-good">O(n)</td>
+      </tr>
+      <tr>
+        <td>空间复杂度</td>
+        <td class="complexity-good">O(1)</td>
+        <td>O(n) 或 O(1)优化后</td>
+      </tr>
+      <tr>
+        <td>核心思想</td>
+        <td>累加所有正差值</td>
+        <td>状态转移：持/不持股</td>
+      </tr>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转 LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/best-time-to-buy-and-sell-stock/" class="problem-card" target="_blank">
+        <h4>#121 买卖股票的最佳时机</h4>
+        <p>只能交易一次，用最小值/最大值思想</p>
+        <span class="difficulty difficulty-easy">Easy</span>
+      </a>
+      <a href="https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-iii/" class="problem-card" target="_blank">
+        <h4>#123 买卖股票的最佳时机 III</h4>
+        <p>最多交易两次，用四个状态DP</p>
+        <span class="difficulty difficulty-hard">Hard</span>
+      </a>
+      <a href="https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-iv/" class="problem-card" target="_blank">
+        <h4>#188 买卖股票的最佳时机 IV</h4>
+        <p>最多交易k次，通用DP框架</p>
+        <span class="difficulty difficulty-hard">Hard</span>
+      </a>
+      <a href="https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-with-cooldown/" class="problem-card" target="_blank">
+        <h4>#309 买卖股票的最佳时机含冷冻期</h4>
+        <p>卖出后有冷冻期，状态机DP</p>
+        <span class="difficulty difficulty-medium">Medium</span>
+      </a>
+      <a href="https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/" class="problem-card" target="_blank">
+        <h4>#714 买卖股票的最佳时机含手续费</h4>
+        <p>每次交易有手续费，贪心/DP均可</p>
+        <span class="difficulty difficulty-medium">Medium</span>
+      </a>
+      <a href="https://leetcode.cn/problems/gas-station/" class="problem-card" target="_blank">
+        <h4>#134 加油站</h4>
+        <p>类似的贪心思想，找起始点</p>
+        <span class="difficulty difficulty-medium">Medium</span>
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // Python代码，每行带行号
+    const codeLines = [
+      { line: 1, code: '<span class="keyword">class</span> <span class="class">Solution</span>:' },
+      { line: 2, code: '    <span class="keyword">def</span> <span class="function">maxProfit</span>(self, prices: List[<span class="builtin">int</span>]) -> <span class="builtin">int</span>:' },
+      { line: 3, code: '        <span class="comment"># 贪心法：累加所有正差值</span>' },
+      { line: 4, code: '        total_profit = <span class="number">0</span>' },
+      { line: 5, code: '        ' },
+      { line: 6, code: '        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="builtin">range</span>(<span class="number">1</span>, <span class="builtin">len</span>(prices)):' },
+      { line: 7, code: '            <span class="comment"># 如果今天比昨天贵，就在昨天买今天卖</span>' },
+      { line: 8, code: '            diff = prices[i] - prices[i - <span class="number">1</span>]' },
+      { line: 9, code: '            ' },
+      { line: 10, code: '            <span class="keyword">if</span> diff > <span class="number">0</span>:' },
+      { line: 11, code: '                total_profit += diff  <span class="comment"># 累加利润</span>' },
+      { line: 12, code: '                <span class="comment"># 等价于：昨天买入，今天卖出</span>' },
+      { line: 13, code: '        ' },
+      { line: 14, code: '        <span class="keyword">return</span> total_profit' },
+      { line: 15, code: '' },
+      { line: 16, code: '<span class="comment"># 动态规划法（供参考）</span>' },
+      { line: 17, code: '<span class="keyword">class</span> <span class="class">SolutionDP</span>:' },
+      { line: 18, code: '    <span class="keyword">def</span> <span class="function">maxProfit</span>(self, prices: List[<span class="builtin">int</span>]) -> <span class="builtin">int</span>:' },
+      { line: 19, code: '        n = <span class="builtin">len</span>(prices)' },
+      { line: 20, code: '        <span class="comment"># dp[i][0]: 第i天不持股的最大利润</span>' },
+      { line: 21, code: '        <span class="comment"># dp[i][1]: 第i天持股的最大利润</span>' },
+      { line: 22, code: '        hold = -prices[<span class="number">0</span>]  <span class="comment"># 第0天持股</span>' },
+      { line: 23, code: '        not_hold = <span class="number">0</span>       <span class="comment"># 第0天不持股</span>' },
+      { line: 24, code: '        ' },
+      { line: 25, code: '        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="builtin">range</span>(<span class="number">1</span>, n):' },
+      { line: 26, code: '            <span class="comment"># 今天不持股 = max(昨天就不持股, 昨天持股今天卖出)</span>' },
+      { line: 27, code: '            not_hold = <span class="builtin">max</span>(not_hold, hold + prices[i])' },
+      { line: 28, code: '            <span class="comment"># 今天持股 = max(昨天就持股, 昨天不持股今天买入)</span>' },
+      { line: 29, code: '            hold = <span class="builtin">max</span>(hold, not_hold - prices[i])' },
+      { line: 30, code: '        ' },
+      { line: 31, code: '        <span class="keyword">return</span> not_hold' },
+    ];
+    
+    // 步骤与代码行映射（针对贪心法部分）
+    const steps = [
+      { title: "初始化", desc: "总利润设为0，准备遍历价格数组", line: 4, state: "total_profit = 0" },
+      { title: "进入循环", desc: "从第1天开始遍历（需要和前一天比较）", line: 6, state: "i = 1, prices = [7,1,5,3,6,4]" },
+      { title: "计算差值", desc: "比较今天和昨天的价格差", line: 8, state: "i=1: diff = 1-7 = -6 < 0" },
+      { title: "判断条件", desc: "差值为负，不交易", line: 10, state: "diff = -6 ≤ 0，跳过" },
+      { title: "下一轮", desc: "i=2，价格从1涨到5", line: 6, state: "i = 2" },
+      { title: "计算差值", desc: "diff = 5-1 = 4 > 0，有利可图！", line: 8, state: "diff = 4 > 0" },
+      { title: "累加利润", desc: "昨天买今天卖，赚4块钱", line: 11, state: "total_profit = 0 + 4 = 4" },
+      { title: "下一轮", desc: "i=3，价格从5跌到3", line: 6, state: "i = 3" },
+      { title: "计算差值", desc: "diff = 3-5 = -2 < 0", line: 8, state: "diff = -2 < 0" },
+      { title: "判断条件", desc: "价格下跌，不交易", line: 10, state: "跳过" },
+      { title: "下一轮", desc: "i=4，价格从3涨到6", line: 6, state: "i = 4" },
+      { title: "计算差值", desc: "diff = 6-3 = 3 > 0，又有利润！", line: 8, state: "diff = 3 > 0" },
+      { title: "累加利润", desc: "利润再增加3块", line: 11, state: "total_profit = 4 + 3 = 7" },
+      { title: "下一轮", desc: "i=5，价格从6跌到4", line: 6, state: "i = 5" },
+      { title: "计算差值", desc: "diff = 4-6 = -2 < 0", line: 8, state: "diff = -2 < 0" },
+      { title: "循环结束", desc: "遍历完成，返回最大利润", line: 14, state: "return 7" },
+    ];
+    
+    // 渲染代码
+    function renderCode() {
+      const codeBlock = document.getElementById('codeBlock');
+      codeBlock.innerHTML = codeLines.map(({ line, code }) => 
+        `<div class="code-line" data-line="${line}">
+          <span class="line-number">${line}</span>
+          <span>${code}</span>
+        </div>`
+      ).join('');
+    }
+    
+    // 渲染步骤
+    function renderSteps() {
+      const stepsContainer = document.getElementById('vizSteps');
+      stepsContainer.innerHTML = steps.map((step, idx) => 
+        `<div class="viz-step" data-step="${idx}" data-line="${step.line}">
+          <div class="viz-step-title">步骤 ${idx + 1}: ${step.title}</div>
+          <div class="viz-step-desc">${step.desc}</div>
+          <div class="viz-step-state">${step.state}</div>
+        </div>`
+      ).join('');
+    }
+    
+    // 激活行
+    function activateLine(lineNum) {
+      document.querySelectorAll('.code-line').forEach(el => {
+        el.classList.toggle('active', parseInt(el.dataset.line) === lineNum);
+      });
+    }
+    
+    // 激活步骤
+    function activateStep(stepIdx) {
+      document.querySelectorAll('.viz-step').forEach(el => {
+        el.classList.toggle('active', parseInt(el.dataset.step) === stepIdx);
+      });
+    }
+    
+    // 绑定事件
+    function bindEvents() {
+      // 点击步骤 -> 高亮代码行
+      document.querySelectorAll('.viz-step').forEach(el => {
+        el.addEventListener('click', () => {
+          const stepIdx = parseInt(el.dataset.step);
+          const lineNum = parseInt(el.dataset.line);
+          activateStep(stepIdx);
+          activateLine(lineNum);
+          el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+      });
+      
+      // 点击代码行 -> 高亮对应步骤
+      document.querySelectorAll('.code-line').forEach(el => {
+        el.addEventListener('click', () => {
+          const lineNum = parseInt(el.dataset.line);
+          // 找到包含这一行的最后一个步骤
+          let bestStep = -1;
+          steps.forEach((step, idx) => {
+            if (step.line === lineNum) bestStep = idx;
+          });
+          if (bestStep >= 0) {
+            activateStep(bestStep);
+            activateLine(lineNum);
+            document.querySelector(`[data-step="${bestStep}"]`).scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        });
+      });
+    }
+    
+    // 初始化
+    renderCode();
+    renderSteps();
+    bindEvents();
+    
+    // 默认激活第一步
+    activateStep(0);
+    activateLine(4);
+  </script>
+</body>
+</html>

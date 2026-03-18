@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #155 - 最小栈</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --secondary: #8b5cf6;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --border: #334155;
+    }
+    body { 
+      font-family: system-ui, -apple-system, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.6;
+    }
+    h1 { font-size: 2rem; margin-bottom: 8px; }
+    .subtitle { color: var(--text-muted); margin-bottom: 32px; }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px;
+      border: 1px solid var(--border);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .difficulty { 
+      display: inline-block; 
+      padding: 4px 12px; 
+      border-radius: 20px; 
+      font-size: 0.85rem; 
+      font-weight: 600;
+    }
+    .difficulty.medium { background: #f59e0b; color: #1e293b; }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 0; 
+      overflow-x: auto;
+      border: 1px solid #30363d;
+    }
+    code { font-family: 'SF Mono', Monaco, monospace; font-size: 0.9rem; }
+    .code-line { 
+      display: flex; 
+      padding: 4px 20px; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.2); 
+      border-left-color: var(--primary);
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 40px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 24px; 
+      margin: 20px 0;
+    }
+    @media (max-width: 768px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    .viz-steps { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 8px;
+    }
+    .viz-step { 
+      padding: 16px; 
+      border-radius: 12px; 
+      background: #334155; 
+      cursor: pointer; 
+      border: 2px solid transparent; 
+      transition: all 0.2s;
+    }
+    .viz-step:hover { 
+      background: #3d4e66;
+      transform: translateX(4px);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.3);
+    }
+    .viz-step-title { font-weight: 600; margin-bottom: 4px; }
+    .viz-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+    .state-display {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 8px;
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 16px; 
+      border: 1px solid #475569; 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block;
+      cursor: pointer;
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.2);
+    }
+    .problem-card h4 { margin: 0 0 8px 0; color: var(--primary); }
+    .problem-card p { margin: 0; font-size: 0.9rem; color: var(--text-muted); }
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    .complexity-table th,
+    .complexity-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .complexity-table th {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .highlight { background: rgba(99, 102, 241, 0.1); padding: 2px 6px; border-radius: 4px; }
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; }
+    .class { color: #ffa657; }
+    .tag { 
+      display: inline-block; 
+      padding: 2px 8px; 
+      background: rgba(99, 102, 241, 0.2); 
+      border-radius: 4px; 
+      font-size: 0.8rem; 
+      margin-right: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #155 - 最小栈</h1>
+  <p class="subtitle">
+    <span class="difficulty medium">Medium</span>
+    <span style="margin-left: 16px;">栈 | 设计 | 辅助数据结构</span>
+  </p>
+
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>设计一个支持 <code>push</code>、<code>pop</code>、<code>top</code> 操作，并能在<strong>常数时间内</strong>检索到最小元素的栈。</p>
+    <p style="margin-top: 16px;"><strong>实现 <code>MinStack</code> 类：</strong></p>
+    <ul>
+      <li><code>MinStack()</code> 初始化堆栈对象</li>
+      <li><code>void push(int val)</code> 将元素 val 推入堆栈</li>
+      <li><code>void pop()</code> 删除堆栈顶部的元素</li>
+      <li><code>int top()</code> 获取堆栈顶部的元素</li>
+      <li><code>int getMin()</code> 获取堆栈中的最小元素</li>
+    </ul>
+    <div style="background: var(--bg); border-radius: 8px; padding: 16px; margin-top: 16px;">
+      <p style="margin: 0;"><strong>示例：</strong></p>
+      <pre style="margin: 8px 0 0 0; background: transparent; border: none; padding: 0;"><code>MinStack minStack = new MinStack();
+minStack.push(-2);
+minStack.push(0);
+minStack.push(-3);
+minStack.getMin();   --> 返回 -3
+minStack.pop();
+minStack.top();      --> 返回 0
+minStack.getMin();   --> 返回 -2</code></pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>💡 核心思路</h2>
+    <p>问题的关键在于：当栈顶元素被弹出后，如何知道剩余元素中的最小值？</p>
+    <p style="margin-top: 12px;"><strong>解决方案：辅助栈</strong></p>
+    <p>使用两个栈：</p>
+    <ul>
+      <li><strong>主栈 (stack)</strong>：存储所有元素，支持常规的 push/pop/top</li>
+      <li><strong>辅助栈 (min_stack)</strong>：存储每个状态下的最小值</li>
+    </ul>
+    <p style="margin-top: 12px;">关键技巧：辅助栈的栈顶永远是当前所有元素的最小值。push 时，将当前元素与辅助栈顶比较，较小者入辅助栈；pop 时，两栈同时出栈。</p>
+  </div>
+
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3 style="margin-top: 0;">Python 实现</h3>
+        <pre id="codeBlock"><code>
+        </code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <thead>
+        <tr>
+          <th>操作</th>
+          <th>时间复杂度</th>
+          <th>空间复杂度</th>
+          <th>说明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>push</td>
+          <td><span class="highlight">O(1)</span></td>
+          <td>O(1)</td>
+          <td>两栈各执行一次入栈</td>
+        </tr>
+        <tr>
+          <td>pop</td>
+          <td><span class="highlight">O(1)</span></td>
+          <td>O(1)</td>
+          <td>两栈各执行一次出栈</td>
+        </tr>
+        <tr>
+          <td>top</td>
+          <td><span class="highlight">O(1)</span></td>
+          <td>O(1)</td>
+          <td>直接返回主栈栈顶</td>
+        </tr>
+        <tr>
+          <td>getMin</td>
+          <td><span class="highlight">O(1)</span></td>
+          <td>O(1)</td>
+          <td>直接返回辅助栈栈顶</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="margin-top: 16px; color: var(--text-muted);">
+      <strong>总体空间复杂度：O(n)</strong> - 辅助栈最坏情况下存储 n 个元素（当输入递减时）
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>🔧 空间优化版本</h2>
+    <p>当遇到重复的最小值时，可以只在辅助栈中存储一个计数，进一步优化空间：</p>
+    <pre style="padding: 20px;"><code><div class="code-line"><span class="line-number">1</span><span class="keyword">class</span> <span class="class">MinStackOptimized</span>:</div>
+<div class="code-line"><span class="line-number">2</span>    <span class="keyword">def</span> <span class="function">__init__</span>(self):</div>
+<div class="code-line"><span class="line-number">3</span>        self.stack = []      <span class="comment"># 主栈</span></div>
+<div class="code-line"><span class="line-number">4</span>        self.min_stack = []  <span class="comment"># 辅助栈存储 (最小值, 计数)</span></div>
+<div class="code-line"><span class="line-number">5</span></div>
+<div class="code-line"><span class="line-number">6</span>    <span class="keyword">def</span> <span class="function">push</span>(self, val: int) -> None:</div>
+<div class="code-line"><span class="line-number">7</span>        self.stack.append(val)</div>
+<div class="code-line"><span class="line-number">8</span>        <span class="keyword">if</span> <span class="keyword">not</span> self.min_stack <span class="keyword">or</span> val < self.min_stack[-<span class="number">1</span>][<span class="number">0</span>]:</div>
+<div class="code-line"><span class="line-number">9</span>            self.min_stack.append((val, <span class="number">1</span>))  <span class="comment"># 新最小值</span></div>
+<div class="code-line"><span class="line-number">10</span>        <span class="keyword">elif</span> val == self.min_stack[-<span class="number">1</span>][<span class="number">0</span>]:</div>
+<div class="code-line"><span class="line-number">11</span>            self.min_stack[-<span class="number">1</span>] = (val, self.min_stack[-<span class="number">1</span>][<span class="number">1</span>] + <span class="number">1</span>)  <span class="comment"># 计数+1</span></div>
+<div class="code-line"><span class="line-number">12</span></div>
+<div class="code-line"><span class="line-number">13</span>    <span class="keyword">def</span> <span class="function">pop</span>(self) -> None:</div>
+<div class="code-line"><span class="line-number">14</span>        val = self.stack.pop()</div>
+<div class="code-line"><span class="line-number">15</span>        <span class="keyword">if</span> val == self.min_stack[-<span class="number">1</span>][<span class="number">0</span>]:</div>
+<div class="code-line"><span class="line-number">16</span>            count = self.min_stack[-<span class="number">1</span>][<span class="number">1</span>] - <span class="number">1</span></div>
+<div class="code-line"><span class="line-number">17</span>            <span class="keyword">if</span> count == <span class="number">0</span>:</div>
+<div class="code-line"><span class="line-number">18</span>                self.min_stack.pop()</div>
+<div class="code-line"><span class="line-number">19</span>            <span class="keyword">else</span>:</div>
+<div class="code-line"><span class="line-number">20</span>                self.min_stack[-<span class="number">1</span>] = (val, count)</div></code></pre>
+  </div>
+
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/implement-queue-using-stacks/" target="_blank" class="problem-card">
+        <h4>#232 用栈实现队列</h4>
+        <p>两个栈模拟队列，经典设计题</p>
+        <span class="tag">Easy</span><span class="tag">栈</span>
+      </a>
+      <a href="https://leetcode.cn/problems/design-circular-queue/" target="_blank" class="problem-card">
+        <h4>#622 设计循环队列</h4>
+        <p>数组实现循环队列，理解队头队尾指针</p>
+        <span class="tag">Medium</span><span class="tag">设计</span>
+      </a>
+      <a href="https://leetcode.cn/problems/valid-parentheses/" target="_blank" class="problem-card">
+        <h4>#20 有效的括号</h4>
+        <p>栈的经典应用，括号匹配问题</p>
+        <span class="tag">Easy</span><span class="tag">栈</span>
+      </a>
+      <a href="https://leetcode.cn/problems/daily-temperatures/" target="_blank" class="problem-card">
+        <h4>#739 每日温度</h4>
+        <p>单调栈应用，寻找下一个更大元素</p>
+        <span class="tag">Medium</span><span class="tag">单调栈</span>
+      </a>
+      <a href="https://leetcode.cn/problems/largest-rectangle-in-histogram/" target="_blank" class="problem-card">
+        <h4>#84 柱状图中最大的矩形</h4>
+        <p>单调栈经典题，找左右边界</p>
+        <span class="tag">Hard</span><span class="tag">单调栈</span>
+      </a>
+      <a href="https://leetcode.cn/problems/online-stock-span/" target="_blank" class="problem-card">
+        <h4>#901 股票价格跨度</h4>
+        <p>单调递减栈，计算跨度</p>
+        <span class="tag">Medium</span><span class="tag">单调栈</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>🎯 面试要点</h2>
+    <ul>
+      <li><strong>常数时间约束</strong>：不能使用遍历找最小值，必须用辅助数据结构</li>
+      <li><strong>栈的同步性</strong>：主栈和辅助栈必须保持同步 push/pop</li>
+      <li><strong>边界处理</strong>：考虑空栈调用 pop/top/getMin 的情况（题目保证不会）</li>
+      <li><strong>空间权衡</strong>：是否值得用计数优化？取决于数据分布</li>
+    </ul>
+  </div>
+
+  <script>
+    // Python 代码（按行分割用于高亮）
+    const pythonCode = `class MinStack:
+    def __init__(self):
+        self.stack = []      # 主栈存储所有元素
+        self.min_stack = []  # 辅助栈存储最小值
+
+    def push(self, val: int) -> None:
+        self.stack.append(val)
+        # 辅助栈：空栈或新值更小时入栈
+        if not self.min_stack or val <= self.min_stack[-1]:
+            self.min_stack.append(val)
+        else:
+            self.min_stack.append(self.min_stack[-1])
+
+    def pop(self) -> None:
+        self.stack.pop()
+        self.min_stack.pop()
+
+    def top(self) -> int:
+        return self.stack[-1]
+
+    def getMin(self) -> int:
+        return self.min_stack[-1]`;
+
+    // 步骤与代码行映射
+    const steps = [
+      {title: "初始化栈", desc: "创建空的主栈和辅助栈", line: 2, state: "stack = []\\nmin_stack = []"},
+      {title: "push(-2)", desc: "第一个元素，两栈都入栈", line: 7, state: "stack = [-2]\\nmin_stack = [-2]\\nmin = -2"},
+      {title: "push(0)", desc: "0 > -2，辅助栈重复压入当前最小", line: 11, state: "stack = [-2, 0]\\nmin_stack = [-2, -2]\\nmin = -2"},
+      {title: "push(-3)", desc: "-3 < -2，新最小值入辅助栈", line: 9, state: "stack = [-2, 0, -3]\\nmin_stack = [-2, -2, -3]\\nmin = -3"},
+      {title: "getMin()", desc: "返回辅助栈顶 -3", line: 18, state: "return min_stack[-1] = -3"},
+      {title: "pop()", desc: "两栈同时出栈", line: 14, state: "stack = [-2, 0]\\nmin_stack = [-2, -2]\\nmin = -2"},
+      {title: "top()", desc: "返回主栈顶 0", line: 17, state: "return stack[-1] = 0"},
+      {title: "getMin()", desc: "返回辅助栈顶 -2", line: 18, state: "return min_stack[-1] = -2"},
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    const codeLines = pythonCode.split('\n');
+    codeBlock.innerHTML = codeLines.map((line, idx) => {
+      // 简单的语法高亮
+      let highlighted = line
+        .replace(/\b(def|class|return|if|else|not|or|and|None|True|False)\b/g, '<span class="keyword">$1</span>')
+        .replace(/\b(__init__|push|pop|top|getMin|append)\b/g, '<span class="function">$1</span>')
+        .replace(/\b(MinStack|int)\b/g, '<span class="class">$1</span>')
+        .replace(/(#.*$)/gm, '<span class="comment">$1</span>')
+        .replace(/(-?\d+)/g, '<span class="number">$1</span>')
+        .replace(/('.*?')/g, '<span class="string">$1</span>');
+      return `<div class="code-line" data-line="${idx + 1}"><span class="line-number">${idx + 1}</span>${highlighted || ' '}</div>`;
+    }).join('');
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    vizSteps.innerHTML = steps.map((step, idx) => `
+      <div class="viz-step" data-step="${idx}" data-line="${step.line}">
+        <div class="viz-step-title">步骤 ${idx + 1}: ${step.title}</div>
+        <div class="viz-step-desc">${step.desc}</div>
+        <div class="state-display">${step.state.replace(/\\n/g, '<br>')}</div>
+      </div>
+    `).join('');
+
+    // 交互逻辑
+    let activeStep = null;
+    let activeLine = null;
+
+    function highlightStep(stepIdx) {
+      // 清除之前的高亮
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      
+      // 高亮步骤
+      const stepEl = document.querySelector(`.viz-step[data-step="${stepIdx}"]`);
+      if (stepEl) {
+        stepEl.classList.add('active');
+        activeStep = stepIdx;
+        
+        // 高亮对应代码行
+        const lineNum = steps[stepIdx].line;
+        const lineEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+        if (lineEl) {
+          lineEl.classList.add('active');
+          activeLine = lineNum;
+          lineEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    }
+
+    function highlightLine(lineNum) {
+      // 清除之前的高亮
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      
+      // 高亮代码行
+      const lineEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+      if (lineEl) {
+        lineEl.classList.add('active');
+        activeLine = lineNum;
+        
+        // 查找并高亮对应的步骤
+        const stepIdx = steps.findIndex(s => s.line === lineNum);
+        if (stepIdx !== -1) {
+          const stepEl = document.querySelector(`.viz-step[data-step="${stepIdx}"]`);
+          if (stepEl) {
+            stepEl.classList.add('active');
+            activeStep = stepIdx;
+            stepEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }
+      }
+    }
+
+    // 绑定步骤点击事件
+    document.querySelectorAll('.viz-step').forEach(el => {
+      el.addEventListener('click', () => {
+        const stepIdx = parseInt(el.dataset.step);
+        highlightStep(stepIdx);
+      });
+    });
+
+    // 绑定代码行点击事件
+    document.querySelectorAll('.code-line').forEach(el => {
+      el.addEventListener('click', () => {
+        const lineNum = parseInt(el.dataset.line);
+        highlightLine(lineNum);
+      });
+    });
+
+    // 默认高亮第一步
+    highlightStep(0);
+  </script>
+</body>
+</html>

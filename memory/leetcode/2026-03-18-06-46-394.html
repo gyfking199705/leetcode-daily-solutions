@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #394 - 字符串解码</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --text: #f1f5f9; 
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.7;
+    }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      color: #94a3b8;
+      font-size: 1.1rem;
+    }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 20px; 
+      overflow-x: auto;
+      margin: 16px 0;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 3px 0; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.25); 
+      border-left-color: #6366f1;
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 45px; 
+      text-align: right; 
+      padding-right: 16px; 
+      font-family: 'SF Mono', monospace;
+      font-size: 13px;
+    }
+    .line-content {
+      font-family: 'SF Mono', monospace;
+      font-size: 14px;
+      white-space: pre;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1.2fr; 
+      gap: 24px; 
+      margin: 20px 0;
+    }
+    @media (max-width: 768px) {
+      .viz-container { 
+        grid-template-columns: 1fr; 
+      }
+    }
+    .viz-steps {
+      background: rgba(0,0,0,0.2);
+      border-radius: 12px;
+      padding: 16px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .viz-step { 
+      padding: 12px 16px; 
+      margin: 8px 0; 
+      border-radius: 8px; 
+      background: #334155; 
+      cursor: pointer; 
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .viz-step:hover {
+      background: #3d4f64;
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.3); 
+    }
+    .viz-step-title {
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-bottom: 4px;
+    }
+    .viz-step-desc {
+      font-size: 13px;
+      color: #94a3b8;
+    }
+    .viz-state {
+      background: rgba(99, 102, 241, 0.1);
+      border-radius: 6px;
+      padding: 8px 12px;
+      margin-top: 8px;
+      font-family: monospace;
+      font-size: 12px;
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 20px; 
+      border: 1px solid #475569; 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block; 
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.25);
+    }
+    .problem-card h4 {
+      margin: 0 0 8px 0;
+      color: var(--primary);
+    }
+    .problem-card p {
+      margin: 0;
+      font-size: 13px;
+      color: #94a3b8;
+    }
+    .tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      margin-right: 8px;
+    }
+    .tag-easy { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+    .tag-medium { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+    .tag-hard { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    .tag-method { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
+    .keyword { color: #ff7b72; } 
+    .function { color: #d2a8ff; } 
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; } 
+    .comment { color: #8b949e; font-style: italic; } 
+    .class { color: #ffa657; }
+    .operator { color: #ff7b72; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #334155;
+    }
+    th {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .complexity-good {
+      color: #22c55e;
+    }
+    .example-box {
+      background: rgba(99, 102, 241, 0.1);
+      border-left: 3px solid var(--primary);
+      padding: 16px 20px;
+      margin: 16px 0;
+      border-radius: 0 8px 8px 0;
+    }
+    .example-box code {
+      font-family: 'SF Mono', monospace;
+      font-size: 14px;
+    }
+    .stack-visual {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-family: monospace;
+      font-size: 13px;
+    }
+    .stack-item {
+      padding: 8px 12px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+      border-left: 3px solid var(--primary);
+    }
+    .stack-item.empty {
+      border-left-color: #475569;
+      color: #64748b;
+    }
+    .output-display {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-family: monospace;
+      margin-top: 12px;
+    }
+    .output-label {
+      font-size: 11px;
+      color: #22c55e;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #394 - 字符串解码</h1>
+  <p class="subtitle">Decode String &nbsp;|&nbsp; 中等难度 &nbsp;|&nbsp; 栈 / 递归</p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给定一个经过编码的字符串，返回它解码后的字符串。</p>
+    <p>编码规则为: <code>k[encoded_string]</code>，表示其中方括号内部的 <code>encoded_string</code> 正好重复 <code>k</code> 次。注意 <code>k</code> 保证为正整数。</p>
+    <p>你可以认为输入字符串总是有效的；输入字符串中没有额外的空格，且输入的方括号总是符合格式要求的。</p>
+    <p>此外，你可以认为原始数据不包含数字，所有的数字只表示重复的次数 <code>k</code> ，例如不会出现像 <code>3a</code> 或 <code>2[4]</code> 的输入。</p>
+    
+    <div class="example-box">
+      <strong>示例 1：</strong><br>
+      输入: s = "3[a]2[bc]"<br>
+      输出: "aaabcbc"
+    </div>
+    <div class="example-box">
+      <strong>示例 2：</strong><br>
+      输入: s = "3[a2[c]]"<br>
+      输出: "accaccacc"
+    </div>
+    <div class="example-box">
+      <strong>示例 3：</strong><br>
+      输入: s = "2[abc]3[cd]ef"<br>
+      输出: "abcabccdcdcdef"
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>💡 解题思路</h2>
+    <p>这道题的核心是处理嵌套结构（如 <code>3[a2[c]]</code>）。我们需要一种能够处理「后遇到先处理」的机制——<strong>栈</strong>。</p>
+    <p><strong>算法流程：</strong></p>
+    <ol>
+      <li>遍历字符串，遇到四种字符分别处理：</li>
+      <li><strong>数字</strong>：构建当前重复次数 <code>k</code></li>
+      <li><strong>字母</strong>：追加到当前字符串</li>
+      <li><strong>'['</strong>：将当前字符串和重复次数压栈，重置当前状态</li>
+      <li><strong>']'</strong>：弹栈，用弹出的重复次数重复当前字符串，拼接到上一层</li>
+    </ol>
+    <p>栈中存储的是元组 <code>(前一个字符串, 重复次数)</code>，遇到 <code>]</code> 时展开。</p>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <p style="color: #94a3b8; font-size: 14px; margin-bottom: 16px;">以输入 <code>"3[a2[c]]"</code> 为例，演示栈的变化过程：</p>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre id="codeBlock"></pre>
+      </div>
+    </div>
+    <div class="output-display" id="currentOutput" style="display: none;">
+      <div class="output-label">当前输出字符串</div>
+      <div id="outputText"></div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>指标</th>
+          <th>复杂度</th>
+          <th>说明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>时间复杂度</td>
+          <td class="complexity-good">O(n × max(k))</td>
+          <td>n为字符串长度，max(k)为最大重复次数</td>
+        </tr>
+        <tr>
+          <td>空间复杂度</td>
+          <td class="complexity-good">O(n)</td>
+          <td>栈的深度最坏情况下为O(n)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>🎯 关键点总结</h2>
+    <ul>
+      <li><strong>栈的应用场景</strong>：括号匹配、嵌套结构处理，这是栈最典型的应用场景</li>
+      <li><strong>状态保存</strong>：遇到 <code>[</code> 时将当前状态压栈，相当于进入下一层递归</li>
+      <li><strong>数字拼接</strong>：数字可能是多位数（如 "100[a]"），需要持续构建</li>
+      <li><strong>字符串拼接优化</strong>：在Python中可以用列表收集再join，减少中间字符串</li>
+    </ul>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/valid-parentheses/" class="problem-card" target="_blank">
+        <span class="tag tag-easy">Easy</span>
+        <span class="tag tag-method">栈</span>
+        <h4>20. 有效的括号</h4>
+        <p>栈的经典入门题，判断括号是否匹配</p>
+      </a>
+      <a href="https://leetcode.cn/problems/simplify-path/" class="problem-card" target="_blank">
+        <span class="tag tag-medium">Medium</span>
+        <span class="tag tag-method">栈</span>
+        <h4>71. 简化路径</h4>
+        <p>Unix路径简化，用栈处理目录跳转</p>
+      </a>
+      <a href="https://leetcode.cn/problems/basic-calculator-ii/" class="problem-card" target="_blank">
+        <span class="tag tag-medium">Medium</span>
+        <span class="tag tag-method">栈</span>
+        <h4>227. 基本计算器 II</h4>
+        <p>表达式求值，处理运算符优先级</p>
+      </a>
+      <a href="https://leetcode.cn/problems/number-of-atoms/" class="problem-card" target="_blank">
+        <span class="tag tag-hard">Hard</span>
+        <span class="tag tag-method">栈</span>
+        <h4>726. 原子的数量</h4>
+        <p>化学式解析，类似的多层嵌套结构</p>
+      </a>
+      <a href="https://leetcode.cn/problems/build-binary-expression-tree-from-infix-expression/" class="problem-card" target="_blank">
+        <span class="tag tag-hard">Hard</span>
+        <span class="tag tag-method">栈</span>
+        <h4>1597. 根据中缀表达式构建二叉表达式树</h4>
+        <p>表达式树构建，栈的高级应用</p>
+      </a>
+      <a href="https://leetcode.cn/problems/remove-k-digits/" class="problem-card" target="_blank">
+        <span class="tag tag-medium">Medium</span>
+        <span class="tag tag-method">单调栈</span>
+        <h4>402. 移掉 K 位数字</h4>
+        <p>单调栈经典题目，贪心+栈的结合</p>
+      </a>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📝 扩展思考</h2>
+    <p><strong>Q: 如果数字在后面呢？比如 "abc3" 表示 "abcabcabc"？</strong></p>
+    <p>思路不变，但需要反向遍历字符串，或者预处理找到数字位置。核心仍然是栈处理。</p>
+    <p><strong>Q: 如何递归实现？</strong></p>
+    <p>递归的思路是：遇到数字解析重复次数，然后递归解析方括号内的内容，最后重复拼接。递归终止条件是遇到 <code>]</code> 或字符串结束。</p>
+  </div>
+
+  <script>
+    // 源代码
+    const sourceCode = `class Solution:
+    def decodeString(self, s: str) -> str:
+        stack = []          # 存储 (前一个字符串, 重复次数)
+        curr_str = ""       # 当前正在构建的字符串
+        curr_num = 0        # 当前解析的数字
+        
+        for ch in s:
+            if ch.isdigit():
+                # 构建多位数字
+                curr_num = curr_num * 10 + int(ch)
+            elif ch == '[':
+                # 状态压栈，进入新一层
+                stack.append((curr_str, curr_num))
+                curr_str = ""
+                curr_num = 0
+            elif ch == ']':
+                # 弹栈，展开当前层
+                prev_str, num = stack.pop()
+                curr_str = prev_str + curr_str * num
+            else:
+                # 普通字符，直接追加
+                curr_str += ch
+        
+        return curr_str`;
+
+    // 步骤与代码行映射
+    const steps = [
+      {title: "初始化状态", desc: "创建空栈，当前字符串和数字都为空", line: 2, state: {stack: "[]", curr_str: '""', curr_num: 0, char: '-'}},
+      {title: "遇到 '3'", desc: "数字字符，构建curr_num = 3", line: 7, state: {stack: "[]", curr_str: '""', curr_num: 3, char: "'3'"}},
+      {title: "遇到 '['", desc: "压栈 ('', 3)，重置状态，进入内层", line: 10, state: {stack: "[('', 3)]", curr_str: '""', curr_num: 0, char: "'['"}},
+      {title: "遇到 'a'", desc: "字母，追加到当前字符串", line: 16, state: {stack: "[('', 3)]", curr_str: '"a"', curr_num: 0, char: "'a'"}},
+      {title: "遇到 '2'", desc: "数字字符，构建curr_num = 2", line: 7, state: {stack: "[('', 3)]", curr_str: '"a"', curr_num: 2, char: "'2'"}},
+      {title: "遇到 '['", desc: "压栈 ('a', 2)，重置状态，进入更内层", line: 10, state: {stack: "[('', 3), ('a', 2)]", curr_str: '""', curr_num: 0, char: "'['"}},
+      {title: "遇到 'c'", desc: "字母，追加到当前字符串", line: 16, state: {stack: "[('', 3), ('a', 2)]", curr_str: '"c"', curr_num: 0, char: "'c'"}},
+      {title: "遇到 ']'", desc: "弹栈得到 ('a', 2)，展开: 'a' + 'c'*2 = 'acc'", line: 13, state: {stack: "[('', 3)]", curr_str: '"acc"', curr_num: 0, char: "']'"}},
+      {title: "遇到 ']'", desc: "弹栈得到 ('', 3)，展开: '' + 'acc'*3 = 'accaccacc'", line: 13, state: {stack: "[]", curr_str: '"accaccacc"', curr_num: 0, char: "']'"}},
+      {title: "遍历结束", desc: "返回最终结果", line: 18, state: {stack: "[]", curr_str: '"accaccacc"', result: '"accaccacc"'}}
+    ];
+
+    // 渲染代码
+    function renderCode() {
+      const lines = sourceCode.split('\n');
+      const codeBlock = document.getElementById('codeBlock');
+      codeBlock.innerHTML = lines.map((line, idx) => {
+        const lineNum = idx + 1;
+        const highlighted = line
+          .replace(/(#.*$)/g, '<span class="comment">$1</span>')
+          .replace(/\b(def|class|if|elif|else|for|in|return|and|or|not)\b/g, '<span class="keyword">$1</span>')
+          .replace(/\b(self|int|str|list|dict)\b/g, '<span class="class">$1</span>')
+          .replace(/\b(append|pop|isdigit|decodeString)\b/g, '<span class="function">$1</span>')
+          .replace(/(".*?"|'.*?')/g, '<span class="string">$1</span>')
+          .replace(/\b(\d+)\b/g, '<span class="number">$1</span>')
+          .replace(/([=+\-*\/\[\]\(\)\{\},:])/g, '<span class="operator">$1</span>');
+        return `<div class="code-line" data-line="${lineNum}"><span class="line-number">${lineNum}</span><span class="line-content">${highlighted || ' '}</span></div>`;
+      }).join('');
+    }
+
+    // 渲染步骤
+    function renderSteps() {
+      const vizSteps = document.getElementById('vizSteps');
+      vizSteps.innerHTML = steps.map((step, idx) => `
+        <div class="viz-step" data-step="${idx}" data-line="${step.line}">
+          <div class="viz-step-title">Step ${idx + 1}: ${step.title}</div>
+          <div class="viz-step-desc">${step.desc}</div>
+          <div class="viz-state">
+            <div>ch = ${step.state.char}</div>
+            <div>stack = ${step.state.stack}</div>
+            <div>curr_str = ${step.state.curr_str}</div>
+            ${step.state.curr_num !== undefined ? `<div>curr_num = ${step.state.curr_num}</div>` : ''}
+            ${step.state.result ? `<div style="color: #22c55e;">→ ${step.state.result}</div>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // 激活步骤
+    function activateStep(stepIdx) {
+      // 重置所有
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      
+      if (stepIdx === -1) {
+        document.getElementById('currentOutput').style.display = 'none';
+        return;
+      }
+      
+      const step = steps[stepIdx];
+      
+      // 高亮步骤
+      document.querySelector(`.viz-step[data-step="${stepIdx}"]`)?.classList.add('active');
+      
+      // 高亮代码行
+      document.querySelector(`.code-line[data-line="${step.line}"]`)?.classList.add('active');
+      
+      // 更新输出显示
+      const outputDiv = document.getElementById('currentOutput');
+      const outputText = document.getElementById('outputText');
+      outputDiv.style.display = 'block';
+      outputText.textContent = step.state.curr_str.replace(/"/g, '') || '(空)';
+    }
+
+    // 绑定事件
+    function bindEvents() {
+      // 步骤点击
+      document.getElementById('vizSteps').addEventListener('click', (e) => {
+        const step = e.target.closest('.viz-step');
+        if (step) {
+          activateStep(parseInt(step.dataset.step));
+        }
+      });
+      
+      // 代码行点击
+      document.getElementById('codeBlock').addEventListener('click', (e) => {
+        const line = e.target.closest('.code-line');
+        if (line) {
+          const lineNum = parseInt(line.dataset.line);
+          // 找到对应的步骤
+          for (let i = 0; i < steps.length; i++) {
+            if (steps[i].line === lineNum) {
+              activateStep(i);
+              return;
+            }
+          }
+          // 如果没有精确匹配，清除高亮
+          activateStep(-1);
+        }
+      });
+    }
+
+    // 初始化
+    renderCode();
+    renderSteps();
+    bindEvents();
+    
+    // 默认选中第一步
+    activateStep(0);
+  </script>
+</body>
+</html>

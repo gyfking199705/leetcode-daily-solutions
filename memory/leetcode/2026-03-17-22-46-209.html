@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>LeetCode 209 - 长度最小的子数组</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --text: #f1f5f9; 
+      --accent: #22d3ee;
+    }
+    body { 
+      font-family: system-ui, -apple-system, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 40px 20px;
+      line-height: 1.7;
+    }
+    h1 { color: var(--primary); margin-bottom: 8px; }
+    .subtitle { color: #94a3b8; margin-bottom: 30px; }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px; 
+      border: 1px solid #334155;
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      font-size: 1.3em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .tag {
+      display: inline-block;
+      background: rgba(99, 102, 241, 0.2);
+      color: var(--primary);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      margin-right: 8px;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+    .tag.diff-medium { background: rgba(251, 191, 36, 0.2); color: #fbbf24; border-color: rgba(251, 191, 36, 0.3); }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 20px; 
+      overflow-x: auto;
+      margin: 16px 0;
+      border: 1px solid #30363d;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 3px 0; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+      margin-left: -3px;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+      border-left-color: rgba(99, 102, 241, 0.5);
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.25); 
+      border-left-color: var(--primary);
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 45px; 
+      text-align: right; 
+      padding-right: 16px;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.9em;
+    }
+    .code-content { font-family: 'SF Mono', Monaco, monospace; font-size: 0.95em; }
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; }
+    .class { color: #ffa657; }
+    .return { color: #f0883e; }
+    .param { color: #79c0ff; }
+    
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 768px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    .viz-steps { 
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 12px;
+      padding: 16px;
+      max-height: 450px;
+      overflow-y: auto;
+    }
+    .viz-step { 
+      padding: 12px 16px; 
+      margin: 8px 0; 
+      border-radius: 10px; 
+      background: #334155; 
+      cursor: pointer; 
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .viz-step:hover { 
+      background: #3d4b5c;
+      transform: translateX(4px);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.3);
+      box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+    }
+    .viz-step-title { font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .viz-step-desc { font-size: 0.9em; color: #94a3b8; }
+    .viz-state { 
+      background: rgba(34, 211, 238, 0.1);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 0.85em;
+      color: var(--accent);
+      margin-top: 8px;
+      display: inline-block;
+      font-family: monospace;
+    }
+    
+    .array-viz {
+      display: flex;
+      gap: 6px;
+      margin: 12px 0;
+      padding: 12px;
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 8px;
+      flex-wrap: wrap;
+    }
+    .array-item {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.9em;
+      transition: all 0.3s;
+    }
+    .array-item.normal { background: #334155; color: var(--text); }
+    .array-item.window { background: var(--primary); color: white; }
+    .array-item.sum { background: var(--accent); color: #0f172a; }
+    
+    .pointer-label {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+      font-size: 0.75em;
+    }
+    .pointer-left { color: var(--primary); }
+    .pointer-right { color: var(--accent); }
+    
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 20px; 
+      border: 1px solid #475569; 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block; 
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+    }
+    .problem-card h4 { margin: 0 0 8px 0; color: var(--primary); }
+    .problem-card p { margin: 0; color: #94a3b8; font-size: 0.9em; }
+    .problem-card .difficulty {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.8em;
+      margin-top: 12px;
+    }
+    .diff-easy { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+    .diff-medium { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
+    .diff-hard { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid #334155;
+    }
+    th { color: var(--primary); font-weight: 600; }
+    tr:last-child td { border-bottom: none; }
+    
+    .highlight-box {
+      background: rgba(99, 102, 241, 0.1);
+      border-left: 4px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 12px 12px 0;
+      margin: 16px 0;
+    }
+    .highlight-box h4 { margin: 0 0 8px 0; color: var(--primary); }
+    .highlight-box p { margin: 0; color: #cbd5e1; }
+    
+    .code-block-title {
+      font-size: 0.85em;
+      color: #94a3b8;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .state-table {
+      font-family: monospace;
+      font-size: 0.9em;
+    }
+    .state-row {
+      display: flex;
+      gap: 16px;
+      padding: 4px 0;
+    }
+    .state-label { color: #94a3b8; min-width: 80px; }
+    .state-value { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <h1>LeetCode 209 - 长度最小的子数组</h1>
+  <div class="subtitle">Minimum Size Subarray Sum</div>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给定一个含有 <code>n</code> 个正整数的数组和一个正整数 <code>target</code> 。</p>
+    <p>找出该数组中满足其总和<strong>大于等于</strong> <code>target</code> 的长度最小的 <strong>连续子数组</strong> <code>[nums<sub>l</sub>, nums<sub>l+1</sub>, ..., nums<sub>r-1</sub>, nums<sub>r</sub>]</code> ，并返回其长度。如果不存在符合条件的子数组，返回 <code>0</code> 。</p>
+    
+    <div class="highlight-box">
+      <h4>核心思路</h4>
+      <p>使用<strong>滑动窗口（Sliding Window）</strong>技术。用两个指针 <code>left</code> 和 <code>right</code> 维护一个窗口，当窗口内元素和 ≥ target 时，尝试收缩窗口以找到更短的有效子数组。</p>
+    </div>
+    
+    <h4>示例</h4>
+    <pre style="background: #1e293b;">输入：target = 7, nums = [2,3,1,2,4,3]
+输出：2
+解释：子数组 [4,3] 是该条件下的长度最小的子数组，和为 7。</pre>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行互相高亮）</h2>
+    <p style="color: #94a3b8; font-size: 0.9em;">可视化展示：数组 = [2,3,1,2,4,3], target = 7</p>
+    
+    <div class="array-viz" id="arrayViz">
+      <!-- 数组可视化 -->
+    </div>
+    
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <div class="code-block-title">
+          <span>Python 实现</span>
+          <span style="color: #6366f1;">滑动窗口</span>
+        </div>
+        <pre><code id="codeBlock">
+<!-- 代码行由JS生成 -->
+        </code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table>
+      <tr>
+        <th>指标</th>
+        <th>值</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td><strong>时间复杂度</strong></td>
+        <td>O(n)</td>
+        <td>每个元素最多被访问两次（右指针扩展一次，左指针收缩一次）</td>
+      </tr>
+      <tr>
+        <td><strong>空间复杂度</strong></td>
+        <td>O(1)</td>
+        <td>只使用常数额外空间（left, right, current_sum, min_len）</td>
+      </tr>
+      <tr>
+        <td><strong>最优解</strong></td>
+        <td>✓ 是</td>
+        <td>对于正整数数组，滑动窗口是此问题的最优解法</td>
+      </tr>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>💡 关键点解析</h2>
+    <div class="highlight-box">
+      <h4>1. 为什么滑动窗口适用于正整数数组？</h4>
+      <p>因为都是正数，当右指针右移时窗口和一定<strong>单调递增</strong>；当左指针右移时窗口和一定<strong>单调递减</strong>。这种单调性保证了我们不会遗漏最优解。</p>
+    </div>
+    <div class="highlight-box">
+      <h4>2. 收缩窗口的时机</h4>
+      <p>当 <code>current_sum ≥ target</code> 时，说明当前窗口是「有效」的。此时应该尝试收缩左边界，看看能否找到<strong>更短的</strong>有效子数组。</p>
+    </div>
+    <div class="highlight-box">
+      <h4>3. 为什么用 while 而不是 if 收缩？</h4>
+      <p>因为收缩一个元素后，新的窗口可能仍然满足条件（例如 [3,4] 和为7，收缩3后 [4] 不足7）。使用 while 可以持续收缩直到窗口不再有效。</p>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/minimum-window-substring/" class="problem-card" target="_blank">
+        <h4>76. 最小覆盖子串</h4>
+        <p>滑动窗口 + 哈希表，找出覆盖目标字符的最小子串</p>
+        <span class="difficulty diff-hard">Hard</span>
+      </a>
+      <a href="https://leetcode.cn/problems/longest-substring-without-repeating-characters/" class="problem-card" target="_blank">
+        <h4>3. 无重复字符的最长子串</h4>
+        <p>滑动窗口经典入门题，找最长无重复子串</p>
+        <span class="difficulty diff-medium">Medium</span>
+      </a>
+      <a href="https://leetcode.cn/problems/subarray-product-less-than-k/" class="problem-card" target="_blank">
+        <h4>713. 乘积小于 K 的子数组</h4>
+        <p>滑动窗口处理乘法场景，注意正整数条件</p>
+        <span class="difficulty diff-medium">Medium</span>
+      </a>
+      <a href="https://leetcode.cn/problems/maximum-sum-of-two-non-overlapping-subarrays/" class="problem-card" target="_blank">
+        <h4>1031. 两个非重叠子数组的最大和</h4>
+        <p>滑动窗口 + 预处理，寻找两个不重叠的固定长度子数组</p>
+        <span class="difficulty diff-medium">Medium</span>
+      </a>
+      <a href="https://leetcode.cn/problems/sliding-window-maximum/" class="problem-card" target="_blank">
+        <h4>239. 滑动窗口最大值</h4>
+        <p>单调队列优化的滑动窗口，求每个窗口的最大值</p>
+        <span class="difficulty diff-hard">Hard</span>
+      </a>
+      <a href="https://leetcode.cn/problems/longest-repeating-character-replacement/" class="problem-card" target="_blank">
+        <h4>424. 替换后的最长重复字符</h4>
+        <p>滑动窗口 + 哈希表，允许替换k个字符的最长重复子串</p>
+        <span class="difficulty diff-medium">Medium</span>
+      </a>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📝 代码实现</h2>
+    <div class="code-block-title">Python - 滑动窗口解法</div>
+    <pre style="font-size: 0.95em;"><code class="code-content"><span class="keyword">class</span> <span class="class">Solution</span>:
+    <span class="keyword">def</span> <span class="function">minSubArrayLen</span>(<span class="param">self</span>, target: <span class="keyword">int</span>, nums: List[<span class="keyword">int</span>]) -> <span class="keyword">int</span>:
+        n = <span class="function">len</span>(nums)
+        left = <span class="number">0</span>
+        current_sum = <span class="number">0</span>
+        min_len = <span class="class">float</span>(<span class="string">'inf'</span>)
+        
+        <span class="keyword">for</span> right <span class="keyword">in</span> <span class="function">range</span>(n):
+            current_sum += nums[right]  <span class="comment"># 扩展右边界</span>
+            
+            <span class="comment"># 当窗口满足条件时，尝试收缩左边界</span>
+            <span class="keyword">while</span> current_sum >= target:
+                min_len = <span class="function">min</span>(min_len, right - left + <span class="number">1</span>)
+                current_sum -= nums[left]
+                left += <span class="number">1</span>
+        
+        <span class="keyword">return</span> min_len <span class="keyword">if</span> min_len != <span class="class">float</span>(<span class="string">'inf'</span>) <span class="keyword">else</span> <span class="number">0</span></code></pre>
+  </div>
+  
+  <script>
+    // 代码行数据
+    const codeLines = [
+      { line: 1, content: '<span class="keyword">class</span> <span class="class">Solution</span>:' },
+      { line: 2, content: '    <span class="keyword">def</span> <span class="function">minSubArrayLen</span>(<span class="param">self</span>, target: <span class="keyword">int</span>, nums: List[<span class="keyword">int</span>]) -> <span class="keyword">int</span>:' },
+      { line: 3, content: '        n = <span class="function">len</span>(nums)' },
+      { line: 4, content: '        left = <span class="number">0</span>' },
+      { line: 5, content: '        current_sum = <span class="number">0</span>' },
+      { line: 6, content: '        min_len = <span class="class">float</span>(<span class="string">\'inf\'</span>)' },
+      { line: 7, content: '        ' },
+      { line: 8, content: '        <span class="keyword">for</span> right <span class="keyword">in</span> <span class="function">range</span>(n):' },
+      { line: 9, content: '            current_sum += nums[right]  <span class="comment"># 扩展右边界</span>' },
+      { line: 10, content: '            ' },
+      { line: 11, content: '            <span class="comment"># 当窗口满足条件时，尝试收缩左边界</span>' },
+      { line: 12, content: '            <span class="keyword">while</span> current_sum >= target:' },
+      { line: 13, content: '                min_len = <span class="function">min</span>(min_len, right - left + <span class="number">1</span>)' },
+      { line: 14, content: '                current_sum -= nums[left]' },
+      { line: 15, content: '                left += <span class="number">1</span>' },
+      { line: 16, content: '        ' },
+      { line: 17, content: '        <span class="keyword">return</span> min_len <span class="keyword">if</span> min_len != <span class="class">float</span>(<span class="string">\'inf\'</span>) <span class="keyword">else</span> <span class="number">0</span>' },
+    ];
+    
+    // 算法执行步骤
+    const steps = [
+      { title: "初始化", desc: "left=0, current_sum=0, min_len=∞", line: 4, state: { left: 0, right: "-", sum: 0, min_len: "∞" }, window: [] },
+      { title: "右指针扩展到0", desc: "nums[0]=2, current_sum=2", line: 9, state: { left: 0, right: 0, sum: 2, min_len: "∞" }, window: [0] },
+      { title: "右指针扩展到1", desc: "nums[1]=3, current_sum=5", line: 9, state: { left: 0, right: 1, sum: 5, min_len: "∞" }, window: [0,1] },
+      { title: "右指针扩展到2", desc: "nums[2]=1, current_sum=6", line: 9, state: { left: 0, right: 2, sum: 6, min_len: "∞" }, window: [0,1,2] },
+      { title: "右指针扩展到3", desc: "nums[3]=2, current_sum=8 (≥7)", line: 9, state: { left: 0, right: 3, sum: 8, min_len: "∞" }, window: [0,1,2,3] },
+      { title: "进入while循环", desc: "发现有效子数组[0,3],长度=4", line: 12, state: { left: 0, right: 3, sum: 8, min_len: 4 }, window: [0,1,2,3] },
+      { title: "更新min_len", desc: "min_len = min(∞, 4) = 4", line: 13, state: { left: 0, right: 3, sum: 8, min_len: 4 }, window: [0,1,2,3] },
+      { title: "收缩左边界", desc: "减去nums[0]=2, left=1, sum=6", line: 14, state: { left: 1, right: 3, sum: 6, min_len: 4 }, window: [1,2,3] },
+      { title: "退出while", desc: "sum=6 < 7, 继续扩展", line: 12, state: { left: 1, right: 3, sum: 6, min_len: 4 }, window: [1,2,3] },
+      { title: "右指针扩展到4", desc: "nums[4]=4, current_sum=10 (≥7)", line: 9, state: { left: 1, right: 4, sum: 10, min_len: 4 }, window: [1,2,3,4] },
+      { title: "进入while循环", desc: "发现有效子数组[1,4],长度=4", line: 12, state: { left: 1, right: 4, sum: 10, min_len: 4 }, window: [1,2,3,4] },
+      { title: "更新min_len(未变)", desc: "min_len = min(4, 4) = 4", line: 13, state: { left: 1, right: 4, sum: 10, min_len: 4 }, window: [1,2,3,4] },
+      { title: "收缩左边界", desc: "减去nums[1]=3, left=2, sum=7", line: 14, state: { left: 2, right: 4, sum: 7, min_len: 4 }, window: [2,3,4] },
+      { title: "再次检查while", desc: "sum=7 ≥ 7, 继续收缩", line: 12, state: { left: 2, right: 4, sum: 7, min_len: 4 }, window: [2,3,4] },
+      { title: "更新min_len!", desc: "min_len = min(4, 3) = 3 ✨", line: 13, state: { left: 2, right: 4, sum: 7, min_len: 3 }, window: [2,3,4] },
+      { title: "收缩左边界", desc: "减去nums[2]=1, left=3, sum=6", line: 14, state: { left: 3, right: 4, sum: 6, min_len: 3 }, window: [3,4] },
+      { title: "退出while", desc: "sum=6 < 7, 继续扩展", line: 12, state: { left: 3, right: 4, sum: 6, min_len: 3 }, window: [3,4] },
+      { title: "右指针扩展到5", desc: "nums[5]=3, current_sum=9 (≥7)", line: 9, state: { left: 3, right: 5, sum: 9, min_len: 3 }, window: [3,4,5] },
+      { title: "进入while循环", desc: "发现有效子数组[3,5],长度=3", line: 12, state: { left: 3, right: 5, sum: 9, min_len: 3 }, window: [3,4,5] },
+      { title: "更新min_len(未变)", desc: "min_len = min(3, 3) = 3", line: 13, state: { left: 3, right: 5, sum: 9, min_len: 3 }, window: [3,4,5] },
+      { title: "收缩左边界", desc: "减去nums[3]=2, left=4, sum=7", line: 14, state: { left: 4, right: 5, sum: 7, min_len: 3 }, window: [4,5] },
+      { title: "再次检查while", desc: "sum=7 ≥ 7, 继续收缩!", line: 12, state: { left: 4, right: 5, sum: 7, min_len: 3 }, window: [4,5] },
+      { title: "更新min_len!!", desc: "min_len = min(3, 2) = 2 🎉", line: 13, state: { left: 4, right: 5, sum: 7, min_len: 2 }, window: [4,5] },
+      { title: "收缩左边界", desc: "减去nums[4]=4, left=5, sum=3", line: 14, state: { left: 5, right: 5, sum: 3, min_len: 2 }, window: [5] },
+      { title: "循环结束", desc: "遍历完成, 返回min_len=2", line: 17, state: { left: 5, right: 5, sum: 3, min_len: 2 }, window: [5] },
+    ];
+    
+    const nums = [2, 3, 1, 2, 4, 3];
+    
+    // 渲染代码块
+    function renderCodeBlock() {
+      const codeBlock = document.getElementById('codeBlock');
+      codeBlock.innerHTML = codeLines.map((line, idx) => `
+        <div class="code-line" data-line="${line.line}" onclick="highlightStepByLine(${idx})">
+          <span class="line-number">${line.line}</span>
+          <span class="code-content">${line.content}</span>
+        </div>
+      `).join('');
+    }
+    
+    // 渲染数组可视化
+    function renderArrayViz(windowIndices) {
+      const arrayViz = document.getElementById('arrayViz');
+      arrayViz.innerHTML = nums.map((num, idx) => {
+        let cls = 'normal';
+        if (windowIndices.includes(idx)) cls = 'window';
+        return `<div class="array-item ${cls}">${num}</div>`;
+      }).join('');
+    }
+    
+    // 渲染步骤
+    function renderSteps() {
+      const vizSteps = document.getElementById('vizSteps');
+      vizSteps.innerHTML = steps.map((step, idx) => `
+        <div class="viz-step" data-idx="${idx}" onclick="highlightLineByStep(${idx})">
+          <div class="viz-step-title">${step.title}</div>
+          <div class="viz-step-desc">${step.desc}</div>
+          <div class="viz-state">
+            left=${step.state.left}, right=${step.state.right}, sum=${step.state.sum}, min_len=${step.state.min_len}
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    // 高亮步骤对应的代码行
+    function highlightLineByStep(stepIdx) {
+      // 清除所有高亮
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      
+      // 高亮当前步骤
+      const stepEl = document.querySelector(`.viz-step[data-idx="${stepIdx}"]`);
+      if (stepEl) stepEl.classList.add('active');
+      
+      // 高亮对应代码行
+      const step = steps[stepIdx];
+      const codeLine = document.querySelector(`.code-line[data-line="${step.line}"]`);
+      if (codeLine) codeLine.classList.add('active');
+      
+      // 更新数组可视化
+      renderArrayViz(step.window);
+      
+      // 滚动到可视区域
+      stepEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    // 高亮代码行对应的步骤
+    function highlightStepByLine(lineIdx) {
+      const lineNum = codeLines[lineIdx].line;
+      // 找到使用这一行的第一个步骤
+      const stepIdx = steps.findIndex(s => s.line === lineNum);
+      if (stepIdx !== -1) {
+        highlightLineByStep(stepIdx);
+      }
+    }
+    
+    // 初始化
+    renderCodeBlock();
+    renderSteps();
+    renderArrayViz([]);
+    
+    // 默认高亮第一步
+    setTimeout(() => highlightLineByStep(0), 100);
+  </script>
+</body>
+</html>

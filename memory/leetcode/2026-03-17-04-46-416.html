@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>LeetCode 416 - 分割等和子集</title>
+  <style>
+    :root { --primary: #6366f1; --bg: #0f172a; --surface: #1e293b; --text: #f1f5f9; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); max-width: 1000px; margin: 0 auto; padding: 40px 20px; line-height: 1.6; }
+    .section { background: var(--surface); border-radius: 16px; padding: 28px; margin-bottom: 24px; }
+    .section h2 { color: var(--primary); margin-top: 0; }
+    pre { background: #0d1117; border-radius: 12px; padding: 20px; overflow-x: auto; margin: 0; }
+    .code-line { display: flex; padding: 2px 0; cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; }
+    .code-line:hover { background: rgba(255,255,255,0.05); }
+    .code-line.active { background: rgba(99, 102, 241, 0.3); border-left-color: #6366f1; }
+    .line-number { color: #484f58; min-width: 40px; text-align: right; padding-right: 16px; user-select: none; }
+    .line-content { flex: 1; font-family: 'SF Mono', Monaco, monospace; font-size: 14px; }
+    .viz-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+    @media (max-width: 768px) { .viz-container { grid-template-columns: 1fr; } }
+    .viz-steps { max-height: 400px; overflow-y: auto; }
+    .viz-step { padding: 12px; margin: 8px 0; border-radius: 8px; background: #334155; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+    .viz-step:hover { background: #3d4a5c; }
+    .viz-step.active { border-color: var(--primary); background: rgba(99, 102, 241, 0.3); }
+    .viz-step h4 { margin: 0 0 4px 0; color: #94a3b8; font-size: 12px; text-transform: uppercase; }
+    .viz-step p { margin: 0; font-size: 14px; }
+    .viz-step .state { font-family: monospace; font-size: 12px; color: #64748b; margin-top: 6px; }
+    .problem-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .problem-card { background: var(--bg); border-radius: 12px; padding: 16px; border: 1px solid #475569; transition: all 0.2s; text-decoration: none; color: inherit; display: block; }
+    .problem-card:hover { border-color: var(--primary); transform: translateY(-3px); }
+    .problem-card h3 { margin: 0 0 8px 0; color: var(--primary); }
+    .problem-card .tag { display: inline-block; background: rgba(99,102,241,0.2); color: #a5b4fc; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-right: 8px; }
+    .problem-card .difficulty { float: right; font-size: 12px; }
+    .problem-card .difficulty.easy { color: #4ade80; }
+    .problem-card .difficulty.medium { color: #fbbf24; }
+    .problem-card .difficulty.hard { color: #f87171; }
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; }
+    .class { color: #ffa657; }
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #475569; }
+    th { color: #94a3b8; font-weight: 600; }
+    .complexity-good { color: #4ade80; }
+    .complexity-bad { color: #f87171; }
+    .badge { display: inline-block; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>LeetCode 416 - 分割等和子集</h1>
+  <div style="margin-bottom: 20px;">
+    <span class="badge">动态规划</span>
+    <span class="badge" style="background: linear-gradient(135deg, #f59e0b, #f97316);">01背包</span>
+    <span style="color: #64748b; margin-left: 12px;">难度: Medium</span>
+  </div>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给你一个 <strong>只包含正整数</strong> 的 <strong>非空</strong> 数组 <code>nums</code> 。请你判断是否可以将这个数组分割成两个子集，使得两个子集的元素和相等。</p>
+    <p style="background: #1e293b; padding: 12px; border-radius: 8px; margin-top: 16px;">
+      <strong>核心转化：</strong>如果数组总和为 <code>sum</code>，问题等价于：<em>能否从数组中选出若干个数，使其和恰好等于 <code>sum/2</code>？</em>
+    </p>
+    <p style="color: #64748b; font-size: 14px;">这就是经典的「01背包问题」——每个数选或不选，能否恰好装满容量为 <code>sum/2</code> 的背包。</p>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>Python 实现（一维DP优化）</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table>
+      <tr>
+        <th>方案</th>
+        <th>时间复杂度</th>
+        <th>空间复杂度</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>二维DP</td>
+        <td class="complexity-bad">O(n × target)</td>
+        <td class="complexity-bad">O(n × target)</td>
+        <td>dp[i][j] 表示前i个数能否组成和j</td>
+      </tr>
+      <tr>
+        <td>一维DP（推荐）</td>
+        <td class="complexity-good">O(n × target)</td>
+        <td class="complexity-good">O(target)</td>
+        <td>滚动数组优化，倒序遍历避免覆盖</td>
+      </tr>
+    </table>
+    <p style="color: #64748b; font-size: 14px; margin-top: 12px;">
+      <strong>注意：</strong>target = sum/2，当 sum 很大时（如 > 10⁴），需考虑空间限制。LeetCode 数据范围通常可控。
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>💡 解题要点</h2>
+    <ul>
+      <li><strong>问题转化：</strong>先求总和，若为奇数直接返回 False</li>
+      <li><strong>DP定义：</strong><code>dp[j]</code> 表示能否用数组中的数凑出和 <code>j</code></li>
+      <li><strong>状态转移：</strong><code>dp[j] = dp[j] or dp[j-num]</code>（选或不选当前数）</li>
+      <li><strong>遍历顺序：</strong>必须<strong>倒序</strong>遍历！避免同一数字被重复使用</li>
+      <li><strong>初始化：</strong><code>dp[0] = True</code>（和为0总是可达，不选任何数）</li>
+    </ul>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/last-stone-weight-ii/" class="problem-card" target="_blank">
+        <span class="difficulty medium">Medium</span>
+        <h3>1049. 最后一块石头的重量 II</h3>
+        <p style="color: #94a3b8; font-size: 14px; margin: 8px 0;">同样是分割等和问题，只是目标变成最小化差值</p>
+        <span class="tag">01背包</span>
+        <span class="tag">DP</span>
+      </a>
+      <a href="https://leetcode.cn/problems/coin-change/" class="problem-card" target="_blank">
+        <span class="difficulty medium">Medium</span>
+        <h3>322. 零钱兑换</h3>
+        <p style="color: #94a3b8; font-size: 14px; margin: 8px 0;">完全背包问题，求组成金额的最少硬币数</p>
+        <span class="tag">完全背包</span>
+        <span class="tag">DP</span>
+      </a>
+      <a href="https://leetcode.cn/problems/partition-to-k-equal-sum-subsets/" class="problem-card" target="_blank">
+        <span class="difficulty medium">Medium</span>
+        <h3>698. 划分为k个相等的子集</h3>
+        <p style="color: #94a3b8; font-size: 14px; margin: 8px 0;">本题进阶版，分割成k个子集，可用回溯+剪枝</p>
+        <span class="tag">回溯</span>
+        <span class="tag">剪枝</span>
+      </a>
+      <a href="https://leetcode.cn/problems/target-sum/" class="problem-card" target="_blank">
+        <span class="difficulty medium">Medium</span>
+        <h3>494. 目标和</h3>
+        <p style="color: #94a3b8; font-size: 14px; margin: 8px 0;">给数字添加+/-符号使结果等于target</p>
+        <span class="tag">01背包</span>
+        <span class="tag">数学转化</span>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    // Python代码（按行分割）
+    const codeLines = [
+      {line: 1, text: '<span class="keyword">class</span> <span class="class">Solution</span>:'},
+      {line: 2, text: '    <span class="keyword">def</span> <span class="function">canPartition</span>(self, nums: List[<span class="keyword">int</span>]) -> <span class="keyword">bool</span>:'},
+      {line: 3, text: '        total = <span class="function">sum</span>(nums)'},
+      {line: 4, text: '        <span class="comment"># 技巧1: 总和为奇数，无法平分</span>'},
+      {line: 5, text: '        <span class="keyword">if</span> total % <span class="number">2</span> == <span class="number">1</span>:'},
+      {line: 6, text: '            <span class="keyword">return</span> <span class="keyword">False</span>'},
+      {line: 7, text: '        '},
+      {line: 8, text: '        target = total // <span class="number">2</span>  <span class="comment"># 每个子集的目标和</span>'},
+      {line: 9, text: '        '},
+      {line: 10, text: '        <span class="comment"># dp[j] = 能否用数组中的数凑出和j</span>'},
+      {line: 11, text: '        dp = [<span class="keyword">False</span>] * (target + <span class="number">1</span>)'},
+      {line: 12, text: '        dp[<span class="number">0</span>] = <span class="keyword">True</span>  <span class="comment"># 和为0总是可达（不选任何数）</span>'},
+      {line: 13, text: '        '},
+      {line: 14, text: '        <span class="keyword">for</span> num <span class="keyword">in</span> nums:  <span class="comment"># 遍历每个数字（物品）</span>'},
+      {line: 15, text: '            <span class="comment"># 技巧2: 必须倒序遍历！避免重复使用</span>'},
+      {line: 16, text: '            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="function">range</span>(target, num - <span class="number">1</span>, -<span class="number">1</span>):'},
+      {line: 17, text: '                <span class="comment"># 状态转移: 不选num 或 选num</span>'},
+      {line: 18, text: '                dp[j] = dp[j] <span class="keyword">or</span> dp[j - num]'},
+      {line: 19, text: '                '},
+      {line: 20, text: '                <span class="comment"># 提前终止: 已经找到答案</span>'},
+      {line: 21, text: '                <span class="keyword">if</span> dp[target]:'},
+      {line: 22, text: '                    <span class="keyword">return</span> <span class="keyword">True</span>'},
+      {line: 23, text: '        '},
+      {line: 24, text: '        <span class="keyword">return</span> dp[target]'},
+    ];
+
+    // 步骤与代码行映射
+    const steps = [
+      {title: "初始化", desc: "计算数组总和，判断能否平分", line: 3, state: "nums = [1,5,11,5], total = 22"},
+      {title: "奇偶判断", desc: "总和为偶数，可以继续。target = 11", line: 5, state: "22 % 2 = 0 ✓"},
+      {title: "设置目标", desc: "每个子集需要和为 11", line: 8, state: "target = 11"},
+      {title: "DP初始化", desc: "dp[0]=True，其余为False", line: 11, state: "dp = [T,F,F,F,F,F,F,F,F,F,F,F]"},
+      {title: "处理数字1", desc: "倒序更新：dp[1] = dp[1] or dp[0] = True", line: 16, state: "dp[1] = True"},
+      {title: "处理数字5", desc: "更新 dp[5]=True, dp[6]=True（5+1）", line: 18, state: "dp[5]=T, dp[6]=T"},
+      {title: "处理数字11", desc: "直接找到目标！dp[11] = dp[0] = True", line: 21, state: "✓ 找到答案！"},
+      {title: "返回结果", desc: "可以分割成 [1,5,5] 和 [11]，和都为11", line: 24, state: "return True"},
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach(({line, text}) => {
+      const div = document.createElement('div');
+      div.className = 'code-line';
+      div.dataset.line = line;
+      div.innerHTML = `<span class="line-number">${line}</span><span class="line-content">${text}</span>`;
+      div.onclick = () => highlightStepByLine(line);
+      codeBlock.appendChild(div);
+    });
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const div = document.createElement('div');
+      div.className = 'viz-step';
+      div.dataset.step = idx;
+      div.dataset.line = step.line;
+      div.innerHTML = `
+        <h4>步骤 ${idx + 1}</h4>
+        <p>${step.desc}</p>
+        <div class="state">${step.state}</div>
+      `;
+      div.onclick = () => highlightStep(idx);
+      vizSteps.appendChild(div);
+    });
+
+    // 当前高亮状态
+    let currentStep = -1;
+
+    function highlightStep(stepIdx) {
+      // 清除之前的高亮
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      
+      currentStep = stepIdx;
+      const step = steps[stepIdx];
+      
+      // 高亮步骤
+      document.querySelector(`.viz-step[data-step="${stepIdx}"]`).classList.add('active');
+      
+      // 高亮对应代码行
+      const codeLine = document.querySelector(`.code-line[data-line="${step.line}"]`);
+      if (codeLine) {
+        codeLine.classList.add('active');
+        codeLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    function highlightStepByLine(lineNum) {
+      // 找到包含该代码行的步骤
+      const stepIdx = steps.findIndex(s => s.line === lineNum);
+      if (stepIdx !== -1) {
+        highlightStep(stepIdx);
+      }
+    }
+
+    // 默认选中第一步
+    highlightStep(0);
+  </script>
+</body>
+</html>

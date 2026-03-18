@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #647 - 回文子串</title>
+  <style>
+    :root { --primary: #6366f1; --bg: #0f172a; --surface: #1e293b; --text: #f1f5f9; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); max-width: 1000px; margin: 0 auto; padding: 40px 20px; line-height: 1.6; }
+    .section { background: var(--surface); border-radius: 16px; padding: 28px; margin-bottom: 24px; }
+    .section h2 { color: var(--primary); margin-top: 0; }
+    pre { background: #0d1117; border-radius: 12px; padding: 20px; overflow-x: auto; font-size: 14px; }
+    .code-line { display: flex; padding: 3px 0; cursor: pointer; transition: background 0.2s; border-left: 3px solid transparent; }
+    .code-line:hover { background: rgba(255,255,255,0.05); }
+    .code-line.active { background: rgba(99, 102, 241, 0.3); border-left-color: #6366f1; margin-left: -3px; }
+    .line-number { color: #484f58; min-width: 40px; text-align: right; padding-right: 16px; user-select: none; }
+    .line-content { flex: 1; }
+    .viz-container { display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px; margin: 20px 0; }
+    @media (max-width: 768px) { .viz-container { grid-template-columns: 1fr; } }
+    .viz-steps { max-height: 500px; overflow-y: auto; }
+    .viz-step { padding: 14px; margin: 8px 0; border-radius: 8px; background: #334155; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+    .viz-step:hover { background: #3d4c63; }
+    .viz-step.active { border-color: var(--primary); background: rgba(99, 102, 241, 0.3); }
+    .step-title { font-weight: 600; color: var(--primary); margin-bottom: 4px; }
+    .step-desc { font-size: 14px; color: #94a3b8; }
+    .step-state { margin-top: 8px; padding: 8px; background: #0f172a; border-radius: 6px; font-size: 13px; font-family: monospace; }
+    .problem-card { background: var(--bg); border-radius: 12px; padding: 16px; border: 1px solid #475569; transition: all 0.2s; text-decoration: none; color: inherit; display: block; margin-bottom: 12px; }
+    .problem-card:hover { border-color: var(--primary); transform: translateY(-3px); }
+    .problem-id { font-size: 12px; color: var(--primary); font-weight: 600; }
+    .problem-title { font-size: 16px; font-weight: 600; margin: 4px 0; }
+    .problem-tag { font-size: 12px; color: #94a3b8; }
+    .keyword { color: #ff7b72; } .function { color: #d2a8ff; } .string { color: #a5d6ff; }
+    .number { color: #79c0ff; } .comment { color: #8b949e; } .class { color: #ffa657; }
+    .built-in { color: #79c0ff; }
+    .operator { color: #ff7b72; }
+    .complexity-table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+    .complexity-table th, .complexity-table td { padding: 12px; text-align: left; border-bottom: 1px solid #475569; }
+    .complexity-table th { color: var(--primary); font-weight: 600; }
+    .highlight { background: rgba(99, 102, 241, 0.2); padding: 2px 6px; border-radius: 4px; }
+    .string-viz { font-family: monospace; font-size: 20px; letter-spacing: 8px; padding: 20px; text-align: center; background: #0f172a; border-radius: 12px; margin: 16px 0; }
+    .char { display: inline-block; padding: 4px 8px; margin: 0 2px; border-radius: 4px; transition: all 0.3s; }
+    .char.center { background: var(--primary); color: white; }
+    .char.expand { background: #22c55e; color: white; }
+    .char.boundary { background: #ef4444; color: white; }
+    .count-badge { display: inline-block; background: var(--primary); color: white; padding: 2px 10px; border-radius: 12px; font-size: 14px; font-weight: 600; }
+    h1 { margin-bottom: 8px; }
+    .subtitle { color: #94a3b8; margin-bottom: 24px; }
+    .method-tag { display: inline-block; background: rgba(99, 102, 241, 0.2); color: var(--primary); padding: 4px 12px; border-radius: 20px; font-size: 12px; margin-right: 8px; }
+    .difficulty-medium { color: #f59e0b; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #647 - 回文子串</h1>
+  <p class="subtitle"><span class="difficulty-medium">Medium</span> · 字符串 · 双指针 · 动态规划</p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给定一个字符串 <code>s</code>，计算这个字符串中有多少个回文子串。</p>
+    <p>具有不同开始位置或结束位置的子串，即使是由相同的字符组成，也会被视作不同的子串。</p>
+    
+    <h3>示例</h3>
+    <pre><code>输入: s = "abc"
+输出: 3
+解释: 三个回文子串: "a", "b", "c"
+
+输入: s = "aaa"
+输出: 6
+解释: 6个回文子串: "a", "a", "a", "aa", "aa", "aaa"</code></pre>
+    
+    <h3>约束</h3>
+    <ul>
+      <li>1 ≤ s.length ≤ 1000</li>
+      <li>s 由小写英文字母组成</li>
+    </ul>
+  </div>
+  
+  <div class="section">
+    <h2>💡 核心思路：中心扩展法</h2>
+    <p>回文子串的特点是「中心对称」——从中心向两边扩散，两边的字符应该相同。</p>
+    <p><strong>关键洞察</strong>：回文中心可以是<span class="highlight">单个字符</span>（奇数长度回文）或<span class="highlight">两个字符之间</span>（偶数长度回文）。</p>
+    <p>对于长度为 n 的字符串，有 <code>2n-1</code> 个可能的回文中心。对每个中心，向两边扩展直到不再是回文。</p>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="string-viz" id="stringViz">
+      <span class="char">a</span><span class="char">b</span><span class="char">a</span>
+    </div>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps"></div>
+      <div class="code-container">
+        <h3>Python 实现 - 中心扩展法</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <tr>
+        <th>方法</th>
+        <th>时间复杂度</th>
+        <th>空间复杂度</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>中心扩展法</td>
+        <td>O(n²)</td>
+        <td>O(1)</td>
+        <td>最优空间，每个中心最多扩展n次</td>
+      </tr>
+      <tr>
+        <td>动态规划</td>
+        <td>O(n²)</td>
+        <td>O(n²)</td>
+        <td>dp[i][j]表示s[i:j+1]是否为回文</td>
+      </tr>
+      <tr>
+        <td>Manacher算法</td>
+        <td>O(n)</td>
+        <td>O(n)</td>
+        <td>线性时间，实现复杂</td>
+      </tr>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐</h2>
+    <a href="https://leetcode.cn/problems/longest-palindromic-substring/" target="_blank" class="problem-card">
+      <div class="problem-id">#5</div>
+      <div class="problem-title">最长回文子串</div>
+      <div class="problem-tag">中心扩展 · 动态规划 · Manacher</div>
+    </a>
+    <a href="https://leetcode.cn/problems/longest-palindromic-subsequence/" target="_blank" class="problem-card">
+      <div class="problem-id">#516</div>
+      <div class="problem-title">最长回文子序列</div>
+      <div class="problem-tag">动态规划 · 区间DP</div>
+    </a>
+    <a href="https://leetcode.cn/problems/palindrome-partitioning/" target="_blank" class="problem-card">
+      <div class="problem-id">#131</div>
+      <div class="problem-title">分割回文串</div>
+      <div class="problem-tag">回溯 · 动态规划预处理</div>
+    </a>
+    <a href="https://leetcode.cn/problems/valid-palindrome/" target="_blank" class="problem-card">
+      <div class="problem-id">#125</div>
+      <div class="problem-title">验证回文串</div>
+      <div class="problem-tag">双指针 · 字符串</div>
+    </a>
+    <a href="https://leetcode.cn/problems/palindromic-substrings/" target="_blank" class="problem-card">
+      <div class="problem-id">#647</div>
+      <div class="problem-title">回文子串（本题）</div>
+      <div class="problem-tag">中心扩展 · 动态规划</div>
+    </a>
+  </div>
+  
+  <script>
+    // 代码内容（按行分割）
+    const codeLines = [
+      { line: 1, content: '<span class="class">class</span> <span class="class">Solution</span>:' },
+      { line: 2, content: '    <span class="keyword">def</span> <span class="function">countSubstrings</span>(<span class="built-in">self</span>, s: <span class="built-in">str</span>) -> <span class="built-in">int</span>:' },
+      { line: 3, content: '        n = <span class="built-in">len</span>(s)' },
+      { line: 4, content: '        count = <span class="number">0</span>' },
+      { line: 5, content: '        ' },
+      { line: 6, content: '        <span class="keyword">for</span> center <span class="keyword">in</span> <span class="built-in">range</span>(<span class="number">2</span> * n - <span class="number">1</span>):' },
+      { line: 7, content: '            <span class="comment"># 计算左右指针：center//2 和 center//2 + center%2</span>' },
+      { line: 8, content: '            left = center // <span class="number">2</span>' },
+      { line: 9, content: '            right = left + center % <span class="number">2</span>' },
+      { line: 10, content: '            ' },
+      { line: 11, content: '            <span class="comment"># 从中心向两边扩展</span>' },
+      { line: 12, content: '            <span class="keyword">while</span> left >= <span class="number">0</span> <span class="keyword">and</span> right < n <span class="keyword">and</span> s[left] == s[right]:' },
+      { line: 13, content: '                count += <span class="number">1</span>  <span class="comment"># 找到一个回文子串</span>' },
+      { line: 14, content: '                left -= <span class="number">1</span>   <span class="comment"># 向左扩展</span>' },
+      { line: 15, content: '                right += <span class="number">1</span>  <span class="comment"># 向右扩展</span>' },
+      { line: 16, content: '        ' },
+      { line: 17, content: '        <span class="keyword">return</span> count' }
+    ];
+    
+    // 步骤与代码行映射
+    const steps = [
+      { title: "初始化", desc: "获取字符串长度，初始化计数器为0", line: 3, state: { n: 3, count: 0 }, stringState: "aba", highlight: [] },
+      { title: "遍历回文中心", desc: "center=0，对应字符索引0（奇数长度中心）", line: 6, state: { center: 0, left: 0, right: 0, count: 0 }, stringState: "aba", highlight: [0] },
+      { title: "计算指针位置", desc: "left = 0//2 = 0, right = 0 + 0%2 = 0", line: 8, state: { center: 0, left: 0, right: 0, count: 0 }, stringState: "aba", highlight: [0] },
+      { title: "中心扩展", desc: "s[0]=='a' == s[0]=='a'，找到回文'a'", line: 12, state: { center: 0, left: 0, right: 0, count: 0 }, stringState: "aba", highlight: [0] },
+      { title: "计数+1", desc: "count=1，找到第一个回文子串", line: 13, state: { center: 0, left: 0, right: 0, count: 1 }, stringState: "aba", highlight: [0] },
+      { title: "继续扩展", desc: "left=-1超出边界，结束此中心", line: 14, state: { center: 0, left: -1, right: 1, count: 1 }, stringState: "aba", highlight: [] },
+      { title: "下一个中心", desc: "center=1，对应字符0和1之间（偶数长度中心）", line: 6, state: { center: 1, left: 0, right: 1, count: 1 }, stringState: "aba", highlight: [0, 1] },
+      { title: "计算指针位置", desc: "left = 1//2 = 0, right = 0 + 1%2 = 1", line: 8, state: { center: 1, left: 0, right: 1, count: 1 }, stringState: "aba", highlight: [0, 1] },
+      { title: "检查回文", desc: "s[0]=='a' != s[1]=='b'，不是回文", line: 12, state: { center: 1, left: 0, right: 1, count: 1 }, stringState: "aba", highlight: [0, 1], boundary: true },
+      { title: "下一个中心", desc: "center=2，对应字符索引1（奇数长度中心）", line: 6, state: { center: 2, left: 1, right: 1, count: 1 }, stringState: "aba", highlight: [1] },
+      { title: "找到回文", desc: "s[1]=='b'，单个字符是回文", line: 12, state: { center: 2, left: 1, right: 1, count: 1 }, stringState: "aba", highlight: [1] },
+      { title: "计数+1", desc: "count=2", line: 13, state: { center: 2, left: 1, right: 1, count: 2 }, stringState: "aba", highlight: [1] },
+      { title: "继续扩展", desc: "left=0, right=2，s[0]=='a' == s[2]=='a'！", line: 12, state: { center: 2, left: 0, right: 2, count: 2 }, stringState: "aba", highlight: [0, 1, 2], expand: true },
+      { title: "计数+1", desc: "count=3，找到'aba'！", line: 13, state: { center: 2, left: 0, right: 2, count: 3 }, stringState: "aba", highlight: [0, 1, 2], expand: true },
+      { title: "下一个中心", desc: "center=3，字符1和2之间", line: 6, state: { center: 3, left: 1, right: 2, count: 3 }, stringState: "aba", highlight: [1, 2] },
+      { title: "检查回文", desc: "s[1]=='b' != s[2]=='a'，不是回文", line: 12, state: { center: 3, left: 1, right: 2, count: 3 }, stringState: "aba", highlight: [1, 2], boundary: true },
+      { title: "下一个中心", desc: "center=4，对应字符索引2", line: 6, state: { center: 4, left: 2, right: 2, count: 3 }, stringState: "aba", highlight: [2] },
+      { title: "找到回文", desc: "s[2]=='a'，单个字符是回文", line: 12, state: { center: 4, left: 2, right: 2, count: 3 }, stringState: "aba", highlight: [2] },
+      { title: "计数+1", desc: "count=4，最终答案！", line: 13, state: { center: 4, left: 2, right: 2, count: 4 }, stringState: "aba", highlight: [2] },
+      { title: "返回结果", desc: "返回count=4，回文子串：a, b, a, aba", line: 17, state: { count: 4 }, stringState: "aba", highlight: [] }
+    ];
+    
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach(({ line, content }) => {
+      const div = document.createElement('div');
+      div.className = 'code-line';
+      div.dataset.line = line;
+      div.innerHTML = `<span class="line-number">${line}</span><span class="line-content">${content}</span>`;
+      div.addEventListener('click', () => highlightStepByLine(line));
+      codeBlock.appendChild(div);
+    });
+    
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const div = document.createElement('div');
+      div.className = 'viz-step';
+      div.dataset.idx = idx;
+      div.innerHTML = `
+        <div class="step-title">${step.title}</div>
+        <div class="step-desc">${step.desc}</div>
+        <div class="step-state">行${step.line}: ${JSON.stringify(step.state)}</div>
+      `;
+      div.addEventListener('click', () => highlightStep(idx));
+      vizSteps.appendChild(div);
+    });
+    
+    // 高亮步骤
+    let activeStep = -1;
+    function highlightStep(idx) {
+      activeStep = idx;
+      const step = steps[idx];
+      
+      // 更新步骤样式
+      document.querySelectorAll('.viz-step').forEach((el, i) => {
+        el.classList.toggle('active', i === idx);
+      });
+      
+      // 更新代码行样式
+      document.querySelectorAll('.code-line').forEach(el => {
+        el.classList.toggle('active', parseInt(el.dataset.line) === step.line);
+      });
+      
+      // 更新字符串可视化
+      updateStringViz(step);
+      
+      // 滚动到视图
+      const activeLine = document.querySelector(`.code-line[data-line="${step.line}"]`);
+      if (activeLine) activeLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    function highlightStepByLine(line) {
+      // 找到包含这行的最后一步
+      const idx = steps.map((s, i) => ({ i, line: s.line }))
+        .filter(x => x.line === line)
+        .pop()?.i;
+      if (idx !== undefined) {
+        highlightStep(idx);
+        const stepEl = document.querySelector(`.viz-step[data-idx="${idx}"]`);
+        if (stepEl) stepEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+    
+    function updateStringViz(step) {
+      const viz = document.getElementById('stringViz');
+      const chars = step.stringState.split('');
+      viz.innerHTML = chars.map((c, i) => {
+        let cls = 'char';
+        if (step.highlight.includes(i)) {
+          if (step.expand) cls += ' expand';
+          else cls += ' center';
+        }
+        if (step.boundary && step.highlight.includes(i)) {
+          cls = 'char boundary';
+        }
+        return `<span class="${cls}">${c}</span>`;
+      }).join('');
+    }
+    
+    // 默认高亮第一步
+    highlightStep(0);
+  </script>
+</body>
+</html>

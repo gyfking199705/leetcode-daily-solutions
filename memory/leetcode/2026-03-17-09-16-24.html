@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>LeetCode #24 - 两两交换链表中的节点</title>
+  <style>
+    :root { --primary: #6366f1; --bg: #0f172a; --surface: #1e293b; --text: #f1f5f9; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); max-width: 1000px; margin: 0 auto; padding: 40px 20px; line-height: 1.6; }
+    h1 { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 12px; }
+    .section { background: var(--surface); border-radius: 16px; padding: 28px; margin-bottom: 24px; }
+    .section h2 { color: var(--primary); margin-top: 0; }
+    pre { background: #0d1117; border-radius: 12px; padding: 20px; overflow-x: auto; font-size: 14px; }
+    .code-line { display: flex; padding: 3px 0; cursor: pointer; transition: background 0.2s; border-radius: 4px; }
+    .code-line:hover { background: rgba(255,255,255,0.08); }
+    .code-line.active { background: rgba(99, 102, 241, 0.25); border-left: 3px solid #6366f1; margin-left: -3px; }
+    .line-number { color: #6e7681; min-width: 40px; text-align: right; padding-right: 16px; user-select: none; }
+    .viz-container { display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; margin: 20px 0; }
+    .viz-steps { max-height: 400px; overflow-y: auto; }
+    .viz-step { padding: 14px; margin: 10px 0; border-radius: 10px; background: #334155; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+    .viz-step:hover { background: #3d4e63; }
+    .viz-step.active { border-color: var(--primary); background: rgba(99, 102, 241, 0.2); box-shadow: 0 0 15px rgba(99, 102, 241, 0.3); }
+    .viz-step h4 { margin: 0 0 6px 0; color: #94a3b8; font-size: 12px; text-transform: uppercase; }
+    .viz-step p { margin: 0; font-size: 14px; }
+    .problem-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 20px; }
+    .problem-card { background: var(--bg); border-radius: 12px; padding: 16px; border: 1px solid #475569; transition: all 0.2s; text-decoration: none; color: inherit; display: block; }
+    .problem-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 8px 25px rgba(99, 102, 241, 0.2); }
+    .problem-card h3 { margin: 0 0 8px 0; color: var(--primary); }
+    .problem-card .difficulty { font-size: 12px; padding: 3px 10px; border-radius: 20px; display: inline-block; margin-bottom: 8px; }
+    .difficulty.easy { background: #166534; color: #86efac; }
+    .difficulty.medium { background: #854d0e; color: #fcd34d; }
+    .difficulty.hard { background: #991b1b; color: #fca5a5; }
+    .keyword { color: #ff7b72; } .function { color: #d2a8ff; } .string { color: #a5d6ff; }
+    .number { color: #79c0ff; } .comment { color: #8b949e; } .class { color: #ffa657; }
+    .variable { color: #79c0ff; } .operator { color: #ff7b72; }
+    .diagram { background: #1a2332; padding: 20px; border-radius: 10px; margin: 15px 0; font-family: monospace; text-align: center; }
+    .arrow { color: var(--primary); font-size: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #334155; }
+    th { color: var(--primary); }
+    .highlight-box { background: rgba(99, 102, 241, 0.1); border-left: 4px solid var(--primary); padding: 16px; margin: 16px 0; border-radius: 0 8px 8px 0; }
+  </style>
+</head>
+<body>
+  <h1>🔄 LeetCode #24 - 两两交换链表中的节点</h1>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给你一个链表，两两交换其中相邻的节点，并返回交换后链表的头节点。</p>
+    <p>你必须在不修改节点内部的值的情况下完成本题（即，只能进行节点交换）。</p>
+    
+    <div class="highlight-box">
+      <strong>示例 1：</strong><br>
+      输入：head = [1,2,3,4]<br>
+      输出：[2,1,4,3]
+    </div>
+    
+    <div class="highlight-box">
+      <strong>示例 2：</strong><br>
+      输入：head = [1,2,3]<br>
+      输出：[2,1,3]
+    </div>
+    
+    <div class="highlight-box">
+      <strong>示例 3：</strong><br>
+      输入：head = [1]<br>
+      输出：[1]
+    </div>
+    
+    <p><strong>提示：</strong>链表中节点的数目在范围 [0, 100] 内；0 <= Node.val <= 100</p>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>Python 实现（迭代法）</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table>
+      <tr><th>指标</th><th>值</th><th>说明</th></tr>
+      <tr>
+        <td>时间复杂度</td>
+        <td><code>O(n)</code></td>
+        <td>遍历链表一次，n为链表长度</td>
+      </tr>
+      <tr>
+        <td>空间复杂度</td>
+        <td><code>O(1)</code></td>
+        <td>只使用常数个指针变量</td>
+      </tr>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>💡 核心思路解析</h2>
+    <p>这道题的难点在于<strong>指针操作的顺序</strong>。交换两个相邻节点涉及4个指针的重新指向：</p>
+    <ol>
+      <li><code>prev</code>：待交换节点对的前一个节点</li>
+      <li><code>first</code>：第一个节点（要放到后面）</li>
+      <li><code>second</code>：第二个节点（要放到前面）</li>
+      <li><code>next_pair</code>：下一对待交换节点的第一个</li>
+    </ol>
+    
+    <div class="diagram">
+      <div>原始: prev → first → second → next_pair</div>
+      <div class="arrow">⬇️ 交换后</div>
+      <div>结果: prev → second → first → next_pair</div>
+    </div>
+    
+    <p><strong>操作顺序至关重要：</strong></p>
+    <ol>
+      <li>先保存 <code>next_pair</code>（防止断链后找不到）</li>
+      <li>将 <code>second</code> 接到 <code>prev</code> 后面</li>
+      <li>将 <code>first</code> 接到 <code>second</code> 后面</li>
+      <li>将 <code>next_pair</code> 接到 <code>first</code> 后面</li>
+      <li>移动 <code>prev</code> 到 <code>first</code>，准备下一对交换</li>
+    </ol>
+  </div>
+  
+  <div class="section">
+    <h2>🔄 递归解法（一行代码）</h2>
+    <pre><span class="comment"># 递归法：优雅但空间复杂度为O(n)</span>
+<span class="keyword">class</span> <span class="class">Solution</span>:
+    <span class="keyword">def</span> <span class="function">swapPairs</span>(<span class="variable">self</span>, <span class="variable">head</span>: <span class="class">Optional</span>[<span class="class">ListNode</span>]) -> <span class="class">Optional</span>[<span class="class">ListNode</span>]:
+        <span class="comment"># 递归终止条件：不足两个节点</span>
+        <span class="keyword">if not</span> <span class="variable">head</span> <span class="keyword">or not</span> <span class="variable">head</span>.<span class="variable">next</span>:
+            <span class="keyword">return</span> <span class="variable">head</span>
+        
+        <span class="comment"># 保存第二个节点（新头节点）</span>
+        <span class="variable">new_head</span> = <span class="variable">head</span>.<span class="variable">next</span>
+        
+        <span class="comment"># 递归处理后面的链表</span>
+        <span class="variable">head</span>.<span class="variable">next</span> = <span class="variable">self</span>.<span class="function">swapPairs</span>(<span class="variable">new_head</span>.<span class="variable">next</span>)
+        
+        <span class="comment"># 交换当前这对</span>
+        <span class="variable">new_head</span>.<span class="variable">next</span> = <span class="variable">head</span>
+        
+        <span class="keyword">return</span> <span class="variable">new_head</span></pre>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/reverse-nodes-in-k-group/" target="_blank" class="problem-card">
+        <span class="difficulty hard">Hard</span>
+        <h3>#25 K个一组翻转链表</h3>
+        <p>本题进阶版，要求K个一组翻转，需要更强的指针操作能力</p>
+      </a>
+      <a href="https://leetcode.cn/problems/swap-nodes-in-pairs/" target="_blank" class="problem-card">
+        <span class="difficulty medium">Medium</span>
+        <h3>#24 两两交换链表中的节点</h3>
+        <p>当前题目，K=2的特殊情况</p>
+      </a>
+      <a href="https://leetcode.cn/problems/reverse-linked-list/" target="_blank" class="problem-card">
+        <span class="difficulty easy">Easy</span>
+        <h3>#206 反转链表</h3>
+        <p>链表反转基础题，掌握后再做交换节点会更轻松</p>
+      </a>
+      <a href="https://leetcode.cn/problems/odd-even-linked-list/" target="_blank" class="problem-card">
+        <span class="difficulty medium">Medium</span>
+        <h3>#328 奇偶链表</h3>
+        <p>将奇数位置和偶数位置的节点分开重组，指针操作练习</p>
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    const codeLines = [
+      { num: 1, text: '<span class="keyword">class</span> <span class="class">ListNode</span>:' },
+      { num: 2, text: '    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="variable">self</span>, <span class="variable">val</span>=<span class="number">0</span>, <span class="variable">next</span>=<span class="keyword">None</span>):' },
+      { num: 3, text: '        <span class="variable">self</span>.<span class="variable">val</span> = <span class="variable">val</span>' },
+      { num: 4, text: '        <span class="variable">self</span>.<span class="variable">next</span> = <span class="variable">next</span>' },
+      { num: 5, text: '' },
+      { num: 6, text: '<span class="keyword">class</span> <span class="class">Solution</span>:' },
+      { num: 7, text: '    <span class="keyword">def</span> <span class="function">swapPairs</span>(<span class="variable">self</span>, <span class="variable">head</span>):' },
+      { num: 8, text: '        <span class="comment"># 创建虚拟头节点，简化边界处理</span>' },
+      { num: 9, text: '        <span class="variable">dummy</span> = <span class="class">ListNode</span>(<span class="number">0</span>)' },
+      { num: 10, text: '        <span class="variable">dummy</span>.<span class="variable">next</span> = <span class="variable">head</span>' },
+      { num: 11, text: '        <span class="variable">prev</span> = <span class="variable">dummy</span>  <span class="comment"># prev指向待交换节点对的前一个节点</span>' },
+      { num: 12, text: '' },
+      { num: 13, text: '        <span class="keyword">while</span> <span class="variable">prev</span>.<span class="variable">next</span> <span class="keyword">and</span> <span class="variable">prev</span>.<span class="variable">next</span>.<span class="variable">next</span>:' },
+      { num: 14, text: '            <span class="comment"># 定位要交换的两个节点</span>' },
+      { num: 15, text: '            <span class="variable">first</span> = <span class="variable">prev</span>.<span class="variable">next</span>       <span class="comment"># 第一个节点</span>' },
+      { num: 16, text: '            <span class="variable">second</span> = <span class="variable">first</span>.<span class="variable">next</span>     <span class="comment"># 第二个节点</span>' },
+      { num: 17, text: '            <span class="variable">next_pair</span> = <span class="variable">second</span>.<span class="variable">next</span> <span class="comment"># 下一对的第一个节点</span>' },
+      { num: 18, text: '' },
+      { num: 19, text: '            <span class="comment"># 执行交换：prev -> second -> first -> next_pair</span>' },
+      { num: 20, text: '            <span class="variable">prev</span>.<span class="variable">next</span> = <span class="variable">second</span>' },
+      { num: 21, text: '            <span class="variable">second</span>.<span class="variable">next</span> = <span class="variable">first</span>' },
+      { num: 22, text: '            <span class="variable">first</span>.<span class="variable">next</span> = <span class="variable">next_pair</span>' },
+      { num: 23, text: '' },
+      { num: 24, text: '            <span class="comment"># 移动prev指针到下一对的前一个位置</span>' },
+      { num: 25, text: '            <span class="variable">prev</span> = <span class="variable">first</span>' },
+      { num: 26, text: '' },
+      { num: 27, text: '        <span class="keyword">return</span> <span class="variable">dummy</span>.<span class="variable">next</span>' }
+    ];
+
+    const steps = [
+      { title: "初始化", desc: "创建虚拟头节点dummy，prev指向dummy。dummy.next指向原链表头，这样即使头节点被交换，我们也能通过dummy.next获取新头。", line: 9, state: "dummy → 1 → 2 → 3 → 4 → null" },
+      { title: "检查条件", desc: "判断prev.next和prev.next.next是否存在，确保至少有两个节点可以交换。", line: 13, state: "prev在dummy，first=1, second=2 都存在，进入循环" },
+      { title: "定位节点", desc: "first指向节点1，second指向节点2，next_pair指向节点3（下一对的开始）。", line: 15, state: "first=1, second=2, next_pair=3" },
+      { title: "保存next_pair", desc: "必须先保存second.next，因为即将修改second的指向。", line: 17, state: "next_pair = 3（已保存）" },
+      { title: "交换第一步", desc: "将prev(dummy)的next指向second，即dummy → 2。节点1暂时悬空。", line: 20, state: "dummy → 2,  1 → ?" },
+      { title: "交换第二步", desc: "将second的next指向first，即2 → 1。现在形成 dummy → 2 → 1。", line: 21, state: "dummy → 2 → 1,  1.next仍指向2（待修复）" },
+      { title: "交换第三步", desc: "将first的next指向next_pair，即1 → 3。完成这一对交换：dummy → 2 → 1 → 3 → 4。", line: 22, state: "dummy → 2 → 1 → 3 → 4 → null ✓" },
+      { title: "移动prev", desc: "prev移动到first（节点1），它现在是下一对(3,4)的前一个节点。", line: 25, state: "prev=1, 准备交换3和4" },
+      { title: "第二对检查", desc: "prev.next=3, prev.next.next=4 都存在，继续交换第二对。", line: 13, state: "first=3, second=4, next_pair=null" },
+      { title: "第二对交换", desc: "执行相同操作：1 → 4 → 3 → null。链表变为 2 → 1 → 4 → 3。", line: 20, state: "dummy → 2 → 1 → 4 → 3 → null" },
+      { title: "再次移动prev", desc: "prev移动到节点3，但prev.next=null，循环结束。", line: 25, state: "prev=3, prev.next=null" },
+      { title: "返回结果", desc: "返回dummy.next，即节点2，这是交换后的新头节点。", line: 27, state: "返回: 2 → 1 → 4 → 3" }
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach((line, idx) => {
+      const div = document.createElement('div');
+      div.className = 'code-line';
+      div.dataset.line = idx;
+      div.innerHTML = `<span class="line-number">${line.num}</span><span>${line.text}</span>`;
+      div.onclick = () => highlightStepByLine(idx);
+      codeBlock.appendChild(div);
+    });
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const div = document.createElement('div');
+      div.className = 'viz-step';
+      div.dataset.step = idx;
+      div.dataset.line = step.line - 1;
+      div.innerHTML = `<h4>步骤 ${idx + 1}</h4><p><strong>${step.title}</strong></p><p>${step.desc}</p><p style="color:#6366f1;margin-top:8px;font-size:12px;">状态: ${step.state}</p>`;
+      div.onclick = () => highlightStep(idx);
+      vizSteps.appendChild(div);
+    });
+
+    let currentStep = -1;
+
+    function highlightStep(stepIdx) {
+      // 清除之前的高亮
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      
+      currentStep = stepIdx;
+      const step = steps[stepIdx];
+      
+      // 高亮步骤
+      const stepEl = document.querySelector(`.viz-step[data-step="${stepIdx}"]`);
+      if (stepEl) {
+        stepEl.classList.add('active');
+        stepEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      
+      // 高亮对应代码行
+      const lineEl = document.querySelector(`.code-line[data-line="${step.line - 1}"]`);
+      if (lineEl) {
+        lineEl.classList.add('active');
+        lineEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    function highlightStepByLine(lineIdx) {
+      // 查找对应步骤
+      const stepIdx = steps.findIndex(s => s.line - 1 === lineIdx);
+      if (stepIdx !== -1) {
+        highlightStep(stepIdx);
+      }
+    }
+
+    // 默认高亮第一步
+    highlightStep(0);
+  </script>
+</body>
+</html>

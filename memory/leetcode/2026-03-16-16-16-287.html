@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #287 - 寻找重复数</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --primary-light: #818cf8;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --surface-light: #334155;
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --error: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.7;
+    }
+    h1 { 
+      font-size: 2.2rem; 
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle { 
+      color: var(--text-muted); 
+      font-size: 1.1rem; 
+      margin-bottom: 32px;
+    }
+    .badge { 
+      display: inline-block; 
+      padding: 4px 12px; 
+      border-radius: 20px; 
+      font-size: 0.85rem; 
+      font-weight: 600;
+      margin-right: 8px;
+    }
+    .badge-medium { background: var(--warning); color: #000; }
+    .badge-tag { background: var(--surface-light); color: var(--text); }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px; 
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .problem-desc {
+      background: var(--bg);
+      padding: 20px;
+      border-radius: 12px;
+      border-left: 4px solid var(--primary);
+    }
+    .example {
+      background: rgba(99, 102, 241, 0.1);
+      padding: 16px;
+      border-radius: 10px;
+      margin: 12px 0;
+    }
+    .example-title {
+      font-weight: 600;
+      color: var(--primary-light);
+      margin-bottom: 8px;
+    }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 20px; 
+      overflow-x: auto;
+      border: 1px solid var(--surface-light);
+      margin: 0;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 3px 0; 
+      cursor: pointer; 
+      transition: all 0.2s; 
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.95rem;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.25); 
+      border-left: 3px solid var(--primary); 
+      margin-left: -3px;
+      padding-left: 3px;
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 45px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+      font-size: 0.85rem;
+    }
+    .line-content { flex: 1; }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1.3fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 768px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    .viz-steps { 
+      max-height: 500px; 
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+    .viz-steps::-webkit-scrollbar { width: 6px; }
+    .viz-steps::-webkit-scrollbar-thumb { 
+      background: var(--surface-light); 
+      border-radius: 3px; 
+    }
+    .viz-step { 
+      padding: 14px; 
+      margin: 10px 0; 
+      border-radius: 10px; 
+      background: var(--bg); 
+      cursor: pointer; 
+      border: 2px solid transparent; 
+      transition: all 0.2s;
+    }
+    .viz-step:hover { 
+      border-color: var(--surface-light);
+      transform: translateX(4px);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.15);
+    }
+    .step-title {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+    }
+    .step-desc {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    .state-preview {
+      margin-top: 10px;
+      padding: 10px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 0.8rem;
+    }
+    .state-var {
+      display: inline-block;
+      margin-right: 12px;
+    }
+    .state-val {
+      color: var(--primary-light);
+      font-weight: 600;
+    }
+    .code-container h3 {
+      margin-top: 0;
+      color: var(--text-muted);
+      font-size: 1rem;
+      font-weight: 500;
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 18px; 
+      border: 1px solid var(--surface-light); 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block;
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.15);
+    }
+    .problem-card-title {
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+    .problem-card-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    .complexity-table th,
+    .complexity-table td {
+      padding: 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--surface-light);
+    }
+    .complexity-table th {
+      color: var(--primary-light);
+      font-weight: 600;
+    }
+    .complexity-table tr:last-child td {
+      border-bottom: none;
+    }
+    .tag { 
+      display: inline-block; 
+      padding: 2px 8px; 
+      border-radius: 4px; 
+      font-size: 0.75rem; 
+      background: var(--surface-light);
+      margin-right: 6px;
+    }
+    .key-point {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(129, 140, 248, 0.1) 100%);
+      border-left: 3px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 10px 10px 0;
+      margin: 16px 0;
+    }
+    .key-point-title {
+      font-weight: 600;
+      color: var(--primary-light);
+      margin-bottom: 8px;
+    }
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; }
+    .class { color: #ffa657; }
+    .method-tab {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .method-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--surface-light);
+      background: var(--bg);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .method-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    .method-btn:hover:not(.active) {
+      border-color: var(--primary-light);
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #287 - 寻找重复数</h1>
+  <p class="subtitle">
+    <span class="badge badge-medium">Medium</span>
+    <span class="badge badge-tag">数组</span>
+    <span class="badge badge-tag">双指针</span>
+    <span class="badge badge-tag">二分查找</span>
+    <span class="badge badge-tag">Floyd判圈</span>
+  </p>
+
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <div class="problem-desc">
+      <p>给定一个包含 <code>n + 1</code> 个整数的数组 <code>nums</code>，其数字都在 <code>[1, n]</code> 范围内（包括 <code>1</code> 和 <code>n</code>），可知至少存在一个重复的整数。</p>
+      <p style="margin-top: 12px;">假设 <code>nums</code> 只有 <strong>一个重复的整数</strong>，返回这个重复的数。</p>
+      <p style="margin-top: 12px;"><strong>限制条件：</strong></p>
+      <ul>
+        <li>不能更改原数组（假设数组是只读的）</li>
+        <li>只能使用额外的 <code>O(1)</code> 的空间</li>
+        <li>时间复杂度小于 <code>O(n²)</code></li>
+      </ul>
+    </div>
+    
+    <div class="example">
+      <div class="example-title">示例 1</div>
+      <p><strong>输入:</strong> nums = [1,3,4,2,2]</p>
+      <p><strong>输出:</strong> 2</p>
+    </div>
+    
+    <div class="example">
+      <div class="example-title">示例 2</div>
+      <p><strong>输入:</strong> nums = [3,1,3,4,2]</p>
+      <p><strong>输出:</strong> 3</p>
+    </div>
+  </div>
+
+  <div class="key-point">
+    <div class="key-point-title">💡 核心洞察</div>
+    <p>这道题的精妙之处在于：<strong>把数组看作链表</strong>！数组值作为"下一个节点的索引"，重复的数字会形成环。于是问题转化为：<strong>找环的入口</strong>——这正是经典的 Floyd 判圈算法。</p>
+  </div>
+
+  <div class="section">
+    <h2>🎬 算法执行过程</h2>
+    <div class="method-tab">
+      <button class="method-btn active" onclick="switchMethod('floyd')">方法一：Floyd判圈</button>
+      <button class="method-btn" onclick="switchMethod('binary')">方法二：二分查找</button>
+    </div>
+    
+    <div id="floyd-method" class="method-content">
+      <div class="viz-container">
+        <div class="viz-steps" id="vizStepsFloyd">
+          <!-- 步骤由JS生成 -->
+        </div>
+        <div class="code-container">
+          <h3>Python 实现 - Floyd判圈算法</h3>
+          <pre><code id="codeBlockFloyd"></code></pre>
+        </div>
+      </div>
+    </div>
+    
+    <div id="binary-method" class="method-content" style="display:none;">
+      <div class="viz-container">
+        <div class="viz-steps" id="vizStepsBinary">
+          <!-- 步骤由JS生成 -->
+        </div>
+        <div class="code-container">
+          <h3>Python 实现 - 二分查找</h3>
+          <pre><code id="codeBlockBinary"></code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <tr>
+        <th>方法</th>
+        <th>时间复杂度</th>
+        <th>空间复杂度</th>
+        <th>特点</th>
+      </tr>
+      <tr>
+        <td><strong>Floyd判圈</strong></td>
+        <td><code>O(n)</code></td>
+        <td><code>O(1)</code></td>
+        <td>最优解，不修改原数组</td>
+      </tr>
+      <tr>
+        <td><strong>二分查找</strong></td>
+        <td><code>O(n log n)</code></td>
+        <td><code>O(1)</code></td>
+        <td>思路直观，但时间稍慢</td>
+      </tr>
+      <tr>
+        <td>排序</td>
+        <td><code>O(n log n)</code></td>
+        <td><code>O(1)</code> / <code>O(n)</code></td>
+        <td>违反"不修改原数组"限制</td>
+      </tr>
+      <tr>
+        <td>哈希表</td>
+        <td><code>O(n)</code></td>
+        <td><code>O(n)</code></td>
+        <td>违反"O(1)空间"限制</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>🔍 算法原理解析</h2>
+    <h3 style="color: var(--primary-light);">为什么 Floyd 判圈算法适用？</h3>
+    <p>将数组 <code>nums</code> 看作一个函数 <code>f(i) = nums[i]</code>，从任意位置出发，按照这个映射关系一定会形成环（因为有重复数字）。</p>
+    <div style="background: var(--bg); padding: 16px; border-radius: 10px; margin: 16px 0;">
+      <p><strong>Floyd 判圈算法的两个阶段：</strong></p>
+      <ol style="margin-top: 12px; padding-left: 20px;">
+        <li><strong>相遇阶段：</strong>快慢指针（速度2:1）从起点出发，必在环内某点相遇</li>
+        <li><strong>找入口阶段：</strong>一个指针从起点，一个从相遇点，同速前进，相遇点即环入口（重复数）</li>
+      </ol>
+    </div>
+    <p style="color: var(--text-muted); font-size: 0.9rem;">数学证明：设环前长度为 a，环长度为 b，相遇时慢指针走了 a + x，快指针走了 a + x + kb。由于 2(a+x) = a+x+kb，得 a+x = kb，即 x = kb - a。因此从起点走 a 步，从相遇点走 kb-x = a 步，会在入口相遇。</p>
+  </div>
+
+  <div class="section">
+    <h2>🔗 类似题目推荐</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/linked-list-cycle/" class="problem-card" target="_blank">
+        <div class="problem-card-title">141. 环形链表</div>
+        <div class="problem-card-desc">Floyd判圈算法的基础应用，判断链表是否有环</div>
+      </a>
+      <a href="https://leetcode.cn/problems/linked-list-cycle-ii/" class="problem-card" target="_blank">
+        <div class="problem-card-title">142. 环形链表 II</div>
+        <div class="problem-card-desc">进阶版，需要找到环的入口节点</div>
+      </a>
+      <a href="https://leetcode.cn/problems/find-the-duplicate-number/" class="problem-card" target="_blank">
+        <div class="problem-card-title">287. 寻找重复数</div>
+        <div class="problem-card-desc">本题原题，多种解法值得深入研究</div>
+      </a>
+      <a href="https://leetcode.cn/problems/find-all-duplicates-in-an-array/" class="problem-card" target="_blank">
+        <div class="problem-card-title">442. 数组中重复的数据</div>
+        <div class="problem-card-desc">找出所有重复元素，可用原地哈希</div>
+      </a>
+      <a href="https://leetcode.cn/problems/first-missing-positive/" class="problem-card" target="_blank">
+        <div class="problem-card-title">41. 缺失的第一个正数</div>
+        <div class="problem-card-desc">同样是数组下标技巧的经典题目</div>
+      </a>
+      <a href="https://leetcode.cn/problems/missing-number/" class="problem-card" target="_blank">
+        <div class="problem-card-title">268. 丢失的数字</div>
+        <div class="problem-card-desc">异或或数学求和的简单应用</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📝 面试要点</h2>
+    <ul style="padding-left: 20px;">
+      <li><strong>为什么不能用排序？</strong>—— 题目限制不能修改原数组</li>
+      <li><strong>为什么不能用哈希表？</strong>—— 空间复杂度要求是 O(1)</li>
+      <li><strong>Floyd 算法的证明？</strong>—— 理解相遇后找入口的数学原理</li>
+      <li><strong>如果允许多个重复数？</strong>—— 需要修改策略，可用二分查找统计数量</li>
+      <li><strong>实际应用：</strong>—— 找循环引用、检测死锁等场景</li>
+    </ul>
+  </div>
+
+  <script>
+    // Floyd判圈算法代码
+    const floydCode = [
+      {line: 1, text: '<span class="keyword">class</span> <span class="class">Solution</span>:'},
+      {line: 2, text: '    <span class="keyword">def</span> <span class="function">findDuplicate</span>(self, nums: List[<span class="keyword">int</span>]) -> <span class="keyword">int</span>:'},
+      {line: 3, text: '        <span class="comment"># 阶段1：快慢指针找相遇点</span>'},
+      {line: 4, text: '        slow, fast = nums[<span class="number">0</span>], nums[nums[<span class="number">0</span>]]'},
+      {line: 5, text: '        <span class="keyword">while</span> slow != fast:'},
+      {line: 6, text: '            slow = nums[slow]      <span class="comment"># 走一步</span>'},
+      {line: 7, text: '            fast = nums[nums[fast]]  <span class="comment"># 走两步</span>'},
+      {line: 8, text: '        '},
+      {line: 9, text: '        <span class="comment"># 阶段2：找环的入口（重复数）</span>'},
+      {line: 10, text: '        slow2 = <span class="number">0</span>  <span class="comment"># 从起点出发的新指针</span>'},
+      {line: 11, text: '        <span class="keyword">while</span> slow != slow2:'},
+      {line: 12, text: '            slow = nums[slow]     <span class="comment"># 从相遇点出发</span>'},
+      {line: 13, text: '            slow2 = nums[slow2]   <span class="comment"># 从起点出发</span>'},
+      {line: 14, text: '        '},
+      {line: 15, text: '        <span class="keyword">return</span> slow  <span class="comment"># 相遇点即重复数</span>'}
+    ];
+
+    // 二分查找代码
+    const binaryCode = [
+      {line: 1, text: '<span class="keyword">class</span> <span class="class">Solution</span>:'},
+      {line: 2, text: '    <span class="keyword">def</span> <span class="function">findDuplicate</span>(self, nums: List[<span class="keyword">int</span>]) -> <span class="keyword">int</span>:'},
+      {line: 3, text: '        left, right = <span class="number">1</span>, <span class="keyword">len</span>(nums) - <span class="number">1</span>'},
+      {line: 4, text: '        '},
+      {line: 5, text: '        <span class="keyword">while</span> left < right:'},
+      {line: 6, text: '            mid = (left + right) // <span class="number">2</span>'},
+      {line: 7, text: '            '},
+      {line: 8, text: '            <span class="comment"># 统计 <= mid 的数字个数</span>'},
+      {line: 9, text: '            count = <span class="function">sum</span>(<span class="number">1</span> <span class="keyword">for</span> x <span class="keyword">in</span> nums <span class="keyword">if</span> x <= mid)'},
+      {line: 10, text: '            '},
+      {line: 11, text: '            <span class="keyword">if</span> count > mid:'},
+      {line: 12, text: '                <span class="comment"># 重复数在 [left, mid] 中</span>'},
+      {line: 13, text: '                right = mid'},
+      {line: 14, text: '            <span class="keyword">else</span>:'},
+      {line: 15, text: '                <span class="comment"># 重复数在 [mid+1, right] 中</span>'},
+      {line: 16, text: '                left = mid + <span class="number">1</span>'},
+      {line: 17, text: '        '},
+      {line: 18, text: '        <span class="keyword">return</span> left'}
+    ];
+
+    // Floyd步骤数据
+    const floydSteps = [
+      {title: "初始化指针", desc: "slow从nums[0]开始，fast从nums[nums[0]]开始", line: 4, 
+       state: {nums: "[1,3,4,2,2]", slow: "3", fast: "2", note: "以示例1为例"}},
+      {title: "第一轮循环", desc: "slow ≠ fast，继续移动", line: 5, 
+       state: {slow: "3", fast: "2", status: "不相等，继续"}},
+      {title: "slow走一步", desc: "slow = nums[3] = 2", line: 6, 
+       state: {slow: "2", fast: "2"}},
+      {title: "fast走两步", desc: "fast = nums[nums[2]] = nums[4] = 2", line: 7, 
+       state: {slow: "2", fast: "2", note: "相遇！退出循环"}},
+      {title: "阶段2开始", desc: "slow2从0开始，准备找入口", line: 10, 
+       state: {slow: "2", slow2: "0"}},
+      {title: "找入口循环", desc: "slow ≠ slow2，同时移动", line: 11, 
+       state: {slow: "2", slow2: "0"}},
+      {title: "同时前进一步", desc: "slow = nums[2] = 4, slow2 = nums[0] = 1", line: 12, 
+       state: {slow: "4", slow2: "1"}},
+      {title: "继续前进", desc: "slow = nums[4] = 2, slow2 = nums[1] = 3", line: 13, 
+       state: {slow: "2", slow2: "3"}},
+      {title: "再次前进", desc: "slow = nums[2] = 4, slow2 = nums[3] = 2", line: 12, 
+       state: {slow: "4", slow2: "2"}},
+      {title: "最后一次前进", desc: "slow = nums[4] = 2, slow2 = nums[2] = 2", line: 13, 
+       state: {slow: "2", slow2: "2", note: "在2相遇！"}},
+      {title: "返回结果", desc: "返回slow，即重复数2", line: 15, 
+       state: {result: "2"}}
+    ];
+
+    // 二分查找步骤数据
+    const binarySteps = [
+      {title: "初始化边界", desc: "left=1, right=n（数组长度-1）", line: 3, 
+       state: {left: "1", right: "4", nums: "[1,3,4,2,2]"}},
+      {title: "进入循环", desc: "left < right，开始二分", line: 5, 
+       state: {left: "1", right: "4"}},
+      {title: "计算中点", desc: "mid = (1+4)//2 = 2", line: 6, 
+       state: {mid: "2"}},
+      {title: "统计数量", desc: "统计≤2的数字：1,2,2，共3个", line: 9, 
+       state: {count: "3", mid: "2"}},
+      {title: "判断区间", desc: "count(3) > mid(2)，说明重复数≤2", line: 11, 
+       state: {count: "3", mid: "2", note: "count > mid"}},
+      {title: "更新右边界", desc: "right = mid = 2", line: 13, 
+       state: {left: "1", right: "2"}},
+      {title: "第二轮循环", desc: "left=1 < right=2，继续", line: 5, 
+       state: {left: "1", right: "2"}},
+      {title: "计算中点", desc: "mid = (1+2)//2 = 1", line: 6, 
+       state: {mid: "1"}},
+      {title: "统计数量", desc: "统计≤1的数字：1，共1个", line: 9, 
+       state: {count: "1", mid: "1"}},
+      {title: "判断区间", desc: "count(1) ≤ mid(1)，重复数>1", line: 14, 
+       state: {count: "1", mid: "1", note: "count ≤ mid"}},
+      {title: "更新左边界", desc: "left = mid + 1 = 2", line: 16, 
+       state: {left: "2", right: "2"}},
+      {title: "退出循环", desc: "left == right == 2，循环结束", line: 5, 
+       state: {left: "2", right: "2"}},
+      {title: "返回结果", desc: "返回left，即重复数2", line: 18, 
+       state: {result: "2"}}
+    ];
+
+    let currentMethod = 'floyd';
+    let currentStepFloyd = 0;
+    let currentStepBinary = 0;
+
+    function renderCode(codeData, containerId) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = codeData.map(item => 
+        `<div class="code-line" data-line="${item.line}" onclick="onCodeClick(${item.line}, '${currentMethod}')">` +
+        `<span class="line-number">${item.line}</span>` +
+        `<span class="line-content">${item.text}</span>` +
+        `</div>`
+      ).join('');
+    }
+
+    function renderSteps(stepsData, containerId, method) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = stepsData.map((step, idx) => 
+        `<div class="viz-step ${idx === 0 ? 'active' : ''}" data-step="${idx}" onclick="onStepClick(${idx}, '${method}')">` +
+        `<div class="step-title">${idx + 1}. ${step.title}</div>` +
+        `<div class="step-desc">${step.desc}</div>` +
+        `<div class="state-preview">` +
+        Object.entries(step.state).map(([k, v]) => 
+          `<span class="state-var">${k}: <span class="state-val">${v}</span></span>`
+        ).join('') +
+        `</div>` +
+        `</div>`
+      ).join('');
+    }
+
+    function highlightLine(lineNum, method) {
+      const suffix = method === 'floyd' ? 'Floyd' : 'Binary';
+      document.querySelectorAll(`#codeBlock${suffix} .code-line`).forEach(el => {
+        el.classList.toggle('active', parseInt(el.dataset.line) === lineNum);
+      });
+    }
+
+    function highlightStep(stepIdx, method) {
+      const suffix = method === 'floyd' ? 'Floyd' : 'Binary';
+      document.querySelectorAll(`#vizSteps${suffix} .viz-step`).forEach(el => {
+        el.classList.toggle('active', parseInt(el.dataset.step) === stepIdx);
+      });
+      // 滚动到可视区域
+      const activeStep = document.querySelector(`#vizSteps${suffix} .viz-step[data-step="${stepIdx}"]`);
+      if (activeStep) {
+        activeStep.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    function onStepClick(stepIdx, method) {
+      if (method === 'floyd') {
+        currentStepFloyd = stepIdx;
+        highlightStep(stepIdx, 'floyd');
+        highlightLine(floydSteps[stepIdx].line, 'floyd');
+      } else {
+        currentStepBinary = stepIdx;
+        highlightStep(stepIdx, 'binary');
+        highlightLine(binarySteps[stepIdx].line, 'binary');
+      }
+    }
+
+    function onCodeClick(lineNum, method) {
+      if (method === 'floyd') {
+        const stepIdx = floydSteps.findIndex(s => s.line === lineNum);
+        if (stepIdx !== -1) {
+          currentStepFloyd = stepIdx;
+          highlightStep(stepIdx, 'floyd');
+          highlightLine(lineNum, 'floyd');
+        }
+      } else {
+        const stepIdx = binarySteps.findIndex(s => s.line === lineNum);
+        if (stepIdx !== -1) {
+          currentStepBinary = stepIdx;
+          highlightStep(stepIdx, 'binary');
+          highlightLine(lineNum, 'binary');
+        }
+      }
+    }
+
+    function switchMethod(method) {
+      currentMethod = method;
+      document.querySelectorAll('.method-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      document.getElementById('floyd-method').style.display = method === 'floyd' ? 'block' : 'none';
+      document.getElementById('binary-method').style.display = method === 'binary' ? 'block' : 'none';
+    }
+
+    // 初始化渲染
+    renderCode(floydCode, 'codeBlockFloyd');
+    renderCode(binaryCode, 'codeBlockBinary');
+    renderSteps(floydSteps, 'vizStepsFloyd', 'floyd');
+    renderSteps(binarySteps, 'vizStepsBinary', 'binary');
+    
+    // 默认高亮第一行
+    highlightLine(floydSteps[0].line, 'floyd');
+    highlightLine(binarySteps[0].line, 'binary');
+  </script>
+</body>
+</html>

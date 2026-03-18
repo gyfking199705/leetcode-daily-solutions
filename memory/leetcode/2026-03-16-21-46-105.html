@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #105 - 从前序与中序遍历序列构造二叉树</title>
+  <style>
+    :root { --primary: #6366f1; --bg: #0f172a; --surface: #1e293b; --text: #f1f5f9; --accent: #f59e0b; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); max-width: 1000px; margin: 0 auto; padding: 40px 20px; line-height: 1.6; }
+    .section { background: var(--surface); border-radius: 16px; padding: 28px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .section h2 { color: var(--primary); margin-top: 0; font-size: 1.4em; }
+    .tag { display: inline-block; background: rgba(99, 102, 241, 0.2); color: var(--primary); padding: 4px 12px; border-radius: 12px; font-size: 0.85em; margin-right: 8px; }
+    .tag.hard { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    .tag.medium { background: rgba(245, 158, 11, 0.2); color: var(--accent); }
+    .tag.easy { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+    pre { background: #0d1117; border-radius: 12px; padding: 20px; overflow-x: auto; font-size: 14px; line-height: 1.5; }
+    .code-line { display: flex; padding: 2px 0; cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; }
+    .code-line:hover { background: rgba(255,255,255,0.05); }
+    .code-line.active { background: rgba(99, 102, 241, 0.3); border-left-color: var(--primary); }
+    .line-number { color: #484f58; min-width: 40px; text-align: right; padding-right: 16px; user-select: none; }
+    .viz-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+    @media (max-width: 768px) { .viz-container { grid-template-columns: 1fr; } }
+    .viz-steps { max-height: 400px; overflow-y: auto; }
+    .viz-step { padding: 12px 16px; margin: 8px 0; border-radius: 8px; background: #334155; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+    .viz-step:hover { background: #475569; }
+    .viz-step.active { border-color: var(--primary); background: rgba(99, 102, 241, 0.3); }
+    .viz-step h4 { margin: 0 0 4px 0; color: var(--primary); font-size: 0.95em; }
+    .viz-step p { margin: 0; font-size: 0.85em; opacity: 0.9; }
+    .viz-step .state { font-family: monospace; font-size: 0.8em; color: #a5d6ff; margin-top: 6px; }
+    .problem-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 16px; }
+    .problem-card { background: var(--bg); border-radius: 12px; padding: 16px; border: 1px solid #475569; transition: all 0.2s; text-decoration: none; color: inherit; display: block; }
+    .problem-card:hover { border-color: var(--primary); transform: translateY(-3px); }
+    .problem-card h4 { margin: 0 0 8px 0; color: var(--primary); }
+    .problem-card p { margin: 0; font-size: 0.85em; opacity: 0.8; }
+    .complexity-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    .complexity-table th, .complexity-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #475569; }
+    .complexity-table th { color: var(--primary); font-weight: 600; }
+    .complexity-table tr:last-child td { border-bottom: none; }
+    .tree-viz { font-family: monospace; background: #0d1117; padding: 16px; border-radius: 8px; font-size: 13px; line-height: 1.8; }
+    .tree-node { color: var(--primary); }
+    .tree-highlight { color: var(--accent); font-weight: bold; }
+    .keyword { color: #ff7b72; } .function { color: #d2a8ff; } .string { color: #a5d6ff; }
+    .number { color: #79c0ff; } .comment { color: #8b949e; } .class { color: #ffa657; }
+    .var { color: #79c0ff; }
+    h1 { margin-bottom: 8px; }
+    .subtitle { opacity: 0.7; margin-top: 0; margin-bottom: 24px; }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #105 - 从前序与中序遍历序列构造二叉树</h1>
+  <p class="subtitle">
+    <span class="tag medium">Medium</span>
+    <span class="tag">二叉树</span>
+    <span class="tag">递归</span>
+    <span class="tag">分治</span>
+  </p>
+
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给定两个整数数组 <code>preorder</code> 和 <code>inorder</code>，其中 <code>preorder</code> 是二叉树的<strong>前序遍历</strong>，<code>inorder</code> 是同一棵树的<strong>中序遍历</strong>，请构造二叉树并返回其根节点。</p>
+    <br>
+    <p><strong>关键性质：</strong></p>
+    <ul>
+      <li>前序遍历：<code>根节点 → 左子树 → 右子树</code>，所以第一个元素就是整棵树的根</li>
+      <li>中序遍历：<code>左子树 → 根节点 → 右子树</code>，所以根节点左边是左子树，右边是右子树</li>
+      <li>题目保证 <code>preorder</code> 和 <code>inorder</code> 中的元素<strong>无重复</strong></li>
+    </ul>
+    <br>
+    <p><strong>示例：</strong></p>
+    <pre>输入: preorder = [3,9,20,15,7], inorder = [9,3,15,20,7]
+输出: [3,9,20,null,null,15,7]
+
+    3
+   / \\
+  9  20
+    /  \\
+   15   7</pre>
+  </div>
+
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps"></div>
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+    <div class="tree-viz" id="treeViz"></div>
+  </div>
+
+  <div class="section">
+    <h2>⏱️ 复杂度分析</h2>
+    <table class="complexity-table">
+      <tr><th>指标</th><th>值</th><th>说明</th></tr>
+      <tr><td>时间复杂度</td><td>O(n)</td><td>每个节点恰好被访问一次，使用哈希表查找中序索引也是O(1)</td></tr>
+      <tr><td>空间复杂度</td><td>O(n)</td><td>哈希表存储中序索引（O(n)）+ 递归栈深度最坏O(n)</td></tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>💡 核心思路总结</h2>
+    <ol>
+      <li><strong>找根节点</strong>：前序遍历的第一个元素就是当前子树的根</li>
+      <li><strong>分左右子树</strong>：在中序遍历中找到根的位置，左边是左子树，右边是右子树</li>
+      <li><strong>递归构建</strong>：对左右子树分别重复上述过程</li>
+      <li><strong>优化</strong>：用哈希表存储中序索引，避免每次O(n)查找</li>
+    </ol>
+  </div>
+
+  <div class="section">
+    <h2>🔗 类似题目推荐</h2>
+    <div class="problem-grid">
+      <a class="problem-card" href="https://leetcode.cn/problems/construct-binary-tree-from-inorder-and-postorder-traversal/" target="_blank">
+        <h4>#106 从中序与后序遍历序列构造二叉树</h4>
+        <p>本题的后序遍历版本，思路完全一致</p>
+      </a>
+      <a class="problem-card" href="https://leetcode.cn/problems/binary-tree-preorder-traversal/" target="_blank">
+        <h4>#144 二叉树的前序遍历</h4>
+        <p>掌握前序遍历是理解本题的基础</p>
+      </a>
+      <a class="problem-card" href="https://leetcode.cn/problems/binary-tree-inorder-traversal/" target="_blank">
+        <h4>#94 二叉树的中序遍历</h4>
+        <p>回顾中序遍历，加深对"左-根-右"的理解</p>
+      </a>
+      <a class="problem-card" href="https://leetcode.cn/problems/serialize-and-deserialize-binary-tree/" target="_blank">
+        <h4>#297 二叉树的序列化与反序列化</h4>
+        <p>进阶题，涉及多种遍历方式的综合应用</p>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    const codeLines = [
+      { num: 1, text: '<span class="comment"># Definition for a binary tree node.</span>' },
+      { num: 2, text: '<span class="keyword">class</span> <span class="class">TreeNode</span>:' },
+      { num: 3, text: '    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="var">self</span>, val=<span class="number">0</span>, left=<span class="keyword">None</span>, right=<span class="keyword">None</span>):' },
+      { num: 4, text: '        <span class="var">self</span>.val = val' },
+      { num: 5, text: '        <span class="var">self</span>.left = left' },
+      { num: 6, text: '        <span class="var">self</span>.right = right' },
+      { num: 7, text: '' },
+      { num: 8, text: '<span class="keyword">class</span> <span class="class">Solution</span>:' },
+      { num: 9, text: '    <span class="keyword">def</span> <span class="function">buildTree</span>(<span class="var">self</span>, preorder: List[<span class="var">int</span>], inorder: List[<span class="var">int</span>]) -> <span class="class">TreeNode</span>:' },
+      { num: 10, text: '        <span class="comment"># 创建中序值到索引的映射，用于O(1)查找</span>' },
+      { num: 11, text: '        <span class="var">inorder_map</span> = {val: idx <span class="keyword">for</span> idx, val <span class="keyword">in</span> <span class="function">enumerate</span>(inorder)}' },
+      { num: 12, text: '        <span class="var">pre_idx</span> = <span class="number">0</span>  <span class="comment"># 前序遍历的当前索引</span>' },
+      { num: 13, text: '' },
+      { num: 14, text: '        <span class="keyword">def</span> <span class="function">helper</span>(<span class="var">in_left</span>, <span class="var">in_right</span>):' },
+      { num: 15, text: '            <span class="keyword">nonlocal</span> <span class="var">pre_idx</span>' },
+      { num: 16, text: '            <span class="comment"># 递归终止条件：没有元素要处理</span>' },
+      { num: 17, text: '            <span class="keyword">if</span> <span class="var">in_left</span> > <span class="var">in_right</span>:' },
+      { num: 18, text: '                <span class="keyword">return</span> <span class="keyword">None</span>' },
+      { num: 19, text: '' },
+      { num: 20, text: '            <span class="comment"># 前序的第一个元素是根节点</span>' },
+      { num: 21, text: '            <span class="var">root_val</span> = preorder[<span class="var">pre_idx</span>]' },
+      { num: 22, text: '            <span class="var">root</span> = <span class="class">TreeNode</span>(<span class="var">root_val</span>)' },
+      { num: 23, text: '            <span class="var">pre_idx</span> += <span class="number">1</span>  <span class="comment"># 移动到下一个根</span>' },
+      { num: 24, text: '' },
+      { num: 25, text: '            <span class="comment"># 在中序中找到根的位置，确定左右子树范围</span>' },
+      { num: 26, text: '            <span class="var">in_idx</span> = <span class="var">inorder_map</span>[<span class="var">root_val</span>]' },
+      { num: 27, text: '' },
+      { num: 28, text: '            <span class="comment"># 递归构建左子树（在中序根位置左边）</span>' },
+      { num: 29, text: '            <span class="var">root</span>.left = <span class="function">helper</span>(<span class="var">in_left</span>, <span class="var">in_idx</span> - <span class="number">1</span>)' },
+      { num: 30, text: '' },
+      { num: 31, text: '            <span class="comment"># 递归构建右子树（在中序根位置右边）</span>' },
+      { num: 32, text: '            <span class="var">root</span>.right = <span class="function">helper</span>(<span class="var">in_idx</span> + <span class="number">1</span>, <span class="var">in_right</span>)' },
+      { num: 33, text: '' },
+      { num: 34, text: '            <span class="keyword">return</span> <span class="var">root</span>' },
+      { num: 35, text: '' },
+      { num: 36, text: '        <span class="keyword">return</span> <span class="function">helper</span>(<span class="number">0</span>, <span class="function">len</span>(inorder) - <span class="number">1</span>)' }
+    ];
+
+    const steps = [
+      { title: "初始化", desc: "创建中序值到索引的哈希映射，初始化pre_idx=0", line: 11, state: "preorder=[3,9,20,15,7], inorder=[9,3,15,20,7], map={9:0,3:1,15:2,20:3,7:4}" },
+      { title: "递归入口", desc: "调用helper(0, 4)，处理整个中序区间[9,3,15,20,7]", line: 36, state: "in_left=0, in_right=4, pre_idx=0" },
+      { title: "创建根节点3", desc: "preorder[0]=3是根，在中序中找到3的位置是1", line: 21, state: "root=3, in_idx=1, left=[9], right=[15,20,7]" },
+      { title: "构建左子树", desc: "递归helper(0, 0)处理左子树[9]", line: 29, state: "pre_idx=1" },
+      { title: "创建节点9", desc: "preorder[1]=9是左子树根，无左右子节点", line: 21, state: "root=9, in_idx=0, 无左右子树" },
+      { title: "左子树完成", desc: "节点9作为节点3的左孩子", line: 29, state: "3的左子树构建完成" },
+      { title: "构建右子树", desc: "递归helper(2, 4)处理右子树[15,20,7]", line: 32, state: "pre_idx=2, in_left=2, in_right=4" },
+      { title: "创建根节点20", desc: "preorder[2]=20是右子树根，在中序中位置是3", line: 21, state: "root=20, in_idx=3, left=[15], right=[7]" },
+      { title: "构建20的左子树", desc: "递归helper(2, 2)处理[15]", line: 29, state: "pre_idx=3" },
+      { title: "创建节点15", desc: "preorder[3]=15作为20的左孩子", line: 21, state: "15无左右子树" },
+      { title: "构建20的右子树", desc: "递归helper(4, 4)处理[7]", line: 32, state: "pre_idx=4" },
+      { title: "创建节点7", desc: "preorder[4]=7作为20的右孩子", line: 21, state: "7无左右子树" },
+      { title: "返回最终结果", desc: "整棵树构建完成", line: 34, state: "root=3, 左=9, 右=20(左=15,右=7)" }
+    ];
+
+    function renderCode() {
+      const codeBlock = document.getElementById('codeBlock');
+      codeBlock.innerHTML = codeLines.map((line, i) => 
+        `<div class="code-line" data-line="${line.num}" data-idx="${i}">
+          <span class="line-number">${line.num}</span>
+          <span>${line.text}</span>
+        </div>`
+      ).join('');
+    }
+
+    function renderSteps() {
+      const vizSteps = document.getElementById('vizSteps');
+      vizSteps.innerHTML = steps.map((step, i) => 
+        `<div class="viz-step" data-step="${i}" data-line="${step.line}">
+          <h4>步骤${i + 1}: ${step.title}</h4>
+          <p>${step.desc}</p>
+          <div class="state">${step.state}</div>
+        </div>`
+      ).join('');
+    }
+
+    function updateTreeViz(stepIdx) {
+      const treeViz = document.getElementById('treeViz');
+      const trees = [
+        "等待开始...",
+        "       <span class='tree-highlight'>3</span>\n      / \\\n     ?   ?",
+        "       <span class='tree-highlight'>3</span>\n      / \\\n     ?   ?\n        构建中...",
+        "       <span class='tree-node'>3</span>\n      / \\\n   <span class='tree-highlight'>9</span>   ?\n        构建左子树",
+        "       <span class='tree-node'>3</span>\n      / \\\n     <span class='tree-node'>9</span>   ?\n    叶子节点",
+        "       <span class='tree-node'>3</span>\n      / \\\n     <span class='tree-node'>9</span>   ?",
+        "       <span class='tree-node'>3</span>\n      / \\\n     <span class='tree-node'>9</span>   <span class='tree-highlight'>?</span>\n        构建右子树[15,20,7]",
+        "       <span class='tree-node'>3</span>\n      / \\\n     <span class='tree-node'>9</span>  <span class='tree-highlight'>20</span>\n         / \\\n        ?   ?",
+        "       <span class='tree-node'>3</span>\n      / \\\n     <span class='tree-node'>9</span>  <span class='tree-node'>20</span>\n       <span class='tree-highlight'>/</span>   \\\n      ?     ?",
+        "       <span class='tree-node'>3</span>\n      / \\\n     <span class='tree-node'>9</span>  <span class='tree-node'>20</span>\n       <span class='tree-highlight'>/</span>   \\\n      <span class='tree-highlight'>15</span>    ?",
+        "       <span class='tree-node'>3</span>\n      / \\\n     <span class='tree-node'>9</span>  <span class='tree-node'>20</span>\n       <span class='tree-node">/</span>   <span class='tree-highlight'>\\</span>\n      <span class='tree-node'>15</span>    <span class='tree-highlight'>?</span>",
+        "       <span class='tree-node'>3</span>\n      / \\\n     <span class='tree-node'>9</span>  <span class='tree-node'>20</span>\n       <span class='tree-node">/</span>   <span class='tree-highlight'>\\</span>\n      <span class='tree-node'>15</span>    <span class='tree-highlight'>7</span>",
+        "       <span class='tree-node'>3</span>\n      / \\\n     <span class='tree-node'>9</span>  <span class='tree-node'>20</span>\n       <span class='tree-node">/</span>   <span class='tree-node'>\\</span>\n      <span class='tree-node'>15</span>    <span class='tree-node'>7</span>\n✅ 构建完成!"
+      ];
+      treeViz.innerHTML = "<strong>当前树状态：</strong><br><br>" + (trees[stepIdx] || trees[trees.length - 1]);
+    }
+
+    function highlightStep(stepIdx) {
+      document.querySelectorAll('.viz-step').forEach((el, i) => {
+        el.classList.toggle('active', i === stepIdx);
+      });
+      const line = steps[stepIdx]?.line;
+      if (line) {
+        document.querySelectorAll('.code-line').forEach(el => {
+          el.classList.toggle('active', parseInt(el.dataset.line) === line);
+        });
+      }
+      updateTreeViz(stepIdx);
+    }
+
+    function highlightLine(lineNum) {
+      document.querySelectorAll('.code-line').forEach(el => {
+        el.classList.toggle('active', parseInt(el.dataset.line) === lineNum);
+      });
+      const stepIdx = steps.findIndex(s => s.line === lineNum);
+      if (stepIdx !== -1) {
+        document.querySelectorAll('.viz-step').forEach((el, i) => {
+          el.classList.toggle('active', i === stepIdx);
+        });
+        updateTreeViz(stepIdx);
+      }
+    }
+
+    renderCode();
+    renderSteps();
+    updateTreeViz(0);
+
+    document.getElementById('vizSteps').addEventListener('click', e => {
+      const step = e.target.closest('.viz-step');
+      if (step) highlightStep(parseInt(step.dataset.step));
+    });
+
+    document.getElementById('codeBlock').addEventListener('click', e => {
+      const line = e.target.closest('.code-line');
+      if (line) highlightLine(parseInt(line.dataset.line));
+    });
+
+    highlightStep(0);
+  </script>
+</body>
+</html>

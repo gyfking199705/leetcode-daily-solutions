@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #104 - 二叉树的最大深度</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --primary-light: #818cf8;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --surface-light: #334155;
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 40px 20px;
+      line-height: 1.6;
+    }
+    h1 { 
+      font-size: 2rem; 
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle { 
+      color: var(--text-muted); 
+      margin-bottom: 32px;
+      font-size: 1.1rem;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-right: 8px;
+    }
+    .badge-easy { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+    .badge-medium { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+    .badge-hard { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section h3 {
+      color: var(--text);
+      margin-top: 24px;
+      margin-bottom: 12px;
+    }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 20px; 
+      overflow-x: auto;
+      margin: 16px 0;
+      border: 1px solid #21262d;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 4px 0; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      border-radius: 4px;
+      margin: 0 -8px;
+      padding-left: 8px;
+      padding-right: 8px;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.25); 
+      border-left: 3px solid var(--primary); 
+      margin-left: -11px;
+      padding-left: 16px;
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 40px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.9rem;
+    }
+    .line-content {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.9rem;
+      white-space: pre;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1.2fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 768px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    .viz-steps { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 16px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    .viz-step { 
+      padding: 14px 16px; 
+      margin: 10px 0; 
+      border-radius: 10px; 
+      background: var(--surface-light); 
+      cursor: pointer; 
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .viz-step:hover { 
+      background: rgba(99, 102, 241, 0.15);
+      transform: translateX(4px);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.25);
+    }
+    .viz-step-title {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .viz-step-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .viz-step-state {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: var(--primary-light);
+    }
+    .code-container h3 {
+      margin-top: 0;
+      margin-bottom: 16px;
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 18px; 
+      border: 1px solid #475569; 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block;
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.15);
+    }
+    .problem-card h4 {
+      margin: 0 0 8px 0;
+      color: var(--primary-light);
+    }
+    .problem-card p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; }
+    .class { color: #ffa657; }
+    .table-container {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+    }
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--surface-light);
+    }
+    th {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .tree-visual {
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      font-family: monospace;
+      line-height: 1.8;
+    }
+    .tree-node {
+      display: inline-block;
+      width: 36px;
+      height: 36px;
+      line-height: 36px;
+      border-radius: 50%;
+      background: var(--surface-light);
+      margin: 4px;
+      transition: all 0.3s;
+    }
+    .tree-node.highlight {
+      background: var(--primary);
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+    }
+    .tree-line {
+      color: var(--text-muted);
+    }
+    .insight-box {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(129, 140, 248, 0.1));
+      border-left: 4px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 12px 12px 0;
+      margin: 16px 0;
+    }
+    .insight-box strong {
+      color: var(--primary-light);
+    }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #104 - 二叉树的最大深度</h1>
+  <div class="subtitle">
+    <span class="badge badge-easy">Easy</span>
+    <span style="color: var(--text-muted);">树 / 递归 / DFS</span>
+  </div>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给定一个二叉树，找出其最大深度。</p>
+    <p>二叉树的深度为根节点到最远叶子节点的最长路径上的节点数。</p>
+    <br>
+    <p><strong>说明：</strong>叶子节点是指没有子节点的节点。</p>
+    <br>
+    <p><strong>示例：</strong></p>
+    <div class="tree-visual">
+      <div>
+        <span class="tree-node" id="node3">3</span>
+      </div>
+      <div class="tree-line">/   \\</div>
+      <div>
+        <span class="tree-node" id="node9">9</span>
+        <span style="display:inline-block;width:40px;"></span>
+        <span class="tree-node" id="node20">20</span>
+      </div>
+      <div class="tree-line" style="padding-left:100px;">/  \\</div>
+      <div style="padding-left:100px;">
+        <span class="tree-node" id="node15">15</span>
+        <span class="tree-node" id="node7">7</span>
+      </div>
+    </div>
+    <p style="text-align:center;color:var(--text-muted);margin-top:12px;">
+      给定二叉树 [3,9,20,null,null,15,7]，返回最大深度为 <strong>3</strong>
+    </p>
+    
+    <div class="insight-box">
+      <strong>💡 核心洞察：</strong>一棵树的最大深度 = max(左子树深度, 右子树深度) + 1。空节点的深度为0。这是典型的「后序遍历」思想。
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre><code id="codeBlock">
+<div class="code-line" data-line="1"><span class="line-number">1</span><span class="line-content"><span class="keyword">class</span> <span class="class">TreeNode</span>:</span></span></div>
+<div class="code-line" data-line="2"><span class="line-number">2</span><span class="line-content">    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>, val=<span class="number">0</span>, left=<span class="keyword">None</span>, right=<span class="keyword">None</span>):</span></span></div>
+<div class="code-line" data-line="3"><span class="line-number">3</span><span class="line-content">        <span class="keyword">self</span>.val = val</span></span></div>
+<div class="code-line" data-line="4"><span class="line-number">4</span><span class="line-content">        <span class="keyword">self</span>.left = left</span></span></div>
+<div class="code-line" data-line="5"><span class="line-number">5</span><span class="line-content">        <span class="keyword">self</span>.right = right</span></span></div>
+<div class="code-line" data-line="6"><span class="line-number">6</span><span class="line-content"></span></span></div>
+<div class="code-line" data-line="7"><span class="line-number">7</span><span class="line-content"><span class="keyword">class</span> <span class="class">Solution</span>:</span></span></div>
+<div class="code-line" data-line="8"><span class="line-number">8</span><span class="line-content">    <span class="keyword">def</span> <span class="function">maxDepth</span>(<span class="keyword">self</span>, root: Optional[TreeNode]) -> <span class="keyword">int</span>:</span></span></div>
+<div class="code-line" data-line="9"><span class="line-number">9</span><span class="line-content">        <span class="comment"># 递归终止条件：空节点深度为0</span></span></span></div>
+<div class="code-line" data-line="10"><span class="line-number">10</span><span class="line-content">        <span class="keyword">if</span> <span class="keyword">not</span> root:</span></span></div>
+<div class="code-line" data-line="11"><span class="line-number">11</span><span class="line-content">            <span class="keyword">return</span> <span class="number">0</span></span></span></div>
+<div class="code-line" data-line="12"><span class="line-number">12</span><span class="line-content">        </span></span></div>
+<div class="code-line" data-line="13"><span class="line-number">13</span><span class="line-content">        <span class="comment"># 递归计算左子树深度</span></span></span></div>
+<div class="code-line" data-line="14"><span class="line-number">14</span><span class="line-content">        left_depth = <span class="keyword">self</span>.maxDepth(root.left)</span></span></div>
+<div class="code-line" data-line="15"><span class="line-number">15</span><span class="line-content">        </span></span></div>
+<div class="code-line" data-line="16"><span class="line-number">16</span><span class="line-content">        <span class="comment"># 递归计算右子树深度</span></span></span></div>
+<div class="code-line" data-line="17"><span class="line-number">17</span><span class="line-content">        right_depth = <span class="keyword">self</span>.maxDepth(root.right)</span></span></div>
+<div class="code-line" data-line="18"><span class="line-number">18</span><span class="line-content">        </span></span></div>
+<div class="code-line" data-line="19"><span class="line-number">19</span><span class="line-content">        <span class="comment"># 当前节点的深度 = 左右子树最大深度 + 1</span></span></span></div>
+<div class="code-line" data-line="20"><span class="line-number">20</span><span class="line-content">        <span class="keyword">return</span> <span class="function">max</span>(left_depth, right_depth) + <span class="number">1</span></span></span></div>
+        </code></pre>
+      </div>
+    </div>
+    
+    <h3>递归执行流程可视化</h3>
+    <div class="tree-visual" id="recursionViz">
+      <div style="color:var(--text-muted);padding:20px;">
+        点击上方步骤查看递归调用过程
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>指标</th>
+            <th>复杂度</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>时间复杂度</strong></td>
+            <td>O(n)</td>
+            <td>每个节点只被访问一次，n为节点总数</td>
+          </tr>
+          <tr>
+            <td><strong>空间复杂度</strong></td>
+            <td>O(h)</td>
+            <td>递归栈深度等于树的高度h，最坏情况h=n（退化为链表）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="insight-box">
+      <strong>🌲 树的遍历方式对比：</strong><br>
+      • 前序遍历：先访问根节点，再访问子节点（自顶向下）<br>
+      • 中序遍历：先访问左子树，再根节点，再右子树<br>
+      • 后序遍历：先访问子节点，再访问根节点（自底向上）<br><br>
+      本题使用「后序遍历」思想，因为需要先知道子树的深度，才能计算当前节点的深度。
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🔄 BFS解法（迭代）</h2>
+    <p>除了递归，也可以用层序遍历（BFS）来解决。每层遍历完，深度+1。</p>
+    <pre><code><div class="code-line"><span class="line-number">1</span><span class="line-content"><span class="keyword">from</span> collections <span class="keyword">import</span> deque</span></span></div>
+<div class="code-line"><span class="line-number">2</span><span class="line-content"></span></span></div>
+<div class="code-line"><span class="line-number">3</span><span class="line-content"><span class="keyword">class</span> <span class="class">Solution</span>:</span></span></div>
+<div class="code-line"><span class="line-number">4</span><span class="line-content">    <span class="keyword">def</span> <span class="function">maxDepth</span>(<span class="keyword">self</span>, root: Optional[TreeNode]) -> <span class="keyword">int</span>:</span></span></div>
+<div class="code-line"><span class="line-number">5</span><span class="line-content">        <span class="keyword">if</span> <span class="keyword">not</span> root:</span></span></div>
+<div class="code-line"><span class="line-number">6</span><span class="line-content">            <span class="keyword">return</span> <span class="number">0</span></span></span></div>
+<div class="code-line"><span class="line-number">7</span><span class="line-content">        </span></span></div>
+<div class="code-line"><span class="line-number">8</span><span class="line-content">        queue = deque([root])</span></span></div>
+<div class="code-line"><span class="line-number">9</span><span class="line-content">        depth = <span class="number">0</span></span></span></div>
+<div class="code-line"><span class="line-number">10</span><span class="line-content">        </span></span></div>
+<div class="code-line"><span class="line-number">11</span><span class="line-content">        <span class="keyword">while</span> queue:</span></span></div>
+<div class="code-line"><span class="line-number">12</span><span class="line-content">            depth += <span class="number">1</span></span></span></div>
+<div class="code-line"><span class="line-number">13</span><span class="line-content">            level_size = <span class="function">len</span>(queue)</span></span></div>
+<div class="code-line"><span class="line-number">14</span><span class="line-content">            <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="function">range</span>(level_size):</span></span></div>
+<div class="code-line"><span class="line-number">15</span><span class="line-content">                node = queue.popleft()</span></span></div>
+<div class="code-line"><span class="line-number">16</span><span class="line-content">                <span class="keyword">if</span> node.left:</span></span></div>
+<div class="code-line"><span class="line-number">17</span><span class="line-content">                    queue.append(node.left)</span></span></div>
+<div class="code-line"><span class="line-number">18</span><span class="line-content">                <span class="keyword">if</span> node.right:</span></span></div>
+<div class="code-line"><span class="line-number">19</span><span class="line-content">                    queue.append(node.right)</span></span></div>
+<div class="code-line"><span class="line-number">20</span><span class="line-content">        </span></span></div>
+<div class="code-line"><span class="line-number">21</span><span class="line-content">        <span class="keyword">return</span> depth</span></span></div>
+</code></pre>
+    
+    <div class="insight-box">
+      <strong>🔄 两种方法对比：</strong><br>
+      • DFS递归：代码简洁，空间复杂度O(h)，适合理解递归思想<br>
+      • BFS迭代：显式使用队列，空间复杂度O(w)，w为最大宽度<br><br>
+      对于这道题，两种方法效率相当，但DFS递归代码更简洁优雅。
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/minimum-depth-of-binary-tree/" class="problem-card" target="_blank">
+        <h4>#111 二叉树的最小深度</h4>
+        <p>与最大深度类似，但要注意叶子节点的定义</p>
+      </a>
+      <a href="https://leetcode.cn/problems/balanced-binary-tree/" class="problem-card" target="_blank">
+        <h4>#110 平衡二叉树</h4>
+        <p>判断左右子树高度差是否不超过1</p>
+      </a>
+      <a href="https://leetcode.cn/problems/maximum-depth-of-n-ary-tree/" class="problem-card" target="_blank">
+        <h4>#559 N叉树的最大深度</h4>
+        <p>将二叉树扩展到N叉树的版本</p>
+      </a>
+      <a href="https://leetcode.cn/problems/diameter-of-binary-tree/" class="problem-card" target="_blank">
+        <h4>#543 二叉树的直径</h4>
+        <p>求任意两节点路径的最大长度</p>
+      </a>
+      <a href="https://leetcode.cn/problems/path-sum/" class="problem-card" target="_blank">
+        <h4>#112 路径总和</h4>
+        <p>判断是否存在根到叶子的路径和等于目标值</p>
+      </a>
+      <a href="https://leetcode.cn/problems/binary-tree-level-order-traversal/" class="problem-card" target="_blank">
+        <h4>#102 二叉树的层序遍历</h4>
+        <p>BFS经典模板题</p>
+      </a>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📝 解题模板总结</h2>
+    <pre><code><div class="code-line"><span class="line-number">1</span><span class="line-content"><span class="comment"># 树形DP通用模板：自底向上收集信息</span></span></span></div>
+<div class="code-line"><span class="line-number">2</span><span class="line-content"><span class="keyword">def</span> <span class="function">dfs</span>(node):</span></span></div>
+<div class="code-line"><span class="line-number">3</span><span class="line-content">    <span class="keyword">if</span> <span class="keyword">not</span> node:</span></span></div>
+<div class="code-line"><span class="line-number">4</span><span class="line-content">        <span class="keyword">return</span> base_case <span class="comment"># 空节点的返回值</span></span></span></div>
+<div class="code-line"><span class="line-number">5</span><span class="line-content">    </span></span></div>
+<div class="code-line"><span class="line-number">6</span><span class="line-content">    left_info = dfs(node.left)   <span class="comment"># 收集左子树信息</span></span></span></div>
+<div class="code-line"><span class="line-number">7</span><span class="line-content">    right_info = dfs(node.right) <span class="comment"># 收集右子树信息</span></span></span></div>
+<div class="code-line"><span class="line-number">8</span><span class="line-content">    </span></span></div>
+<div class="code-line"><span class="line-number">9</span><span class="line-content">    <span class="comment"># 根据子树信息计算当前节点的值</span></span></span></div>
+<div class="code-line"><span class="line-number">10</span><span class="line-content">    result = combine(left_info, right_info)</span></span></div>
+<div class="code-line"><span class="line-number">11</span><span class="line-content">    <span class="keyword">return</span> result</span></span></div>
+</code></pre>
+  </div>
+  
+  <script>
+    // 步骤与代码行映射
+    const steps = [
+      {title: "🌱 初始调用", desc: "从根节点开始递归计算", line: 8, state: "当前节点: 3"},
+      {title: "↙️ 递归左子树", desc: "计算节点9的深度", line: 14, state: "调用 maxDepth(node=9)"},
+      {title: "↙️ 节点9的左子树", desc: "节点9左子树为空，返回0", line: 10, state: "node.left = null"},
+      {title: "↘️ 节点9的右子树", desc: "节点9右子树为空，返回0", line: 10, state: "node.right = null"},
+      {title: "✅ 节点9深度确定", desc: "max(0, 0) + 1 = 1", line: 20, state: "节点9深度 = 1"},
+      {title: "↘️ 递归右子树", desc: "计算节点20的深度", line: 17, state: "调用 maxDepth(node=20)"},
+      {title: "↙️ 递归节点20左子树", desc: "计算节点15的深度", line: 14, state: "调用 maxDepth(node=15)"},
+      {title: "↙️ 节点15左子树", desc: "为空，返回0", line: 10, state: "null → 0"},
+      {title: "↘️ 节点15右子树", desc: "为空，返回0", line: 10, state: "null → 0"},
+      {title: "✅ 节点15深度确定", desc: "max(0, 0) + 1 = 1", line: 20, state: "节点15深度 = 1"},
+      {title: "↘️ 递归节点20右子树", desc: "计算节点7的深度", line: 17, state: "调用 maxDepth(node=7)"},
+      {title: "↙️ 节点7左子树", desc: "为空，返回0", line: 10, state: "null → 0"},
+      {title: "↘️ 节点7右子树", desc: "为空，返回0", line: 10, state: "null → 0"},
+      {title: "✅ 节点7深度确定", desc: "max(0, 0) + 1 = 1", line: 20, state: "节点7深度 = 1"},
+      {title: "✅ 节点20深度确定", desc: "max(1, 1) + 1 = 2", line: 20, state: "节点20深度 = 2"},
+      {title: "✅ 根节点深度确定", desc: "max(1, 2) + 1 = 3", line: 20, state: "✨ 最终结果: 3"},
+    ];
+    
+    // 生成步骤HTML
+    const vizStepsContainer = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const stepDiv = document.createElement('div');
+      stepDiv.className = 'viz-step';
+      stepDiv.dataset.line = step.line;
+      stepDiv.dataset.idx = idx;
+      stepDiv.innerHTML = `
+        <div class="viz-step-title">${step.title}</div>
+        <div class="viz-step-desc">${step.desc}</div>
+        <div class="viz-step-state">${step.state}</div>
+      `;
+      stepDiv.addEventListener('click', () => activateStep(idx));
+      vizStepsContainer.appendChild(stepDiv);
+    });
+    
+    // 代码行点击事件
+    document.querySelectorAll('.code-line').forEach(line => {
+      line.addEventListener('click', () => {
+        const lineNum = parseInt(line.dataset.line);
+        const stepIdx = steps.findIndex(s => s.line === lineNum);
+        if (stepIdx !== -1) {
+          activateStep(stepIdx);
+        }
+      });
+    });
+    
+    // 激活步骤
+    function activateStep(idx) {
+      // 移除所有active类
+      document.querySelectorAll('.viz-step').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+      
+      // 添加active类
+      const stepEl = document.querySelector(`.viz-step[data-idx="${idx}"]`);
+      if (stepEl) {
+        stepEl.classList.add('active');
+        stepEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      
+      const lineNum = steps[idx].line;
+      const lineEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+      if (lineEl) {
+        lineEl.classList.add('active');
+      }
+      
+      // 更新树可视化
+      updateTreeViz(idx);
+    }
+    
+    // 更新树的视觉展示
+    function updateTreeViz(idx) {
+      const viz = document.getElementById('recursionViz');
+      const highlights = {
+        0: ['node3'],
+        1: ['node3', 'node9'],
+        5: ['node3', 'node20'],
+        6: ['node3', 'node20', 'node15'],
+        10: ['node3', 'node20', 'node7'],
+        14: ['node3', 'node20'],
+        15: ['node3']
+      };
+      
+      // 找到最近的应该高亮的步骤
+      let highlightKeys = Object.keys(highlights).map(Number).filter(k => k <= idx);
+      let toHighlight = highlightKeys.length > 0 ? highlights[Math.max(...highlightKeys)] : [];
+      
+      document.querySelectorAll('.tree-node').forEach(node => {
+        node.classList.toggle('highlight', toHighlight.includes(node.id));
+      });
+      
+      // 显示当前步骤信息
+      if (idx === steps.length - 1) {
+        viz.innerHTML = `
+          <div style="font-size:1.2rem;color:var(--success);padding:20px;">
+            ✅ 递归完成！最大深度 = 3
+          </div>
+          <div style="color:var(--text-muted);">
+            从根节点3到叶子节点15或7的路径长度为3
+          </div>
+        `;
+      }
+    }
+    
+    // 默认激活第一步
+    activateStep(0);
+  </script>
+</body>
+</html>

@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #128 - 最长连续序列</title>
+  <style>
+    :root {
+      --bg-primary: #0d1117;
+      --bg-secondary: #161b22;
+      --bg-tertiary: #21262d;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --accent: #58a6ff;
+      --accent-green: #3fb950;
+      --accent-yellow: #d29922;
+      --accent-red: #f85149;
+      --accent-purple: #a371f7;
+      --border: #30363d;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .subtitle {
+      color: var(--text-secondary);
+      margin-bottom: 30px;
+    }
+    
+    .tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-right: 10px;
+    }
+    
+    .tag-medium {
+      background: rgba(211, 153, 34, 0.2);
+      color: var(--accent-yellow);
+    }
+    
+    .section {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    
+    .section h2 {
+      font-size: 1.3rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .problem-desc {
+      background: var(--bg-tertiary);
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 4px solid var(--accent);
+    }
+    
+    .problem-desc p {
+      margin-bottom: 12px;
+    }
+    
+    .example {
+      background: var(--bg-tertiary);
+      padding: 16px;
+      border-radius: 8px;
+      margin: 12px 0;
+    }
+    
+    .example-title {
+      color: var(--accent-green);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    code {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      background: var(--bg-tertiary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+    
+    .collapsible {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    
+    .collapsible-header {
+      padding: 16px 20px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.2s;
+    }
+    
+    .collapsible-header:hover {
+      background: rgba(88, 166, 255, 0.1);
+    }
+    
+    .collapsible-header h3 {
+      font-size: 1.1rem;
+      color: var(--accent);
+    }
+    
+    .toggle-icon {
+      font-size: 1.2rem;
+      transition: transform 0.3s;
+    }
+    
+    .collapsible.active .toggle-icon {
+      transform: rotate(180deg);
+    }
+    
+    .collapsible-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    
+    .collapsible.active .collapsible-content {
+      max-height: 2000px;
+    }
+    
+    .collapsible-body {
+      padding: 0 20px 20px;
+    }
+    
+    /* 可视化区域 */
+    .visualization {
+      background: var(--bg-tertiary);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 20px 0;
+    }
+    
+    .viz-title {
+      text-align: center;
+      color: var(--accent);
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+    
+    .array-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 20px 0;
+    }
+    
+    .array-item {
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      transition: all 0.3s;
+    }
+    
+    .array-item.normal {
+      background: var(--bg-secondary);
+      border: 2px solid var(--border);
+    }
+    
+    .array-item.start {
+      background: rgba(63, 185, 80, 0.3);
+      border: 2px solid var(--accent-green);
+      box-shadow: 0 0 15px rgba(63, 185, 80, 0.4);
+    }
+    
+    .array-item.sequence {
+      background: rgba(88, 166, 255, 0.3);
+      border: 2px solid var(--accent);
+      box-shadow: 0 0 15px rgba(88, 166, 255, 0.4);
+    }
+    
+    .array-item.skip {
+      opacity: 0.4;
+      background: var(--bg-secondary);
+      border: 2px dashed var(--border);
+    }
+    
+    .step-description {
+      text-align: center;
+      color: var(--text-secondary);
+      margin: 16px 0;
+      font-size: 0.95rem;
+    }
+    
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+    
+    .legend-box {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+    }
+    
+    /* 代码区域 */
+    .code-block {
+      background: var(--bg-primary);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    
+    .code-header {
+      background: var(--bg-tertiary);
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .code-lang {
+      color: var(--accent);
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    
+    .code-copy {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 4px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.2s;
+    }
+    
+    .code-copy:hover {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+    
+    pre {
+      padding: 20px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.9rem;
+      line-height: 1.8;
+    }
+    
+    .line-numbers {
+      display: table;
+      width: 100%;
+    }
+    
+    .line {
+      display: table-row;
+    }
+    
+    .line-number {
+      display: table-cell;
+      text-align: right;
+      padding-right: 16px;
+      color: var(--text-secondary);
+      user-select: none;
+      width: 40px;
+    }
+    
+    .line-content {
+      display: table-cell;
+    }
+    
+    /* 语法高亮 */
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; font-style: italic; }
+    .builtin { color: #ffa657; }
+    
+    /* 复杂度表格 */
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    
+    .complexity-table th,
+    .complexity-table td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .complexity-table th {
+      background: var(--bg-tertiary);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    
+    .complexity-table tr:hover {
+      background: rgba(88, 166, 255, 0.05);
+    }
+    
+    .complexity-good {
+      color: var(--accent-green);
+      font-weight: 600;
+    }
+    
+    .complexity-ok {
+      color: var(--accent-yellow);
+      font-weight: 600;
+    }
+    
+    /* 推荐题目 */
+    .recommendation {
+      display: grid;
+      gap: 12px;
+    }
+    
+    .rec-item {
+      background: var(--bg-tertiary);
+      padding: 16px;
+      border-radius: 8px;
+      border-left: 3px solid var(--accent);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .rec-item:hover {
+      transform: translateX(5px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    
+    .rec-title {
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    
+    .rec-desc {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    
+    .key-point {
+      background: linear-gradient(135deg, rgba(88, 166, 255, 0.1), rgba(163, 113, 247, 0.1));
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      padding: 16px;
+      margin: 16px 0;
+    }
+    
+    .key-point-title {
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    ul, ol {
+      margin-left: 24px;
+    }
+    
+    li {
+      margin-bottom: 8px;
+    }
+    
+    .highlight {
+      color: var(--accent-yellow);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎯 LeetCode #128 - 最长连续序列</h1>
+    <p class="subtitle">
+      <span class="tag tag-medium">Medium</span>
+      <span style="color: var(--text-secondary);">哈希表 · 数组 · 序列优化</span>
+    </p>
+
+    <!-- 题目描述 -->
+    <div class="section">
+      <h2>📋 题目描述</h2>
+      <div class="problem-desc">
+        <p>给定一个未排序的整数数组 <code>nums</code> ，找出数字连续的最长序列（不要求序列元素在原数组中连续）的长度。</p>
+        <p>请你设计并实现时间复杂度为 <code>O(n)</code> 的算法解决此问题。</p>
+      </div>
+      
+      <div class="example">
+        <div class="example-title">示例 1：</div>
+        <p><strong>输入：</strong>nums = [100, 4, 200, 1, 3, 2]</p>
+        <p><strong>输出：</strong>4</p>
+        <p><strong>解释：</strong>最长连续序列为 [1, 2, 3, 4]，长度为 4</p>
+      </div>
+      
+      <div class="example">
+        <div class="example-title">示例 2：</div>
+        <p><strong>输入：</strong>nums = [0, 3, 7, 2, 5, 8, 4, 6, 0, 1]</p>
+        <p><strong>输出：</strong>9</p>
+        <p><strong>解释：</strong>最长连续序列为 [0, 1, 2, 3, 4, 5, 6, 7, 8]，长度为 9</p>
+      </div>
+      
+      <div class="example">
+        <div class="example-title">约束条件：</div>
+        <ul>
+          <li><code>0 ≤ nums.length ≤ 10⁵</code></li>
+          <li><code>-10⁹ ≤ nums[i] ≤ 10⁹</code></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 解题思路 -->
+    <div class="section">
+      <h2>💡 解题思路</h2>
+      
+      <div class="key-point">
+        <div class="key-point-title">🔑 核心思想：只从序列起点开始计数</div>
+        <p>一个数 <code>num</code> 是某个连续序列的起点，当且仅当 <code>num - 1</code> 不在数组中。</p>
+      </div>
+
+      <div class="collapsible active">
+        <div class="collapsible-header" onclick="this.parentElement.classList.toggle('active')">
+          <h3>步骤 1：将所有数字存入哈希集合</h3>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div class="collapsible-body">
+            <p>使用哈希集合（HashSet）存储所有数字，实现 <code>O(1)</code> 的查询效率。这一步的目的是去重 + 快速查找。</p>
+            <p>对于示例 <code>[100, 4, 200, 1, 3, 2]</code>，集合为：{100, 4, 200, 1, 3, 2}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <div class="collapsible-header" onclick="this.parentElement.classList.toggle('active')">
+          <h3>步骤 2：识别序列起点</h3>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div class="collapsible-body">
+            <p>遍历集合中的每个数字 <code>num</code>，检查 <code>num - 1</code> 是否在集合中：</p>
+            <ul>
+              <li>如果 <code>num - 1</code> 存在 → <code>num</code> 不是起点，跳过</li>
+              <li>如果 <code>num - 1</code> 不存在 → <code>num</code> 是序列起点，开始计数</li>
+            </ul>
+            <p>这个技巧保证每个序列只被遍历一次。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <div class="collapsible-header" onclick="this.parentElement.classList.toggle('active')">
+          <h3>步骤 3：从起点向后扩展计数</h3>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div class="collapsible-body">
+            <p>对于每个序列起点 <code>num</code>，不断检查 <code>num + 1</code>, <code>num + 2</code>... 是否在集合中，直到中断，记录序列长度。</p>
+            <p>更新全局最大长度。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 可视化 -->
+      <div class="visualization">
+        <div class="viz-title">🎬 算法执行过程可视化</div>
+        
+        <div class="step-description">
+          <strong>初始数组：</strong>[100, 4, 200, 1, 3, 2]
+        </div>
+        
+        <div class="array-container">
+          <div class="array-item normal">100</div>
+          <div class="array-item normal">4</div>
+          <div class="array-item normal">200</div>
+          <div class="array-item normal">1</div>
+          <div class="array-item normal">3</div>
+          <div class="array-item normal">2</div>
+        </div>
+
+        <div class="step-description">
+          <strong>Step 1：</strong>遍历到 100，检查 99 不在集合中 → <span class="highlight">是起点！</span><br>
+          向后查找：101 不存在，序列长度 = 1
+        </div>
+        
+        <div class="array-container">
+          <div class="array-item start">100</div>
+          <div class="array-item skip">4</div>
+          <div class="array-item skip">200</div>
+          <div class="array-item skip">1</div>
+          <div class="array-item skip">3</div>
+          <div class="array-item skip">2</div>
+        </div>
+
+        <div class="step-description">
+          <strong>Step 2：</strong>遍历到 4，检查 3 在集合中 → <span style="color: var(--accent-red);">不是起点，跳过</span>
+        </div>
+
+        <div class="step-description">
+          <strong>Step 3：</strong>遍历到 200，检查 199 不在集合中 → <span class="highlight">是起点！</span><br>
+          向后查找：201 不存在，序列长度 = 1
+        </div>
+        
+        <div class="array-container">
+          <div class="array-item skip">100</div>
+          <div class="array-item skip">4</div>
+          <div class="array-item start">200</div>
+          <div class="array-item skip">1</div>
+          <div class="array-item skip">3</div>
+          <div class="array-item skip">2</div>
+        </div>
+
+        <div class="step-description">
+          <strong>Step 4：</strong>遍历到 1，检查 0 不在集合中 → <span class="highlight">是起点！</span><br>
+          向后查找：2→3→4 都存在，序列长度 = 4 ✨
+        </div>
+        
+        <div class="array-container">
+          <div class="array-item skip">100</div>
+          <div class="array-item sequence">4</div>
+          <div class="array-item skip">200</div>
+          <div class="array-item start">1</div>
+          <div class="array-item sequence">3</div>
+          <div class="array-item sequence">2</div>
+        </div>
+
+        <div class="step-description">
+          <strong>最终结果：</strong>最长连续序列长度为 <span class="highlight">4</span>
+        </div>
+
+        <div class="legend">
+          <div class="legend-item">
+            <div class="legend-box" style="background: rgba(63, 185, 80, 0.3); border: 2px solid var(--accent-green);"></div>
+            <span>序列起点</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-box" style="background: rgba(88, 166, 255, 0.3); border: 2px solid var(--accent);"></div>
+            <span>序列成员</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-box" style="background: var(--bg-secondary); border: 2px dashed var(--border); opacity: 0.4;"></div>
+            <span>跳过</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 代码实现 -->
+    <div class="section">
+      <h2>📝 代码实现</h2>
+      
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">Python3</span>
+          <button class="code-copy" onclick="copyCode()">复制</button>
+        </div>
+        <pre id="code-content"><div class="line-numbers">
+<div class="line"><span class="line-number">1</span><span class="line-content"><span class="keyword">class</span> <span class="function">Solution</span>:</span></div>
+<div class="line"><span class="line-number">2</span><span class="line-content">    <span class="keyword">def</span> <span class="function">longestConsecutive</span>(self, nums: List[<span class="builtin">int</span>]) -> <span class="builtin">int</span>:</span></div>
+<div class="line"><span class="line-number">3</span><span class="line-content">        <span class="comment"># 将所有数字存入哈希集合，去重 + O(1) 查询</span></span></div>
+<div class="line"><span class="line-number">4</span><span class="line-content">        num_set = <span class="builtin">set</span>(nums)</span></div>
+<div class="line"><span class="line-number">5</span><span class="line-content">        longest = <span class="number">0</span></span></div>
+<div class="line"><span class="line-number">6</span><span class="line-content">        </span></div>
+<div class="line"><span class="line-number">7</span><span class="line-content">        <span class="keyword">for</span> num <span class="keyword">in</span> num_set:</span></div>
+<div class="line"><span class="line-number">8</span><span class="line-content">            <span class="comment"># 只从序列起点开始计数（关键优化）</span></span></div>
+<div class="line"><span class="line-number">9</span><span class="line-content">            <span class="keyword">if</span> num - <span class="number">1</span> <span class="keyword">not in</span> num_set:</span></div>
+<div class="line"><span class="line-number">10</span><span class="line-content">                current_num = num</span></div>
+<div class="line"><span class="line-number">11</span><span class="line-content">                current_streak = <span class="number">1</span></span></div>
+<div class="line"><span class="line-number">12</span><span class="line-content">                </span></div>
+<div class="line"><span class="line-number">13</span><span class="line-content">                <span class="comment"># 向后扩展，统计序列长度</span></span></div>
+<div class="line"><span class="line-number">14</span><span class="line-content">                <span class="keyword">while</span> current_num + <span class="number">1</span> <span class="keyword">in</span> num_set:</span></div>
+<div class="line"><span class="line-number">15</span><span class="line-content">                    current_num += <span class="number">1</span></span></div>
+<div class="line"><span class="line-number">16</span><span class="line-content">                    current_streak += <span class="number">1</span></span></div>
+<div class="line"><span class="line-number">17</span><span class="line-content">                </span></div>
+<div class="line"><span class="line-number">18</span><span class="line-content">                <span class="comment"># 更新最大长度</span></span></div>
+<div class="line"><span class="line-number">19</span><span class="line-content">                longest = <span class="builtin">max</span>(longest, current_streak)</span></div>
+<div class="line"><span class="line-number">20</span><span class="line-content">        </span></div>
+<div class="line"><span class="line-number">21</span><span class="line-content">        <span class="keyword">return</span> longest</span></div>
+</div></pre>
+      </div>
+
+      <div class="key-point" style="margin-top: 20px;">
+        <div class="key-point-title">💡 代码关键点解析</div>
+        <ul>
+          <li><strong>第 4 行：</strong>使用 <code>set()</code> 去重并保证 O(1) 查询</li>
+          <li><strong>第 9 行：</strong>核心判断！只有序列起点才进入内层循环，避免重复计算</li>
+          <li><strong>第 14 行：</strong><code>while</code> 循环向后扩展，寻找连续的数</li>
+          <li><strong>第 19 行：</strong>实时更新全局最大长度</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 复杂度分析 -->
+    <div class="section">
+      <h2>📊 复杂度分析</h2>
+      <table class="complexity-table">
+        <thead>
+          <tr>
+            <th>度量</th>
+            <th>值</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>时间复杂度</td>
+            <td class="complexity-good">O(n)</td>
+            <td>外层遍历 O(n) + 内层 while 每个元素最多被访问一次</td>
+          </tr>
+          <tr>
+            <td>空间复杂度</td>
+            <td class="complexity-ok">O(n)</td>
+            <td>哈希集合存储所有元素</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div style="margin-top: 16px; color: var(--text-secondary); font-size: 0.9rem;">
+        <p><strong>时间复杂度证明：</strong></p>
+        <p>看似有两层循环，但由于「只从序列起点开始计数」的优化，每个数字最多被访问两次：</p>
+        <ul>
+          <li>一次在外层循环中被检查是否为起点</li>
+          <li>一次在内层 while 循环中被计入某个序列</li>
+        </ul>
+        <p>因此总时间复杂度为 <code>O(n)</code>。</p>
+      </div>
+    </div>
+
+    <!-- 类似题目 -->
+    <div class="section">
+      <h2>🔗 类似题目推荐</h2>
+      <div class="recommendation">
+        <div class="rec-item">
+          <div class="rec-title">LeetCode 49 - 字母异位词分组</div>
+          <div class="rec-desc">哈希表分组，练习字符串哈希的运用</div>
+        </div>
+        <div class="rec-item">
+          <div class="rec-title">LeetCode 217 - 存在重复元素</div>
+          <div class="rec-desc">哈希集合的基础应用</div>
+        </div>
+        <div class="rec-item">
+          <div class="rec-title">LeetCode 349 - 两个数组的交集</div>
+          <div class="rec-desc">集合运算，练习哈希表的交集操作</div>
+        </div>
+        <div class="rec-item">
+          <div class="rec-title">LeetCode 523 - 连续的子数组和</div>
+          <div class="rec-desc">前缀和 + 哈希表的经典组合</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 面试要点 -->
+    <div class="section">
+      <h2>🎯 面试要点</h2>
+      <ul>
+        <li><strong>必问点：</strong>为什么时间复杂度是 O(n)？解释「只从序列起点开始」的优化思想</li>
+        <li><strong>变形题：</strong>如果数组已排序，能否做到 O(1) 空间复杂度？</li>
+        <li><strong>边界情况：</strong>空数组、单元素数组、重复元素数组的处理</li>
+        <li><strong>拓展思考：</strong>Union-Find（并查集）是否也能解决此题？时间复杂度如何？</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    function copyCode() {
+      const code = document.getElementById('code-content').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        const btn = document.querySelector('.code-copy');
+        btn.textContent = '已复制!';
+        setTimeout(() => btn.textContent = '复制', 2000);
+      });
+    }
+  </script>
+</body>
+</html>

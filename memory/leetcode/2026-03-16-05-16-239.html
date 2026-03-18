@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #239 - 滑动窗口最大值</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #e0e0e0;
+      line-height: 1.8;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      padding: 40px 0;
+      border-bottom: 2px solid #0f3460;
+      margin-bottom: 30px;
+    }
+    
+    h1 {
+      font-size: 2.5em;
+      background: linear-gradient(90deg, #e94560, #ff6b6b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+    
+    .subtitle {
+      color: #a0a0a0;
+      font-size: 1.1em;
+    }
+    
+    .tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: 600;
+      margin: 5px;
+    }
+    
+    .tag-hard {
+      background: #e94560;
+      color: white;
+    }
+    
+    .tag-topic {
+      background: #0f3460;
+      color: #4fbdba;
+    }
+    
+    .section {
+      background: rgba(255,255,255,0.03);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 25px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    h2 {
+      color: #4fbdba;
+      font-size: 1.5em;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .problem-box {
+      background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+      border-left: 4px solid #e94560;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 15px 0;
+    }
+    
+    .example {
+      background: rgba(79, 189, 186, 0.1);
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+      font-family: 'Consolas', 'Monaco', monospace;
+    }
+    
+    .example-title {
+      color: #4fbdba;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    
+    .collapsible {
+      background: #0f3460;
+      color: #e0e0e0;
+      cursor: pointer;
+      padding: 18px;
+      width: 100%;
+      border: none;
+      text-align: left;
+      outline: none;
+      font-size: 1.1em;
+      border-radius: 8px;
+      margin-bottom: 5px;
+      transition: all 0.3s;
+    }
+    
+    .collapsible:hover {
+      background: #1a4a6e;
+    }
+    
+    .collapsible.active {
+      background: #e94560;
+    }
+    
+    .content {
+      padding: 0 18px;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+      background: rgba(15, 52, 96, 0.3);
+      border-radius: 0 0 8px 8px;
+    }
+    
+    .content.show {
+      max-height: 2000px;
+      padding: 18px;
+    }
+    
+    .arrow {
+      float: right;
+      transition: transform 0.3s;
+    }
+    
+    .collapsible.active .arrow {
+      transform: rotate(180deg);
+    }
+    
+    /* 可视化区域 */
+    .visualization {
+      background: #0a0a14;
+      border-radius: 12px;
+      padding: 25px;
+      margin: 20px 0;
+      overflow-x: auto;
+    }
+    
+    .window-container {
+      display: flex;
+      gap: 8px;
+      margin: 20px 0;
+      padding: 15px;
+      background: rgba(79, 189, 186, 0.1);
+      border-radius: 8px;
+    }
+    
+    .array-element {
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 1.2em;
+      transition: all 0.5s;
+    }
+    
+    .element-normal {
+      background: #1a4a6e;
+      color: #a0c4d9;
+    }
+    
+    .element-window {
+      background: #0f3460;
+      border: 2px solid #4fbdba;
+      color: #4fbdba;
+    }
+    
+    .element-max {
+      background: linear-gradient(135deg, #e94560, #ff6b6b);
+      color: white;
+      transform: scale(1.1);
+      box-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+    }
+    
+    .queue-container {
+      background: rgba(233, 69, 96, 0.1);
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+      border: 1px solid rgba(233, 69, 96, 0.3);
+    }
+    
+    .queue-title {
+      color: #e94560;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    
+    .queue-elements {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .queue-element {
+      background: linear-gradient(135deg, #e94560, #ff6b6b);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-family: monospace;
+      font-weight: bold;
+    }
+    
+    .step-description {
+      color: #a0a0a0;
+      margin: 15px 0;
+      padding: 15px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      border-left: 3px solid #4fbdba;
+    }
+    
+    .step-number {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      background: #e94560;
+      color: white;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 28px;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    
+    /* 代码区域 */
+    pre {
+      background: #0a0a14;
+      border-radius: 12px;
+      padding: 20px;
+      overflow-x: auto;
+      margin: 20px 0;
+      border: 1px solid #1a1a2e;
+    }
+    
+    code {
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    
+    .code-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0f3460;
+      padding: 10px 20px;
+      border-radius: 12px 12px 0 0;
+      margin: -20px -20px 15px -20px;
+    }
+    
+    .code-lang {
+      color: #4fbdba;
+      font-weight: bold;
+    }
+    
+    .line-numbers {
+      color: #4a5568;
+      user-select: none;
+      text-align: right;
+      padding-right: 15px;
+      border-right: 1px solid #2d3748;
+      margin-right: 15px;
+      float: left;
+    }
+    
+    .code-content {
+      color: #e0e0e0;
+    }
+    
+    .keyword { color: #c792ea; }
+    .function { color: #82aaff; }
+    .string { color: #c3e88d; }
+    .comment { color: #546e7a; font-style: italic; }
+    .number { color: #f78c6c; }
+    .operator { color: #89ddff; }
+    
+    /* 表格 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      background: rgba(255,255,255,0.02);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    th {
+      background: #0f3460;
+      color: #4fbdba;
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+    }
+    
+    td {
+      padding: 12px 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    tr:hover {
+      background: rgba(79, 189, 186, 0.05);
+    }
+    
+    .complexity-good {
+      color: #4fbdba;
+      font-weight: bold;
+    }
+    
+    .complexity-bad {
+      color: #e94560;
+      font-weight: bold;
+    }
+    
+    .related-problems {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .problem-card {
+      background: rgba(15, 52, 96, 0.3);
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid rgba(79, 189, 186, 0.2);
+      transition: all 0.3s;
+    }
+    
+    .problem-card:hover {
+      border-color: #4fbdba;
+      transform: translateY(-2px);
+    }
+    
+    .problem-number {
+      color: #e94560;
+      font-weight: bold;
+      font-size: 0.9em;
+    }
+    
+    .problem-title {
+      color: #e0e0e0;
+      font-weight: 600;
+      margin: 5px 0;
+    }
+    
+    .problem-tag {
+      color: #a0a0a0;
+      font-size: 0.85em;
+    }
+    
+    footer {
+      text-align: center;
+      padding: 30px;
+      color: #606060;
+      font-size: 0.9em;
+    }
+    
+    .highlight-box {
+      background: linear-gradient(135deg, rgba(233, 69, 96, 0.1), rgba(79, 189, 186, 0.1));
+      border: 1px solid rgba(233, 69, 96, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    
+    .key-point {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin: 12px 0;
+    }
+    
+    .key-icon {
+      width: 24px;
+      height: 24px;
+      background: #e94560;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 0.8em;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>滑动窗口最大值</h1>
+      <p class="subtitle">LeetCode #239 · 单调队列经典应用</p>
+      <div style="margin-top: 15px;">
+        <span class="tag tag-hard">Hard</span>
+        <span class="tag tag-topic">单调队列</span>
+        <span class="tag tag-topic">滑动窗口</span>
+        <span class="tag tag-topic">双端队列</span>
+      </div>
+    </header>
+
+    <div class="section">
+      <h2>📋 题目描述</h2>
+      <div class="problem-box">
+        <p>给你一个整数数组 <code>nums</code>，有一个大小为 <code>k</code> 的滑动窗口从数组的最左侧移动到数组的最右侧。你只可以看到在滑动窗口内的 <code>k</code> 个数字。滑动窗口每次只向右移动一位。</p>
+        <p style="margin-top: 15px;"><strong>返回</strong> 滑动窗口中的最大值。</p>
+      </div>
+      
+      <div class="example">
+        <div class="example-title">示例 1：</div>
+        <div><strong>输入：</strong> nums = [1,3,-1,-3,5,3,6,7], k = 3</div>
+        <div><strong>输出：</strong> [3,3,5,5,6,7]</div>
+        <div style="margin-top: 10px; color: #a0a0a0;">
+          <strong>解释：</strong><br>
+          滑动窗口位置                最大值<br>
+          ---------------          -----<br>
+          [1  3  -1] -3  5  3  6  7   3<br>
+           1 [3  -1  -3] 5  3  6  7   3<br>
+           1  3 [-1  -3  5] 3  6  7   5<br>
+           1  3  -1 [-3  5  3] 6  7   5<br>
+           1  3  -1  -3 [5  3  6] 7   6<br>
+           1  3  -1  -3  5 [3  6  7] 7<br>
+        </div>
+      </div>
+      
+      <div class="example">
+        <div class="example-title">示例 2：</div>
+        <div><strong>输入：</strong> nums = [1], k = 1</div>
+        <div><strong>输出：</strong> [1]</div>
+      </div>
+
+      <div class="highlight-box">
+        <div class="key-point">
+          <div class="key-icon">!</div>
+          <div>
+            <strong>核心挑战：</strong> 如何在窗口滑动时，快速获取当前窗口的最大值？<br>
+            暴力解法需要 O(k) 时间求最大值，总复杂度 O(n×k)。需要更优解！
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>💡 解题思路</h2>
+      
+      <button class="collapsible active">
+        <span>🔥 核心思想：单调递减队列</span>
+        <span class="arrow">▼</span>
+      </button>
+      <div class="content show">
+        <p>维护一个<strong>单调递减的双端队列</strong>，队列中存储的是<strong>元素的索引</strong>：</p>
+        <ul style="margin: 15px 0; padding-left: 20px;">
+          <li>队列从头到尾对应的值是<strong>递减</strong>的</li>
+          <li>队头元素始终是当前窗口的最大值</li>
+          <li>队列中只保留当前窗口内的有效元素</li>
+        </ul>
+        
+        <div class="step-description">
+          <span class="step-number">1</span>
+          <strong>移除无效元素：</strong>窗口右移时，移除队头不在窗口范围内的索引
+        </div>
+        <div class="step-description">
+          <span class="step-number">2</span>
+          <strong>维护单调性：</strong>新元素入队前，从队尾弹出所有比它小的元素（它们不可能成为最大值）
+        </div>
+        <div class="step-description">
+          <span class="step-number">3</span>
+          <strong>记录答案：</strong>窗口形成后，队头即为当前窗口最大值
+        </div>
+      </div>
+
+      <button class="collapsible">
+        <span>🎬 算法执行可视化</span>
+        <span class="arrow">▼</span>
+      </button>
+      <div class="content">
+        <div class="visualization">
+          <div style="color: #4fbdba; font-weight: bold; margin-bottom: 15px;">nums = [1, 3, -1, -3, 5, 3, 6, 7], k = 3</div>
+          
+          <div style="margin: 20px 0;">
+            <div style="color: #a0a0a0; margin-bottom: 10px;">Step 1: i=0, num=1</div>
+            <div class="window-container">
+              <div class="array-element element-max">1</div>
+              <div class="array-element element-normal">3</div>
+              <div class="array-element element-normal">-1</div>
+              <div class="array-element element-normal">-3</div>
+              <div class="array-element element-normal">5</div>
+              <div class="array-element element-normal">3</div>
+              <div class="array-element element-normal">6</div>
+              <div class="array-element element-normal">7</div>
+            </div>
+            <div class="queue-container">
+              <div class="queue-title">单调队列 (存索引):</div>
+              <div class="queue-elements">
+                <div class="queue-element">0:1</div>
+              </div>
+            </div>
+            <div style="color: #606060;">队列: [0]，窗口未形成，无输出</div>
+          </div>
+
+          <div style="margin: 20px 0;">
+            <div style="color: #a0a0a0; margin-bottom: 10px;">Step 2: i=1, num=3</div>
+            <div class="window-container">
+              <div class="array-element element-normal">1</div>
+              <div class="array-element element-max">3</div>
+              <div class="array-element element-normal">-1</div>
+              <div class="array-element element-normal">-3</div>
+              <div class="array-element element-normal">5</div>
+              <div class="array-element element-normal">3</div>
+              <div class="array-element element-normal">6</div>
+              <div class="array-element element-normal">7</div>
+            </div>
+            <div class="queue-container">
+              <div class="queue-title">单调队列:</div>
+              <div class="queue-elements">
+                <div class="queue-element">1:3</div>
+              </div>
+            </div>
+            <div style="color: #e94560;">3 > 1，弹出1，加入3 → 队列: [1]</div>
+          </div>
+
+          <div style="margin: 20px 0;">
+            <div style="color: #a0a0a0; margin-bottom: 10px;">Step 3: i=2, num=-1</div>
+            <div class="window-container">
+              <div class="array-element element-window">1</div>
+              <div class="array-element element-window">3</div>
+              <div class="array-element element-window">-1</div>
+              <div class="array-element element-normal">-3</div>
+              <div class="array-element element-normal">5</div>
+              <div class="array-element element-normal">3</div>
+              <div class="array-element element-normal">6</div>
+              <div class="array-element element-normal">7</div>
+            </div>
+            <div class="queue-container">
+              <div class="queue-title">单调队列:</div>
+              <div class="queue-elements">
+                <div class="queue-element">1:3</div>
+                <div class="queue-element" style="background: #1a4a6e; color: #a0c4d9;">2:-1</div>
+              </div>
+            </div>
+            <div style="color: #4fbdba; font-weight: bold;">窗口形成！队头 3 是第一个答案</div>
+            <div style="color: #e94560;">结果: [3]</div>
+          </div>
+
+          <div style="margin: 20px 0;">
+            <div style="color: #a0a0a0; margin-bottom: 10px;">Step 4: i=3, num=-3，窗口右移</div>
+            <div class="window-container">
+              <div class="array-element element-normal">1</div>
+              <div class="array-element element-window">3</div>
+              <div class="array-element element-window">-1</div>
+              <div class="array-element element-window">-3</div>
+              <div class="array-element element-normal">5</div>
+              <div class="array-element element-normal">3</div>
+              <div class="array-element element-normal">6</div>
+              <div class="array-element element-normal">7</div>
+            </div>
+            <div class="queue-container">
+              <div class="queue-title">单调队列:</div>
+              <div class="queue-elements">
+                <div class="queue-element">1:3</div>
+                <div class="queue-element" style="background: #1a4a6e; color: #a0c4d9;">2:-1</div>
+                <div class="queue-element" style="background: #1a4a6e; color: #a0c4d9;">3:-3</div>
+              </div>
+            </div>
+            <div style="color: #4fbdba; font-weight: bold;">队头 3 仍是最大值</div>
+            <div style="color: #e94560;">结果: [3, 3]</div>
+          </div>
+
+          <div style="margin: 20px 0;">
+            <div style="color: #a0a0a0; margin-bottom: 10px;">Step 5: i=4, num=5，关键转折点！</div>
+            <div class="window-container">
+              <div class="array-element element-normal">1</div>
+              <div class="array-element element-normal">3</div>
+              <div class="array-element element-window">-1</div>
+              <div class="array-element element-window">-3</div>
+              <div class="array-element element-window element-max">5</div>
+              <div class="array-element element-normal">3</div>
+              <div class="array-element element-normal">6</div>
+              <div class="array-element element-normal">7</div>
+            </div>
+            <div class="queue-container">
+              <div class="queue-title">单调队列:</div>
+              <div class="queue-elements">
+                <div class="queue-element">4:5</div>
+              </div>
+            </div>
+            <div style="color: #e94560;">5 > 所有元素，清空队列后加入5 → 队列: [4]</div>
+            <div style="color: #4fbdba; font-weight: bold;">新最大值 5</div>
+            <div style="color: #e94560;">结果: [3, 3, 5]</div>
+          </div>
+
+          <div style="margin-top: 20px; padding: 15px; background: rgba(79, 189, 186, 0.1); border-radius: 8px;">
+            <strong style="color: #4fbdba;">最终输出: [3, 3, 5, 5, 6, 7]</strong>
+          </div>
+        </div>
+      </div>
+
+      <button class="collapsible">
+        <span>🎯 为什么单调队列有效？</span>
+        <span class="arrow">▼</span>
+      </button>
+      <div class="content">
+        <div class="highlight-box">
+          <div class="key-point">
+            <div class="key-icon">1</div>
+            <div><strong>元素淘汰规律：</strong>如果 a 在 b 的左边，且 a ≤ b，那么 a 永远不可能成为窗口最大值（因为 b 比 a 大，且 b 后过期）</div>
+          </div>
+          <div class="key-point">
+            <div class="key-icon">2</div>
+            <div><strong>队列性质：</strong>队列中的元素值严格递减，因此队头始终是当前窗口最大值</div>
+          </div>
+          <div class="key-point">
+            <div class="key-icon">3</div>
+            <div><strong>时间复杂度：</strong>每个元素最多入队、出队各一次，总复杂度 O(n)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>📝 代码实现</h2>
+      
+      <div class="code-header">
+        <span class="code-lang">Python3</span>
+        <span style="color: #a0a0a0; font-size: 0.9em;">单调队列解法</span>
+      </div>
+      <pre><code><span class="keyword">from</span> collections <span class="keyword">import</span> deque
+
+<span class="keyword">class</span> <span class="function">Solution</span>:
+    <span class="keyword">def</span> <span class="function">maxSlidingWindow</span>(self, nums: List[<span class="keyword">int</span>], k: <span class="keyword">int</span>) -> List[<span class="keyword">int</span>]:
+        <span class="comment"># 单调递减队列，存储索引</span>
+        q = deque()
+        result = []
+        
+        <span class="keyword">for</span> i, num <span class="keyword">in</span> enumerate(nums):
+            <span class="comment"># Step 1: 移除队尾小于当前值的元素（维护单调性）</span>
+            <span class="keyword">while</span> q <span class="keyword">and</span> nums[q[-<span class="number">1</span>]] < num:
+                q.pop()
+            
+            <span class="comment"># Step 2: 当前索引入队</span>
+            q.append(i)
+            
+            <span class="comment"># Step 3: 移除队头不在窗口范围内的元素</span>
+            <span class="keyword">if</span> q[<span class="number">0</span>] <= i - k:
+                q.popleft()
+            
+            <span class="comment"># Step 4: 窗口形成后，记录最大值（队头）</span>
+            <span class="keyword">if</span> i >= k - <span class="number">1</span>:
+                result.append(nums[q[<span class="number">0</span>]])
+        
+        <span class="keyword">return</span> result</code></pre>
+
+      <div class="code-header" style="margin-top: 25px;">
+        <span class="code-lang">Python3</span>
+        <span style="color: #a0a0a0; font-size: 0.9em;">暴力解法（对比）</span>
+      </div>
+      <pre><code><span class="keyword">class</span> <span class="function">Solution</span>:
+    <span class="keyword">def</span> <span class="function">maxSlidingWindow</span>(self, nums: List[<span class="keyword">int</span>], k: <span class="keyword">int</span>) -> List[<span class="keyword">int</span>]:
+        <span class="comment"># 暴力解法：每次遍历窗口求最大值</span>
+        result = []
+        <span class="keyword">for</span> i <span class="keyword">in</span> range(len(nums) - k + <span class="number">1</span>):
+            window_max = max(nums[i:i + k])  <span class="comment"># O(k)</span>
+            result.append(window_max)
+        <span class="keyword">return</span> result
+        <span class="comment"># 时间复杂度: O(n×k) - 会超时！</span></code></pre>
+    </div>
+
+    <div class="section">
+      <h2>📊 复杂度分析</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>解法</th>
+            <th>时间复杂度</th>
+            <th>空间复杂度</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>暴力解法</td>
+            <td class="complexity-bad">O(n × k)</td>
+            <td class="complexity-good">O(1)</td>
+            <td>每次窗口遍历求max，超时</td>
+          </tr>
+          <tr>
+            <td>优先队列 (堆)</td>
+            <td class="complexity-bad">O(n × logk)</td>
+            <td class="complexity-bad">O(k)</td>
+            <td>需要延迟删除无效元素</td>
+          </tr>
+          <tr style="background: rgba(79, 189, 186, 0.1);">
+            <td><strong>单调队列 ⭐</strong></td>
+            <td class="complexity-good"><strong>O(n)</strong></td>
+            <td class="complexity-good"><strong>O(k)</strong></td>
+            <td>每个元素最多入队出队一次</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="highlight-box" style="margin-top: 20px;">
+        <div class="key-point">
+          <div class="key-icon">✓</div>
+          <div>
+            <strong>最优解分析：</strong><br>
+            单调队列之所以能达到 O(n)，是因为每个元素最多被处理两次（入队一次，出队一次）。
+            这是一种典型的<strong>均摊分析</strong>（Amortized Analysis）场景。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>🔗 类似题目推荐</h2>
+      <div class="related-problems">
+        <div class="problem-card">
+          <div class="problem-number">LeetCode #1438</div>
+          <div class="problem-title">绝对差不超过限制的最长子数组</div>
+          <div class="problem-tag">单调队列 + 滑动窗口</div>
+        </div>
+        <div class="problem-card">
+          <div class="problem-number">LeetCode #862</div>
+          <div class="problem-title">和至少为 K 的最短子数组</div>
+          <div class="problem-tag">单调队列 + 前缀和</div>
+        </div>
+        <div class="problem-card">
+          <div class="problem-number">LeetCode #84</div>
+          <div class="problem-title">柱状图中最大的矩形</div>
+          <div class="problem-tag">单调栈</div>
+        </div>
+        <div class="problem-card">
+          <div class="problem-number">LeetCode #42</div>
+          <div class="problem-title">接雨水</div>
+          <div class="problem-tag">双指针 / 单调栈</div>
+        </div>
+        <div class="problem-card">
+          <div class="problem-number">LeetCode #3</div>
+          <div class="problem-title">无重复字符的最长子串</div>
+          <div class="problem-tag">滑动窗口</div>
+        </div>
+        <div class="problem-card">
+          <div class="problem-number">LeetCode #76</div>
+          <div class="problem-title">最小覆盖子串</div>
+          <div class="problem-tag">滑动窗口 + 哈希表</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>🧠 面试要点</h2>
+      <div class="highlight-box">
+        <div class="key-point">
+          <div class="key-icon">Q</div>
+          <div><strong>常见追问：</strong></div>
+        </div>
+        <ul style="margin-left: 36px; color: #c0c0c0;">
+          <li>为什么用双端队列而不是普通队列？→ 需要两端操作</li>
+          <li>队列中为什么存索引而不是值？→ 需要判断元素是否在窗口内</li>
+          <li>能否用堆实现？复杂度如何？→ 可以，但需要延迟删除，O(n log k)</li>
+          <li>如果要求最小值怎么办？→ 维护单调递增队列即可</li>
+        </ul>
+      </div>
+    </div>
+
+    <footer>
+      <p>LeetCode 每日精讲 · 第40期</p>
+      <p style="margin-top: 5px; color: #4fbdba;">生成时间: 2026-03-16 05:16 (Asia/Shanghai)</p>
+    </footer>
+  </div>
+
+  <script>
+    // 折叠面板交互
+    document.querySelectorAll('.collapsible').forEach(button => {
+      button.addEventListener('click', function() {
+        this.classList.toggle('active');
+        const content = this.nextElementSibling;
+        content.classList.toggle('show');
+      });
+    });
+  </script>
+</body>
+</html>

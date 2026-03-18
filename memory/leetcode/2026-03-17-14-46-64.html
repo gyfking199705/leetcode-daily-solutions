@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #64 - 最小路径和</title>
+  <style>
+    :root { --primary: #6366f1; --secondary: #22d3ee; --bg: #0f172a; --surface: #1e293b; --text: #f1f5f9; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); max-width: 1100px; margin: 0 auto; padding: 40px 20px; line-height: 1.7; }
+    h1 { font-size: 2.2rem; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+    .subtitle { color: #64748b; font-size: 1rem; margin-bottom: 32px; }
+    .section { background: var(--surface); border-radius: 16px; padding: 28px; margin-bottom: 24px; border: 1px solid #334155; }
+    .section h2 { color: var(--primary); margin-top: 0; font-size: 1.3rem; }
+    pre { background: #0d1117; border-radius: 12px; padding: 20px; overflow-x: auto; margin: 16px 0; }
+    .code-line { display: flex; padding: 4px 0; cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; }
+    .code-line:hover { background: rgba(255,255,255,0.05); }
+    .code-line.active { background: rgba(99, 102, 241, 0.3); border-left-color: #6366f1; }
+    .line-number { color: #484f58; min-width: 40px; text-align: right; padding-right: 16px; font-size: 0.85rem; }
+    .line-content { font-family: 'Fira Code', 'Consolas', monospace; font-size: 0.9rem; }
+    .viz-container { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 20px 0; }
+    .viz-steps { max-height: 420px; overflow-y: auto; padding-right: 8px; }
+    .viz-step { padding: 14px; margin: 10px 0; border-radius: 10px; background: #334155; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+    .viz-step:hover { background: #3d4a5f; transform: translateX(4px); }
+    .viz-step.active { border-color: var(--primary); background: rgba(99, 102, 241, 0.25); box-shadow: 0 0 20px rgba(99,102,241,0.3); }
+    .viz-step-title { font-weight: 600; color: var(--secondary); font-size: 0.95rem; }
+    .viz-step-desc { font-size: 0.85rem; color: #94a3b8; margin-top: 4px; }
+    .viz-state { margin-top: 8px; padding: 8px; background: rgba(0,0,0,0.3); border-radius: 6px; font-family: monospace; font-size: 0.8rem; }
+    .grid-viz { display: grid; gap: 4px; margin: 10px 0; justify-content: start; }
+    .grid-cell { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: #334155; border-radius: 6px; font-family: monospace; font-weight: bold; transition: all 0.3s; }
+    .grid-cell.active { background: var(--primary); color: white; box-shadow: 0 0 15px rgba(99,102,241,0.5); }
+    .grid-cell.current { background: var(--secondary); color: #0f172a; }
+    .grid-cell.path { background: #22c55e; color: white; }
+    .problem-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 16px; }
+    .problem-card { background: var(--bg); border-radius: 12px; padding: 16px; border: 1px solid #475569; transition: all 0.2s; text-decoration: none; color: inherit; display: block; }
+    .problem-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+    .problem-number { color: var(--primary); font-weight: bold; font-size: 0.85rem; }
+    .problem-title { font-weight: 600; margin: 6px 0; }
+    .problem-tag { font-size: 0.8rem; color: #64748b; background: rgba(99,102,241,0.15); padding: 4px 10px; border-radius: 20px; display: inline-block; margin-top: 8px; }
+    .complexity-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    .complexity-table th, .complexity-table td { padding: 12px; text-align: left; border-bottom: 1px solid #334155; }
+    .complexity-table th { color: var(--primary); font-weight: 600; }
+    .tag-easy { color: #22c55e; }
+    .tag-medium { color: #f59e0b; }
+    .tag-hard { color: #ef4444; }
+    .keyword { color: #ff7b72; } .function { color: #d2a8ff; } .string { color: #a5d6ff; }
+    .number { color: #79c0ff; } .comment { color: #8b949e; font-style: italic; } .class { color: #ffa657; }
+    .highlight-box { background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(34,211,238,0.1)); border-left: 4px solid var(--primary); padding: 16px; border-radius: 8px; margin: 16px 0; }
+    .dp-table { display: grid; gap: 6px; margin: 20px 0; }
+    .dp-cell { background: #334155; padding: 12px 16px; text-align: center; border-radius: 8px; font-family: monospace; min-width: 50px; }
+    .dp-cell.highlight { background: var(--primary); color: white; }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #1e293b; }
+    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #64 - 最小路径和</h1>
+  <p class="subtitle">Minimum Path Sum | 动态规划经典入门题 | 难度：<span class="tag-medium">Medium</span></p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给定一个包含非负整数的 <code>m x n</code> 网格 <code>grid</code>，请找出一条从左上角到右下角的路径，使得路径上的数字总和为最小。</p>
+    <p><strong>移动规则：</strong>每次只能向下或者向右移动一步。</p>
+    
+    <div class="highlight-box">
+      <strong>示例：</strong><br>
+      输入: grid = [[1,3,1],[1,5,1],[4,2,1]]<br>
+      输出: 7<br>
+      解释: 路径 1→3→1→1→1 的总和为 7（注意只能向下或向右移动）
+    </div>
+    
+    <h3>🎯 解题思路</h3>
+    <p>这是一个经典的<strong>动态规划</strong>问题。核心思想是：</p>
+    <ul>
+      <li>设 <code>dp[i][j]</code> 表示从起点到达位置 <code>(i,j)</code> 的最小路径和</li>
+      <li>由于只能向右或向下移动，所以到达 <code>(i,j)</code> 只能从 <code>(i-1,j)</code> 或 <code>(i,j-1)</code> 来</li>
+      <li>状态转移方程：<code>dp[i][j] = min(dp[i-1][j], dp[i][j-1]) + grid[i][j]</code></li>
+    </ul>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>Python 实现（空间优化版）</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <tr>
+        <th>解法</th>
+        <th>时间复杂度</th>
+        <th>空间复杂度</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>基础DP（二维）</td>
+        <td>O(m × n)</td>
+        <td>O(m × n)</td>
+        <td>需要额外的dp数组存储所有状态</td>
+      </tr>
+      <tr>
+        <td>滚动数组优化</td>
+        <td>O(m × n)</td>
+        <td>O(n)</td>
+        <td>只保留当前行，空间减半</td>
+      </tr>
+      <tr>
+        <td>原地修改（最优）</td>
+        <td>O(m × n)</td>
+        <td>O(1)</td>
+        <td>直接修改grid数组，不额外使用空间</td>
+      </tr>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>💡 关键技巧与易错点</h2>
+    <ul>
+      <li><strong>边界处理：</strong>第一行和第一列只能单向移动，需要单独初始化</li>
+      <li><strong>空间优化：</strong>如果允许修改输入数组，可以直接在grid上原地计算，达到O(1)空间</li>
+      <li><strong>与「最大路径和」的区别：</strong>最大路径和会有负数导致贪心失效，但最小路径和全是非负数，DP是唯一正解</li>
+      <li><strong>路径还原：</strong>如果需要输出具体路径，需要额外记录每个位置是从哪个方向来的</li>
+    </ul>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/unique-paths/" class="problem-card" target="_blank">
+        <span class="problem-number">#62</span>
+        <div class="problem-title">不同路径</div>
+        <p style="font-size: 0.85rem; color: #94a3b8; margin: 8px 0;">计算从左上到右下的路径数量</p>
+        <span class="problem-tag">动态规划</span>
+      </a>
+      <a href="https://leetcode.cn/problems/unique-paths-ii/" class="problem-card" target="_blank">
+        <span class="problem-number">#63</span>
+        <div class="problem-title">不同路径 II</div>
+        <p style="font-size: 0.85rem; color: #94a3b8; margin: 8px 0;">有障碍物的路径计数</p>
+        <span class="problem-tag">动态规划</span>
+      </a>
+      <a href="https://leetcode.cn/problems/triangle/" class="problem-card" target="_blank">
+        <span class="problem-number">#120</span>
+        <div class="problem-title">三角形最小路径和</div>
+        <p style="font-size: 0.85rem; color: #94a3b8; margin: 8px 0;">类似思路，但路径方向不同</p>
+        <span class="problem-tag">动态规划</span>
+      </a>
+      <a href="https://leetcode.cn/problems/minimum-falling-path-sum/" class="problem-card" target="_blank">
+        <span class="problem-number">#931</span>
+        <div class="problem-title">下降路径最小和</div>
+        <p style="font-size: 0.85rem; color: #94a3b8; margin: 8px 0;">可以向三个方向移动</p>
+        <span class="problem-tag">动态规划</span>
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // 代码行数据
+    const codeLines = [
+      {num: 1, content: '<span class="keyword">class</span> <span class="class">Solution</span>:'},
+      {num: 2, content: '    <span class="keyword">def</span> <span class="function">minPathSum</span>(self, grid: List[List[<span class="keyword">int</span>]]) -> <span class="keyword">int</span>:'},
+      {num: 3, content: '        m, n = <span class="function">len</span>(grid), <span class="function">len</span>(grid[<span class="number">0</span>])'},
+      {num: 4, content: '        '},
+      {num: 5, content: '        <span class="comment"># 初始化第一行：只能从左往右走</span>'},
+      {num: 6, content: '        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="function">range</span>(<span class="number">1</span>, n):'},
+      {num: 7, content: '            grid[<span class="number">0</span>][j] += grid[<span class="number">0</span>][j-<span class="number">1</span>]'},
+      {num: 8, content: '        '},
+      {num: 9, content: '        <span class="comment"># 初始化第一列：只能从上往下走</span>'},
+      {num: 10, content: '        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="number">1</span>, m):'},
+      {num: 11, content: '            grid[i][<span class="number">0</span>] += grid[i-<span class="number">1</span>][<span class="number">0</span>]'},
+      {num: 12, content: '        '},
+      {num: 13, content: '        <span class="comment"># 填充剩余格子</span>'},
+      {num: 14, content: '        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="number">1</span>, m):'},
+      {num: 15, content: '            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="function">range</span>(<span class="number">1</span>, n):'},
+      {num: 16, content: '                <span class="comment"># 状态转移：从上方或左方选择较小值</span>'},
+      {num: 17, content: '                grid[i][j] += <span class="function">min</span>(grid[i-<span class="number">1</span>][j], grid[i][j-<span class="number">1</span>])'},
+      {num: 18, content: '        '},
+      {num: 19, content: '        <span class="keyword">return</span> grid[m-<span class="number">1</span>][n-<span class="number">1</span>]'},
+    ];
+    
+    // 步骤与代码行映射
+    const steps = [
+      {title: "步骤1：获取网格尺寸", desc: "m=3(行), n=3(列)", line: 3, state: {grid: "[[1,3,1],[1,5,1],[4,2,1]]"}},
+      {title: "步骤2：初始化第一行", desc: "grid[0][1] = 3+1 = 4, grid[0][2] = 1+4 = 5", line: 6, state: {grid: "[[1,4,5],[1,5,1],[4,2,1]]"}},
+      {title: "步骤3：初始化第一列", desc: "grid[1][0] = 1+1 = 2, grid[2][0] = 4+2 = 6", line: 10, state: {grid: "[[1,4,5],[2,5,1],[6,2,1]]"}},
+      {title: "步骤4：填充位置(1,1)", desc: "grid[1][1] = 5 + min(2,4) = 5+2 = 7", line: 14, state: {grid: "[[1,4,5],[2,7,1],[6,2,1]]"}},
+      {title: "步骤5：填充位置(1,2)", desc: "grid[1][2] = 1 + min(7,5) = 1+5 = 6", line: 17, state: {grid: "[[1,4,5],[2,7,6],[6,2,1]]"}},
+      {title: "步骤6：填充位置(2,1)", desc: "grid[2][1] = 2 + min(7,6) = 2+6 = 8", line: 17, state: {grid: "[[1,4,5],[2,7,6],[6,8,1]]"}},
+      {title: "步骤7：填充位置(2,2)", desc: "grid[2][2] = 1 + min(8,6) = 1+6 = 7", line: 17, state: {grid: "[[1,4,5],[2,7,6],[6,8,7]]"}},
+      {title: "步骤8：返回结果", desc: "grid[2][2] = 7 即为最小路径和", line: 19, state: {result: "7"}},
+    ];
+    
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach(line => {
+      const div = document.createElement('div');
+      div.className = 'code-line';
+      div.dataset.line = line.num;
+      div.innerHTML = `<span class="line-number">${line.num}</span><span class="line-content">${line.content}</span>`;
+      div.onclick = () => highlightStepByLine(line.num);
+      codeBlock.appendChild(div);
+    });
+    
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const div = document.createElement('div');
+      div.className = 'viz-step';
+      div.dataset.step = idx;
+      div.innerHTML = `
+        <div class="viz-step-title">${step.title}</div>
+        <div class="viz-step-desc">${step.desc}</div>
+        <div class="viz-state">对应代码行: ${step.line}</div>
+      `;
+      div.onclick = () => highlightStep(idx);
+      vizSteps.appendChild(div);
+    });
+    
+    let currentStep = -1;
+    
+    function highlightStep(idx) {
+      // 清除之前的高亮
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      
+      // 高亮当前步骤
+      const stepEl = document.querySelector(`.viz-step[data-step="${idx}"]`);
+      if (stepEl) stepEl.classList.add('active');
+      
+      // 高亮对应代码行
+      const lineNum = steps[idx].line;
+      const codeEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+      if (codeEl) {
+        codeEl.classList.add('active');
+        codeEl.scrollIntoView({behavior: 'smooth', block: 'center'});
+      }
+      
+      currentStep = idx;
+    }
+    
+    function highlightStepByLine(lineNum) {
+      // 找到对应的步骤
+      const stepIdx = steps.findIndex(s => s.line === lineNum);
+      if (stepIdx !== -1) {
+        highlightStep(stepIdx);
+        // 滚动到对应的步骤
+        const stepEl = document.querySelector(`.viz-step[data-step="${stepIdx}"]`);
+        if (stepEl) stepEl.scrollIntoView({behavior: 'smooth', block: 'center'});
+      }
+    }
+    
+    // 默认高亮第一个步骤
+    highlightStep(0);
+  </script>
+</body>
+</html>

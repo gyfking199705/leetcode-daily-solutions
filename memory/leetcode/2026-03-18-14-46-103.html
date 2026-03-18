@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>LeetCode #103 - 二叉树的锯齿形层序遍历</title>
+  <style>
+    :root { --primary: #6366f1; --bg: #0f172a; --surface: #1e293b; --text: #f1f5f9; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); max-width: 1100px; margin: 0 auto; padding: 40px 20px; line-height: 1.7; }
+    .section { background: var(--surface); border-radius: 16px; padding: 28px; margin-bottom: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3); }
+    .section h2 { color: var(--primary); margin-top: 0; font-size: 1.5rem; }
+    pre { background: #0d1117; border-radius: 12px; padding: 20px; overflow-x: auto; font-size: 14px; }
+    .code-line { display: flex; padding: 3px 0; cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; }
+    .code-line:hover { background: rgba(255,255,255,0.05); }
+    .code-line.active { background: rgba(99, 102, 241, 0.3); border-left-color: #6366f1; }
+    .line-number { color: #484f58; min-width: 40px; text-align: right; padding-right: 16px; user-select: none; }
+    .code-content { flex: 1; }
+    .viz-container { display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; margin: 20px 0; }
+    .viz-step { padding: 14px; margin: 10px 0; border-radius: 10px; background: #334155; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+    .viz-step:hover { transform: translateX(4px); }
+    .viz-step.active { border-color: var(--primary); background: rgba(99, 102, 241, 0.3); }
+    .viz-step-title { font-weight: bold; color: #818cf8; margin-bottom: 6px; }
+    .viz-step-desc { font-size: 14px; color: #94a3b8; }
+    .viz-state { font-size: 12px; color: #64748b; margin-top: 8px; font-family: monospace; }
+    .problem-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px; }
+    .problem-card { background: var(--bg); border-radius: 12px; padding: 16px; border: 1px solid #475569; transition: all 0.2s; text-decoration: none; color: inherit; display: block; }
+    .problem-card:hover { border-color: var(--primary); transform: translateY(-4px); box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2); }
+    .problem-number { font-size: 12px; color: var(--primary); font-weight: bold; }
+    .problem-title { font-weight: 600; margin: 8px 0; }
+    .problem-tag { font-size: 12px; color: #64748b; }
+    .keyword { color: #ff7b72; } .function { color: #d2a8ff; } .string { color: #a5d6ff; }
+    .number { color: #79c0ff; } .comment { color: #8b949e; font-style: italic; } .class { color: #ffa657; }
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #475569; }
+    th { color: var(--primary); font-weight: 600; }
+    .tree-viz { background: #1e293b; border-radius: 12px; padding: 20px; margin: 16px 0; }
+    .tree-level { display: flex; justify-content: center; gap: 20px; margin: 12px 0; flex-wrap: wrap; }
+    .tree-node { width: 40px; height: 40px; border-radius: 50%; background: #334155; display: flex; align-items: center; justify-content: center; font-weight: bold; transition: all 0.3s; border: 2px solid #475569; }
+    .tree-node.active { background: var(--primary); border-color: #818cf8; transform: scale(1.1); }
+    .tree-node.visited { background: #059669; border-color: #34d399; }
+    .level-label { text-align: center; color: #64748b; font-size: 12px; margin-bottom: 8px; }
+    .arrow-indicator { color: var(--primary); font-size: 20px; margin: 0 10px; }
+  </style>
+</head>
+<body>
+  <h1>🌲 LeetCode #103 - 二叉树的锯齿形层序遍历</h1>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给你二叉树的根节点 <code>root</code>，返回其节点值的<strong>锯齿形层序遍历</strong>。（即先从左往右，再从右往左进行下一层遍历，以此类推，层与层之间交替进行）。</p>
+    <p style="margin-top: 16px; padding: 16px; background: rgba(99,102,241,0.1); border-radius: 8px;">
+      <strong>示例：</strong>输入: root = [3,9,20,null,null,15,7]<br>
+      输出: [[3],[20,9],[15,7]]
+    </p>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    
+    <div class="tree-viz">
+      <div class="level-label">Level 0 (Left→Right)</div>
+      <div class="tree-level">
+        <div class="tree-node" id="node-3">3</div>
+      </div>
+      <div class="level-label">Level 1 (Right→Left)</div>
+      <div class="tree-level">
+        <div class="tree-node" id="node-9">9</div>
+        <div class="tree-node" id="node-20">20</div>
+      </div>
+      <div class="level-label">Level 2 (Left→Right)</div>
+      <div class="tree-level">
+        <div class="tree-node" id="node-15">15</div>
+        <div class="tree-node" id="node-7">7</div>
+      </div>
+    </div>
+    
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <div class="viz-step" data-line="5">
+          <div class="viz-step-title">步骤1: 初始化结果列表</div>
+          <div class="viz-step-desc">创建空列表result，用于存储每层遍历结果</div>
+          <div class="viz-state">result = []</div>
+        </div>
+        <div class="viz-step" data-line="7">
+          <div class="viz-step-title">步骤2: 处理空树情况</div>
+          <div class="viz-step-desc">如果根节点为空，直接返回空列表</div>
+          <div class="viz-state">if not root: return []</div>
+        </div>
+        <div class="viz-step" data-line="10">
+          <div class="viz-step-title">步骤3: 初始化队列</div>
+          <div class="viz-step-desc">将根节点加入队列，开始BFS遍历</div>
+          <div class="viz-state">queue = [root], level = 0</div>
+        </div>
+        <div class="viz-step" data-line="12">
+          <div class="viz-step-title">步骤4: 开始层序遍历</div>
+          <div class="viz-step-desc">当队列不为空时，处理当前层的所有节点</div>
+          <div class="viz-state">while queue:</div>
+        </div>
+        <div class="viz-step" data-line="13">
+          <div class="viz-step-title">步骤5: 记录当前层节点数</div>
+          <div class="viz-step-desc">level_size = 当前队列长度，表示本层节点数</div>
+          <div class="viz-state">level_size = len(queue)</div>
+        </div>
+        <div class="viz-step" data-line="14">
+          <div class="viz-step-title">步骤6: 初始化当前层列表</div>
+          <div class="viz-step-desc">创建空列表存储当前层的节点值</div>
+          <div class="viz-state">current_level = []</div>
+        </div>
+        <div class="viz-step" data-line="15">
+          <div class="viz-step-title">步骤7: 处理当前层所有节点</div>
+          <div class="viz-step-desc">遍历level_size次，处理本层每个节点</div>
+          <div class="viz-state">for _ in range(level_size):</div>
+        </div>
+        <div class="viz-step" data-line="16">
+          <div class="viz-step-title">步骤8: 取出队首节点</div>
+          <div class="viz-step-desc">从队列左侧弹出节点进行处理</div>
+          <div class="viz-state">node = queue.pop(0)</div>
+        </div>
+        <div class="viz-step" data-line="17">
+          <div class="viz-step-title">步骤9: 添加节点值到当前层</div>
+          <div class="viz-step-desc">将节点值追加到current_level</div>
+          <div class="viz-state">current_level.append(node.val)</div>
+        </div>
+        <div class="viz-step" data-line="18-19">
+          <div class="viz-step-title">步骤10: 子节点入队</div>
+          <div class="viz-step-desc">将左右子节点依次加入队列</div>
+          <div class="viz-state">queue.extend([left, right])</div>
+        </div>
+        <div class="viz-step" data-line="20">
+          <div class="viz-step-title">步骤11: 判断翻转方向</div>
+          <div class="viz-step-desc">根据层数奇偶性决定是否翻转</div>
+          <div class="viz-state">if level % 2 == 1: 翻转</div>
+        </div>
+        <div class="viz-step" data-line="21">
+          <div class="viz-step-title">步骤12: 添加层结果</div>
+          <div class="viz-step-desc">将当前层结果加入result，层数+1</div>
+          <div class="viz-state">result.append(current_level)</div>
+        </div>
+        <div class="viz-step" data-line="22">
+          <div class="viz-step-title">步骤13: 层数递增</div>
+          <div class="viz-step-desc">进入下一层遍历</div>
+          <div class="viz-state">level += 1</div>
+        </div>
+        <div class="viz-step" data-line="24">
+          <div class="viz-step-title">步骤14: 返回结果</div>
+          <div class="viz-step-desc">所有层遍历完成，返回锯齿形结果</div>
+          <div class="viz-state">return result</div>
+        </div>
+      </div>
+      
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre><code id="codeBlock">
+<span class="code-line" data-step="1"><span class="line-number">1</span><span class="code-content"><span class="keyword">class</span> <span class="class">Solution</span>:</span></span>
+<span class="code-line" data-step="1"><span class="line-number">2</span><span class="code-content">    <span class="keyword">def</span> <span class="function">zigzagLevelOrder</span>(self, root: Optional[TreeNode]) -> List[List[<span class="keyword">int</span>]]:</span></span>
+<span class="code-line" data-step="1"><span class="line-number">3</span><span class="code-content">        <span class="comment"># 锯齿形层序遍历：奇数层翻转</span></span></span>
+<span class="code-line" data-step="1"><span class="line-number">4</span><span class="code-content">        </span></span>
+<span class="code-line" data-step="1"><span class="line-number">5</span><span class="code-content">        result = []  <span class="comment"># 存储最终结果</span></span></span>
+<span class="code-line" data-step="1"><span class="line-number">6</span><span class="code-content">        </span></span>
+<span class="code-line" data-step="2"><span class="line-number">7</span><span class="code-content">        <span class="keyword">if</span> <span class="keyword">not</span> root:  <span class="comment"># 处理空树</span></span></span>
+<span class="code-line" data-step="2"><span class="line-number">8</span><span class="code-content">            <span class="keyword">return</span> result</span></span>
+<span class="code-line" data-step="2"><span class="line-number">9</span><span class="code-content">        </span></span>
+<span class="code-line" data-step="3"><span class="line-number">10</span><span class="code-content">        queue = [root]  <span class="comment"># BFS队列</span></span></span>
+<span class="code-line" data-step="3"><span class="line-number">11</span><span class="code-content">        level = <span class="number">0</span>  <span class="comment"># 当前层数，从0开始</span></span></span>
+<span class="code-line" data-step="3"><span class="line-number">12</span><span class="code-content">        </span></span>
+<span class="code-line" data-step="4"><span class="line-number">13</span><span class="code-content">        <span class="keyword">while</span> queue:  <span class="comment"># 当队列不为空</span></span></span>
+<span class="code-line" data-step="5"><span class="line-number">14</span><span class="code-content">            level_size = <span class="function">len</span>(queue)  <span class="comment"># 当前层节点数</span></span></span>
+<span class="code-line" data-step="6"><span class="line-number">15</span><span class="code-content">            current_level = []  <span class="comment"># 当前层节点值</span></span></span>
+<span class="code-line" data-step="6"><span class="line-number">16</span><span class="code-content">            </span></span>
+<span class="code-line" data-step="7"><span class="line-number">17</span><span class="code-content">            <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="function">range</span>(level_size):  <span class="comment"># 处理本层所有节点</span></span></span>
+<span class="code-line" data-step="8"><span class="line-number">18</span><span class="code-content">                node = queue.pop(<span class="number">0</span>)  <span class="comment"># 取出队首</span></span></span>
+<span class="code-line" data-step="9"><span class="line-number">19</span><span class="code-content">                current_level.append(node.val)  <span class="comment"># 记录节点值</span></span></span>
+<span class="code-line" data-step="9"><span class="line-number">20</span><span class="code-content">                </span></span>
+<span class="code-line" data-step="10"><span class="line-number">21</span><span class="code-content">                <span class="comment"># 子节点入队（先左后右）</span></span></span>
+<span class="code-line" data-step="10"><span class="line-number">22</span><span class="code-content">                <span class="keyword">if</span> node.left:</span></span>
+<span class="code-line" data-step="10"><span class="line-number">23</span><span class="code-content">                    queue.append(node.left)</span></span>
+<span class="code-line" data-step="10"><span class="line-number">24</span><span class="code-content">                <span class="keyword">if</span> node.right:</span></span>
+<span class="code-line" data-step="10"><span class="line-number">25</span><span class="code-content">                    queue.append(node.right)</span></span>
+<span class="code-line" data-step="10"><span class="line-number">26</span><span class="code-content">            </span></span>
+<span class="code-line" data-step="11"><span class="line-number">27</span><span class="code-content">            <span class="comment"># 奇数层翻转（锯齿形关键）</span></span></span>
+<span class="code-line" data-step="11"><span class="line-number">28</span><span class="code-content">            <span class="keyword">if</span> level % <span class="number">2</span> == <span class="number">1</span>:</span></span>
+<span class="code-line" data-step="11"><span class="line-number">29</span><span class="code-content">                current_level.reverse()</span></span>
+<span class="code-line" data-step="11"><span class="line-number">30</span><span class="code-content">            </span></span>
+<span class="code-line" data-step="12"><span class="line-number">31</span><span class="code-content">            result.append(current_level)  <span class="comment"># 添加层结果</span></span></span>
+<span class="code-line" data-step="13"><span class="line-number">32</span><span class="code-content">            level += <span class="number">1</span>  <span class="comment"># 进入下一层</span></span></span>
+<span class="code-line" data-step="13"><span class="line-number">33</span><span class="code-content">        </span></span>
+<span class="code-line" data-step="14"><span class="line-number">34</span><span class="code-content">        <span class="keyword">return</span> result</span></span>
+        </code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table>
+      <tr>
+        <th>指标</th>
+        <th>复杂度</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>时间复杂度</td>
+        <td>O(N)</td>
+        <td>每个节点恰好被访问一次，N为节点总数</td>
+      </tr>
+      <tr>
+        <td>空间复杂度</td>
+        <td>O(N)</td>
+        <td>队列最多存储一层的节点数，最坏情况下为N/2（完全二叉树最底层）</td>
+      </tr>
+      <tr>
+        <td>翻转操作</td>
+        <td>O(L)</td>
+        <td>每层最多翻转L个元素，L为当前层节点数，总体仍是O(N)</td>
+      </tr>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>💡 核心思路</h2>
+    <ul>
+      <li><strong>标准BFS</strong>：使用队列进行层序遍历，逐层处理节点</li>
+      <li><strong>层数标记</strong>：用<code>level</code>变量记录当前层数（从0开始）</li>
+      <li><strong>翻转策略</strong>：奇数层（level % 2 == 1）时翻转当前层结果</li>
+      <li><strong>关键点</strong>：子节点入队顺序<strong>始终先左后右</strong>，翻转只影响输出不影响遍历</li>
+    </ul>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/binary-tree-level-order-traversal/" class="problem-card" target="_blank">
+        <div class="problem-number">#102</div>
+        <div class="problem-title">二叉树的层序遍历</div>
+        <div class="problem-tag">BFS基础版 ⭐</div>
+      </a>
+      <a href="https://leetcode.cn/problems/binary-tree-level-order-traversal-ii/" class="problem-card" target="_blank">
+        <div class="problem-number">#107</div>
+        <div class="problem-title">二叉树的层序遍历 II</div>
+        <div class="problem-tag">自底向上遍历</div>
+      </a>
+      <a href="https://leetcode.cn/problems/populating-next-right-pointers-in-each-node-ii/" class="problem-card" target="_blank">
+        <div class="problem-number">#117</div>
+        <div class="problem-title">填充每个节点的下一个右侧节点指针 II</div>
+        <div class="problem-tag">层序遍历变形</div>
+      </a>
+      <a href="https://leetcode.cn/problems/binary-tree-right-side-view/" class="problem-card" target="_blank">
+        <div class="problem-number">#199</div>
+        <div class="problem-title">二叉树的右视图</div>
+        <div class="problem-tag">只取每层最右</div>
+      </a>
+      <a href="https://leetcode.cn/problems/average-of-levels-in-binary-tree/" class="problem-card" target="_blank">
+        <div class="problem-number">#637</div>
+        <div class="problem-title">二叉树的层平均值</div>
+        <div class="problem-tag">层序遍历应用</div>
+      </a>
+      <a href="https://leetcode.cn/problems/find-largest-value-in-each-tree-row/" class="problem-card" target="_blank">
+        <div class="problem-number">#515</div>
+        <div class="problem-title">在每个树行中找最大值</div>
+        <div class="problem-tag">层序遍历应用</div>
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // 步骤与代码行映射
+    const stepMap = {
+      1: [5],
+      2: [7, 8],
+      3: [10, 11],
+      4: [13],
+      5: [14],
+      6: [15],
+      7: [17],
+      8: [18],
+      9: [19],
+      10: [21, 22, 23, 24, 25],
+      11: [27, 28, 29],
+      12: [31],
+      13: [32],
+      14: [34]
+    };
+    
+    const codeLines = document.querySelectorAll('.code-line');
+    const vizSteps = document.querySelectorAll('.viz-step');
+    
+    // 点击可视化步骤
+    vizSteps.forEach((step, index) => {
+      step.addEventListener('click', () => {
+        // 清除所有高亮
+        vizSteps.forEach(s => s.classList.remove('active'));
+        codeLines.forEach(l => l.classList.remove('active'));
+        
+        // 高亮当前步骤
+        step.classList.add('active');
+        
+        // 高亮对应代码行
+        const stepNum = index + 1;
+        const lineNums = stepMap[stepNum] || [];
+        lineNums.forEach(lineNum => {
+          const line = document.querySelector(`.code-line:nth-child(${lineNum})`);
+          if (line) line.classList.add('active');
+        });
+      });
+    });
+    
+    // 点击代码行
+    codeLines.forEach((line, index) => {
+      line.addEventListener('click', () => {
+        // 清除所有高亮
+        vizSteps.forEach(s => s.classList.remove('active'));
+        codeLines.forEach(l => l.classList.remove('active'));
+        
+        // 高亮当前代码行
+        line.classList.add('active');
+        
+        // 找到对应的步骤
+        const lineNum = index + 1;
+        for (const [stepNum, lines] of Object.entries(stepMap)) {
+          if (lines.includes(lineNum)) {
+            const step = vizSteps[parseInt(stepNum) - 1];
+            if (step) {
+              step.classList.add('active');
+              step.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            break;
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

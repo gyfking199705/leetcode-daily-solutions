@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #151 - 反转字符串中的单词</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --primary-light: #818cf8;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --surface-light: #334155;
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --error: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1100px; 
+      margin: 0 auto; 
+      padding: 40px 20px;
+      line-height: 1.6;
+    }
+    h1 { 
+      font-size: 2rem; 
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin-bottom: 32px;
+    }
+    .tag {
+      display: inline-block;
+      background: var(--surface);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+    .tag.difficulty-medium { background: linear-gradient(135deg, #f59e0b33, #f59e0b11); border: 1px solid #f59e0b55; color: #fbbf24; }
+    .tag.method { background: linear-gradient(135deg, #6366f133, #6366f111); border: 1px solid #6366f155; }
+    
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 0;
+      overflow-x: auto;
+      border: 1px solid #30363d;
+      margin: 16px 0;
+    }
+    code {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 4px 20px; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.03); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.2); 
+      border-left-color: var(--primary);
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 40px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+      font-size: 12px;
+      line-height: 1.8;
+    }
+    
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1.2fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 900px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    
+    .viz-steps {
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 16px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    .viz-step { 
+      padding: 14px 16px; 
+      margin: 8px 0; 
+      border-radius: 10px; 
+      background: var(--surface-light); 
+      cursor: pointer; 
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .viz-step:hover { 
+      background: rgba(99, 102, 241, 0.15);
+      transform: translateX(4px);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.25);
+    }
+    .viz-step .step-title {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .viz-step .step-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .viz-step .step-state {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: var(--primary-light);
+    }
+    
+    .code-container {
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .code-container h3 {
+      margin-top: 0;
+      color: var(--primary-light);
+      font-size: 1rem;
+    }
+    
+    .demo-visual {
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 16px 0;
+      text-align: center;
+      font-family: monospace;
+      font-size: 1.2rem;
+    }
+    .demo-visual .char {
+      display: inline-block;
+      width: 28px;
+      height: 36px;
+      line-height: 36px;
+      margin: 2px;
+      background: var(--surface-light);
+      border-radius: 6px;
+      transition: all 0.3s;
+    }
+    .demo-visual .char.space {
+      background: transparent;
+      width: 10px;
+    }
+    .demo-visual .char.highlight {
+      background: var(--primary);
+      transform: scale(1.1);
+    }
+    .demo-visual .arrow {
+      color: var(--primary);
+      font-size: 1.5rem;
+      margin: 0 10px;
+    }
+    
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+    }
+    .complexity-table th, .complexity-table td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--surface-light);
+    }
+    .complexity-table th {
+      color: var(--primary-light);
+      font-weight: 600;
+    }
+    .complexity-table .highlight {
+      color: var(--success);
+      font-weight: 600;
+    }
+    
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 18px; 
+      border: 1px solid #475569; 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block;
+      cursor: pointer;
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+    }
+    .problem-card .card-title {
+      font-weight: 600;
+      color: var(--primary-light);
+      margin-bottom: 6px;
+    }
+    .problem-card .card-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .problem-card .card-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: var(--surface-light);
+      margin-top: 10px;
+    }
+    
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; font-style: italic; }
+    .class { color: #ffa657; }
+    .builtin { color: #79c0ff; }
+    
+    .example-box {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 16px;
+      margin: 12px 0;
+      border-left: 4px solid var(--primary);
+    }
+    .example-box .label {
+      color: var(--primary-light);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .algo-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 20px;
+      background: var(--bg);
+      border-radius: 12px;
+      margin: 16px 0;
+    }
+    .flow-step {
+      background: var(--surface-light);
+      padding: 12px 20px;
+      border-radius: 10px;
+      text-align: center;
+      min-width: 100px;
+    }
+    .flow-step .step-num {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      background: var(--primary);
+      border-radius: 50%;
+      font-size: 0.85rem;
+      line-height: 24px;
+      margin-bottom: 6px;
+    }
+    .flow-arrow {
+      color: var(--primary);
+      font-size: 1.5rem;
+    }
+    
+    .state-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background: rgba(99, 102, 241, 0.2);
+      border-radius: 4px;
+      font-size: 0.85rem;
+      color: var(--primary-light);
+      margin-right: 8px;
+    }
+    
+    .two-pointer-viz {
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 16px 0;
+    }
+    .pointer-array {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      margin: 20px 0;
+    }
+    .pointer-cell {
+      width: 40px;
+      height: 40px;
+      background: var(--surface-light);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: monospace;
+      font-weight: 600;
+      position: relative;
+      transition: all 0.3s;
+    }
+    .pointer-cell.left::before {
+      content: 'L';
+      position: absolute;
+      top: -20px;
+      color: var(--success);
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+    .pointer-cell.right::before {
+      content: 'R';
+      position: absolute;
+      top: -20px;
+      color: var(--error);
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+    .pointer-cell.both::before {
+      content: 'L,R';
+      position: absolute;
+      top: -20px;
+      color: var(--warning);
+      font-size: 0.65rem;
+      font-weight: bold;
+    }
+    .pointer-cell.active {
+      background: var(--primary);
+    }
+    .pointer-cell.swapped {
+      background: var(--success);
+    }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #151 - 反转字符串中的单词</h1>
+  <p class="subtitle">Reverse Words in a String</p>
+  
+  <div style="margin-bottom: 24px;">
+    <span class="tag difficulty-medium">中等</span>
+    <span class="tag method">双指针</span>
+    <span class="tag method">字符串</span>
+    <span class="tag method">原地操作</span>
+  </div>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给你一个字符串 <code>s</code> ，请你反转字符串中 <strong>单词</strong> 的顺序。</p>
+    <p><strong>单词</strong> 是由非空格字符组成的字符串。<code>s</code> 中使用至少一个空格将字符串中的 <strong>单词</strong> 分隔开。</p>
+    <p>返回 <strong>单词</strong> 顺序颠倒且 <strong>单词</strong> 之间用单个空格连接的结果字符串。</p>
+    <p><strong>注意：</strong>输入字符串 <code>s</code> 中可能会存在前导空格、尾随空格或者单词间的多个空格。返回的结果字符串中，单词间应当仅用单个空格分隔，且不包含任何额外的空格。</p>
+    
+    <div class="example-box">
+      <div class="label">示例 1：</div>
+      <p><strong>输入：</strong>s = "the sky is blue"</p>
+      <p><strong>输出：</strong>"blue is sky the"</p>
+    </div>
+    
+    <div class="example-box">
+      <div class="label">示例 2：</div>
+      <p><strong>输入：</strong>s = "  hello world  "</p>
+      <p><strong>输出：</strong>"world hello"</p>
+      <p><strong>解释：</strong>反转后的字符串中不能存在前导空格和尾随空格。</p>
+    </div>
+    
+    <div class="example-box">
+      <div class="label">示例 3：</div>
+      <p><strong>输入：</strong>s = "a good   example"</p>
+      <p><strong>输出：</strong>"example good a"</p>
+      <p><strong>解释：</strong>如果两个单词间有多余的空格，反转后的字符串需要将单词间的空格减少到仅有一个。</p>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🧠 算法思路</h2>
+    <p>这道题的经典解法是「双指针法」，整体思路分为三步：</p>
+    
+    <div class="algo-flow">
+      <div class="flow-step">
+        <div class="step-num">1</div>
+        <div>去除首尾空格</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="step-num">2</div>
+        <div>翻转整个字符串</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="step-num">3</div>
+        <div>翻转每个单词</div>
+      </div>
+    </div>
+    
+    <p><strong>核心思想：</strong>两次翻转法</p>
+    <ul>
+      <li>将整个字符串翻转后，单词的顺序就对了，但每个单词内部的字符是反的</li>
+      <li>再将每个单词内部翻转一次，就得到了最终结果</li>
+      <li>同时需要处理多余空格：通过双指针将有效字符移动到数组前面</li>
+    </ul>
+    
+    <div class="demo-visual">
+      <div style="margin-bottom: 12px; color: var(--text-muted);">演示："the sky is blue"</div>
+      <div style="margin-bottom: 8px;">
+        <span class="char">t</span><span class="char">h</span><span class="char">e</span><span class="char space"></span><span class="char">s</span><span class="char">k</span><span class="char">y</span><span class="char space"></span><span class="char">i</span><span class="char">s</span><span class="char space"></span><span class="char">b</span><span class="char">l</span><span class="char">u</span><span class="char">e</span>
+      </div>
+      <div class="arrow">↓ 翻转整个字符串</div>
+      <div style="margin: 8px 0;">
+        <span class="char">e</span><span class="char">u</span><span class="char">l</span><span class="char">b</span><span class="char space"></span><span class="char">s</span><span class="char">i</span><span class="char space"></span><span class="char">y</span><span class="char">k</span><span class="char">s</span><span class="char space"></span><span class="char">e</span><span class="char">h</span><span class="char">t</span>
+      </div>
+      <div class="arrow">↓ 翻转每个单词</div>
+      <div style="margin-top: 8px;">
+        <span class="char">b</span><span class="char">l</span><span class="char">u</span><span class="char">e</span><span class="char space"></span><span class="char">i</span><span class="char">s</span><span class="char space"></span><span class="char">s</span><span class="char">k</span><span class="char">y</span><span class="char space"></span><span class="char">t</span><span class="char">h</span><span class="char">e</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程</h2>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre><code id="codeBlock">
+<span class="code-line" data-line="1"><span class="line-number">1</span><span class="keyword">class</span> <span class="class">Solution</span>:</span>
+<span class="code-line" data-line="2"><span class="line-number">2</span>    <span class="keyword">def</span> <span class="function">reverseWords</span>(<span class="builtin">self</span>, s: <span class="builtin">str</span>) -> <span class="builtin">str</span>:</span>
+<span class="code-line" data-line="3"><span class="line-number">3</span>        <span class="comment"># 去除首尾空格并转为字符列表</span></span>
+<span class="code-line" data-line="4"><span class="line-number">4</span>        chars = <span class="builtin">list</span>(s.strip())</span>
+<span class="code-line" data-line="5"><span class="line-number">5</span>        n = <span class="builtin">len</span>(chars)</span>
+<span class="code-line" data-line="6"><span class="line-number">6</span>        </span>
+<span class="code-line" data-line="7"><span class="line-number">7</span>        <span class="comment"># 步骤1：清理多余空格（双指针）</span></span>
+<span class="code-line" data-line="8"><span class="line-number">8</span>        i, j = <span class="number">0</span>, <span class="number">0</span></span>
+<span class="code-line" data-line="9"><span class="line-number">9</span>        <span class="keyword">while</span> j < n:</span>
+<span class="code-line" data-line="10"><span class="line-number">10</span>            <span class="keyword">if</span> chars[j] != <span class="string">' '</span>:</span>
+<span class="code-line" data-line="11"><span class="line-number">11</span>                <span class="comment"># 不是空格，直接复制</span></span>
+<span class="code-line" data-line="12"><span class="line-number">12</span>                chars[i] = chars[j]</span>
+<span class="code-line" data-line="13"><span class="line-number">13</span>                i += <span class="number">1</span></span>
+<span class="code-line" data-line="14"><span class="line-number">14</span>            <span class="keyword">elif</span> i > <span class="number">0</span> <span class="keyword">and</span> chars[i-<span class="number">1</span>] != <span class="string">' '</span>:</span>
+<span class="code-line" data-line="15"><span class="line-number">15</span>                <span class="comment"># 是空格，但前一个不是空格（单词间单个空格）</span></span>
+<span class="code-line" data-line="16"><span class="line-number">16</span>                chars[i] = chars[j]</span>
+<span class="code-line" data-line="17"><span class="line-number">17</span>                i += <span class="number">1</span></span>
+<span class="code-line" data-line="18"><span class="line-number">18</span>            j += <span class="number">1</span></span>
+<span class="code-line" data-line="19"><span class="line-number">19</span>        </span>
+<span class="code-line" data-line="20"><span class="line-number">20</span>        <span class="comment"># 截取有效部分</span></span>
+<span class="code-line" data-line="21"><span class="line-number">21</span>        chars = chars[:i]</span>
+<span class="code-line" data-line="22"><span class="line-number">22</span>        n = <span class="builtin">len</span>(chars)</span>
+<span class="code-line" data-line="23"><span class="line-number">23</span>        </span>
+<span class="code-line" data-line="24"><span class="line-number">24</span>        <span class="comment"># 步骤2：翻转整个字符串</span></span>
+<span class="code-line" data-line="25"><span class="line-number">25</span>        <span class="builtin">self</span>._reverse(chars, <span class="number">0</span>, n - <span class="number">1</span>)</span>
+<span class="code-line" data-line="26"><span class="line-number">26</span>        </span>
+<span class="code-line" data-line="27"><span class="line-number">27</span>        <span class="comment"># 步骤3：翻转每个单词</span></span>
+<span class="code-line" data-line="28"><span class="line-number">28</span>        start = <span class="number">0</span></span>
+<span class="code-line" data-line="29"><span class="line-number">29</span>        <span class="keyword">while</span> start < n:</span>
+<span class="code-line" data-line="30"><span class="line-number">30</span>            <span class="comment"># 找单词结尾（空格或字符串末尾）</span></span>
+<span class="code-line" data-line="31"><span class="line-number">31</span>            end = start</span>
+<span class="code-line" data-line="32"><span class="line-number">32</span>            <span class="keyword">while</span> end < n <span class="keyword">and</span> chars[end] != <span class="string">' '</span>:</span>
+<span class="code-line" data-line="33"><span class="line-number">33</span>                end += <span class="number">1</span></span>
+<span class="code-line" data-line="34"><span class="line-number">34</span>            <span class="comment"># 翻转当前单词</span></span>
+<span class="code-line" data-line="35"><span class="line-number">35</span>            <span class="builtin">self</span>._reverse(chars, start, end - <span class="number">1</span>)</span>
+<span class="code-line" data-line="36"><span class="line-number">36</span>            start = end + <span class="number">1</span></span>
+<span class="code-line" data-line="37"><span class="line-number">37</span>        </span>
+<span class="code-line" data-line="38"><span class="line-number">38</span>        <span class="keyword">return</span> <span class="string">''</span>.join(chars)</span>
+<span class="code-line" data-line="39"><span class="line-number">39</span>    </span>
+<span class="code-line" data-line="40"><span class="line-number">40</span>    <span class="keyword">def</span> <span class="function">_reverse</span>(<span class="builtin">self</span>, chars: <span class="builtin">list</span>, left: <span class="builtin">int</span>, right: <span class="builtin">int</span>) -> <span class="builtin">None</span>:</span>
+<span class="code-line" data-line="41"><span class="line-number">41</span>        <span class="comment"># 双指针翻转字符数组的[left, right]区间</span></span>
+<span class="code-line" data-line="42"><span class="line-number">42</span>        <span class="keyword">while</span> left < right:</span>
+<span class="code-line" data-line="43"><span class="line-number">43</span>            chars[left], chars[right] = chars[right], chars[left]</span>
+<span class="code-line" data-line="44"><span class="line-number">44</span>            left += <span class="number">1</span></span>
+<span class="code-line" data-line="45"><span class="line-number">45</span>            right -= <span class="number">1</span></span>
+        </code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <tr>
+        <th>指标</th>
+        <th>值</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>时间复杂度</td>
+        <td class="highlight">O(n)</td>
+        <td>遍历字符串3次（清理空格、整体翻转、单词翻转）</td>
+      </tr>
+      <tr>
+        <td>空间复杂度</td>
+        <td class="highlight">O(n)</td>
+        <td>需要字符数组存储结果（Python字符串不可变）</td>
+      </tr>
+    </table>
+    
+    <p><strong>优化思考：</strong></p>
+    <ul>
+      <li>在C++/Java中可以实现 <strong>O(1)</strong> 额外空间，因为可以直接修改输入字符数组</li>
+      <li>Python由于字符串不可变，必须创建新列表，所以空间复杂度为 O(n)</li>
+    </ul>
+  </div>
+  
+  <div class="section">
+    <h2>🎯 关键要点总结</h2>
+    <ul>
+      <li><span class="state-badge">双指针</span>清理多余空格时，使用快慢指针技巧，将有效字符前移</li>
+      <li><span class="state-badge">两次翻转</span>先整体翻转，再逐个单词翻转，是字符串单词反转的经典技巧</li>
+      <li><span class="state-badge">边界处理</span>注意处理首尾空格、连续多个空格的情况</li>
+      <li><span class="state-badge">单词识别</span>通过空格位置识别单词边界，翻转指定区间</li>
+    </ul>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/reverse-string/" target="_blank" class="problem-card">
+        <div class="card-title">#344 反转字符串</div>
+        <div class="card-desc">基础的双指针翻转，学习原地交换元素</div>
+        <span class="card-tag">简单</span>
+        <span class="card-tag">双指针</span>
+      </a>
+      <a href="https://leetcode.cn/problems/reverse-string-ii/" target="_blank" class="problem-card">
+        <div class="card-title">#541 反转字符串 II</div>
+        <div class="card-desc">每2k个字符反转前k个，练习区间翻转</div>
+        <span class="card-tag">简单</span>
+        <span class="card-tag">字符串</span>
+      </a>
+      <a href="https://leetcode.cn/problems/reverse-words-in-a-string-iii/" target="_blank" class="problem-card">
+        <div class="card-title">#557 反转字符串中的单词 III</div>
+        <div class="card-desc">只翻转每个单词，不翻转单词顺序，本题简化版</div>
+        <span class="card-tag">简单</span>
+        <span class="card-tag">字符串</span>
+      </a>
+      <a href="https://leetcode.cn/problems/reverse-only-letters/" target="_blank" class="problem-card">
+        <div class="card-title">#917 仅仅反转字母</div>
+        <div class="card-desc">只翻转字母，非字母字符保持原位</div>
+        <span class="card-tag">简单</span>
+        <span class="card-tag">双指针</span>
+      </a>
+      <a href="https://leetcode.cn/problems/trapping-rain-water/" target="_blank" class="problem-card">
+        <div class="card-title">#42 接雨水</div>
+        <div class="card-desc">双指针经典题目，左右夹逼</div>
+        <span class="card-tag">困难</span>
+        <span class="card-tag">双指针</span>
+      </a>
+      <a href="https://leetcode.cn/problems/move-zeroes/" target="_blank" class="problem-card">
+        <div class="card-title">#283 移动零</div>
+        <div class="card-desc">快慢指针将非零元素前移，类似的数组处理技巧</div>
+        <span class="card-tag">简单</span>
+        <span class="card-tag">双指针</span>
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // 步骤与代码行映射
+    const steps = [
+      {title: "初始化", desc: "去除首尾空格，转为字符列表", line: 4, state: {chars: "['a',' ','g','o','o','d',' ','e','x','a','m','p','l','e']", n: 14}},
+      {title: "清理空格 - 双指针初始化", desc: "i指向写入位置，j指向读取位置", line: 8, state: {i: 0, j: 0, chars: "[a, ,g,o,o,d, ,e,x,a,m,p,l,e]"}},
+      {title: "清理空格 - 遍历字符", desc: "j遍历整个字符数组", line: 9, state: {action: "进入循环", condition: "j < n"}},
+      {title: "清理空格 - 非空格字符", desc: "遇到'a'，复制到位置i", line: 10, state: {chars[j]: "'a'", "chars[j] != ' '": true}},
+      {title: "清理空格 - 复制字符", desc: "chars[0]='a'，i自增", line: 12, state: {"chars[i]": "'a'", i: "-> 1"}},
+      {title: "清理空格 - 遇到空格", desc: "i>0且前一个不是空格，保留单个空格", line: 14, state: {condition: "i>0 && chars[i-1]!=' '", result: true}},
+      {title: "清理空格 - 跳过连续空格", desc: "遇到多个空格时，i不会增加，自然去重", line: 9, state: {action: "连续空格被跳过", i: "保持不变"}},
+      {title: "截取有效部分", desc: "去除末尾可能的多余空格", line: 21, state: {chars: "['a',' ','g','o','o','d',' ','e','x','a','m','p','l','e']", i: 14}},
+      {title: "翻转整个字符串", desc: "调用_reverse翻转[0, n-1]", line: 25, state: {left: 0, right: 13, action: "准备翻转"}},
+      {title: "整体翻转过程", desc: "首尾字符互换，向中间收敛", line: 42, state: {left: "0->6", right: "13->7", action: "交换chars[left]和chars[right]"}},
+      {title: "整体翻转结果", desc: "字符串变为'elpmaxe doog a'", line: 25, state: {result: "['e','l','p','m','a','x','e',' ','d','o','o','g',' ','a']"}},
+      {title: "翻转单词 - 初始化", desc: "start指向单词起始位置", line: 28, state: {start: 0, n: 14}},
+      {title: "找单词结尾", desc: "end移动到第一个空格前", line: 31, state: {end: "start=0", action: "找单词边界"}},
+      {title: "第一个单词边界", desc: "找到'example'的结尾", line: 32, state: {start: 0, end: 7, word: "'elpmaxe'->'example'"}},
+      {title: "翻转第一个单词", desc: "翻转chars[0..6]，'elpmaxe'→'example'", line: 35, state: {action: "_reverse(chars, 0, 6)"}},
+      {title: "第二个单词", desc: "start=8，找到'doog'", line: 29, state: {start: 8, end: 12, word: "'doog'->'good'"}},
+      {title: "翻转第二个单词", desc: "翻转chars[8..11]，'doog'→'good'", line: 35, state: {action: "_reverse(chars, 8, 11)"}},
+      {title: "第三个单词", desc: "start=13，找到'a'", line: 29, state: {start: 13, end: 14, word: "'a'"}},
+      {title: "翻转第三个单词", desc: "翻转chars[13..13]，单个字符不变", line: 35, state: {action: "_reverse(chars, 13, 13)"}},
+      {title: "返回结果", desc: "拼接字符数组为字符串", line: 38, state: {result: "'example good a'"}}
+    ];
+    
+    // 生成步骤HTML
+    const vizStepsContainer = document.getElementById('vizSteps');
+    steps.forEach((step, index) => {
+      const stepDiv = document.createElement('div');
+      stepDiv.className = 'viz-step';
+      stepDiv.dataset.line = step.line;
+      stepDiv.dataset.index = index;
+      
+      let stateHtml = '';
+      if (step.state) {
+        const statePairs = Object.entries(step.state);
+        stateHtml = '<div class="step-state">' + statePairs.map(([k, v]) => `${k}: ${v}`).join('<br>') + '</div>';
+      }
+      
+      stepDiv.innerHTML = `
+        <div class="step-title">${index + 1}. ${step.title}</div>
+        <div class="step-desc">${step.desc}</div>
+        ${stateHtml}
+      `;
+      
+      stepDiv.addEventListener('click', () => activateStep(index));
+      vizStepsContainer.appendChild(stepDiv);
+    });
+    
+    // 激活步骤
+    function activateStep(index) {
+      // 移除所有active
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      
+      // 添加active到当前步骤
+      const stepEl = document.querySelector(`.viz-step[data-index="${index}"]`);
+      if (stepEl) stepEl.classList.add('active');
+      
+      // 高亮对应代码行
+      const line = steps[index].line;
+      const codeLine = document.querySelector(`.code-line[data-line="${line}"]`);
+      if (codeLine) {
+        codeLine.classList.add('active');
+        codeLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      
+      // 滚动步骤到视图
+      stepEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    
+    // 代码行点击事件
+    document.querySelectorAll('.code-line').forEach(lineEl => {
+      lineEl.addEventListener('click', () => {
+        const line = parseInt(lineEl.dataset.line);
+        // 找到对应这个代码行的第一个步骤
+        const stepIndex = steps.findIndex(s => s.line === line);
+        if (stepIndex !== -1) {
+          activateStep(stepIndex);
+        }
+      });
+    });
+    
+    // 默认激活第一步
+    activateStep(0);
+  </script>
+</body>
+</html>

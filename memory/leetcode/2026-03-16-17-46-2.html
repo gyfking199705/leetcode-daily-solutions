@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #2 - 两数相加</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --secondary: #8b5cf6;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --surface-light: #334155;
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    body { 
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1100px; 
+      margin: 0 auto; 
+      padding: 40px 20px;
+      line-height: 1.6;
+    }
+    h1 { 
+      font-size: 2.2rem; 
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle { 
+      color: var(--text-muted); 
+      font-size: 1rem; 
+      margin-bottom: 32px;
+    }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+    .tag-medium { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+    .tag-easy { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+    .tag-hard { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 0;
+      overflow-x: auto;
+      border: 1px solid rgba(255,255,255,0.05);
+      margin: 16px 0;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 3px 20px;
+      cursor: pointer; 
+      transition: all 0.2s ease;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.9rem;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.25); 
+      border-left: 3px solid var(--primary); 
+      margin-left: -3px;
+      padding-left: 17px;
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 40px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+      font-size: 0.8rem;
+      line-height: 1.8;
+    }
+    .code-content { flex: 1; }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1.2fr; 
+      gap: 24px; 
+      margin: 20px 0;
+    }
+    @media (max-width: 768px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    .viz-steps { 
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 16px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    .viz-step { 
+      padding: 14px 16px; 
+      margin: 10px 0; 
+      border-radius: 10px; 
+      background: var(--surface-light); 
+      cursor: pointer; 
+      border: 2px solid transparent;
+      transition: all 0.2s ease;
+    }
+    .viz-step:hover { 
+      border-color: rgba(99, 102, 241, 0.4);
+      transform: translateX(4px);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.15);
+    }
+    .viz-step-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    .step-number {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .viz-step.active .step-number {
+      background: var(--secondary);
+    }
+    .step-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    .step-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-left: 34px;
+    }
+    .step-state {
+      margin-top: 8px;
+      margin-left: 34px;
+      padding: 8px 12px;
+      background: var(--bg);
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 0.8rem;
+    }
+    .step-state-label {
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .state-var { color: var(--success); }
+    .state-val { color: var(--warning); }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 18px; 
+      border: 1px solid rgba(255,255,255,0.1); 
+      transition: all 0.2s ease; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block;
+      position: relative;
+      overflow: hidden;
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+    }
+    .problem-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .problem-card:hover::before {
+      opacity: 1;
+    }
+    .problem-num {
+      font-size: 0.8rem;
+      color: var(--primary);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .problem-title {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+    .problem-method {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    .complexity-table th, .complexity-table td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .complexity-table th {
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 0.85rem;
+    }
+    .complexity-good { color: var(--success); font-weight: 600; }
+    .complexity-ok { color: var(--warning); }
+    .highlight-box {
+      background: rgba(99, 102, 241, 0.1);
+      border-left: 4px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 12px 12px 0;
+      margin: 16px 0;
+    }
+    .example-box {
+      background: var(--bg);
+      padding: 16px 20px;
+      border-radius: 10px;
+      margin: 12px 0;
+      font-family: monospace;
+    }
+    .example-label {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      margin-bottom: 8px;
+    }
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; }
+    .class { color: #ffa657; }
+    .operator { color: #ff7b72; }
+    .highlight-row {
+      background: rgba(245, 158, 11, 0.15) !important;
+    }
+    .link-icon {
+      font-size: 0.8rem;
+      margin-left: 4px;
+    }
+    .core-point {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin: 12px 0;
+      padding: 14px 16px;
+      background: var(--bg);
+      border-radius: 10px;
+    }
+    .core-point-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(99, 102, 241, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .core-point-content {
+      flex: 1;
+    }
+    .core-point-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .core-point-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #2 - 两数相加 <span class="tag tag-medium">Medium</span></h1>
+  <p class="subtitle">模拟加法运算的链表经典题目，考察数位处理与进位逻辑</p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给你两个 <strong>非空</strong> 的链表，表示两个非负的整数。它们每位数字都是按照 <strong>逆序</strong> 的方式存储的，并且每个节点只能存储 <strong>一位</strong> 数字。</p>
+    <p>请你将两个数相加，并以相同形式返回一个表示和的链表。</p>
+    <p>你可以假设除了数字 0 之外，这两个数都不会以 0 开头。</p>
+    
+    <div class="highlight-box">
+      <strong>💡 关键理解：</strong>链表的头部是数字的个位，这与我们手算加法的顺序一致（从右往左），所以可以直接遍历链表进行加法运算。
+    </div>
+    
+    <div class="example-box">
+      <div class="example-label">示例 1：</div>
+      <div>输入：l1 = [2,4,3], l2 = [5,6,4]</div>
+      <div>输出：[7,0,8]</div>
+      <div>解释：342 + 465 = 807</div>
+    </div>
+    
+    <div class="example-box">
+      <div class="example-label">示例 2：</div>
+      <div>输入：l1 = [0], l2 = [0]</div>
+      <div>输出：[0]</div>
+    </div>
+    
+    <div class="example-box">
+      <div class="example-label">示例 3：</div>
+      <div>输入：l1 = [9,9,9,9,9,9,9], l2 = [9,9,9,9]</div>
+      <div>输出：[8,9,9,9,0,0,0,1]</div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🎯 核心考点</h2>
+    <div class="core-point">
+      <div class="core-point-icon">🔗</div>
+      <div class="core-point-content">
+        <div class="core-point-title">链表遍历与构建</div>
+        <div class="core-point-desc">熟练操作链表指针，同时遍历两个链表并构建新链表</div>
+      </div>
+    </div>
+    <div class="core-point">
+      <div class="core-point-icon">➕</div>
+      <div class="core-point-content">
+        <div class="core-point-title">进位处理</div>
+        <div class="core-point-desc">理解进位的产生条件（和 ≥ 10），以及如何传递到高位</div>
+      </div>
+    </div>
+    <div class="core-point">
+      <div class="core-point-icon">⚖️</div>
+      <div class="core-point-content">
+        <div class="core-point-title">边界情况</div>
+        <div class="core-point-desc">链表长度不同、最后一位产生进位（结果多一位）</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行互相高亮）</h2>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <thead>
+        <tr>
+          <th>维度</th>
+          <th>值</th>
+          <th>说明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>时间复杂度</td>
+          <td class="complexity-good">O(max(m, n))</td>
+          <td>只需遍历较长的链表一次，m 和 n 分别是两个链表的长度</td>
+        </tr>
+        <tr>
+          <td>空间复杂度</td>
+          <td class="complexity-good">O(max(m, n))</td>
+          <td>新链表长度最多为 max(m, n) + 1（考虑最后的进位）</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>💭 解题思路详解</h2>
+    <p><strong>核心思想：</strong>模拟小学竖式加法。从个位开始，逐位相加，处理进位。</p>
+    <ol>
+      <li><strong>初始化：</strong>创建哑节点（dummy）作为结果链表的头节点，方便处理边界情况</li>
+      <li><strong>遍历相加：</strong>同时遍历 l1 和 l2，取对应节点的值相加，再加上进位</li>
+      <li><strong>计算新节点值：</strong>新值 = 总和 % 10，新进位 = 总和 // 10</li>
+      <li><strong>链表长度不等：</strong>如果其中一个链表先遍历完，继续处理另一个链表剩余部分</li>
+      <li><strong>最终进位：</strong>如果遍历结束后还有进位，需要再添加一个节点</li>
+    </ol>
+    
+    <div class="highlight-box">
+      <strong>🎨 设计技巧：</strong>使用「哑节点」（dummy node）可以简化代码逻辑，避免对头节点的特殊判断。最终返回 dummy.next 即可。
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/add-two-numbers-ii/" class="problem-card" target="_blank">
+        <div class="problem-num">#445<span class="link-icon">↗</span></div>
+        <div class="problem-title">两数相加 II</div>
+        <div class="problem-method">栈 / 递归 / 反转链表</div>
+      </a>
+      <a href="https://leetcode.cn/problems/multiply-strings/" class="problem-card" target="_blank">
+        <div class="problem-num">#43<span class="link-icon">↗</span></div>
+        <div class="problem-title">字符串相乘</div>
+        <div class="problem-method">模拟乘法 / 竖式计算</div>
+      </a>
+      <a href="https://leetcode.cn/problems/plus-one/" class="problem-card" target="_blank">
+        <div class="problem-num">#66<span class="link-icon">↗</span></div>
+        <div class="problem-title">加一</div>
+        <div class="problem-method">数组 / 进位处理</div>
+      </a>
+      <a href="https://leetcode.cn/problems/add-strings/" class="problem-card" target="_blank">
+        <div class="problem-num">#415<span class="link-icon">↗</span></div>
+        <div class="problem-title">字符串相加</div>
+        <div class="problem-method">双指针 / 模拟加法</div>
+      </a>
+      <a href="https://leetcode.cn/problems/reverse-linked-list/" class="problem-card" target="_blank">
+        <div class="problem-num">#206<span class="link-icon">↗</span></div>
+        <div class="problem-title">反转链表</div>
+        <div class="problem-method">迭代 / 递归</div>
+      </a>
+      <a href="https://leetcode.cn/problems/merge-two-sorted-lists/" class="problem-card" target="_blank">
+        <div class="problem-num">#21<span class="link-icon">↗</span></div>
+        <div class="problem-title">合并两个有序链表</div>
+        <div class="problem-method">双指针 / 递归</div>
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // 代码行内容
+    const codeLines = [
+      { num: 1, content: '<span class="comment"># Definition for singly-linked list.</span>' },
+      { num: 2, content: '<span class="comment"># class ListNode:</span>' },
+      { num: 3, content: '<span class="comment">#     def __init__(self, val=0, next=None):</span>' },
+      { num: 4, content: '<span class="comment">#         self.val = val</span>' },
+      { num: 5, content: '<span class="comment">#         self.next = next</span>' },
+      { num: 6, content: '' },
+      { num: 7, content: '<span class="keyword">class</span> <span class="class">Solution</span>:' },
+      { num: 8, content: '    <span class="keyword">def</span> <span class="function">addTwoNumbers</span>(<span class="keyword">self</span>, l1: ListNode, l2: ListNode) -> ListNode:' },
+      { num: 9, content: '        <span class="comment"># 创建哑节点作为结果链表的头部</span>' },
+      { num: 10, content: '        dummy = ListNode(<span class="number">0</span>)' },
+      { num: 11, content: '        current = dummy' },
+      { num: 12, content: '        carry = <span class="number">0</span>  <span class="comment"># 进位标记</span>' },
+      { num: 13, content: '' },
+      { num: 14, content: '        <span class="comment"># 遍历两个链表，直到都为空</span>' },
+      { num: 15, content: '        <span class="keyword">while</span> l1 <span class="keyword">or</span> l2:' },
+      { num: 16, content: '            <span class="comment"># 获取当前位的值，如果链表已遍历完则为0</span>' },
+      { num: 17, content: '            x = l1.val <span class="keyword">if</span> l1 <span class="keyword">else</span> <span class="number">0</span>' },
+      { num: 18, content: '            y = l2.val <span class="keyword">if</span> l2 <span class="keyword">else</span> <span class="number">0</span>' },
+      { num: 19, content: '' },
+      { num: 20, content: '            <span class="comment"># 计算当前位的和</span>' },
+      { num: 21, content: '            total = x + y + carry' },
+      { num: 22, content: '' },
+      { num: 23, content: '            <span class="comment"># 新节点的值为和的个位数</span>' },
+      { num: 24, content: '            current.next = ListNode(total % <span class="number">10</span>)' },
+      { num: 25, content: '' },
+      { num: 26, content: '            <span class="comment"># 更新进位</span>' },
+      { num: 27, content: '            carry = total // <span class="number">10</span>' },
+      { num: 28, content: '' },
+      { num: 29, content: '            <span class="comment"># 移动指针</span>' },
+      { num: 30, content: '            current = current.next' },
+      { num: 31, content: '            <span class="keyword">if</span> l1: l1 = l1.next' },
+      { num: 32, content: '            <span class="keyword">if</span> l2: l2 = l2.next' },
+      { num: 33, content: '' },
+      { num: 34, content: '        <span class="comment"># 处理最后的进位</span>' },
+      { num: 35, content: '        <span class="keyword">if</span> carry > <span class="number">0</span>:' },
+      { num: 36, content: '            current.next = ListNode(carry)' },
+      { num: 37, content: '' },
+      { num: 38, content: '        <span class="keyword">return</span> dummy.next' }
+    ];
+
+    // 步骤与代码行映射
+    const steps = [
+      {
+        title: "初始化哑节点和进位",
+        desc: "创建 dummy 节点作为结果链表头部，current 指向当前构建位置，carry 记录进位",
+        line: 10,
+        state: { dummy: "ListNode(0)", current: "dummy", carry: 0 }
+      },
+      {
+        title: "进入遍历循环",
+        desc: "只要 l1 或 l2 还有节点，就继续循环",
+        line: 15,
+        state: { "循环条件": "l1 or l2", "当前状态": "继续执行" }
+      },
+      {
+        title: "获取当前位的值",
+        desc: "分别取 l1 和 l2 当前节点的值，如果链表已空则取 0",
+        line: 17,
+        state: { x: "l1.val or 0", y: "l2.val or 0" }
+      },
+      {
+        title: "计算总和",
+        desc: "当前位的和 = x + y + carry",
+        line: 21,
+        state: { total: "x + y + carry" }
+      },
+      {
+        title: "创建新节点",
+        desc: "新节点值为 total % 10（取个位数）",
+        line: 24,
+        state: { "current.next": "ListNode(total % 10)" }
+      },
+      {
+        title: "更新进位",
+        desc: "新的进位为 total // 10（取十位数）",
+        line: 27,
+        state: { carry: "total // 10" }
+      },
+      {
+        title: "移动指针",
+        desc: "current 后移，l1 和 l2 如果还有节点也后移",
+        line: 30,
+        state: { current: "current.next", l1: "l1.next", l2: "l2.next" }
+      },
+      {
+        title: "检查最终进位",
+        desc: "循环结束后检查是否还有进位，有则添加新节点",
+        line: 35,
+        state: { "if carry": "carry > 0 ?" }
+      },
+      {
+        title: "返回结果",
+        desc: "返回 dummy.next（跳过哑节点）",
+        line: 38,
+        state: { return: "dummy.next" }
+      }
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach(line => {
+      const lineDiv = document.createElement('div');
+      lineDiv.className = 'code-line';
+      lineDiv.dataset.line = line.num;
+      lineDiv.innerHTML = `<span class="line-number">${line.num}</span><span class="code-content">${line.content || '&nbsp;'}</span>`;
+      lineDiv.addEventListener('click', () => selectLine(line.num));
+      codeBlock.appendChild(lineDiv);
+    });
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const stepDiv = document.createElement('div');
+      stepDiv.className = 'viz-step';
+      stepDiv.dataset.step = idx;
+      stepDiv.dataset.line = step.line;
+      
+      let stateHtml = '';
+      if (step.state) {
+        const statePairs = Object.entries(step.state);
+        stateHtml = `<div class="step-state"><div class="step-state-label">状态:</div>${statePairs.map(([k, v]) => `<span class="state-var">${k}</span>=<span class="state-val">${v}</span>`).join(', ')}</div>`;
+      }
+      
+      stepDiv.innerHTML = `
+        <div class="viz-step-header">
+          <span class="step-number">${idx + 1}</span>
+          <span class="step-title">${step.title}</span>
+        </div>
+        <div class="step-desc">${step.desc}</div>
+        ${stateHtml}
+      `;
+      stepDiv.addEventListener('click', () => selectStep(idx));
+      vizSteps.appendChild(stepDiv);
+    });
+
+    let selectedStep = null;
+    let selectedLine = null;
+
+    function selectStep(idx) {
+      // 清除之前的选择
+      document.querySelectorAll('.viz-step').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+      
+      // 高亮当前步骤
+      const stepEl = document.querySelector(`.viz-step[data-step="${idx}"]`);
+      if (stepEl) {
+        stepEl.classList.add('active');
+        stepEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      
+      // 高亮对应代码行
+      const lineNum = steps[idx].line;
+      const lineEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+      if (lineEl) {
+        lineEl.classList.add('active');
+        lineEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      
+      selectedStep = idx;
+      selectedLine = lineNum;
+    }
+
+    function selectLine(lineNum) {
+      // 查找对应的步骤
+      const stepIdx = steps.findIndex(s => s.line === lineNum);
+      if (stepIdx !== -1) {
+        selectStep(stepIdx);
+      } else {
+        // 只高亮代码行
+        document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+        document.querySelectorAll('.viz-step').forEach(s => s.classList.remove('active'));
+        const lineEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+        if (lineEl) lineEl.classList.add('active');
+        selectedLine = lineNum;
+        selectedStep = null;
+      }
+    }
+
+    // 默认选中第一步
+    selectStep(0);
+  </script>
+</body>
+</html>

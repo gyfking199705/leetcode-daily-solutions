@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #91 - 解码方法</title>
+  <style>
+    :root { --primary: #6366f1; --bg: #0f172a; --surface: #1e293b; --text: #f1f5f9; --accent: #22d3ee; --success: #4ade80; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); max-width: 1100px; margin: 0 auto; padding: 40px 20px; line-height: 1.7; }
+    h1 { color: var(--primary); margin-bottom: 8px; }
+    .subtitle { color: #94a3b8; margin-bottom: 30px; }
+    .section { background: var(--surface); border-radius: 16px; padding: 28px; margin-bottom: 24px; }
+    .section h2 { color: var(--primary); margin-top: 0; }
+    .difficulty { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .difficulty.medium { background: #fbbf24; color: #1e293b; }
+    pre { background: #0d1117; border-radius: 12px; padding: 20px; overflow-x: auto; font-size: 14px; line-height: 1.8; }
+    .code-line { display: flex; padding: 2px 0; cursor: pointer; transition: all 0.2s; }
+    .code-line:hover { background: rgba(255,255,255,0.05); }
+    .code-line.active { background: rgba(99, 102, 241, 0.3); border-left: 3px solid #6366f1; margin-left: -3px; }
+    .line-number { color: #484f58; min-width: 40px; text-align: right; padding-right: 16px; user-select: none; }
+    .viz-container { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 20px 0; }
+    @media (max-width: 900px) { .viz-container { grid-template-columns: 1fr; } }
+    .viz-steps { display: flex; flex-direction: column; gap: 8px; }
+    .viz-step { padding: 14px 16px; border-radius: 10px; background: #334155; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+    .viz-step:hover { background: #475569; }
+    .viz-step.active { border-color: var(--primary); background: rgba(99, 102, 241, 0.3); }
+    .viz-step h4 { margin: 0 0 4px 0; color: var(--accent); font-size: 14px; }
+    .viz-step p { margin: 0; font-size: 13px; color: #cbd5e1; }
+    .state-vars { margin-top: 8px; padding-top: 8px; border-top: 1px solid #475569; font-size: 12px; font-family: monospace; }
+    .problem-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .problem-card { background: var(--bg); border-radius: 12px; padding: 16px; border: 1px solid #475569; transition: all 0.2s; text-decoration: none; color: inherit; display: block; }
+    .problem-card:hover { border-color: var(--primary); transform: translateY(-3px); }
+    .problem-card h4 { margin: 0 0 8px 0; color: var(--accent); }
+    .problem-card p { margin: 0; font-size: 13px; color: #94a3b8; }
+    .problem-card .diff { font-size: 11px; padding: 2px 8px; border-radius: 12px; margin-left: 8px; }
+    .problem-card .diff.easy { background: #4ade80; color: #0f172a; }
+    .problem-card .diff.medium { background: #fbbf24; color: #0f172a; }
+    .problem-card .diff.hard { background: #f87171; color: #0f172a; }
+    .complexity-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    .complexity-table th, .complexity-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #334155; }
+    .complexity-table th { color: var(--accent); font-weight: 600; }
+    .dp-table { display: grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap: 8px; margin: 20px 0; }
+    .dp-cell { background: #334155; padding: 12px 8px; text-align: center; border-radius: 8px; font-family: monospace; }
+    .dp-cell.highlight { background: var(--primary); }
+    .keyword { color: #ff7b72; } .function { color: #d2a8ff; } .string { color: #a5d6ff; } .number { color: #79c0ff; } .comment { color: #8b949e; } .class { color: #ffa657; }
+    .example-box { background: #0d1117; border-radius: 10px; padding: 16px; margin: 12px 0; font-family: monospace; }
+    .example-box .input { color: #79c0ff; } .example-box .output { color: #4ade80; } .example-box .explain { color: #8b949e; }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #91 - 解码方法 <span class="difficulty medium">Medium</span></h1>
+  <p class="subtitle">动态规划经典题目 | 字符串解码 | 斐波那契思想</p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>一条包含字母 <code>A-Z</code> 的消息通过以下映射进行了 <strong>编码</strong>：</p>
+    <div class="example-box">
+      <span class="number">'A' -&gt; "1"</span><br>
+      <span class="number">'B' -&gt; "2"</span><br>
+      <span class="number">...</span><br>
+      <span class="number">'Z' -&gt; "26"</span>
+    </div>
+    <p>要 <strong>解码</strong> 已编码的消息，所有数字必须基于上述映射的方法，反向映射回字母（可能有多种方法）。例如，<code>"11106"</code> 可以映射为：</p>
+    <ul>
+      <li><code>"AAJF"</code>，将消息分组为 <code>(1 1 10 6)</code></li>
+      <li><code>"KJF"</code>，将消息分组为 <code>(11 10 6)</code></li>
+    </ul>
+    <p>注意，消息不能分组为 <code>(1 11 06)</code>，因为 <code>"06"</code> 不能映射为 <code>'F'</code>，这是由于 <code>'6'</code> 和 <code>'06'</code> 在映射中并不等价。</p>
+    <p>给你一个只含数字的 <strong>非空</strong> 字符串 <code>s</code> ，请计算并返回 <strong>解码</strong> 方法的 <strong>总数</strong> 。</p>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <p>以 <code>s = "226"</code> 为例，演示动态规划过程：</p>
+    
+    <div class="dp-table">
+      <div class="dp-cell">s</div>
+      <div class="dp-cell">""</div>
+      <div class="dp-cell">"2"</div>
+      <div class="dp-cell">"22"</div>
+      <div class="dp-cell">"226"</div>
+    </div>
+    <div class="dp-table">
+      <div class="dp-cell">dp</div>
+      <div class="dp-cell highlight">1</div>
+      <div class="dp-cell highlight">1</div>
+      <div class="dp-cell highlight">2</div>
+      <div class="dp-cell highlight">3</div>
+    </div>
+    
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <div class="viz-step" data-line="5">
+          <h4>步骤1: 初始化DP数组</h4>
+          <p>dp[0] = 1（空字符串有1种解码方式）<br>dp[1] = 1（"2"只有一种解码"B"）</p>
+          <div class="state-vars">dp = [1, 1, ?, ?]</div>
+        </div>
+        <div class="viz-step" data-line="7">
+          <h4>步骤2: 进入迭代（i=2）</h4>
+          <p>处理子串"22"，考虑最后一位"2"单独解码</p>
+          <div class="state-vars">i=2, one_digit=2, dp[2] = 0</div>
+        </div>
+        <div class="viz-step" data-line="8">
+          <h4>步骤3: 单独解码检查</h4>
+          <p>检查 s[i-1]='2' 是否有效（1-9），有效则继承dp[1]</p>
+          <div class="state-vars">s[1]='2' ∈ [1,9] ✓<br>dp[2] += dp[1] = 1</div>
+        </div>
+        <div class="viz-step" data-line="11">
+          <h4>步骤4: 组合解码检查</h4>
+          <p>检查 s[0:2]="22" 是否在10-26范围内</p>
+          <div class="state-vars">two_digits=22 ∈ [10,26] ✓<br>dp[2] += dp[0] = 2</div>
+        </div>
+        <div class="viz-step" data-line="7">
+          <h4>步骤5: 进入下一轮（i=3）</h4>
+          <p>处理子串"226"，考虑最后一位"6"</p>
+          <div class="state-vars">i=3, dp[3] = 0</div>
+        </div>
+        <div class="viz-step" data-line="8">
+          <h4>步骤6: 单独解码检查</h4>
+          <p>s[2]='6' 单独有效，继承dp[2]</p>
+          <div class="state-vars">dp[3] += dp[2] = 2</div>
+        </div>
+        <div class="viz-step" data-line="11">
+          <h4>步骤7: 组合解码检查</h4>
+          <p>"26"在有效范围内，组合解码有效</p>
+          <div class="state-vars">two_digits=26 ∈ [10,26] ✓<br>dp[3] += dp[1] = 3</div>
+        </div>
+        <div class="viz-step" data-line="14">
+          <h4>步骤8: 返回结果</h8>
+          <p>遍历完成，dp[3]=3 即为答案</p>
+          <div class="state-vars">结果: 3种解码方式<br>(BBF, BV, ZBF)</div>
+        </div>
+      </div>
+      
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre><code id="codeBlock">
+<div class="code-line" data-step="0"><span class="line-number">1</span><span class="keyword">class</span> <span class="class">Solution</span>:</div>
+<div class="code-line" data-step="0"><span class="line-number">2</span>    <span class="keyword">def</span> <span class="function">numDecodings</span>(<span class="keyword">self</span>, s: <span class="keyword">str</span>) -> <span class="keyword">int</span>:</div>
+<div class="code-line" data-step="0"><span class="line-number">3</span>        <span class="keyword">if</span> <span class="keyword">not</span> s <span class="keyword">or</span> s[<span class="number">0</span>] == <span class="string">'0'</span>:</div>
+<div class="code-line" data-step="0"><span class="line-number">4</span>            <span class="keyword">return</span> <span class="number">0</span></div>
+<div class="code-line active" data-step="0"><span class="line-number">5</span>        n = <span class="function">len</span>(s)</div>
+<div class="code-line active" data-step="0"><span class="line-number">6</span>        dp = [<span class="number">0</span>] * (n + <span class="number">1</span>)</div>
+<div class="code-line active" data-step="0"><span class="line-number">7</span>        dp[<span class="number">0</span>], dp[<span class="number">1</span>] = <span class="number">1</span>, <span class="number">1</span>  <span class="comment"># 初始化</span></div>
+<div class="code-line" data-step="1"><span class="line-number">8</span>        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="number">2</span>, n + <span class="number">1</span>):</div>
+<div class="code-line" data-step="2"><span class="line-number">9</span>            <span class="comment"># 单独解码：s[i-1] 是 '1'-'9'</span></div>
+<div class="code-line active" data-step="2"><span class="line-number">10</span>            <span class="keyword">if</span> <span class="string">'1'</span> <= s[i<span class="number">-1</span>] <= <span class="string">'9'</span>:</div>
+<div class="code-line active" data-step="2"><span class="line-number">11</span>                dp[i] += dp[i<span class="number">-1</span>]</div>
+<div class="code-line" data-step="3"><span class="line-number">12</span>            <span class="comment"># 组合解码：s[i-2:i] 是 '10'-'26'</span></div>
+<div class="code-line active" data-step="3"><span class="line-number">13</span>            two = <span class="function">int</span>(s[i<span class="number">-2</span>:i])</div>
+<div class="code-line active" data-step="3"><span class="line-number">14</span>            <span class="keyword">if</span> <span class="number">10</span> <= two <= <span class="number">26</span>:</div>
+<div class="code-line active" data-step="3"><span class="line-number">15</span>                dp[i] += dp[i<span class="number">-2</span>]</div>
+<div class="code-line active" data-step="7"><span class="line-number">16</span>        <span class="keyword">return</span> dp[n]</div>
+        </code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🧠 算法思路解析</h2>
+    <h3>状态定义</h3>
+    <p><code>dp[i]</code> 表示字符串 <code>s[0:i]</code>（前i个字符）的解码方法总数。</p>
+    
+    <h3>状态转移</h3>
+    <p>对于位置 <code>i</code>，有两种情况可以形成有效解码：</p>
+    <ol>
+      <li><strong>单独解码</strong>：如果 <code>s[i-1]</code> 是 '1'~'9'，则可以单独解码为一个字母，方法数 += <code>dp[i-1]</code></li>
+      <li><strong>组合解码</strong>：如果 <code>s[i-2:i]</code> 组成的数字在 10~26 范围内，则可以组合解码，方法数 += <code>dp[i-2]</code></li>
+    </ol>
+    
+    <h3>边界条件</h3>
+    <ul>
+      <li><code>dp[0] = 1</code>：空字符串有1种解码方式（什么都不做）</li>
+      <li><code>dp[1] = 1</code>：如果第一个字符不是 '0'，则有1种解码方式</li>
+      <li>如果字符串以 '0' 开头，直接返回 0</li>
+    </ul>
+    
+    <h3>空间优化</h3>
+    <p>由于 <code>dp[i]</code> 只依赖于 <code>dp[i-1]</code> 和 <code>dp[i-2]</code>，可以用滚动变量将空间复杂度优化到 O(1)：</p>
+    <pre style="background:#0d1117;padding:16px;border-radius:8px;"><code><span class="keyword">def</span> <span class="function">numDecodings</span>(<span class="keyword">self</span>, s: <span class="keyword">str</span>) -> <span class="keyword">int</span>:
+    <span class="keyword">if</span> <span class="keyword">not</span> s <span class="keyword">or</span> s[<span class="number">0</span>] == <span class="string">'0'</span>: <span class="keyword">return</span> <span class="number">0</span>
+    prev2, prev1 = <span class="number">1</span>, <span class="number">1</span>  <span class="comment"># dp[i-2], dp[i-1]</span>
+    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="number">1</span>, <span class="function">len</span>(s)):
+        curr = <span class="number">0</span>
+        <span class="keyword">if</span> s[i] != <span class="string">'0'</span>: curr += prev1
+        <span class="keyword">if</span> <span class="number">10</span> <= <span class="function">int</span>(s[i<span class="number">-1</span>:i+<span class="number">1</span>]) <= <span class="number">26</span>: curr += prev2
+        prev2, prev1 = prev1, curr
+    <span class="keyword">return</span> prev1</code></pre>
+  </div>
+  
+  <div class="section">
+    <h2>⏱️ 复杂度分析</h2>
+    <table class="complexity-table">
+      <tr><th>方案</th><th>时间复杂度</th><th>空间复杂度</th><th>说明</th></tr>
+      <tr><td>DP数组版</td><td>O(n)</td><td>O(n)</td><td>直观易理解，面试推荐先写这个</td></tr>
+      <tr><td>空间优化版</td><td>O(n)</td><td>O(1)</td><td>滚动变量，空间最优</td></tr>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/climbing-stairs/" class="problem-card" target="_blank">
+        <h4>#70 爬楼梯 <span class="diff easy">Easy</span></h4>
+        <p>基础斐波那契DP，解码方法的思想源头</p>
+      </a>
+      <a href="https://leetcode.cn/problems/house-robber/" class="problem-card" target="_blank">
+        <h4>#198 打家劫舍 <span class="diff medium">Medium</span></h4>
+        <p>线性DP经典，状态转移的另一种形式</p>
+      </a>
+      <a href="https://leetcode.cn/problems/decode-ways-ii/" class="problem-card" target="_blank">
+        <h4>#639 解码方法 II <span class="diff medium">Medium</span></h4>
+        <p>本题进阶版，包含通配符 '*'，需要考虑更多情况</p>
+      </a>
+      <a href="https://leetcode.cn/problems/unique-paths/" class="problem-card" target="_blank">
+        <h4>#62 不同路径 <span class="diff medium">Medium</span></h4>
+        <p>二维DP入门，与本题一维DP形成对比</p>
+      </a>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>💡 面试要点</h2>
+    <ul>
+      <li><strong>'0'的处理</strong>：'0'不能单独解码，也不能作为组合的高位（如"01"无效）</li>
+      <li><strong>边界陷阱</strong>：注意字符串长度为1的情况，以及"10"、"20"这样的特殊情况</li>
+      <li><strong>模块化思维</strong>：单独解码和组合解码是两个独立的条件判断，不要耦合</li>
+      <li><strong>空间优化</strong>：面试官通常会追问能否优化空间，提前准备好滚动变量的写法</li>
+      <li><strong>大数问题</strong>：Python整数无上限，但其他语言需注意溢出（本题不需要取模）</li>
+    </ul>
+  </div>
+  
+  <script>
+    const steps = document.querySelectorAll('.viz-step');
+    const codeLines = document.querySelectorAll('.code-line');
+    let activeStep = 0;
+    
+    function highlightStep(index) {
+      steps.forEach((s, i) => s.classList.toggle('active', i === index));
+      codeLines.forEach(line => line.classList.remove('active'));
+      
+      const step = steps[index];
+      const lineNum = step.dataset.line;
+      if (lineNum) {
+        document.querySelectorAll(`.code-line[data-step="${index}"]`).forEach(line => {
+          line.classList.add('active');
+        });
+      }
+      activeStep = index;
+    }
+    
+    steps.forEach((step, index) => {
+      step.addEventListener('click', () => highlightStep(index));
+    });
+    
+    codeLines.forEach((line, index) => {
+      line.addEventListener('click', () => {
+        const stepIndex = parseInt(line.dataset.step);
+        if (!isNaN(stepIndex)) {
+          highlightStep(stepIndex);
+          steps[stepIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      });
+    });
+    
+    // 键盘导航
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' && activeStep < steps.length - 1) {
+        highlightStep(activeStep + 1);
+      } else if (e.key === 'ArrowUp' && activeStep > 0) {
+        highlightStep(activeStep - 1);
+      }
+    });
+  </script>
+</body>
+</html>

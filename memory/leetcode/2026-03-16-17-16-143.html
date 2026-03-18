@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #143 - 重排链表</title>
+  <style>
+    :root { --primary: #6366f1; --bg: #0f172a; --surface: #1e293b; --text: #f1f5f9; --success: #22c55e; --warning: #f59e0b; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); max-width: 1000px; margin: 0 auto; padding: 40px 20px; line-height: 1.7; }
+    h1 { font-size: 2.2rem; margin-bottom: 8px; }
+    .subtitle { color: #94a3b8; font-size: 1.1rem; margin-bottom: 30px; }
+    .section { background: var(--surface); border-radius: 16px; padding: 28px; margin-bottom: 24px; border: 1px solid #334155; }
+    .section h2 { color: var(--primary); margin-top: 0; font-size: 1.4rem; }
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; margin-right: 8px; }
+    .badge-medium { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
+    .badge-tag { background: #334155; color: #94a3b8; }
+    pre { background: #0d1117; border-radius: 12px; padding: 20px; overflow-x: auto; margin: 15px 0; }
+    code { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 0.9rem; }
+    .code-line { display: flex; padding: 3px 12px; cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; }
+    .code-line:hover { background: rgba(255,255,255,0.05); }
+    .code-line.active { background: rgba(99, 102, 241, 0.3); border-left-color: #6366f1; }
+    .line-number { color: #484f58; min-width: 32px; text-align: right; padding-right: 16px; font-size: 0.85rem; user-select: none; }
+    .line-content { flex: 1; }
+    .keyword { color: #ff7b72; } .function { color: #d2a8ff; } .string { color: #a5d6ff; }
+    .number { color: #79c0ff; } .comment { color: #8b949e; } .class { color: #ffa657; }
+    .viz-container { display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; margin: 20px 0; }
+    @media (max-width: 768px) { .viz-container { grid-template-columns: 1fr; } }
+    .viz-panel { background: #0d1117; border-radius: 12px; padding: 20px; }
+    .viz-steps { max-height: 400px; overflow-y: auto; }
+    .viz-step { padding: 14px; margin: 8px 0; border-radius: 10px; background: #1e293b; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+    .viz-step:hover { border-color: #475569; }
+    .viz-step.active { border-color: var(--primary); background: rgba(99, 102, 241, 0.2); }
+    .viz-step h4 { margin: 0 0 6px 0; color: var(--text); font-size: 0.95rem; }
+    .viz-step p { margin: 0; font-size: 0.85rem; color: #94a3b8; }
+    .state-table { margin-top: 10px; font-size: 0.8rem; }
+    .state-table td { padding: 3px 10px; color: #79c0ff; }
+    .state-label { color: #94a3b8; }
+    .step-number { display: inline-block; width: 24px; height: 24px; background: var(--primary); color: white; border-radius: 50%; text-align: center; line-height: 24px; font-size: 0.8rem; margin-right: 10px; }
+    .problem-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 20px; }
+    .problem-card { background: var(--bg); border-radius: 12px; padding: 18px; border: 1px solid #475569; transition: all 0.2s; text-decoration: none; color: inherit; display: block; }
+    .problem-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2); }
+    .problem-card h4 { margin: 0 0 8px 0; color: var(--text); }
+    .problem-card p { margin: 0; font-size: 0.85rem; color: #94a3b8; }
+    .problem-card .badge-small { font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; margin-top: 10px; display: inline-block; }
+    .badge-easy { background: #22c55e33; color: #22c55e; }
+    .badge-medium { background: #f59e0b33; color: #f59e0b; }
+    .badge-hard { background: #ef444433; color: #ef4444; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #334155; }
+    th { color: var(--primary); font-weight: 600; }
+    .complexity-good { color: #22c55e; }
+    .diagram { background: #0d1117; border-radius: 8px; padding: 15px; margin: 10px 0; font-family: monospace; text-align: center; }
+    .arrow { color: var(--primary); font-size: 1.2rem; margin: 0 8px; }
+    .node { display: inline-block; padding: 6px 14px; background: #334155; border-radius: 6px; margin: 0 2px; }
+    .node-highlight { background: var(--primary); }
+    .tips { background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1)); border-left: 4px solid var(--primary); padding: 16px 20px; border-radius: 0 12px 12px 0; margin: 20px 0; }
+    .tips h4 { margin: 0 0 8px 0; color: var(--primary); }
+    .tips ul { margin: 0; padding-left: 20px; }
+    .tips li { margin: 6px 0; }
+  </style>
+</head>
+<body>
+  <h1>🔀 LeetCode #143 - 重排链表</h1>
+  <p class="subtitle">
+    <span class="badge badge-medium">Medium</span>
+    <span class="badge badge-tag">链表</span>
+    <span class="badge badge-tag">双指针</span>
+    <span class="badge badge-tag">链表反转</span>
+  </p>
+
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给定一个单链表 <code>L</code> 的头节点 <code>head</code> ，单链表 <code>L</code> 表示为：</p>
+    <div class="diagram">
+      <span class="node">L<sub>0</sub></span> → <span class="node">L<sub>1</sub></span> → <span class="node">L<sub>2</sub></span> → ... → <span class="node">L<sub>n-2</sub></span> → <span class="node">L<sub>n-1</sub></span>
+    </div>
+    <p>将其重新排列后变为：</p>
+    <div class="diagram">
+      <span class="node">L<sub>0</sub></span> → <span class="node">L<sub>n-1</sub></span> → <span class="node">L<sub>1</sub></span> → <span class="node">L<sub>n-2</sub></span> → <span class="node">L<sub>2</sub></span> → <span class="node">L<sub>n-3</sub></span> → ...
+    </div>
+    <p><strong>要求：</strong>不能只是单纯的改变节点内部的值，而是需要实际的进行节点交换。</p>
+    <p><strong>示例 1：</strong></p>
+    <div class="diagram">
+      输入: <span class="node">1</span> → <span class="node">2</span> → <span class="node">3</span> → <span class="node">4</span><br><br>
+      输出: <span class="node">1</span> → <span class="node">4</span> → <span class="node">2</span> → <span class="node">3</span>
+    </div>
+    <p><strong>示例 2：</strong></p>
+    <div class="diagram">
+      输入: <span class="node">1</span> → <span class="node">2</span> → <span class="node">3</span> → <span class="node">4</span> → <span class="node">5</span><br><br>
+      输出: <span class="node">1</span> → <span class="node">5</span> → <span class="node">2</span> → <span class="node">4</span> → <span class="node">3</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="viz-container">
+      <div class="viz-panel viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="viz-panel">
+        <h3 style="margin-top:0;color:#6366f1;">Python 实现</h3>
+        <pre style="margin:0;"><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>💡 算法思路解析</h2>
+    <p>这道题的核心是将链表从中间分成两半，然后把后半部分反转，最后交错合并两个链表。</p>
+    <div class="tips">
+      <h4>🎯 三步走策略</h4>
+      <ul>
+        <li><strong>Step 1 - 找中点：</strong>使用快慢指针，快指针走2步，慢指针走1步，当快指针到达末尾时，慢指针正好在中间</li>
+        <li><strong>Step 2 - 反转后半段：</strong>将链表后半部分原地反转（经典三指针法）</li>
+        <li><strong>Step 3 - 交错合并：</strong>类似拉链一样，交替从两个链表取节点连接</li>
+      </ul>
+    </div>
+    <p><strong>时间复杂度：</strong>O(n) — 每个节点最多被访问3次（找中点、反转、合并各1次）</p>
+    <p><strong>空间复杂度：</strong>O(1) — 只使用了几个指针变量，原地操作</p>
+  </div>
+
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table>
+      <tr>
+        <th>算法</th>
+        <th>时间复杂度</th>
+        <th>空间复杂度</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>三步法（最优）</td>
+        <td class="complexity-good">O(n)</td>
+        <td class="complexity-good">O(1)</td>
+        <td>原地操作，不借助额外数据结构</td>
+      </tr>
+      <tr>
+        <td>线性表辅助</td>
+        <td>O(n)</td>
+        <td>O(n)</td>
+        <td>用数组存储节点再重连，不符合进阶要求</td>
+      </tr>
+      <tr>
+        <td>递归（栈）</td>
+        <td>O(n)</td>
+        <td>O(n)</td>
+        <td>利用递归隐式栈找到末尾节点</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>🔗 类似题目推荐</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/reverse-linked-list/" class="problem-card" target="_blank">
+        <h4>206. 反转链表</h4>
+        <p>链表反转的基础题，本题Step 2的核心操作</p>
+        <span class="badge-small badge-easy">Easy</span>
+      </a>
+      <a href="https://leetcode.cn/problems/middle-of-the-linked-list/" class="problem-card" target="_blank">
+        <h4>876. 链表的中间结点</h4>
+        <p>快慢指针找中点的经典题目</p>
+        <span class="badge-small badge-easy">Easy</span>
+      </a>
+      <a href="https://leetcode.cn/problems/palindrome-linked-list/" class="problem-card" target="_blank">
+        <h4>234. 回文链表</h4>
+        <p>同样需要「找中点+反转+比较」三步法</p>
+        <span class="badge-small badge-easy">Easy</span>
+      </a>
+      <a href="https://leetcode.cn/problems/reorder-list-ii/" class="problem-card" target="_blank">
+        <h4>面试题 02.05. 链表求和</h4>
+        <p>链表操作进阶，考察逆向思维</p>
+        <span class="badge-small badge-medium">Medium</span>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    // 代码内容
+    const codeLines = [
+      { num: 1, content: '<span class="keyword">class</span> <span class="class">ListNode</span>:' },
+      { num: 2, content: '    <span class="keyword">def</span> <span class="function">__init__</span>(self, val=<span class="number">0</span>, next=<span class="keyword">None</span>):' },
+      { num: 3, content: '        self.val = val' },
+      { num: 4, content: '        self.next = next' },
+      { num: 5, content: '' },
+      { num: 6, content: '<span class="keyword">class</span> <span class="class">Solution</span>:' },
+      { num: 7, content: '    <span class="keyword">def</span> <span class="function">reorderList</span>(self, head: ListNode) -> <span class="keyword">None</span>:' },
+      { num: 8, content: '        <span class="keyword">if</span> <span class="keyword">not</span> head <span class="keyword">or</span> <span class="keyword">not</span> head.next:' },
+      { num: 9, content: '            <span class="keyword">return</span>  <span class="comment"># 空链表或单节点无需处理</span>' },
+      { num: 10, content: '' },
+      { num: 11, content: '        <span class="comment"># ===== Step 1: 使用快慢指针找中点 =====</span>' },
+      { num: 12, content: '        slow, fast = head, head' },
+      { num: 13, content: '        <span class="keyword">while</span> fast.next <span class="keyword">and</span> fast.next.next:' },
+      { num: 14, content: '            slow = slow.next      <span class="comment"># 慢指针走1步</span>' },
+      { num: 15, content: '            fast = fast.next.next <span class="comment"># 快指针走2步</span>' },
+      { num: 16, content: '        mid = slow.next  <span class="comment"># 后半段起始</span>' },
+      { num: 17, content: '        slow.next = <span class="keyword">None</span>  <span class="comment"># 断开前半段</span>' },
+      { num: 18, content: '' },
+      { num: 19, content: '        <span class="comment"># ===== Step 2: 反转后半段链表 =====</span>' },
+      { num: 20, content: '        prev, curr = <span class="keyword">None</span>, mid' },
+      { num: 21, content: '        <span class="keyword">while</span> curr:' },
+      { num: 22, content: '            next_temp = curr.next' },
+      { num: 23, content: '            curr.next = prev' },
+      { num: 24, content: '            prev = curr' },
+      { num: 25, content: '            curr = next_temp' },
+      { num: 26, content: '        second = prev  <span class="comment"># 反转后的后半段头</span>' },
+      { num: 27, content: '' },
+      { num: 28, content: '        <span class="comment"># ===== Step 3: 交错合并两个链表 =====</span>' },
+      { num: 29, content: '        first = head  <span class="comment"># 前半段头</span>' },
+      { num: 30, content: '        <span class="keyword">while</span> second:  <span class="comment"># 后半段更短或等长</span>' },
+      { num: 31, content: '            <span class="comment"># 保存下一个节点</span>' },
+      { num: 32, content: '            tmp1, tmp2 = first.next, second.next' },
+      { num: 33, content: '            <span class="comment"># 交错连接</span>' },
+      { num: 34, content: '            first.next = second' },
+      { num: 35, content: '            second.next = tmp1' },
+      { num: 36, content: '            <span class="comment"># 移动到下一对</span>' },
+      { num: 37, content: '            first, second = tmp1, tmp2' },
+      { num: 38, content: '        <span class="comment"># 合并完成，first可能还剩一个节点（奇数长度）</span>' },
+    ];
+
+    // 步骤定义
+    const steps = [
+      { title: "初始化检查", desc: "检查边界情况：空链表或单节点直接返回", line: 8, state: { "head": "指向链表头" } },
+      { title: "Step 1开始 - 初始化快慢指针", desc: "slow和fast都指向head，开始找中点", line: 12, state: { "slow": "head", "fast": "head" } },
+      { title: "快慢指针移动", desc: "fast每次走2步，slow每次走1步，直到fast到达末尾", line: 13, state: { "循环条件": "fast.next 且 fast.next.next 存在" } },
+      { title: "slow前进一步", desc: "慢指针移动到下一个节点", line: 14, state: {} },
+      { title: "fast前进两步", desc: "快指针移动到下一个的下一个节点", line: 15, state: {} },
+      { title: "找到中点", desc: "slow现在指向中点，保存后半段起始mid", line: 16, state: { "mid": "slow.next（后半段头节点）" } },
+      { title: "断开链表", desc: "将前半段与后半段断开，slow.next设为None", line: 17, state: { "前半段终点": "slow" } },
+      { title: "Step 2开始 - 初始化反转", desc: "准备反转后半段，prev=None, curr=mid", line: 20, state: { "prev": "None", "curr": "mid(后半段头)" } },
+      { title: "反转循环", desc: "遍历后半段，逐个反转指针方向", line: 21, state: { "条件": "curr不为None" } },
+      { title: "保存下一个节点", desc: "临时保存curr.next，防止断链", line: 22, state: { "next_temp": "curr.next" } },
+      { title: "反转指针", desc: "当前节点指向prev，完成局部反转", line: 23, state: { "curr.next": "指向prev" } },
+      { title: "prev前进", desc: "prev移动到curr位置", line: 24, state: { "prev": "curr" } },
+      { title: "curr前进", desc: "curr移动到next_temp位置", line: 25, state: { "curr": "next_temp" } },
+      { title: "反转完成", desc: "prev现在是反转后的后半段头节点", line: 26, state: { "second": "反转后的后半段头" } },
+      { title: "Step 3开始 - 合并准备", desc: "first指向原链表头，准备交错合并", line: 29, state: { "first": "head", "second": "反转后的后半段" } },
+      { title: "合并循环", desc: "当second不为空时，持续交错合并", line: 30, state: { "循环条件": "second存在" } },
+      { title: "保存下一对节点", desc: "临时保存first和second的下一个节点", line: 32, state: { "tmp1": "first.next", "tmp2": "second.next" } },
+      { title: "连接first到second", desc: "将first的next指向second", line: 34, state: {} },
+      { title: "连接second到tmp1", desc: "将second的next指向tmp1，完成交错", line: 35, state: {} },
+      { title: "移动到下一对", desc: "first和second各自前进到下一对待合并节点", line: 37, state: {} },
+      { title: "算法结束", desc: "second已用完，first可能还剩一个节点（奇数长度时），重排完成！", line: 38, state: { "结果": "链表已按L0→Ln→L1→Ln-1...重排" } }
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach(({ num, content }) => {
+      const line = document.createElement('div');
+      line.className = 'code-line';
+      line.dataset.line = num;
+      line.innerHTML = `<span class="line-number">${num}</span><span class="line-content">${content}</span>`;
+      line.addEventListener('click', () => highlightStepByLine(num));
+      codeBlock.appendChild(line);
+    });
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const stepEl = document.createElement('div');
+      stepEl.className = 'viz-step';
+      stepEl.dataset.step = idx;
+      stepEl.dataset.line = step.line;
+      
+      let stateHtml = '';
+      if (Object.keys(step.state).length > 0) {
+        stateHtml = '<table class="state-table">' + 
+          Object.entries(step.state).map(([k, v]) => 
+            `<tr><td class="state-label">${k}:</td><td>${v}</td></tr>`
+          ).join('') + '</table>';
+      }
+      
+      stepEl.innerHTML = `
+        <h4><span class="step-number">${idx + 1}</span>${step.title}</h4>
+        <p>${step.desc}</p>
+        ${stateHtml}
+      `;
+      stepEl.addEventListener('click', () => highlightStep(idx));
+      vizSteps.appendChild(stepEl);
+    });
+
+    // 高亮功能
+    function highlightStep(stepIdx) {
+      // 清除所有高亮
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      
+      // 高亮当前步骤
+      const stepEl = document.querySelector(`.viz-step[data-step="${stepIdx}"]`);
+      if (stepEl) {
+        stepEl.classList.add('active');
+        stepEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        
+        // 高亮对应代码行
+        const lineNum = parseInt(stepEl.dataset.line);
+        const lineEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+        if (lineEl) lineEl.classList.add('active');
+      }
+    }
+
+    function highlightStepByLine(lineNum) {
+      // 清除所有高亮
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      
+      // 高亮代码行
+      const lineEl = document.querySelector(`.code-line[data-line="${lineNum}"]`);
+      if (lineEl) lineEl.classList.add('active');
+      
+      // 找到对应的步骤并高亮
+      const stepEl = document.querySelector(`.viz-step[data-line="${lineNum}"]`);
+      if (stepEl) {
+        stepEl.classList.add('active');
+        stepEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    // 默认高亮第一步
+    highlightStep(0);
+  </script>
+</body>
+</html>

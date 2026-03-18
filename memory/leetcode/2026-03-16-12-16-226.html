@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>LeetCode #226 - 翻转二叉树</title>
+  <style>
+    :root { --primary: #6366f1; --bg: #0f172a; --surface: #1e293b; --text: #f1f5f9; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+    h1 { font-size: 2rem; margin-bottom: 8px; }
+    .subtitle { color: #94a3b8; margin-bottom: 24px; }
+    .section { background: var(--surface); border-radius: 16px; padding: 28px; margin-bottom: 24px; }
+    .section h2 { color: var(--primary); margin-top: 0; font-size: 1.3rem; }
+    pre { background: #0d1117; border-radius: 12px; padding: 0; overflow-x: auto; margin: 0; }
+    .code-block { font-family: 'SF Mono', Monaco, monospace; font-size: 14px; line-height: 1.6; }
+    .code-line { display: flex; padding: 3px 20px; cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; }
+    .code-line:hover { background: rgba(255,255,255,0.05); }
+    .code-line.active { background: rgba(99, 102, 241, 0.25); border-left-color: #6366f1; }
+    .line-number { color: #484f58; min-width: 40px; text-align: right; padding-right: 16px; user-select: none; }
+    .viz-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+    @media (max-width: 800px) { .viz-container { grid-template-columns: 1fr; } }
+    .viz-steps { max-height: 400px; overflow-y: auto; }
+    .viz-step { padding: 14px 16px; margin: 8px 0; border-radius: 10px; background: #334155; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+    .viz-step:hover { background: #475569; }
+    .viz-step.active { border-color: var(--primary); background: rgba(99, 102, 241, 0.25); }
+    .viz-step-title { font-weight: 600; color: #fff; margin-bottom: 4px; }
+    .viz-step-desc { font-size: 13px; color: #94a3b8; }
+    .viz-step-state { margin-top: 8px; padding: 6px 10px; background: rgba(0,0,0,0.3); border-radius: 6px; font-family: monospace; font-size: 12px; color: #a5d6ff; }
+    .tree-viz { display: flex; flex-direction: column; align-items: center; padding: 20px; background: #0d1117; border-radius: 12px; }
+    .tree-level { display: flex; justify-content: center; gap: 40px; margin: 10px 0; }
+    .tree-node { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; background: #334155; transition: all 0.3s; }
+    .tree-node.highlight { background: var(--primary); transform: scale(1.1); box-shadow: 0 0 20px rgba(99,102,241,0.5); }
+    .tree-edge { position: relative; }
+    .problem-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .problem-card { background: var(--bg); border-radius: 12px; padding: 20px; border: 1px solid #475569; transition: all 0.2s; text-decoration: none; color: inherit; display: block; }
+    .problem-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 10px 30px rgba(99,102,241,0.2); }
+    .problem-difficulty { font-size: 12px; padding: 4px 10px; border-radius: 20px; display: inline-block; margin-bottom: 8px; }
+    .diff-easy { background: rgba(34,197,94,0.2); color: #4ade80; }
+    .diff-medium { background: rgba(251,191,36,0.2); color: #fbbf24; }
+    .diff-hard { background: rgba(239,68,68,0.2); color: #f87171; }
+    .problem-title { font-weight: 600; font-size: 1.1rem; margin-bottom: 6px; }
+    .problem-method { font-size: 13px; color: #94a3b8; }
+    .complexity-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    .complexity-table th, .complexity-table td { padding: 14px 18px; text-align: left; border-bottom: 1px solid #334155; }
+    .complexity-table th { color: #94a3b8; font-weight: 500; }
+    .complexity-table tr:last-child td { border-bottom: none; }
+    .tag { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 12px; margin: 4px 4px 0 0; }
+    .tag-blue { background: rgba(99,102,241,0.2); color: #818cf8; }
+    .tag-green { background: rgba(34,197,94,0.2); color: #4ade80; }
+    .tag-orange { background: rgba(251,191,36,0.2); color: #fbbf24; }
+    .method-box { background: var(--bg); border-radius: 12px; padding: 20px; margin: 12px 0; border-left: 4px solid var(--primary); }
+    .method-box h4 { margin: 0 0 8px 0; color: #fff; }
+    .method-box p { margin: 0; color: #94a3b8; font-size: 14px; line-height: 1.6; }
+    .arrow { color: #6366f1; font-size: 20px; margin: 5px 0; }
+    .note { background: rgba(251,191,36,0.1); border-left: 3px solid #fbbf24; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; font-size: 14px; }
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; }
+    .class { color: #ffa657; }
+    .built-in { color: #79c0ff; }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #226 - 翻转二叉树</h1>
+  <p class="subtitle">Invert Binary Tree · <span class="diff-easy" style="padding:2px 10px;border-radius:10px;">Easy</span> · 递归 / DFS / BFS</p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给你一棵二叉树的根节点 <code>root</code>，翻转这棵二叉树，并返回其根节点。</p>
+    <p style="margin-top: 12px; color: #94a3b8; font-size: 14px;"><strong>翻转定义：</strong>将二叉树中每个节点的左子树和右子树进行交换。</p>
+    
+    <div class="method-box">
+      <h4>🎯 示例</h4>
+      <p>
+        输入：root = [4,2,7,1,3,6,9]<br>
+        输出：[4,7,2,9,6,3,1]<br><br>
+        解释：每一层的左右子树都被交换了位置
+      </p>
+    </div>
+    
+    <div style="margin-top: 20px;">
+      <span class="tag tag-blue">树</span>
+      <span class="tag tag-green">递归</span>
+      <span class="tag tag-blue">DFS</span>
+      <span class="tag tag-blue">BFS</span>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🧠 核心思路</h2>
+    <p>翻转二叉树的核心思想是<strong>递归地交换每个节点的左右子节点</strong>。</p>
+    
+    <div class="method-box">
+      <h4>🔑 递归三部曲</h4>
+      <p>
+        1. <strong>终止条件</strong>：当前节点为空，直接返回<br>
+        2. <strong>单层逻辑</strong>：交换当前节点的左右子节点<br>
+        3. <strong>递归调用</strong>：分别对左右子树进行翻转
+      </p>
+    </div>
+    
+    <div class="note">
+      💡 <strong>关键理解</strong>：翻转操作是「自底向上」还是「自顶向下」？<br>
+      实际上两者都可以！先交换再递归，或者先递归再交换，结果是一样的。
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div>
+        <div class="tree-viz" id="treeViz">
+          <div class="tree-level">
+            <div class="tree-node" data-val="4">4</div>
+          </div>
+          <div class="arrow">↙ ↘</div>
+          <div class="tree-level">
+            <div class="tree-node" data-val="2">2</div>
+            <div class="tree-node" data-val="7">7</div>
+          </div>
+          <div class="arrow">↙↘   ↙↘</div>
+          <div class="tree-level">
+            <div class="tree-node" data-val="1">1</div>
+            <div class="tree-node" data-val="3">3</div>
+            <div class="tree-node" data-val="6">6</div>
+            <div class="tree-node" data-val="9">9</div>
+          </div>
+        </div>
+        <h3 style="margin-top: 20px; margin-bottom: 12px;">Python 实现</h3>
+        <pre><code id="codeBlock" class="code-block">
+<!-- 代码行由JS生成 -->
+        </code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>⏱️ 复杂度分析</h2>
+    <table class="complexity-table">
+      <tr>
+        <th>方法</th>
+        <th>时间复杂度</th>
+        <th>空间复杂度</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td><strong>递归（DFS）</strong></td>
+        <td>O(n)</td>
+        <td>O(h)</td>
+        <td>h为树的高度，递归栈深度</td>
+      </tr>
+      <tr>
+        <td><strong>迭代（BFS/栈）</strong></td>
+        <td>O(n)</td>
+        <td>O(w)</td>
+        <td>w为树的最大宽度</td>
+      </tr>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/same-tree/" class="problem-card" target="_blank">
+        <span class="problem-difficulty diff-easy">Easy</span>
+        <div class="problem-title">100. 相同的树</div>
+        <div class="problem-method">递归 · 树的基本操作</div>
+      </a>
+      <a href="https://leetcode.cn/problems/symmetric-tree/" class="problem-card" target="_blank">
+        <span class="problem-difficulty diff-easy">Easy</span>
+        <div class="problem-title">101. 对称二叉树</div>
+        <div class="problem-method">递归 · 双指针</div>
+      </a>
+      <a href="https://leetcode.cn/problems/maximum-depth-of-binary-tree/" class="problem-card" target="_blank">
+        <span class="problem-difficulty diff-easy">Easy</span>
+        <div class="problem-title">104. 二叉树的最大深度</div>
+        <div class="problem-method">递归 · DFS</div>
+      </a>
+      <a href="https://leetcode.cn/problems/binary-tree-level-order-traversal/" class="problem-card" target="_blank">
+        <span class="problem-difficulty diff-medium">Medium</span>
+        <div class="problem-title">102. 二叉树的层序遍历</div>
+        <div class="problem-method">BFS · 队列</div>
+      </a>
+      <a href="https://leetcode.cn/problems/construct-binary-tree-from-preorder-and-inorder-traversal/" class="problem-card" target="_blank">
+        <span class="problem-difficulty diff-medium">Medium</span>
+        <div class="problem-title">105. 从前序与中序遍历序列构造二叉树</div>
+        <div class="problem-method">递归 · 分治</div>
+      </a>
+      <a href="https://leetcode.cn/problems/path-sum/" class="problem-card" target="_blank">
+        <span class="problem-difficulty diff-easy">Easy</span>
+        <div class="problem-title">112. 路径总和</div>
+        <div class="problem-method">递归 · DFS</div>
+      </a>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>💡 面试技巧</h2>
+    <div class="method-box">
+      <h4>🎤 高频追问</h4>
+      <p>
+        • 「你能用非递归的方式实现吗？」→ BFS/栈<br>
+        • 「翻转前序遍历和中序遍历结果有什么变化？」→ 前序：左右互换；中序：完全颠倒<br>
+        • 「如何判断两棵树互为翻转？」→ 同时遍历，一个左优先一个右优先
+      </p>
+    </div>
+    <div class="method-box">
+      <h4>⚠️ 常见错误</h4>
+      <p>
+        • 忘记处理空节点<br>
+        • 交换时写成 <code>root.left = root.right</code> 导致右子树丢失（应该先保存）
+      </p>
+    </div>
+  </div>
+  
+  <script>
+    // Python代码
+    const codeLines = [
+      '<span class="keyword">class</span> <span class="class">Solution</span>:',
+      '    <span class="keyword">def</span> <span class="function">invertTree</span>(<span class="built-in">self</span>, root: Optional[TreeNode]) -> Optional[TreeNode]:',
+      '        <span class="comment"># 终止条件：空节点直接返回</span>',
+      '        <span class="keyword">if</span> <span class="keyword">not</span> root:',
+      '            <span class="keyword">return</span> <span class="keyword">None</span>',
+      '        ',
+      '        <span class="comment"># 交换当前节点的左右子节点</span>',
+      '        root.left, root.right = root.right, root.left',
+      '        ',
+      '        <span class="comment"># 递归翻转左子树（原右子树）</span>',
+      '        <span class="built-in">self</span>.invertTree(root.left)',
+      '        ',
+      '        <span class="comment"># 递归翻转右子树（原左子树）</span>',
+      '        <span class="built-in">self</span>.invertTree(root.right)',
+      '        ',
+      '        <span class="comment"># 返回翻转后的根节点</span>',
+      '        <span class="keyword">return</span> root'
+    ];
+    
+    // 步骤定义
+    const steps = [
+      {title: "1️⃣ 调用 invertTree(root=4)", desc: "从根节点开始，当前节点值为4", line: 2, node: "4"},
+      {title: "2️⃣ 检查终止条件", desc: "root不为空，继续执行", line: 4, node: "4"},
+      {title: "3️⃣ 交换左右子节点", desc: "交换节点4的左子树(2)和右子树(7)", line: 7, node: "4"},
+      {title: "4️⃣ 递归翻转左子树", desc: "现在left指向原right(7)，递归处理", line: 10, node: "7"},
+      {title: "5️⃣ 检查节点7的终止条件", desc: "节点7不为空，继续", line: 4, node: "7"},
+      {title: "6️⃣ 交换节点7的左右子节点", desc: "交换6和9的位置", line: 7, node: "7"},
+      {title: "7️⃣ 递归处理节点7的左子树(9)", desc: "节点9是叶子节点", line: 10, node: "9"},
+      {title: "8️⃣ 节点9：空子节点返回", desc: "叶子节点的子节点为空，直接返回None", line: 5, node: "9"},
+      {title: "9️⃣ 递归处理节点7的右子树(6)", desc: "节点6是叶子节点", line: 12, node: "6"},
+      {title: "🔟 节点6：空子节点返回", desc: "叶子节点的子节点为空，直接返回None", line: 5, node: "6"},
+      {title: "1️⃣1️⃣ 节点7处理完成，返回", desc: "左子树7翻转完成", line: 14, node: "7"},
+      {title: "1️⃣2️⃣ 递归翻转右子树", desc: "现在right指向原left(2)，递归处理", line: 12, node: "2"},
+      {title: "1️⃣3️⃣ 交换节点2的左右子节点", desc: "交换1和3的位置", line: 7, node: "2"},
+      {title: "1️⃣4️⃣ 递归处理节点2的左右叶子", desc: "1和3都是叶子，直接返回", line: 10, node: "1"},
+      {title: "1️⃣5️⃣ 节点2处理完成，返回", desc: "右子树2翻转完成", line: 14, node: "2"},
+      {title: "1️⃣6️⃣ 整棵树翻转完成", desc: "返回根节点4，全部左右子树已交换", line: 14, node: "4"}
+    ];
+    
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach((line, i) => {
+      const lineDiv = document.createElement('div');
+      lineDiv.className = 'code-line';
+      lineDiv.dataset.line = i + 1;
+      lineDiv.innerHTML = `<span class="line-number">${i + 1}</span><span>${line}</span>`;
+      lineDiv.onclick = () => selectLine(i + 1);
+      codeBlock.appendChild(lineDiv);
+    });
+    
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, i) => {
+      const stepDiv = document.createElement('div');
+      stepDiv.className = 'viz-step';
+      stepDiv.dataset.index = i;
+      stepDiv.innerHTML = `
+        <div class="viz-step-title">${step.title}</div>
+        <div class="viz-step-desc">${step.desc}</div>
+        <div class="viz-step-state">代码行: ${step.line} | 节点: ${step.node}</div>
+      `;
+      stepDiv.onclick = () => selectStep(i);
+      vizSteps.appendChild(stepDiv);
+    });
+    
+    let activeStep = -1;
+    
+    function selectStep(index) {
+      activeStep = index;
+      const step = steps[index];
+      
+      // 更新步骤高亮
+      document.querySelectorAll('.viz-step').forEach((el, i) => {
+        el.classList.toggle('active', i === index);
+      });
+      
+      // 更新代码高亮
+      document.querySelectorAll('.code-line').forEach(el => {
+        el.classList.toggle('active', parseInt(el.dataset.line) === step.line);
+      });
+      
+      // 更新树节点高亮
+      document.querySelectorAll('.tree-node').forEach(el => {
+        el.classList.toggle('highlight', el.dataset.val === step.node);
+      });
+      
+      // 滚动到可见区域
+      vizSteps.children[index].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    function selectLine(lineNum) {
+      // 找到包含该代码行的最后一个步骤
+      let bestIndex = -1;
+      steps.forEach((step, i) => {
+        if (step.line === lineNum) bestIndex = i;
+      });
+      if (bestIndex >= 0) selectStep(bestIndex);
+    }
+    
+    // 默认选中第一步
+    selectStep(0);
+  </script>
+</body>
+</html>

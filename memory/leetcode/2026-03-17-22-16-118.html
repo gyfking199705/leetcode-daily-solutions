@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>LeetCode #118 - 杨辉三角</title>
+  <style>
+    :root { --primary: #6366f1; --bg: #0f172a; --surface: #1e293b; --text: #f1f5f9; --accent: #22d3ee; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); max-width: 1000px; margin: 0 auto; padding: 40px 20px; line-height: 1.8; }
+    h1 { font-size: 2rem; margin-bottom: 8px; }
+    .subtitle { color: #94a3b8; font-size: 1rem; margin-bottom: 30px; }
+    .section { background: var(--surface); border-radius: 16px; padding: 28px; margin-bottom: 24px; }
+    .section h2 { color: var(--primary); margin-top: 0; font-size: 1.3rem; }
+    pre { background: #0d1117; border-radius: 12px; padding: 20px; overflow-x: auto; margin: 0; }
+    .code-line { display: flex; padding: 3px 0; cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; }
+    .code-line:hover { background: rgba(255,255,255,0.05); }
+    .code-line.active { background: rgba(99, 102, 241, 0.3); border-left: 3px solid var(--primary); }
+    .line-number { color: #484f58; min-width: 40px; text-align: right; padding-right: 16px; user-select: none; }
+    .viz-container { display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; margin: 20px 0; }
+    .viz-step { padding: 14px; margin: 8px 0; border-radius: 10px; background: #334155; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+    .viz-step:hover { background: #475569; }
+    .viz-step.active { border-color: var(--primary); background: rgba(99, 102, 241, 0.3); }
+    .viz-step h4 { margin: 0 0 6px 0; color: var(--accent); font-size: 0.95rem; }
+    .viz-step p { margin: 0; font-size: 0.9rem; color: #cbd5e1; }
+    .state-display { background: #0d1117; border-radius: 10px; padding: 16px; margin-top: 16px; font-family: monospace; font-size: 0.9rem; }
+    .state-row { display: flex; gap: 8px; margin: 4px 0; align-items: center; }
+    .state-label { color: var(--accent); min-width: 60px; }
+    .triangle-viz { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 16px 0; }
+    .triangle-row { display: flex; gap: 8px; justify-content: center; }
+    .triangle-cell { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; background: #334155; font-size: 0.85rem; transition: all 0.3s; }
+    .triangle-cell.active { background: var(--primary); color: white; transform: scale(1.1); }
+    .triangle-cell.new { background: var(--accent); color: #0f172a; animation: pulse 0.5s; }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+    .problem-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 16px; }
+    .problem-card { background: var(--bg); border-radius: 12px; padding: 16px; border: 1px solid #475569; transition: all 0.2s; text-decoration: none; color: inherit; display: block; }
+    .problem-card:hover { border-color: var(--primary); transform: translateY(-3px); }
+    .problem-card h4 { margin: 0 0 8px 0; color: var(--primary); }
+    .problem-card p { margin: 0; font-size: 0.9rem; color: #94a3b8; }
+    .difficulty-easy { color: #22c55e; }
+    .difficulty-medium { color: #f59e0b; }
+    .difficulty-hard { color: #ef4444; }
+    .keyword { color: #ff7b72; } .function { color: #d2a8ff; } .string { color: #a5d6ff; }
+    .number { color: #79c0ff; } .comment { color: #8b949e; } .class { color: #ffa657; }
+    .return { color: #ff7b72; } .def { color: #ff7b72; } .var { color: #79c0ff; }
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #475569; }
+    th { color: var(--primary); font-weight: 600; }
+    .tag { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; margin-right: 8px; background: rgba(99, 102, 241, 0.2); color: var(--primary); }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #118 - 杨辉三角</h1>
+  <p class="subtitle">Pascal's Triangle · Easy · 动态规划入门经典</p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给定一个非负整数 <code>numRows</code>，生成「杨辉三角」的前 <code>numRows</code> 行。</p>
+    <p style="margin-top: 12px;">在<strong>杨辉三角</strong>中，每个数是它左上方和右上方的数的和。</p>
+    <div class="triangle-viz" id="exampleTriangle">
+      <div class="triangle-row">
+        <div class="triangle-cell">1</div>
+      </div>
+      <div class="triangle-row">
+        <div class="triangle-cell">1</div>
+        <div class="triangle-cell">1</div>
+      </div>
+      <div class="triangle-row">
+        <div class="triangle-cell">1</div>
+        <div class="triangle-cell">2</div>
+        <div class="triangle-cell">1</div>
+      </div>
+      <div class="triangle-row">
+        <div class="triangle-cell">1</div>
+        <div class="triangle-cell">3</div>
+        <div class="triangle-cell">3</div>
+        <div class="triangle-cell">1</div>
+      </div>
+      <div class="triangle-row">
+        <div class="triangle-cell">1</div>
+        <div class="triangle-cell">4</div>
+        <div class="triangle-cell">6</div>
+        <div class="triangle-cell">4</div>
+        <div class="triangle-cell">1</div>
+      </div>
+    </div>
+    <p><strong>示例：</strong></p>
+    <pre style="background: #1e293b; padding: 16px; border-radius: 8px;">输入: numRows = 5
+输出: [[1],[1,1],[1,2,1],[1,3,3,1],[1,4,6,4,1]]
+
+输入: numRows = 1
+输出: [[1]]</pre>
+  </div>
+
+  <div class="section">
+    <h2>💡 核心思路</h2>
+    <p>杨辉三角的核心规律：</p>
+    <ul>
+      <li>每行的第一个和最后一个元素都是 <code>1</code></li>
+      <li>中间的元素等于<strong>上一行左上方</strong> + <strong>上一行正上方</strong>的元素</li>
+      <li>即：<code>triangle[i][j] = triangle[i-1][j-1] + triangle[i-1][j]</code></li>
+    </ul>
+    <p style="margin-top: 12px;">这是一个典型的<strong>动态规划</strong>问题，利用已计算的结果推导新结果。</p>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看联动效果）</h2>
+    <div class="viz-container">
+      <div>
+        <div class="viz-steps" id="vizSteps">
+          <!-- 步骤由JS生成 -->
+        </div>
+        <div class="state-display" id="stateDisplay">
+          <div class="state-row"><span class="state-label">当前行:</span><span id="curRow">-</span></div>
+          <div class="state-row"><span class="state-label">当前列:</span><span id="curCol">-</span></div>
+          <div class="state-row"><span class="state-label">计算值:</span><span id="calcVal">-</span></div>
+          <div class="state-row"><span class="state-label">当前结果:</span><span id="curRes">[]</span></div>
+        </div>
+        <div class="triangle-viz" id="dynTriangle" style="margin-top: 20px;"></div>
+      </div>
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre><code id="codeBlock">
+<span class="code-line" data-line="1"><span class="line-number">1</span><span class="keyword">class</span> <span class="class">Solution</span>:</span>
+<span class="code-line" data-line="2"><span class="line-number">2</span>    <span class="keyword">def</span> <span class="function">generate</span>(<span class="var">self</span>, <span class="var">numRows</span>: <span class="class">int</span>) -> <span class="class">List</span>[<span class="class">List</span>[<span class="class">int</span>]]:</span>
+<span class="code-line" data-line="3"><span class="line-number">3</span>        <span class="comment"># 特判：如果 numRows 为 0，返回空列表</span></span>
+<span class="code-line" data-line="4"><span class="line-number">4</span>        <span class="keyword">if</span> numRows == <span class="number">0</span>:</span>
+<span class="code-line" data-line="5"><span class="line-number">5</span>            <span class="return">return</span> []</span>
+<span class="code-line" data-line="6"><span class="line-number">6</span>        </span>
+<span class="code-line" data-line="7"><span class="line-number">7</span>        <span class="comment"># 初始化结果，第一行永远是 [1]</span></span>
+<span class="code-line" data-line="8"><span class="line-number">8</span>        result = [[<span class="number">1</span>]]</span>
+<span class="code-line" data-line="9"><span class="line-number">9</span>        </span>
+<span class="code-line" data-line="10"><span class="line-number">10</span>        <span class="comment"># 从第 2 行开始生成（索引从 1 开始）</span></span>
+<span class="code-line" data-line="11"><span class="line-number">11</span>        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="number">1</span>, numRows):</span>
+<span class="code-line" data-line="12"><span class="line-number">12</span>            <span class="comment"># 获取上一行</span></span>
+<span class="code-line" data-line="13"><span class="line-number">13</span>            prev_row = result[i - <span class="number">1</span>]</span>
+<span class="code-line" data-line="14"><span class="line-number">14</span>            </span>
+<span class="code-line" data-line="15"><span class="line-number">15</span>            <span class="comment"># 创建当前行，第一个元素是 1</span></span>
+<span class="code-line" data-line="16"><span class="line-number">16</span>            cur_row = [<span class="number">1</span>]</span>
+<span class="code-line" data-line="17"><span class="line-number">17</span>            </span>
+<span class="code-line" data-line="18"><span class="line-number">18</span>            <span class="comment"># 计算中间元素：每个数等于左上方 + 右上方</span></span>
+<span class="code-line" data-line="19"><span class="line-number">19</span>            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="function">range</span>(<span class="number">1</span>, i):</span>
+<span class="code-line" data-line="20"><span class="line-number">20</span>                val = prev_row[j - <span class="number">1</span>] + prev_row[j]</span>
+<span class="code-line" data-line="21"><span class="line-number">21</span>                cur_row.<span class="function">append</span>(val)</span>
+<span class="code-line" data-line="22"><span class="line-number">22</span>            </span>
+<span class="code-line" data-line="23"><span class="line-number">23</span>            <span class="comment"># 最后一个元素也是 1</span></span>
+<span class="code-line" data-line="24"><span class="line-number">24</span>            cur_row.<span class="function">append</span>(<span class="number">1</span>)</span>
+<span class="code-line" data-line="25"><span class="line-number">25</span>            </span>
+<span class="code-line" data-line="26"><span class="line-number">26</span>            <span class="comment"># 将当前行加入结果</span></span>
+<span class="code-line" data-line="27"><span class="line-number">27</span>            result.<span class="function">append</span>(cur_row)</span>
+<span class="code-line" data-line="28"><span class="line-number">28</span>        </span>
+<span class="code-line" data-line="29"><span class="line-number">29</span>        <span class="return">return</span> result</span>
+        </code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table>
+      <tr><th>指标</th><th>值</th><th>说明</th></tr>
+      <tr><td>时间复杂度</td><td>O(numRows²)</td><td>需要填充约 n²/2 个元素（等差数列求和）</td></tr>
+      <tr><td>空间复杂度</td><td>O(numRows²)</td><td>存储结果所需的空间（不考虑输出则为 O(numRows)）</td></tr>
+      <tr><td>最优性</td><td>✅ 最优</td><td>必须生成所有元素，无法更优</td></tr>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/pascals-triangle-ii/" class="problem-card" target="_blank">
+        <h4>#119 杨辉三角 II <span class="difficulty-easy">Easy</span></h4>
+        <p>只返回第 k 行，可以用滚动数组优化到 O(k) 空间</p>
+      </a>
+      <a href="https://leetcode.cn/problems/triangle/" class="problem-card" target="_blank">
+        <h4>#120 三角形最小路径和 <span class="difficulty-medium">Medium</span></h4>
+        <p>自底向上/自顶向下的动态规划，与杨辉三角类似但要求最小和</p>
+      </a>
+      <a href="https://leetcode.cn/problems/unique-paths/" class="problem-card" target="_blank">
+        <h4>#62 不同路径 <span class="difficulty-medium">Medium</span></h4>
+        <p>网格 DP 经典题，状态转移思想与杨辉三角一脉相承</p>
+      </a>
+      <a href="https://leetcode.cn/problems/climbing-stairs/" class="problem-card" target="_blank">
+        <h4>#70 爬楼梯 <span class="difficulty-easy">Easy</span></h4>
+        <p>斐波那契数列 DP，适合 DP 入门练习</p>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    const steps = [
+      {title: "初始化结果", desc: "创建结果列表，第一行 [1] 已存在", line: 8, state: {row: 0, col: 0, result: [[1]]}},
+      {title: "进入外层循环", desc: "开始生成第 2 行（i=1）", line: 11, state: {row: 1, col: "-", result: [[1]]}},
+      {title: "获取上一行", desc: "prev_row = [1]", line: 13, state: {row: 1, col: "-", result: [[1]]}},
+      {title: "创建当前行", desc: "cur_row = [1]，第一个元素固定为1", line: 16, state: {row: 1, col: 0, result: [[1]], cur: [1]}},
+      {title: "检查内层循环", desc: "range(1, 1) 为空，跳过中间元素计算", line: 19, state: {row: 1, col: "-", result: [[1]], cur: [1]}},
+      {title: "添加末尾1", desc: "cur_row = [1, 1]", line: 24, state: {row: 1, col: 1, result: [[1]], cur: [1, 1]}},
+      {title: "加入结果", desc: "result = [[1], [1,1]]", line: 27, state: {row: 1, col: "-", result: [[1], [1,1]]}},
+      {title: "生成第3行", desc: "i=2, prev_row = [1,1]", line: 11, state: {row: 2, col: "-", result: [[1], [1,1]]}},
+      {title: "创建当前行", desc: "cur_row = [1]", line: 16, state: {row: 2, col: 0, result: [[1], [1,1]], cur: [1]}},
+      {title: "计算中间元素", desc: "j=1: val = prev[0] + prev[1] = 1+1 = 2", line: 20, state: {row: 2, col: 1, result: [[1], [1,1]], cur: [1, 2], calc: "1+1=2"}},
+      {title: "添加末尾1", desc: "cur_row = [1, 2, 1]", line: 24, state: {row: 2, col: 2, result: [[1], [1,1]], cur: [1, 2, 1]}},
+      {title: "加入结果", desc: "result = [[1], [1,1], [1,2,1]]", line: 27, state: {row: 2, col: "-", result: [[1], [1,1], [1,2,1]]}},
+      {title: "生成第4行", desc: "i=3, 开始计算 [1,3,3,1]", line: 11, state: {row: 3, col: "-", result: [[1], [1,1], [1,2,1]]}},
+      {title: "计算 j=1", desc: "val = 1+2 = 3, cur_row = [1,3]", line: 20, state: {row: 3, col: 1, result: [[1], [1,1], [1,2,1]], cur: [1,3], calc: "1+2=3"}},
+      {title: "计算 j=2", desc: "val = 2+1 = 3, cur_row = [1,3,3]", line: 20, state: {row: 3, col: 2, result: [[1], [1,1], [1,2,1]], cur: [1,3,3], calc: "2+1=3"}},
+      {title: "添加末尾1", desc: "cur_row = [1,3,3,1]", line: 24, state: {row: 3, col: 3, result: [[1], [1,1], [1,2,1]], cur: [1,3,3,1]}},
+      {title: "返回结果", desc: "所有行生成完毕，返回 result", line: 29, state: {row: "-", col: "-", result: [[1], [1,1], [1,2,1], [1,3,3,1]]}}
+    ];
+
+    // 生成步骤元素
+    const stepsContainer = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const div = document.createElement('div');
+      div.className = 'viz-step';
+      div.dataset.idx = idx;
+      div.dataset.line = step.line;
+      div.innerHTML = `<h4>步骤 ${idx + 1}: ${step.title}</h4><p>${step.desc}</p>`;
+      div.addEventListener('click', () => activateStep(idx));
+      stepsContainer.appendChild(div);
+    });
+
+    // 代码行点击事件
+    document.querySelectorAll('.code-line').forEach(line => {
+      line.addEventListener('click', () => {
+        const lineNum = parseInt(line.dataset.line);
+        const stepIdx = steps.findIndex(s => s.line === lineNum);
+        if (stepIdx !== -1) activateStep(stepIdx);
+      });
+    });
+
+    let currentStep = -1;
+
+    function activateStep(idx) {
+      // 更新步骤高亮
+      document.querySelectorAll('.viz-step').forEach((el, i) => {
+        el.classList.toggle('active', i === idx);
+      });
+      
+      // 更新代码行高亮
+      document.querySelectorAll('.code-line').forEach(el => {
+        el.classList.toggle('active', parseInt(el.dataset.line) === steps[idx].line);
+      });
+
+      // 更新状态显示
+      const state = steps[idx].state;
+      document.getElementById('curRow').textContent = state.row;
+      document.getElementById('curCol').textContent = state.col;
+      document.getElementById('calcVal').textContent = state.calc || '-';
+      document.getElementById('curRes').textContent = JSON.stringify(state.result);
+
+      // 更新三角形可视化
+      renderTriangle(state);
+      
+      currentStep = idx;
+    }
+
+    function renderTriangle(state) {
+      const container = document.getElementById('dynTriangle');
+      container.innerHTML = '';
+      
+      const result = state.result;
+      result.forEach((row, i) => {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'triangle-row';
+        
+        row.forEach((val, j) => {
+          const cell = document.createElement('div');
+          cell.className = 'triangle-cell';
+          cell.textContent = val;
+          
+          // 高亮当前计算的元素
+          if (i === state.row && j === state.col && state.cur) {
+            cell.classList.add('new');
+          }
+          
+          rowDiv.appendChild(cell);
+        });
+        
+        container.appendChild(rowDiv);
+      });
+
+      // 如果有当前正在构建的行，也显示出来
+      if (state.cur) {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'triangle-row';
+        state.cur.forEach((val, j) => {
+          const cell = document.createElement('div');
+          cell.className = 'triangle-cell';
+          cell.textContent = val;
+          if (j === state.col) cell.classList.add('new');
+          rowDiv.appendChild(cell);
+        });
+        container.appendChild(rowDiv);
+      }
+    }
+
+    // 初始化
+    activateStep(0);
+  </script>
+</body>
+</html>

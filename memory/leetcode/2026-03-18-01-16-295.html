@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #295 - 数据流的中位数</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --secondary: #8b5cf6;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --surface-light: #334155;
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --max-heap: #f87171;
+      --min-heap: #34d399;
+    }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.6;
+    }
+    h1 {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 2.2rem;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin-bottom: 30px;
+    }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px; 
+      border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .problem-meta {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .badge-hard { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    .badge-topic { background: rgba(99, 102, 241, 0.2); color: #6366f1; }
+    .badge-tag { background: rgba(52, 211, 153, 0.2); color: #34d399; }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 20px; 
+      overflow-x: auto; 
+      margin: 0;
+    }
+    code { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 0.9rem; }
+    .code-line { 
+      display: flex; 
+      padding: 3px 0; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      border-radius: 4px;
+    }
+    .code-line:hover { background: rgba(255,255,255,0.05); }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.25); 
+      border-left: 3px solid var(--primary); 
+      margin-left: -3px;
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 40px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    @media (max-width: 768px) {
+      .viz-container { grid-template-columns: 1fr; }
+    }
+    .viz-steps {
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    .viz-step { 
+      padding: 14px 16px; 
+      margin: 10px 0; 
+      border-radius: 10px; 
+      background: var(--surface-light); 
+      cursor: pointer; 
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .viz-step:hover { 
+      border-color: rgba(99, 102, 241, 0.5);
+      transform: translateX(4px);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.2);
+    }
+    .viz-step h4 {
+      margin: 0 0 6px 0;
+      color: var(--primary);
+      font-size: 1rem;
+    }
+    .viz-step p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .state-preview {
+      margin-top: 10px;
+      padding: 10px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+      font-size: 0.85rem;
+    }
+    .heap-container {
+      display: flex;
+      gap: 20px;
+      margin-top: 15px;
+    }
+    .heap {
+      flex: 1;
+      padding: 15px;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.2);
+    }
+    .heap-title {
+      font-weight: 600;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .max-heap-title { color: var(--max-heap); }
+    .min-heap-title { color: var(--min-heap); }
+    .heap-content {
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+    .heap-item {
+      display: inline-block;
+      padding: 4px 10px;
+      margin: 3px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.1);
+    }
+    .median-highlight {
+      background: linear-gradient(135deg, var(--primary), var(--secondary)) !important;
+      font-weight: bold;
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 18px; 
+      border: 1px solid #475569; 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block; 
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+    }
+    .problem-card h4 {
+      margin: 0 0 8px 0;
+      color: var(--primary);
+    }
+    .problem-card p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    .complexity-table th,
+    .complexity-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--surface-light);
+    }
+    .complexity-table th {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .complexity-good { color: #34d399; }
+    .complexity-ok { color: #fbbf24; }
+    .highlight { 
+      background: rgba(99, 102, 241, 0.2); 
+      padding: 2px 6px; 
+      border-radius: 4px;
+    }
+    .key-point {
+      background: rgba(52, 211, 153, 0.1);
+      border-left: 4px solid #34d399;
+      padding: 16px 20px;
+      margin: 16px 0;
+      border-radius: 0 10px 10px 0;
+    }
+    .key-point h4 {
+      margin: 0 0 8px 0;
+      color: #34d399;
+    }
+    .key-point p {
+      margin: 0;
+    }
+    /* Syntax Highlighting */
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; font-style: italic; }
+    .class { color: #ffa657; }
+    .decorator { color: #ff7b72; }
+    .self { color: #ff7b72; }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #295 - 数据流的中位数</h1>
+  <p class="subtitle">Median Finder - 使用双堆设计实现动态中位数查询</p>
+  
+  <div class="section">
+    <div class="problem-meta">
+      <span class="badge badge-hard">Hard</span>
+      <span class="badge badge-topic">设计</span>
+      <span class="badge badge-tag">双堆</span>
+      <span class="badge badge-tag">优先队列</span>
+    </div>
+    <h2>📋 题目描述</h2>
+    <p>中位数是有序整数列表中的中间值。如果列表的大小是偶数，则没有中间值，中位数是两个中间值的平均值。</p>
+    <p style="margin-top: 16px;"><strong>实现 MedianFinder 类：</strong></p>
+    <ul>
+      <li><code>MedianFinder()</code> 初始化 <code>MedianFinder</code> 对象</li>
+      <li><code>void addNum(int num)</code> 将数据流中的数字 <code>num</code> 添加到数据结构中</li>
+      <li><code>double findMedian()</code> 返回到目前为止所有元素的中位数</li>
+    </ul>
+    
+    <div class="key-point">
+      <h4>💡 核心思路</h4>
+      <p>使用<span class="highlight">最大堆（左边）</span>和<span class="highlight">最小堆（右边）</span>维护数据：左边保存较小的一半，右边保存较大的一半。保持两堆大小平衡（差值不超过1），中位数就在堆顶。</p>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+    <div id="heapVisualization" class="heap-container" style="display:none;">
+      <div class="heap">
+        <div class="heap-title max-heap-title">🔴 最大堆（左边）</div>
+        <div class="heap-content" id="maxHeapContent"></div>
+      </div>
+      <div class="heap">
+        <div class="heap-title min-heap-title">🟢 最小堆（右边）</div>
+        <div class="heap-content" id="minHeapContent"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <thead>
+        <tr>
+          <th>操作</th>
+          <th>时间复杂度</th>
+          <th>空间复杂度</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>addNum</code></td>
+          <td class="complexity-ok">O(log n)</td>
+          <td rowspan="2" class="complexity-ok">O(n)</td>
+        </tr>
+        <tr>
+          <td><code>findMedian</code></td>
+          <td class="complexity-good">O(1)</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="margin-top: 16px; color: var(--text-muted);">由于 Python 的 <code>heapq</code> 只提供最小堆，最大堆通过存储负数实现。插入时先放入一个堆，再将堆顶元素移到另一个堆，保持平衡。</p>
+  </div>
+
+  <div class="section">
+    <h2>🎯 关键要点总结</h2>
+    <div class="key-point">
+      <h4>1. 双堆平衡</h4>
+      <p>最大堆存较小一半，最小堆存较大一半。插入时先放入对应堆，再平衡：将堆顶元素移动到另一个堆。</p>
+    </div>
+    <div class="key-point">
+      <h4>2. Python 最大堆技巧</h4>
+      <p>Python 的 heapq 是最小堆，要实现最大堆，存入 <code>-num</code>，取出时再取负。</p>
+    </div>
+    <div class="key-point">
+      <h4>3. 大小约束</h4>
+      <p>最大堆的大小 = 最小堆的大小，或者 最大堆的大小 = 最小堆的大小 + 1。这样中位数计算才有规律。</p>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/sliding-window-median/" class="problem-card" target="_blank">
+        <h4>#480 滑动窗口中位数</h4>
+        <p>双堆 + 延迟删除，滑动窗口内找中位数</p>
+      </a>
+      <a href="https://leetcode.cn/problems/find-median-from-data-stream/" class="problem-card" target="_blank">
+        <h4>#295 数据流的中位数 ⭐</h4>
+        <p>本题，双堆经典应用</p>
+      </a>
+      <a href="https://leetcode.cn/problems/ipo/" class="problem-card" target="_blank">
+        <h4>#502 IPO</h4>
+        <p>最大堆 + 最小堆贪心选择项目</p>
+      </a>
+      <a href="https://leetcode.cn/problems/merge-k-sorted-lists/" class="problem-card" target="_blank">
+        <h4>#23 合并K个升序链表</h4>
+        <p>优先队列/最小堆经典题</p>
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // 代码行数据
+    const codeLines = [
+      {num: 1, content: '<span class="keyword">import</span> heapq'},
+      {num: 2, content: ''},
+      {num: 3, content: '<span class="keyword">class</span> <span class="class">MedianFinder</span>:'},
+      {num: 4, content: '    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="self">self</span>):'},
+      {num: 5, content: '        <span class="comment"># 最大堆：存储较小的一半（存负数实现）</span>'},
+      {num: 6, content: '        <span class="self">self</span>.max_heap = []  <span class="comment"># 左边</span>'},
+      {num: 7, content: '        <span class="comment"># 最小堆：存储较大的一半</span>'},
+      {num: 8, content: '        <span class="self">self</span>.min_heap = []  <span class="comment"># 右边</span>'},
+      {num: 9, content: ''},
+      {num: 10, content: '    <span class="keyword">def</span> <span class="function">addNum</span>(<span class="self">self</span>, num: <span class="keyword">int</span>) -> <span class="keyword">None</span>:'},
+      {num: 11, content: '        <span class="comment"># 先放入最大堆（左边）</span>'},
+      {num: 12, content: '        heapq.heappush(<span class="self">self</span>.max_heap, -num)'},
+      {num: 13, content: ''},
+      {num: 14, content: '        <span class="comment"># 平衡：最大堆顶移到最小堆</span>'},
+      {num: 15, content: '        max_top = -heapq.heappop(<span class="self">self</span>.max_heap)'},
+      {num: 16, content: '        heapq.heappush(<span class="self">self</span>.min_heap, max_top)'},
+      {num: 17, content: ''},
+      {num: 18, content: '        <span class="comment"># 确保大小约束：左堆 >= 右堆</span>'},
+      {num: 19, content: '        <span class="keyword">if</span> <span class="function">len</span>(<span class="self">self</span>.min_heap) > <span class="function">len</span>(<span class="self">self</span>.max_heap):'},
+      {num: 20, content: '            min_top = heapq.heappop(<span class="self">self</span>.min_heap)'},
+      {num: 21, content: '            heapq.heappush(<span class="self">self</span>.max_heap, -min_top)'},
+      {num: 22, content: ''},
+      {num: 23, content: '    <span class="keyword">def</span> <span class="function">findMedian</span>(<span class="self">self</span>) -> <span class="keyword">float</span>:'},
+      {num: 24, content: '        <span class="keyword">if</span> <span class="function">len</span>(<span class="self">self</span>.max_heap) > <span class="function">len</span>(<span class="self">self</span>.min_heap):'},
+      {num: 25, content: '            <span class="comment"># 奇数个，左边多一个，取左堆顶</span>'},
+      {num: 26, content: '            <span class="keyword">return</span> float(-<span class="self">self</span>.max_heap[<span class="number">0</span>])'},
+      {num: 27, content: '        <span class="keyword">else</span>:'},
+      {num: 28, content: '            <span class="comment"># 偶数个，取两堆顶平均</span>'},
+      {num: 29, content: '            <span class="keyword">return</span> (-<span class="self">self</span>.max_heap[<span class="number">0</span>] + <span class="self">self</span>.min_heap[<span class="number">0</span>]) / <span class="number">2.0</span>'},
+    ];
+
+    // 步骤与代码行映射
+    const steps = [
+      {
+        title: "1️⃣ 初始化数据结构",
+        desc: "创建两个空堆：max_heap（存负数实现最大堆）和 min_heap（标准最小堆）",
+        lines: [4, 5, 6, 7, 8],
+        maxHeap: [],
+        minHeap: [],
+        median: null
+      },
+      {
+        title: "2️⃣ 添加数字 num",
+        desc: "addNum(1)：先将数字放入最大堆（存储为 -1）",
+        lines: [10, 11, 12],
+        maxHeap: [1],
+        minHeap: [],
+        median: null
+      },
+      {
+        title: "3️⃣ 平衡堆结构",
+        desc: "将最大堆顶移到最小堆，确保右边元素 >= 左边",
+        lines: [14, 15, 16],
+        maxHeap: [],
+        minHeap: [1],
+        median: null
+      },
+      {
+        title: "4️⃣ 大小约束调整",
+        desc: "右边比左边大，将最小堆顶移回最大堆",
+        lines: [18, 19, 20, 21],
+        maxHeap: [1],
+        minHeap: [],
+        median: 1
+      },
+      {
+        title: "5️⃣ 添加更多数字",
+        desc: "addNum(2)：放入最大堆，平衡后左边[1]，右边[2]",
+        lines: [10, 12, 14, 16, 18, 19],
+        maxHeap: [1],
+        minHeap: [2],
+        median: 1.5
+      },
+      {
+        title: "6️⃣ 查询中位数",
+        desc: "两堆大小相等，取堆顶平均值：(1+2)/2 = 1.5",
+        lines: [23, 27, 28, 29],
+        maxHeap: [1],
+        minHeap: [2],
+        median: 1.5
+      },
+      {
+        title: "7️⃣ 继续添加 addNum(3)",
+        desc: "放入最大堆 → 平衡 → 大小约束，最终左边[2,1]，右边[3]",
+        lines: [10, 12, 14, 16, 18, 19, 20, 21],
+        maxHeap: [2, 1],
+        minHeap: [3],
+        median: 2
+      },
+      {
+        title: "8️⃣ 查询中位数（奇数）",
+        desc: "左边比右边大1，取左堆顶：2",
+        lines: [23, 24, 25, 26],
+        maxHeap: [2, 1],
+        minHeap: [3],
+        median: 2
+      }
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach(line => {
+      const div = document.createElement('div');
+      div.className = 'code-line';
+      div.dataset.line = line.num;
+      div.innerHTML = `<span class="line-number">${line.num}</span><span>${line.content}</span>`;
+      div.addEventListener('click', () => highlightStepByLine(line.num));
+      codeBlock.appendChild(div);
+    });
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const div = document.createElement('div');
+      div.className = 'viz-step';
+      div.dataset.step = idx;
+      div.innerHTML = `
+        <h4>${step.title}</h4>
+        <p>${step.desc}</p>
+      `;
+      div.addEventListener('click', () => highlightStep(idx));
+      vizSteps.appendChild(div);
+    });
+
+    let currentStep = -1;
+
+    function highlightStep(stepIdx) {
+      currentStep = stepIdx;
+      const step = steps[stepIdx];
+      
+      // 高亮步骤
+      document.querySelectorAll('.viz-step').forEach((el, i) => {
+        el.classList.toggle('active', i === stepIdx);
+      });
+      
+      // 高亮代码行
+      document.querySelectorAll('.code-line').forEach(el => {
+        const lineNum = parseInt(el.dataset.line);
+        el.classList.toggle('active', step.lines.includes(lineNum));
+      });
+      
+      // 更新堆可视化
+      updateHeapVisualization(step);
+    }
+
+    function highlightStepByLine(lineNum) {
+      for (let i = 0; i < steps.length; i++) {
+        if (steps[i].lines.includes(lineNum)) {
+          highlightStep(i);
+          // 滚动到对应步骤
+          vizSteps.children[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
+          break;
+        }
+      }
+    }
+
+    function updateHeapVisualization(step) {
+      const heapViz = document.getElementById('heapVisualization');
+      const maxHeapContent = document.getElementById('maxHeapContent');
+      const minHeapContent = document.getElementById('minHeapContent');
+      
+      heapViz.style.display = 'flex';
+      
+      // 最大堆显示（从大到小）
+      if (step.maxHeap.length === 0) {
+        maxHeapContent.innerHTML = '<span style="color:#666">空</span>';
+      } else {
+        maxHeapContent.innerHTML = step.maxHeap
+          .map((v, i) => `<span class="heap-item ${i === 0 ? 'median-highlight' : ''}">${v}</span>`)
+          .join('');
+      }
+      
+      // 最小堆显示（从小到大）
+      if (step.minHeap.length === 0) {
+        minHeapContent.innerHTML = '<span style="color:#666">空</span>';
+      } else {
+        minHeapContent.innerHTML = step.minHeap
+          .map((v, i) => `<span class="heap-item ${i === 0 && step.maxHeap.length === step.minHeap.length ? 'median-highlight' : ''}">${v}</span>`)
+          .join('');
+      }
+    }
+
+    // 默认高亮第一个步骤
+    highlightStep(0);
+  </script>
+</body>
+</html>

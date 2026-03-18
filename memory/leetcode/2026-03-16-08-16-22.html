@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #22 - 括号生成</title>
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --secondary: #8b5cf6;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-light: #334155;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: #475569;
+    }
+    
+    * { box-sizing: border-box; }
+    
+    body {
+      font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .meta {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+    
+    .tag {
+      background: var(--surface);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      border: 1px solid var(--border);
+    }
+    
+    .tag.difficulty-medium {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.1));
+      border-color: var(--warning);
+      color: var(--warning);
+    }
+    
+    .tag.method {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(99, 102, 241, 0.1));
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    
+    .section {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 24px;
+      border: 1px solid var(--border);
+    }
+    
+    .section h2 {
+      margin-top: 0;
+      color: var(--primary);
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .problem-box {
+      background: var(--bg);
+      padding: 20px;
+      border-radius: 12px;
+      border-left: 4px solid var(--primary);
+      margin: 16px 0;
+    }
+    
+    .example {
+      background: var(--surface-light);
+      padding: 16px;
+      border-radius: 10px;
+      margin: 12px 0;
+    }
+    
+    .example-title {
+      color: var(--success);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .collapsible {
+      background: var(--surface-light);
+      border-radius: 12px;
+      margin: 16px 0;
+      overflow: hidden;
+    }
+    
+    .collapsible-header {
+      padding: 16px 20px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.2s;
+    }
+    
+    .collapsible-header:hover {
+      background: rgba(99, 102, 241, 0.1);
+    }
+    
+    .collapsible-content {
+      padding: 0 20px;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+    }
+    
+    .collapsible.expanded .collapsible-content {
+      padding: 0 20px 20px;
+      max-height: 2000px;
+    }
+    
+    .collapsible-arrow {
+      transition: transform 0.3s;
+    }
+    
+    .collapsible.expanded .collapsible-arrow {
+      transform: rotate(180deg);
+    }
+    
+    /* Tree Visualization */
+    .tree-container {
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+      overflow-x: auto;
+    }
+    
+    .tree {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .tree-level {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .tree-node {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.9rem;
+      min-width: 60px;
+      text-align: center;
+      position: relative;
+    }
+    
+    .tree-node.leaf {
+      background: linear-gradient(135deg, var(--success), #059669);
+    }
+    
+    .tree-node.pruned {
+      background: var(--surface-light);
+      color: var(--text-muted);
+      text-decoration: line-through;
+    }
+    
+    .tree-branch {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .branch-line {
+      width: 2px;
+      height: 20px;
+      background: var(--border);
+    }
+    
+    .arrow-down {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    
+    /* Visualization Steps */
+    .viz-step {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 16px;
+      margin: 12px 0;
+      border: 1px solid var(--border);
+    }
+    
+    .viz-step-header {
+      color: var(--primary);
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    
+    .state-display {
+      font-family: 'SF Mono', Monaco, monospace;
+      background: var(--surface);
+      padding: 12px;
+      border-radius: 8px;
+      margin: 8px 0;
+    }
+    
+    .state-row {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .state-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .state-label {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    
+    .state-value {
+      color: var(--success);
+      font-weight: 600;
+    }
+    
+    /* Code Block */
+    pre {
+      background: #0d1117;
+      border-radius: 12px;
+      padding: 20px;
+      overflow-x: auto;
+      border: 1px solid #30363d;
+      margin: 16px 0;
+    }
+    
+    code {
+      font-family: 'SF Mono', 'Fira Code', Monaco, 'Cascadia Code', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    .code-line {
+      display: flex;
+      padding: 2px 0;
+    }
+    
+    .line-number {
+      color: #484f58;
+      min-width: 40px;
+      text-align: right;
+      padding-right: 16px;
+      user-select: none;
+    }
+    
+    .line-content {
+      color: #c9d1d9;
+    }
+    
+    .line-content .keyword { color: #ff7b72; }
+    .line-content .function { color: #d2a8ff; }
+    .line-content .string { color: #a5d6ff; }
+    .line-content .comment { color: #8b949e; font-style: italic; }
+    .line-content .number { color: #79c0ff; }
+    .line-content .class { color: #ffa657; }
+    
+    /* Complexity Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+    }
+    
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    th {
+      background: var(--surface-light);
+      color: var(--primary);
+      font-weight: 600;
+    }
+    
+    tr:hover {
+      background: rgba(99, 102, 241, 0.05);
+    }
+    
+    .complexity-good {
+      color: var(--success);
+      font-weight: 600;
+    }
+    
+    .complexity-medium {
+      color: var(--warning);
+      font-weight: 600;
+    }
+    
+    /* Related Problems */
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+    
+    .problem-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      transition: all 0.2s;
+    }
+    
+    .problem-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+    
+    .problem-card-num {
+      color: var(--primary);
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    
+    .problem-card-title {
+      margin-top: 4px;
+      font-weight: 500;
+    }
+    
+    .problem-card-tag {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    
+    /* Hint Box */
+    .hint-box {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05));
+      border: 1px solid var(--warning);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin: 16px 0;
+    }
+    
+    .hint-title {
+      color: var(--warning);
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    /* Key Insight */
+    .insight-box {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05));
+      border: 1px solid var(--success);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    
+    .insight-title {
+      color: var(--success);
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 12px;
+    }
+    
+    /* Animation for tree */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    .tree-node.active {
+      animation: pulse 1.5s ease-in-out infinite;
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <h1>#22. 括号生成</h1>
+  <div class="subtitle">Generate Parentheses</div>
+  
+  <div class="meta">
+    <span class="tag difficulty-medium">Medium</span>
+    <span class="tag method">回溯算法 / DFS</span>
+    <span class="tag">字符串</span>
+    <span class="tag">第46期</span>
+  </div>
+  
+  <!-- 题目描述 -->
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <div class="problem-box">
+      <p>数字 <code>n</code> 代表生成括号的对数，请你设计一个函数，用于能够生成所有可能的并且 <strong>有效的</strong> 括号组合。</p>
+      <p>有效括号组合需满足：任意前缀中，左括号的数量都 <strong>大于等于</strong> 右括号的数量。</p>
+    </div>
+    
+    <div class="example">
+      <div class="example-title">示例 1：</div>
+      <p><strong>输入：</strong>n = 3</p>
+      <p><strong>输出：</strong>["((()))","(()())","(())()","()(())","()()()"]</p>
+    </div>
+    
+    <div class="example">
+      <div class="example-title">示例 2：</strong></div>
+      <p><strong>输入：</strong>n = 1</p>
+      <p><strong>输出：</strong>["()"]</p>
+    </div>
+    
+    <p><strong>提示：</strong>1 <= n <= 8</p>
+  </div>
+  
+  <!-- 核心洞察 -->
+  <div class="insight-box">
+    <div class="insight-title">💡 核心洞察</div>
+    <p>这是一道<strong>经典的回溯/DFS模板题</strong>。关键在于理解「剪枝条件」：</p>
+    <ul>
+      <li>剩余左括号数量 > 0 时，可以添加 '('</li>
+      <li>已添加的右括号数量 < 已添加的左括号数量时，可以添加 ')'</li>
+      <li>当左右括号都用完时，得到一个有效组合</li>
+    </ul>
+  </div>
+  
+  <!-- 解题思路 -->
+  <div class="section">
+    <h2>🧠 解题思路</h2>
+    
+    <div class="collapsible expanded">
+      <div class="collapsible-header" onclick="this.parentElement.classList.toggle('expanded')">
+        <span>1️⃣ 决策树分析 — 理解搜索空间</span>
+        <span class="collapsible-arrow">▼</span>
+      </div>
+      <div class="collapsible-content">
+        <p>对于 n=3，我们需要生成 3 对括号。每个位置有两个选择（理论上）：添加 '(' 或 ')'。</p>
+        <p>但通过约束条件剪枝，我们得到如下决策树：</p>
+        
+        <div class="tree-container">
+          <div class="tree">
+            <div class="tree-level">
+              <div class="tree-node active">""</div>
+            </div>
+            <div class="arrow-down">↓</div>
+            <div class="tree-level">
+              <div class="tree-node">(</div>
+            </div>
+            <div class="arrow-down">↓</div>
+            <div class="tree-level">
+              <div class="tree-node">((</div>
+              <div class="tree-node">()</div>
+            </div>
+            <div class="arrow-down">↓</div>
+            <div class="tree-level">
+              <div class="tree-node">(((</div>
+              <div class="tree-node">(()</div>
+              <div class="tree-node pruned">()) ✗</div>
+              <div class="tree-node">()(</div>
+            </div>
+            <div class="arrow-down">↓</div>
+            <div class="tree-level">
+              <div style="font-size: 0.8rem; color: var(--text-muted);">...继续展开直到生成所有合法组合</div>
+            </div>
+          </div>
+        </div>
+        
+        <p>注意：当右括号数量 > 左括号数量时，该分支被<strong>剪枝</strong>（标记为 ✗）。</p>
+      </div>
+    </div>
+    
+    <div class="collapsible">
+      <div class="collapsible-header" onclick="this.parentElement.classList.toggle('expanded')">
+        <span>2️⃣ 算法执行过程 — 以 n=2 为例</span>
+        <span class="collapsible-arrow">▼</span>
+      </div>
+      <div class="collapsible-content">
+        <div class="viz-step">
+          <div class="viz-step-header">Step 1: 初始状态</div>
+          <div class="state-display">
+            <div class="state-row">
+              <div class="state-item"><span class="state-label">当前字符串:</span> <span class="state-value">""</span></div>
+              <div class="state-item"><span class="state-label">已用左括号:</span> <span class="state-value">0</span></div>
+              <div class="state-item"><span class="state-label">已用右括号:</span> <span class="state-value">0</span></div>
+            </div>
+          </div>
+          <p>选择：可以添加 '(' (剩余3个) 或 ')'？右括号已用0 < 左括号已用0？否，所以不能添加 ')'</p>
+        </div>
+        
+        <div class="viz-step">
+          <div class="viz-step-header">Step 2: 添加 '('</div>
+          <div class="state-display">
+            <div class="state-row">
+              <div class="state-item"><span class="state-label">当前字符串:</span> <span class="state-value">"("</span></div>
+              <div class="state-item"><span class="state-label">已用左括号:</span> <span class="state-value">1</span></div>
+              <div class="state-item"><span class="state-label">已用右括号:</span> <span class="state-value">0</span></div>
+            </div>
+          </div>
+          <p>选择：可以添加 '(' 或 ')' (1<1? 否, 但 0<1 是, 可以添加 ')')</p>
+        </div>
+        
+        <div class="viz-step">
+          <div class="viz-step-header">Step 3-A: 分支 - 添加 '('</div>
+          <div class="state-display">
+            <div class="state-row">
+              <div class="state-item"><span class="state-label">当前字符串:</span> <span class="state-value">"(("</span></div>
+              <div class="state-item"><span class="state-label">已用左括号:</span> <span class="state-value">2</span></div>
+              <div class="state-item"><span class="state-label">已用右括号:</span> <span class="state-value">0</span></div>
+            </div>
+          </div>
+          <p>左括号已用完(n=2)，只能添加右括号...</p>
+        </div>
+        
+        <div class="viz-step">
+          <div class="viz-step-header">Step 4-A: 添加 ')' 两次 → 得到 "(())" ✅</div>
+          <div class="state-display">
+            <div class="state-row">
+              <div class="state-item"><span class="state-label">结果:</span> <span class="state-value">"(())"</span></div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="viz-step">
+          <div class="viz-step-header">Step 3-B: 分支 - 添加 ')'</div>
+          <div class="state-display">
+            <div class="state-row">
+              <div class="state-item"><span class="state-label">当前字符串:</span> <span class="state-value">"()"</span></div>
+              <div class="state-item"><span class="state-label">已用左括号:</span> <span class="state-value">1</span></div>
+              <div class="state-item"><span class="state-label">已用右括号:</span> <span class="state-value">1</span></div>
+            </div>
+          </div>
+          <p>可以添加 '(' 或 ')'？右括号1 < 左括号1？否，只能添加 '('</p>
+        </div>
+        
+        <div class="viz-step">
+          <div class="viz-step-header">Step 4-B: 继续 → 得到 "()()" ✅</div>
+          <div class="state-display">
+            <div class="state-row">
+              <div class="state-item"><span class="state-label">结果:</span> <span class="state-value">"()()"</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="hint-box">
+      <div class="hint-title">⚠️ 常见误区</div>
+      <ul>
+        <li>不要试图用「枚举所有组合再过滤」的方法 —— 时间复杂度会爆炸（2^(2n) 种可能）</li>
+        <li>剪枝条件不要写反：是 <strong>已用右 < 已用左</strong> 才能加右括号，不是剩余右 < 剩余左</li>
+        <li>注意递归终止条件：字符串长度达到 2*n 时才记录结果</li>
+      </ul>
+    </div>
+  </div>
+  
+  <!-- 代码实现 -->
+  <div class="section">
+    <h2>📝 代码实现</h2>
+    
+    <h3>Python 解法</h3>
+    <pre><code><div class="code-line"><span class="line-number">1</span><span class="line-content"><span class="keyword">class</span> <span class="class">Solution</span>:</span></div>
+<div class="code-line"><span class="line-number">2</span><span class="line-content">    <span class="keyword">def</span> <span class="function">generateParenthesis</span>(self, n: <span class="class">int</span>) -> <span class="class">List</span>[<span class="class">str</span>]:</span></div>
+<div class="code-line"><span class="line-number">3</span><span class="line-content">        result = []</span></div>
+<div class="code-line"><span class="line-number">4</span><span class="line-content">        </span></div>
+<div class="code-line"><span class="line-number">5</span><span class="line-content">        <span class="keyword">def</span> <span class="function">backtrack</span>(current, left_used, right_used):</span></div>
+<div class="code-line"><span class="line-number">6</span><span class="line-content">            <span class="comment"># 终止条件：生成了 n 对括号</span></span></div>
+<div class="code-line"><span class="line-number">7</span><span class="line-content">            <span class="keyword">if</span> len(current) == <span class="number">2</span> * n:</span></div>
+<div class="code-line"><span class="line-number">8</span><span class="line-content">                result.append(current)</span></div>
+<div class="code-line"><span class="line-number">9</span><span class="line-content">                <span class="keyword">return</span></span></div>
+<div class="code-line"><span class="line-number">10</span><span class="line-content">            </span></div>
+<div class="code-line"><span class="line-number">11</span><span class="line-content">            <span class="comment"># 选择1：添加左括号（如果还有剩余）</span></span></div>
+<div class="code-line"><span class="line-number">12</span><span class="line-content">            <span class="keyword">if</span> left_used < n:</span></div>
+<div class="code-line"><span class="line-number">13</span><span class="line-content">                backtrack(current + <span class="string">"("</span>, left_used + <span class="number">1</span>, right_used)</span></div>
+<div class="code-line"><span class="line-number">14</span><span class="line-content">            </span></div>
+<div class="code-line"><span class="line-number">15</span><span class="line-content">            <span class="comment"># 选择2：添加右括号（如果右括号数量 < 左括号）</span></span></div>
+<div class="code-line"><span class="line-number">16</span><span class="line-content">            <span class="keyword">if</span> right_used < left_used:</span></div>
+<div class="code-line"><span class="line-number">17</span><span class="line-content">                backtrack(current + <span class="string">")"</span>, left_used, right_used + <span class="number">1</span>)</span></div>
+<div class="code-line"><span class="line-number">18</span><span class="line-content">        </span></div>
+<div class="code-line"><span class="line-number">19</span><span class="line-content">        backtrack(<span class="string">""</span>, <span class="number">0</span>, <span class="number">0</span>)</span></div>
+<div class="code-line"><span class="line-number">20</span><span class="line-content">        <span class="keyword">return</span> result</span></div></code></pre>
+    
+    <h3>Java 解法</h3>
+    <pre><code><div class="code-line"><span class="line-number">1</span><span class="line-content"><span class="keyword">class</span> <span class="class">Solution</span> {</span></div>
+<div class="code-line"><span class="line-number">2</span><span class="line-content">    <span class="keyword">public</span> <span class="class">List</span><<span class="class">String</span>> <span class="function">generateParenthesis</span>(<span class="keyword">int</span> n) {</span></div>
+<div class="code-line"><span class="line-number">3</span><span class="line-content">        <span class="class">List</span><<span class="class">String</span>> result = <span class="keyword">new</span> <span class="class">ArrayList</span><>();</span></div>
+<div class="code-line"><span class="line-number">4</span><span class="line-content">        backtrack(result, <span class="keyword">new</span> <span class="class">StringBuilder</span>(), <span class="number">0</span>, <span class="number">0</span>, n);</span></div>
+<div class="code-line"><span class="line-number">5</span><span class="line-content">        <span class="keyword">return</span> result;</span></div>
+<div class="code-line"><span class="line-number">6</span><span class="line-content">    }</span></div>
+<div class="code-line"><span class="line-number">7</span><span class="line-content">    </span></div>
+<div class="code-line"><span class="line-number">8</span><span class="line-content">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="function">backtrack</span>(<span class="class">List</span><<span class="class">String</span>> result, <span class="class">StringBuilder</span> current, </span></div>
+<div class="code-line"><span class="line-number">9</span><span class="line-content">                           <span class="keyword">int</span> left, <span class="keyword">int</span> right, <span class="keyword">int</span> n) {</span></div>
+<div class="code-line"><span class="line-number">10</span><span class="line-content">        <span class="keyword">if</span> (current.length() == <span class="number">2</span> * n) {</span></div>
+<div class="code-line"><span class="line-number">11</span><span class="line-content">            result.add(current.toString());</span></div>
+<div class="code-line"><span class="line-number">12</span><span class="line-content">            <span class="keyword">return</span>;</span></div>
+<div class="code-line"><span class="line-number">13</span><span class="line-content">        }</span></div>
+<div class="code-line"><span class="line-number">14</span><span class="line-content">        </span></div>
+<div class="code-line"><span class="line-number">15</span><span class="line-content">        <span class="keyword">if</span> (left < n) {</span></div>
+<div class="code-line"><span class="line-number">16</span><span class="line-content">            current.append(<span class="string">'('</span>);</span></div>
+<div class="code-line"><span class="line-number">17</span><span class="line-content">            backtrack(result, current, left + <span class="number">1</span>, right, n);</span></div>
+<div class="code-line"><span class="line-number">18</span><span class="line-content">            current.deleteCharAt(current.length() - <span class="number">1</span>); <span class="comment">// 回溯</span></span></div>
+<div class="code-line"><span class="line-number">19</span><span class="line-content">        }</span></div>
+<div class="code-line"><span class="line-number">20</span><span class="line-content">        </span></div>
+<div class="code-line"><span class="line-number">21</span><span class="line-content">        <span class="keyword">if</span> (right < left) {</span></div>
+<div class="code-line"><span class="line-number">22</span><span class="line-content">            current.append(<span class="string">')'</span>);</span></div>
+<div class="code-line"><span class="line-number">23</span><span class="line-content">            backtrack(result, current, left, right + <span class="number">1</span>, n);</span></div>
+<div class="code-line"><span class="line-number">24</span><span class="line-content">            current.deleteCharAt(current.length() - <span class="number">1</span>); <span class="comment">// 回溯</span></span></div>
+<div class="code-line"><span class="line-number">25</span><span class="line-content">        }</span></div>
+<div class="code-line"><span class="line-number">26</span><span class="line-content">    }</span></div>
+<div class="code-line"><span class="line-number">27</span><span class="line-content">}</span></div></code></pre>
+    
+    <h3>C++ 解法</h3>
+    <pre><code><div class="code-line"><span class="line-number">1</span><span class="line-content"><span class="keyword">class</span> <span class="class">Solution</span> {</span></div>
+<div class="code-line"><span class="line-number">2</span><span class="line-content"><span class="keyword">public</span>:</span></div>
+<div class="code-line"><span class="line-number">3</span><span class="line-content">    vector<<span class="class">string</span>> <span class="function">generateParenthesis</span>(<span class="keyword">int</span> n) {</span></div>
+<div class="code-line"><span class="line-number">4</span><span class="line-content">        vector<<span class="class">string</span>> result;</span></div>
+<div class="code-line"><span class="line-number">5</span><span class="line-content">        <span class="function">backtrack</span>(result, <span class="string">""</span>, <span class="number">0</span>, <span class="number">0</span>, n);</span></div>
+<div class="code-line"><span class="line-number">6</span><span class="line-content">        <span class="keyword">return</span> result;</span></div>
+<div class="code-line"><span class="line-number">7</span><span class="line-content">    }</span></div>
+<div class="code-line"><span class="line-number">8</span><span class="line-content">    </span></div>
+<div class="code-line"><span class="line-number">9</span><span class="line-content"><span class="keyword">private</span>:</span></div>
+<div class="code-line"><span class="line-number">10</span><span class="line-content">    <span class="keyword">void</span> <span class="function">backtrack</span>(vector<<span class="class">string</span>>& result, <span class="class">string</span> current, </span></div>
+<div class="code-line"><span class="line-number">11</span><span class="line-content">                   <span class="keyword">int</span> left, <span class="keyword">int</span> right, <span class="keyword">int</span> n) {</span></div>
+<div class="code-line"><span class="line-number">12</span><span class="line-content">        <span class="keyword">if</span> (current.length() == <span class="number">2</span> * n) {</span></div>
+<div class="code-line"><span class="line-number">13</span><span class="line-content">            result.push_back(current);</span></div>
+<div class="code-line"><span class="line-number">14</span><span class="line-content">            <span class="keyword">return</span>;</span></div>
+<div class="code-line"><span class="line-number">15</span><span class="line-content">        }</span></div>
+<div class="code-line"><span class="line-number">16</span><span class="line-content">        </span></div>
+<div class="code-line"><span class="line-number">17</span><span class="line-content">        <span class="keyword">if</span> (left < n)</span></div>
+<div class="code-line"><span class="line-number">18</span><span class="line-content">            <span class="function">backtrack</span>(result, current + <span class="string">"("</span>, left + <span class="number">1</span>, right, n);</span></div>
+<div class="code-line"><span class="line-number">19</span><span class="line-content">        </span></div>
+<div class="code-line"><span class="line-number">20</span><span class="line-content">        <span class="keyword">if</span> (right < left)</span></div>
+<div class="code-line"><span class="line-number">21</span><span class="line-content">            <span class="function">backtrack</span>(result, current + <span class="string-">")"</span>, left, right + <span class="number">1</span>, n);</span></div>
+<div class="code-line"><span class="line-number">22</span><span class="line-content">    }</span></div>
+<div class="code-line"><span class="line-number">23</span><span class="line-content">};</span></div></code></pre>
+  </div>
+  
+  <!-- 复杂度分析 -->
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table>
+      <tr>
+        <th>指标</th>
+        <th>复杂度</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>时间复杂度</td>
+        <td class="complexity-medium">O(4ⁿ/√n)</td>
+        <td>第 n 个 Catalan 数，约为 4ⁿ/(n^(3/2)√π)</td>
+      </tr>
+      <tr>
+        <td>空间复杂度</td>
+        <td class="complexity-medium">O(4ⁿ/√n)</td>
+        <td>结果存储空间 + 递归调用栈 O(n)</td>
+      </tr>
+      <tr>
+        <td>结果数量</td>
+        <td class="complexity-good">Catalan(n)</td>
+        <td>n=8 时有 1430 种组合</td>
+      </tr>
+    </table>
+    
+    <div class="hint-box">
+      <div class="hint-title">📐 Catalan 数</div>
+      <p>有效括号组合数恰好等于第 n 个 Catalan 数：</p>
+      <p style="text-align: center; font-family: monospace; font-size: 1.2rem; margin: 12px 0;">
+        C(n) = (2n)! / ((n+1)! × n!) = C(2n,n) / (n+1)
+      </p>
+      <p>Catalan 数列：1, 2, 5, 14, 42, 132, 429, 1430...</p>
+    </div>
+  </div>
+  
+  <!-- 类似题目 -->
+  <div class="section">
+    <h2>🔗 类似题目推荐</h2>
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="problem-card-num">#20</div>
+        <div class="problem-card-title">有效的括号</div>
+        <div class="problem-card-tag">栈 · Easy</div>
+      </div>
+      <div class="problem-card">
+        <div class="problem-card-num">#32</div>
+        <div class="problem-card-title">最长有效括号</div>
+        <div class="problem-card-tag">栈/DP · Hard</div>
+      </div>
+      <div class="problem-card">
+        <div class="problem-card-num">#301</div>
+        <div class="problem-card-title">删除无效括号</div>
+        <div class="problem-card-tag">BFS/回溯 · Hard</div>
+      </div>
+      <div class="problem-card">
+        <div class="problem-card-num">#241</div>
+        <div class="problem-card-title">为运算表达式设计优先级</div>
+        <div class="problem-card-tag">分治/递归 · Medium</div>
+      </div>
+      <div class="problem-card">
+        <div class="problem-card-num">#39</div>
+        <div class="problem-card-title">组合总和</div>
+        <div class="problem-card-tag">回溯 · Medium</div>
+      </div>
+      <div class="problem-card">
+        <div class="problem-card-num">#78</div>
+        <div class="problem-card-title">子集</div>
+        <div class="problem-card-tag">回溯 · Medium</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 总结 -->
+  <div class="section">
+    <h2>✅ 要点总结</h2>
+    <ol>
+      <li><strong>回溯模板</strong>：本题是回溯算法的经典应用，掌握「选择→递归→撤销」的三段式</li>
+      <li><strong>剪枝策略</strong>：通过 <code>right < left</code> 剪去无效分支，避免生成非法组合</li>
+      <li><strong>数学本质</strong>：答案数量 = Catalan 数，理解其组合意义</li>
+      <li><strong>代码细节</strong>：Python 可以用字符串拼接简化，Java/C++ 需要用 StringBuilder/传值优化</li>
+    </ol>
+  </div>
+  
+  <div style="text-align: center; color: var(--text-muted); margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border);">
+    <p>Generated by Kimi Claw on 2026-03-16 | LeetCode Daily #46</p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #10 - 正则表达式匹配</title>
+  <style>
+    :root { --primary: #6366f1; --bg: #0f172a; --surface: #1e293b; --text: #f1f5f9; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); max-width: 1000px; margin: 0 auto; padding: 40px 20px; line-height: 1.6; }
+    .section { background: var(--surface); border-radius: 16px; padding: 28px; margin-bottom: 24px; }
+    .section h2 { color: var(--primary); margin-top: 0; }
+    pre { background: #0d1117; border-radius: 12px; padding: 20px; overflow-x: auto; font-size: 14px; margin: 0; }
+    .code-line { display: flex; padding: 2px 0; cursor: pointer; transition: background 0.2s; font-family: 'JetBrains Mono', monospace; }
+    .code-line:hover { background: rgba(255,255,255,0.05); }
+    .code-line.active { background: rgba(99, 102, 241, 0.3); border-left: 3px solid #6366f1; margin-left: -3px; }
+    .line-number { color: #484f58; min-width: 40px; text-align: right; padding-right: 16px; user-select: none; }
+    .viz-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+    .viz-steps { max-height: 400px; overflow-y: auto; }
+    .viz-step { padding: 12px; margin: 8px 0; border-radius: 8px; background: #334155; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+    .viz-step:hover { background: #3d4a5f; }
+    .viz-step.active { border-color: var(--primary); background: rgba(99, 102, 241, 0.3); }
+    .viz-step-title { font-weight: bold; color: #79c0ff; }
+    .viz-step-desc { font-size: 13px; color: #8b949e; margin-top: 4px; }
+    .problem-card { background: var(--bg); border-radius: 12px; padding: 16px; border: 1px solid #475569; transition: all 0.2s; text-decoration: none; color: inherit; display: block; }
+    .problem-card:hover { border-color: var(--primary); transform: translateY(-3px); }
+    .keyword { color: #ff7b72; } .function { color: #d2a8ff; } .string { color: #a5d6ff; }
+    .number { color: #79c0ff; } .comment { color: #8b949e; } .class { color: #ffa657; }
+    .tag { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; margin-right: 8px; font-weight: 500; }
+    .tag-hard { background: rgba(248, 81, 73, 0.2); color: #f85149; }
+    .tag-medium { background: rgba(210, 153, 34, 0.2); color: #d29922; }
+    .tag-easy { background: rgba(35, 197, 94, 0.2); color: #3fb950; }
+    .complexity-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    .complexity-table th, .complexity-table td { padding: 12px; text-align: left; border-bottom: 1px solid #334155; }
+    .complexity-table th { color: var(--primary); }
+    .dp-table { display: grid; grid-template-columns: repeat(auto-fit, minmax(40px, 1fr)); gap: 4px; margin: 20px 0; }
+    .dp-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-size: 13px; font-weight: 600; background: #334155; transition: all 0.3s; }
+    .dp-cell.true { background: rgba(35, 197, 94, 0.3); color: #3fb950; }
+    .dp-cell.false { background: rgba(248, 81, 73, 0.2); color: #f85149; }
+    .dp-cell.active { box-shadow: 0 0 0 2px var(--primary); }
+    .problem-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .state-info { background: var(--bg); border-radius: 8px; padding: 12px; margin-top: 12px; font-family: monospace; font-size: 13px; }
+    .state-info .label { color: #8b949e; }
+  </style>
+</head>
+<body>
+  <h1>🎯 LeetCode #10 - 正则表达式匹配</h1>
+  <span class="tag tag-hard">Hard</span> <span class="tag">动态规划</span> <span class="tag">字符串</span> <span class="tag">递归</span>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给你一个字符串 <code>s</code> 和一个字符规律 <code>p</code>，请你来实现一个支持 <code>'.'</code> 和 <code>'*'</code> 的正则表达式匹配。</p>
+    <ul>
+      <li><code>'.'</code> 匹配任意单个字符</li>
+      <li><code>'*'</code> 匹配零个或多个前面的那一个元素</li>
+    </ul>
+    <p><strong>所谓匹配</strong>，是要涵盖整个字符串 <code>s</code> 的，而不是部分字符串。</p>
+    
+    <div style="background: var(--bg); padding: 16px; border-radius: 8px; margin-top: 16px;">
+      <p><strong>示例 1:</strong></p>
+      <p>输入：s = "aa", p = "a"</p>
+      <p>输出：false</p>
+      <p>解释："a" 无法匹配 "aa" 整个字符串。</p>
+    </div>
+    
+    <div style="background: var(--bg); padding: 16px; border-radius: 8px; margin-top: 16px;">
+      <p><strong>示例 2:</strong></p>
+      <p>输入：s = "aa", p = "a*"</p>
+      <p>输出：true</p>
+      <p>解释：因为 '*' 代表零个或多个前面的元素, 在这里前面的元素就是 'a'。因此，字符串 "aa" 可被视为 'a' 重复了一次。</p>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>💡 核心思路</h2>
+    <p>使用<strong>动态规划</strong>来解决这个问题。定义 <code>dp[i][j]</code> 表示 <code>s[0..i-1]</code> 与 <code>p[0..j-1]</code> 是否匹配。</p>
+    <p><strong>关键转移方程：</strong></p>
+    <ul>
+      <li>如果 <code>p[j-1]</code> 是普通字符或 <code>'.'</code>：匹配当且仅当 <code>s[i-1] == p[j-1]</code>（或 <code>p[j-1] == '.'</code>）且 <code>dp[i-1][j-1]</code> 为真</li>
+      <li>如果 <code>p[j-1] == '*'</code>：可以选择匹配0次（忽略 <code>p[j-2]*</code>）或匹配多次（前提是 <code>s[i-1]</code> 与 <code>p[j-2]</code> 匹配）</li>
+    </ul>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps"></div>
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+    <div class="state-info" id="stateInfo">
+      <div class="label">当前状态：</div>
+      <div id="stateDisplay">点击上方步骤查看详情</div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <tr><th>维度</th><th>值</th><th>说明</th></tr>
+      <tr><td>时间复杂度</td><td>O(m × n)</td><td>m, n 分别为 s 和 p 的长度，需要填充 m×n 的 DP 表</td></tr>
+      <tr><td>空间复杂度</td><td>O(m × n)</td><td>DP 表的空间，可优化至 O(n)</td></tr>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a class="problem-card" href="https://leetcode.cn/problems/wildcard-matching/" target="_blank">
+        <h4>44. 通配符匹配</h4>
+        <p>类似思路，通配符 '?', '*' 匹配</p>
+        <span class="tag tag-hard">Hard</span>
+      </a>
+      <a class="problem-card" href="https://leetcode.cn/problems/regular-expression-matching/" target="_blank">
+        <h4>10. 正则表达式匹配（本题）</h4>
+        <p>'.' 和 '*' 的正则匹配</p>
+        <span class="tag tag-hard">Hard</span>
+      </a>
+      <a class="problem-card" href="https://leetcode.cn/problems/longest-common-subsequence/" target="_blank">
+        <h4>1143. 最长公共子序列</h4>
+        <p>经典的二维DP问题</p>
+        <span class="tag tag-medium">Medium</span>
+      </a>
+      <a class="problem-card" href="https://leetcode.cn/problems/edit-distance/" target="_blank">
+        <h4>72. 编辑距离</h4>
+        <p>字符串DP的进阶应用</p>
+        <span class="tag tag-hard">Hard</span>
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    const codeLines = [
+      { num: 1, content: '<span class="keyword">class</span> <span class="class">Solution</span>:' },
+      { num: 2, content: '    <span class="keyword">def</span> <span class="function">isMatch</span>(self, s: <span class="keyword">str</span>, p: <span class="keyword">str</span>) -> <span class="keyword">bool</span>:' },
+      { num: 3, content: '        m, n = <span class="function">len</span>(s), <span class="function">len</span>(p)' },
+      { num: 4, content: '        <span class="comment"># dp[i][j]: s[0..i-1] 与 p[0..j-1] 是否匹配</span>' },
+      { num: 5, content: '        dp = [[<span class="keyword">False</span>] * (n + <span class="number">1</span>) <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="function">range</span>(m + <span class="number">1</span>)]' },
+      { num: 6, content: '        ' },
+      { num: 7, content: '        <span class="comment"># 空字符串匹配空模式</span>' },
+      { num: 8, content: '        dp[<span class="number">0</span>][<span class="number">0</span>] = <span class="keyword">True</span>' },
+      { num: 9, content: '        ' },
+      { num: 10, content: '        <span class="comment"># 初始化第一行：模式匹配空字符串</span>' },
+      { num: 11, content: '        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="function">range</span>(<span class="number">2</span>, n + <span class="number">1</span>):' },
+      { num: 12, content: '            <span class="keyword">if</span> p[j - <span class="number">1</span>] == <span class="string">\'*\'</span>:' },
+      { num: 13, content: '                dp[<span class="number">0</span>][j] = dp[<span class="number">0</span>][j - <span class="number">2</span>]  <span class="comment"># * 表示前面的字符出现0次</span>' },
+      { num: 14, content: '        ' },
+      { num: 15, content: '        <span class="comment"># 填充DP表</span>' },
+      { num: 16, content: '        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="number">1</span>, m + <span class="number">1</span>):' },
+      { num: 17, content: '            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="function">range</span>(<span class="number">1</span>, n + <span class="number">1</span>):' },
+      { num: 18, content: '                <span class="keyword">if</span> p[j - <span class="number">1</span>] == <span class="string">\'*\'</span>:' },
+      { num: 19, content: '                    <span class="comment"># * 可以匹配0次或多次</span>' },
+      { num: 20, content: '                    <span class="comment"># 匹配0次：dp[i][j-2]</span>' },
+      { num: 21, content: '                    <span class="comment"># 匹配多次：dp[i-1][j] 且 s[i-1]匹配p[j-2]</span>' },
+      { num: 22, content: '                    match = <span class="keyword">False</span>' },
+      { num: 23, content: '                    <span class="keyword">if</span> dp[i][j - <span class="number">2</span>]:  <span class="comment"># 匹配0次</span>' },
+      { num: 24, content: '                        match = <span class="keyword">True</span>' },
+      { num: 25, content: '                    <span class="keyword">elif</span> self.<span class="function">_match</span>(s[i - <span class="number">1</span>], p[j - <span class="number">2</span>]) <span class="keyword">and</span> dp[i - <span class="number">1</span>][j]:' },
+      { num: 26, content: '                        match = <span class="keyword">True</span>  <span class="comment"># 匹配多次</span>' },
+      { num: 27, content: '                    dp[i][j] = match' },
+      { num: 28, content: '                <span class="keyword">else</span>:' },
+      { num: 29, content: '                    <span class="comment"># 普通字符或 '.'</span>' },
+      { num: 30, content: '                    <span class="keyword">if</span> self.<span class="function">_match</span>(s[i - <span class="number">1</span>], p[j - <span class="number">1</span>]) <span class="keyword">and</span> dp[i - <span class="number">1</span>][j - <span class="number">1</span>]:' },
+      { num: 31, content: '                        dp[i][j] = <span class="keyword">True</span>' },
+      { num: 32, content: '        ' },
+      { num: 33, content: '        <span class="keyword">return</span> dp[m][n]' },
+      { num: 34, content: '    ' },
+      { num: 35, content: '    <span class="keyword">def</span> <span class="function">_match</span>(self, sc: <span class="keyword">str</span>, pc: <span class="keyword">str</span>) -> <span class="keyword">bool</span>:' },
+      { num: 36, content: '        <span class="keyword">return</span> sc == pc <span class="keyword">or</span> pc == <span class="string">\'.\'</span>' }
+    ];
+
+    const steps = [
+      { title: "初始化 DP 表", desc: "创建 (m+1)×(n+1) 的布尔表，多一行一列处理空字符串情况", line: 5, state: "dp = [[False] * 3 for _ in range(3)] # 假设 s='aa', p='a*'" },
+      { title: "设置基础状态", desc: "空字符串匹配空模式，dp[0][0] = True", line: 8, state: "dp[0][0] = True  # '' 匹配 ''" },
+      { title: "处理第一行初始化", desc: "处理模式匹配空字符串的情况，例如 'a*b*c*' 可以匹配空串", line: 11, state: "遍历 j=1..n，如果 p[j-1]=='*'，则 dp[0][j] = dp[0][j-2]" },
+      { title: "进入双层循环", desc: "开始填充 DP 表，遍历 s 和 p 的所有位置组合", line: 16, state: "i 从 1 到 m，j 从 1 到 n" },
+      { title: "遇到 '*' 字符", desc: "当 p[j-1] 是 '*' 时，有两种选择：匹配0次或匹配多次", line: 18, state: "p[j-1] == '*'，考虑两种情况" },
+      { title: "情况1: 匹配0次", desc: "忽略 'x*' 这一部分，即 dp[i][j-2]", line: 23, state: "dp[i][j] = dp[i][j-2]  # 不使用 * 的重复能力" },
+      { title: "情况2: 匹配多次", desc: "使用 * 的重复能力，前提是 s[i-1] 匹配 p[j-2]", line: 25, state: "sc 匹配 pc 且 dp[i-1][j] 为 True" },
+      { title: "普通字符匹配", desc: "当 p[j-1] 是普通字符或 '.' 时，需要直接匹配", line: 28, state: "p[j-1] != '*'，进入 else 分支" },
+      { title: "字符匹配检查", desc: "检查 s[i-1] 和 p[j-1] 是否相等，或 p[j-1] 是 '.'", line: 30, state: "self._match(s[i-1], p[j-1]) 返回 True/False" },
+      { title: "DP 转移完成", desc: "当前状态取决于字符匹配和 dp[i-1][j-1]", line: 31, state: "dp[i][j] = True 当且仅当匹配且前一个状态为 True" },
+      { title: "返回最终结果", desc: "dp[m][n] 表示完整字符串 s 是否匹配完整模式 p", line: 33, state: "return dp[m][n]  # s='aa', p='a*' → True" }
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach(line => {
+      const div = document.createElement('div');
+      div.className = 'code-line';
+      div.dataset.line = line.num;
+      div.innerHTML = `<span class="line-number">${line.num}</span><span class="line-content">${line.content}</span>`;
+      codeBlock.appendChild(div);
+    });
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const div = document.createElement('div');
+      div.className = 'viz-step';
+      div.dataset.idx = idx;
+      div.dataset.line = step.line;
+      div.innerHTML = `<div class="viz-step-title">${step.title}</div><div class="viz-step-desc">${step.desc}</div>`;
+      vizSteps.appendChild(div);
+    });
+
+    let activeStep = -1;
+    
+    function highlight(idx) {
+      // 清除之前的高亮
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      
+      if (idx >= 0) {
+        const step = steps[idx];
+        const stepEl = document.querySelector(`.viz-step[data-idx="${idx}"]`);
+        const lineEl = document.querySelector(`.code-line[data-line="${step.line}"]`);
+        
+        if (stepEl) stepEl.classList.add('active');
+        if (lineEl) lineEl.classList.add('active');
+        
+        document.getElementById('stateDisplay').innerHTML = `<span class="label">步骤：</span>${step.title}<br><span class="label">状态：</span>${step.state}`;
+      }
+      activeStep = idx;
+    }
+
+    // 绑定事件
+    document.querySelectorAll('.viz-step').forEach((el, idx) => {
+      el.addEventListener('click', () => highlight(idx));
+    });
+
+    document.querySelectorAll('.code-line').forEach(el => {
+      el.addEventListener('click', () => {
+        const lineNum = parseInt(el.dataset.line);
+        const stepIdx = steps.findIndex(s => s.line === lineNum);
+        if (stepIdx >= 0) highlight(stepIdx);
+      });
+    });
+  </script>
+</body>
+</html>

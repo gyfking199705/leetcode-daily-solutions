@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #494 - 目标和</title>
+  <style>
+    :root { --primary: #6366f1; --bg: #0f172a; --surface: #1e293b; --text: #f1f5f9; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); max-width: 1000px; margin: 0 auto; padding: 40px 20px; line-height: 1.7; }
+    .section { background: var(--surface); border-radius: 16px; padding: 28px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .section h2 { color: var(--primary); margin-top: 0; font-size: 1.4em; }
+    pre { background: #0d1117; border-radius: 12px; padding: 20px; overflow-x: auto; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 14px; }
+    .code-line { display: flex; padding: 3px 0; cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; }
+    .code-line:hover { background: rgba(255,255,255,0.05); }
+    .code-line.active { background: rgba(99, 102, 241, 0.25); border-left-color: #6366f1; }
+    .line-number { color: #484f58; min-width: 40px; text-align: right; padding-right: 16px; user-select: none; }
+    .code-content { flex: 1; }
+    .viz-container { display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; margin: 20px 0; }
+    .viz-steps { max-height: 500px; overflow-y: auto; }
+    .viz-step { padding: 14px; margin: 8px 0; border-radius: 10px; background: #334155; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+    .viz-step:hover { background: #3d4e66; }
+    .viz-step.active { border-color: var(--primary); background: rgba(99, 102, 241, 0.2); }
+    .viz-step h4 { margin: 0 0 6px 0; color: var(--primary); font-size: 0.95em; }
+    .viz-step p { margin: 0; font-size: 0.85em; color: #94a3b8; }
+    .state-display { background: #0d1117; border-radius: 8px; padding: 12px; margin-top: 10px; font-family: monospace; font-size: 0.85em; }
+    .problem-card { background: var(--bg); border-radius: 12px; padding: 16px; border: 1px solid #475569; transition: all 0.2s; text-decoration: none; color: inherit; display: block; }
+    .problem-card:hover { border-color: var(--primary); transform: translateY(-3px); }
+    .problem-card h4 { margin: 0 0 8px 0; color: var(--primary); }
+    .problem-card p { margin: 0; font-size: 0.85em; color: #94a3b8; }
+    .problem-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
+    .keyword { color: #ff7b72; } .function { color: #d2a8ff; } .string { color: #a5d6ff; }
+    .number { color: #79c0ff; } .comment { color: #8b949e; } .class { color: #ffa657; }
+    .table-container { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #334155; }
+    th { color: var(--primary); font-weight: 600; background: rgba(99, 102, 241, 0.1); }
+    tr:hover { background: rgba(255,255,255,0.03); }
+    .highlight-box { background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15)); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 12px; padding: 20px; margin: 16px 0; }
+    .formula { font-family: 'JetBrains Mono', monospace; background: #0d1117; padding: 2px 8px; border-radius: 4px; color: #79c0ff; }
+    .tag { display: inline-block; background: rgba(99, 102, 241, 0.2); color: var(--primary); padding: 4px 12px; border-radius: 20px; font-size: 0.8em; margin-right: 8px; }
+    @media (max-width: 768px) { .viz-container { grid-template-columns: 1fr; } .problem-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <h1>🎯 LeetCode #494 - 目标和</h1>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给你一个整数数组 <code>nums</code> 和一个整数 <code>target</code>。</p>
+    <p>向数组中的每个整数前添加 <strong>'+'</strong> 或 <strong>'-'</strong>，然后串联起所有整数，可以构造一个 <strong>表达式</strong> ：</p>
+    <ul>
+      <li>例如，<code>nums = [2, 1]</code>，可以在 <code>2</code> 之前添加 <code>'+'</code>，在 <code>1</code> 之前添加 <code>'-'</code>，然后串联起来得到表达式 <code>"+2-1"</code>。</li>
+    </ul>
+    <p>返回可以通过上述方法构造的、运算结果等于 <code>target</code> 的不同 <strong>表达式</strong> 的数目。</p>
+    
+    <div class="highlight-box">
+      <strong>💡 核心思想：数学转换</strong><br><br>
+      设正数之和为 P，负数绝对值之和为 N：<br>
+      • 总和关系：P + N = sum(nums)<br>
+      • 目标关系：P - N = target<br><br>
+      两式相加得：<span class="formula">2P = target + sum</span><br>
+      因此：<span class="formula">P = (target + sum) / 2</span><br><br>
+      问题转化为：<strong>从数组中选择若干个数，使其和等于 P 的方案数</strong>（01背包问题）
+    </div>
+    
+    <p><strong>示例 1：</strong></p>
+    <pre>输入：nums = [1,1,1,1,1], target = 3
+输出：5
+解释：-1+1+1+1+1 = 3
+      +1-1+1+1+1 = 3
+      +1+1-1+1+1 = 3
+      +1+1+1-1+1 = 3
+      +1+1+1+1-1 = 3</pre>
+    
+    <p><strong>示例 2：</strong></p>
+    <pre>输入：nums = [1], target = 1
+输出：1</pre>
+    
+    <div style="margin-top: 16px;">
+      <span class="tag">Medium</span>
+      <span class="tag">动态规划</span>
+      <span class="tag">01背包</span>
+      <span class="tag">数学转换</span>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程（点击步骤或代码行查看对应关系）</h2>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3>Python 实现</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+    <div id="currentState" class="state-display" style="margin-top: 16px;">
+      点击步骤或代码行查看执行状态...
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>维度</th>
+            <th>时间复杂度</th>
+            <th>空间复杂度</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>基础实现</td>
+            <td>O(n × target)</td>
+            <td>O(n × target)</td>
+            <td>二维DP数组，n为数组长度</td>
+          </tr>
+          <tr>
+            <td>空间优化</td>
+            <td>O(n × target)</td>
+            <td>O(target)</td>
+            <td>滚动数组，一维DP</td>
+          </tr>
+          <tr>
+            <td>最坏情况</td>
+            <td>O(n × sum)</td>
+            <td>O(sum)</td>
+            <td>target可能接近sum</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🔑 关键点总结</h2>
+    <ul>
+      <li><strong>数学转换是核心：</strong>将符号分配问题转化为子集和问题</li>
+      <li><strong>边界情况：</strong>如果 <code>(target + sum) % 2 != 0</code>，直接返回0（无法整除）</li>
+      <li><strong>负数处理：</strong>如果 <code>abs(target) > sum</code>，直接返回0（不可能实现）</li>
+      <li><strong>DP定义：</strong><code>dp[i][j]</code> 表示前i个数中选若干个，和为j的方案数</li>
+      <li><strong>状态转移：</strong><code>dp[j] = dp[j] + dp[j - num]</code>（滚动数组优化）</li>
+    </ul>
+    
+    <div class="highlight-box">
+      <strong>🎯 01背包问题的本质</strong><br><br>
+      这是一个<strong>组合计数</strong>类型的01背包：求装满背包的方案数，而不是最大价值。<br>
+      状态转移时采用<strong>累加</strong>而非<strong>取最大值</strong>。
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐（点击跳转LeetCode）</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/partition-equal-subset-sum/" target="_blank" class="problem-card">
+        <h4>#416 分割等和子集</h4>
+        <p>经典01背包，判断是否能分成两个和相等的子集</p>
+      </a>
+      <a href="https://leetcode.cn/problems/coin-change/" target="_blank" class="problem-card">
+        <h4>#322 零钱兑换</h4>
+        <p>完全背包问题，求最少硬币数</p>
+      </a>
+      <a href="https://leetcode.cn/problems/coin-change-ii/" target="_blank" class="problem-card">
+        <h4>#518 零钱兑换 II</h4>
+        <p>完全背包求方案数，与本题非常相似</p>
+      </a>
+      <a href="https://leetcode.cn/problems/last-stone-weight-ii/" target="_blank" class="problem-card">
+        <h4>#1049 最后一块石头的重量 II</h4>
+        <p>01背包变形，尽量将石头分成两堆</p>
+      </a>
+      <a href="https://leetcode.cn/problems/ones-and-zeroes/" target="_blank" class="problem-card">
+        <h4>#474 一和零</h4>
+        <p>二维费用的01背包问题</p>
+      </a>
+      <a href="https://leetcode.cn/problems/combination-sum-iv/" target="_blank" class="problem-card">
+        <h4>#377 组合总和 Ⅳ</h4>
+        <p>完全背包求排列数</p>
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // 代码行
+    const codeLines = [
+      {num: 1, code: '<span class="keyword">class</span> <span class="class">Solution</span>:'},
+      {num: 2, code: '    <span class="keyword">def</span> <span class="function">findTargetSumWays</span>(self, nums: List[<span class="keyword">int</span>], target: <span class="keyword">int</span>) -> <span class="keyword">int</span>:'},
+      {num: 3, code: '        total_sum = <span class="function">sum</span>(nums)'},
+      {num: 4, code: '        <span class="comment"># 剪枝：如果目标绝对值大于总和，不可能实现</span>'},
+      {num: 5, code: '        <span class="keyword">if</span> <span class="function">abs</span>(target) > total_sum:'},
+      {num: 6, code: '            <span class="keyword">return</span> <span class="number">0</span>'},
+      {num: 7, code: '        <span class="comment"># 剪枝：如果 (target + sum) 为奇数，无法整除得到P</span>'},
+      {num: 8, code: '        <span class="keyword">if</span> (target + total_sum) % <span class="number">2</span> != <span class="number">0</span>:'},
+      {num: 9, code: '            <span class="keyword">return</span> <span class="number">0</span>'},
+      {num: 10, code: '        <span class="comment"># 计算目标和P：正数之和</span>'},
+      {num: 11, code: '        P = (target + total_sum) // <span class="number">2</span>'},
+      {num: 12, code: '        <span class="comment"># dp[j] 表示和为j的方案数</span>'},
+      {num: 13, code: '        dp = [<span class="number">0</span>] * (P + <span class="number">1</span>)'},
+      {num: 14, code: '        dp[<span class="number">0</span>] = <span class="number">1</span>  <span class="comment"># 和为0的方案数为1（什么都不选）</span>'},
+      {num: 15, code: '        <span class="comment"># 01背包：遍历每个数字</span>'},
+      {num: 16, code: '        <span class="keyword">for</span> num <span class="keyword">in</span> nums:'},
+      {num: 17, code: '            <span class="comment"># 倒序遍历，避免重复计算</span>'},
+      {num: 18, code: '            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="function">range</span>(P, num - <span class="number">1</span>, -<span class="number">1</span>):'},
+      {num: 19, code: '                dp[j] = dp[j] + dp[j - num]'},
+      {num: 20, code: '                <span class="comment"># 当前方案数 = 不选num的方案数 + 选num的方案数</span>'},
+      {num: 21, code: '        <span class="keyword">return</span> dp[P]'},
+    ];
+    
+    // 步骤定义
+    const steps = [
+      {title: "初始化 & 剪枝检查", desc: "计算数组总和，检查边界条件", line: 3, state: {total_sum: "sum(nums)", target: "给定值"}},
+      {title: "边界检查1", desc: "如果|target| > sum，不可能实现，返回0", line: 5, state: {condition: "abs(target) > sum", result: "直接返回0"}},
+      {title: "边界检查2", desc: "如果(target+sum)为奇数，无法整除，返回0", line: 8, state: {condition: "(target + sum) % 2 != 0", result: "直接返回0"}},
+      {title: "计算正数目标和P", desc: "通过数学推导：P = (target + sum) / 2", line: 11, state: {formula: "P = (target + sum) / 2", meaning: "正数之和的目标值"}},
+      {title: "初始化DP数组", desc: "dp[j]表示和为j的方案数，初始dp[0]=1", line: 13, state: {dp: "[1, 0, 0, ..., 0]", length: "P+1"}},
+      {title: "开始遍历数字", desc: "对每个数字，更新DP数组", line: 16, state: {current_num: "nums[i]", action: "进入内层循环"}},
+      {title: "倒序遍历背包", desc: "从P到num倒序遍历，避免重复", line: 18, state: {j: "从P递减到num", direction: "倒序保证01特性"}},
+      {title: "状态转移", desc: "dp[j] += dp[j-num]：累加方案数", line: 19, state: {transition: "dp[j] = dp[j] + dp[j-num]", meaning: "不选 + 选的方案数之和"}},
+      {title: "返回结果", desc: "dp[P]即为正数之和等于P的方案数", line: 21, state: {result: "dp[P]", meaning: "最终的表达式方案数"}},
+    ];
+    
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach((line, idx) => {
+      const div = document.createElement('div');
+      div.className = 'code-line';
+      div.dataset.line = line.num;
+      div.dataset.idx = idx;
+      div.innerHTML = `<span class="line-number">${line.num}</span><span class="code-content">${line.code}</span>`;
+      div.addEventListener('click', () => highlightByLine(idx));
+      codeBlock.appendChild(div);
+    });
+    
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const div = document.createElement('div');
+      div.className = 'viz-step';
+      div.dataset.idx = idx;
+      div.innerHTML = `<h4>步骤 ${idx + 1}: ${step.title}</h4><p>${step.desc}</p>`;
+      div.addEventListener('click', () => highlightByStep(idx));
+      vizSteps.appendChild(div);
+    });
+    
+    // 状态显示
+    const stateDisplay = document.getElementById('currentState');
+    
+    function updateState(step) {
+      const state = step.state;
+      let html = `<strong>📍 当前状态：${step.title}</strong><br><br>`;
+      for (let [k, v] of Object.entries(state)) {
+        html += `${k}: <span style="color:#79c0ff">${v}</span><br>`;
+      }
+      html += `<br><em>${step.desc}</em>`;
+      stateDisplay.innerHTML = html;
+    }
+    
+    // 高亮逻辑
+    function highlightByStep(idx) {
+      // 清除所有高亮
+      document.querySelectorAll('.viz-step').forEach(e => e.classList.remove('active'));
+      document.querySelectorAll('.code-line').forEach(e => e.classList.remove('active'));
+      
+      // 高亮当前步骤
+      document.querySelector(`.viz-step[data-idx="${idx}"]`).classList.add('active');
+      
+      // 高亮对应代码行
+      const step = steps[idx];
+      const lineIdx = codeLines.findIndex(l => l.num === step.line);
+      if (lineIdx >= 0) {
+        document.querySelector(`.code-line[data-idx="${lineIdx}"]`).classList.add('active');
+      }
+      
+      updateState(step);
+    }
+    
+    function highlightByLine(idx) {
+      const lineNum = codeLines[idx].num;
+      const stepIdx = steps.findIndex(s => s.line === lineNum);
+      
+      if (stepIdx >= 0) {
+        highlightByStep(stepIdx);
+      }
+    }
+    
+    // 默认高亮第一步
+    highlightByStep(0);
+  </script>
+</body>
+</html>

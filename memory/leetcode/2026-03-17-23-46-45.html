@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #45 - 跳跃游戏 II</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --primary-dark: #4f46e5;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --surface-light: #334155;
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    body { 
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1100px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.6;
+    }
+    h1 { 
+      font-size: 2.2rem; 
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--primary), #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle { 
+      color: var(--text-muted); 
+      font-size: 1.1rem;
+      margin-bottom: 30px;
+    }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px; 
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .problem-desc {
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 20px;
+      border-left: 4px solid var(--primary);
+    }
+    .example {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin: 12px 0;
+    }
+    .example-label {
+      color: var(--primary);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    pre { 
+      background: #0d1117; 
+      border-radius: 12px; 
+      padding: 20px; 
+      overflow-x: auto; 
+      margin: 0;
+    }
+    code { font-family: 'Fira Code', 'JetBrains Mono', monospace; font-size: 14px; }
+    .code-line { 
+      display: flex; 
+      padding: 3px 0; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      border-radius: 4px;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.25); 
+      border-left: 3px solid var(--primary); 
+      margin-left: -3px;
+      padding-left: 3px;
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 40px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1.2fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    .viz-steps { 
+      max-height: 500px; 
+      overflow-y: auto;
+    }
+    .viz-step { 
+      padding: 14px 16px; 
+      margin: 10px 0; 
+      border-radius: 10px; 
+      background: var(--surface-light); 
+      cursor: pointer; 
+      border: 2px solid transparent; 
+      transition: all 0.2s;
+    }
+    .viz-step:hover {
+      transform: translateX(4px);
+      border-color: rgba(99, 102, 241, 0.3);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.15);
+    }
+    .viz-step-title {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .viz-step-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .state-display {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-top: 10px;
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+    .state-var {
+      display: inline-block;
+      margin-right: 16px;
+    }
+    .state-var .label { color: var(--primary); }
+    .state-var .value { color: var(--success); }
+    .array-viz {
+      display: flex;
+      gap: 8px;
+      margin: 16px 0;
+      flex-wrap: wrap;
+    }
+    .array-cell {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--surface-light);
+      border-radius: 8px;
+      border: 2px solid transparent;
+      transition: all 0.3s;
+    }
+    .array-cell.current {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.2);
+    }
+    .array-cell.reachable {
+      border-color: var(--success);
+      background: rgba(34, 197, 94, 0.15);
+    }
+    .array-cell .index {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+    .array-cell .value {
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 18px; 
+      border: 1px solid #475569; 
+      transition: all 0.25s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block; 
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.15);
+    }
+    .problem-card .number {
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .problem-card .title {
+      font-weight: 600;
+      margin: 6px 0;
+      font-size: 1.05rem;
+    }
+    .problem-card .method {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .difficulty {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+    .difficulty.medium { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+    .difficulty.hard { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    .difficulty.easy { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--surface-light);
+    }
+    th {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; font-style: italic; }
+    .class { color: #ffa657; }
+    .operator { color: #ff7b72; }
+    @media (max-width: 768px) {
+      .viz-container { grid-template-columns: 1fr; }
+      .problem-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #45 - 跳跃游戏 II</h1>
+  <p class="subtitle">贪心算法经典题 | 最小跳跃次数 <span class="difficulty medium">Medium</span></p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <div class="problem-desc">
+      <p>给定一个长度为 <code>n</code> 的 <strong>0 索引</strong>整数数组 <code>nums</code>。初始位置为 <code>nums[0]</code>。</p>
+      <p>每个元素 <code>nums[i]</code> 表示从索引 <code>i</code> 向前跳转的<strong>最大长度</strong>。</p>
+      <p>返回到达 <code>nums[n - 1]</code> 的<strong>最小跳跃次数</strong>。</p>
+      <p style="color: var(--text-muted); margin-top: 12px;">假设你总是可以到达数组的最后一个位置。</p>
+    </div>
+    
+    <div class="example">
+      <div class="example-label">示例 1</div>
+      <p><strong>输入:</strong> nums = [2,3,1,1,4]</p>
+      <p><strong>输出:</strong> 2</p>
+      <p><strong>解释:</strong> 跳到最后一个位置的最小跳跃数是 2。<br>
+      从下标为 0 跳到下标为 1 的位置，跳 1 步，然后跳 3 步到达数组的最后一个位置。</p>
+    </div>
+    
+    <div class="example">
+      <div class="example-label">示例 2</div>
+      <p><strong>输入:</strong> nums = [2,3,0,1,4]</p>
+      <p><strong>输出:</strong> 2</p>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>💡 核心思路</h2>
+    <p>本题使用<strong>贪心算法</strong>，核心思想是：</p>
+    <ul>
+      <li>维护 <code>end</code>：当前跳跃能到达的最远边界</li>
+      <li>维护 <code>farthest</code>：在当前边界内，下一跳能到达的最远位置</li>
+      <li>当遍历到 <code>end</code> 时，说明必须再跳一次，更新边界</li>
+    </ul>
+    <p style="color: var(--primary); margin-top: 16px;">关键洞察：我们不需要关心具体跳到哪里，只需要知道「在当前这一步内，能跳到的最远位置」。</p>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程可视化</h2>
+    <p style="color: var(--text-muted); margin-bottom: 16px;">点击左侧步骤或右侧代码行查看对应关系。以 nums = [2,3,1,1,4] 为例：</p>
+    
+    <div class="array-viz" id="arrayViz">
+      <!-- JS生成 -->
+    </div>
+    
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3 style="margin-top: 0; color: var(--primary);">Python 实现</h3>
+        <pre><code id="codeBlock">
+<!-- 代码行由JS生成 -->
+        </code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table>
+      <tr>
+        <th>复杂度类型</th>
+        <th>值</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>时间复杂度</td>
+        <td><code>O(n)</code></td>
+        <td>只需遍历数组一次</td>
+      </tr>
+      <tr>
+        <td>空间复杂度</td>
+        <td><code>O(1)</code></td>
+        <td>只使用常数个额外变量</td>
+      </tr>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐</h2>
+    <p style="color: var(--text-muted); margin-bottom: 8px;">点击卡片跳转到 LeetCode 练习</p>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/jump-game/" class="problem-card" target="_blank">
+        <span class="number">#55</span>
+        <div class="title">跳跃游戏</div>
+        <div class="method">贪心算法 - 判断是否能到达终点</div>
+      </a>
+      <a href="https://leetcode.cn/problems/gas-station/" class="problem-card" target="_blank">
+        <span class="number">#134</span>
+        <div class="title">加油站</div>
+        <div class="method">贪心算法 - 环形路线可行性</div>
+      </a>
+      <a href="https://leetcode.cn/problems/candy/" class="problem-card" target="_blank">
+        <span class="number">#135</span>
+        <div class="title">分发糖果</div>
+        <div class="method">贪心算法 - 双向遍历</div>
+      </a>
+      <a href="https://leetcode.cn/problems/jump-game-iii/" class="problem-card" target="_blank">
+        <span class="number">#1306</span>
+        <div class="title">跳跃游戏 III</div>
+        <div class="method">BFS / DFS - 可往回跳</div>
+      </a>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🎯 解题模板总结</h2>
+    <pre><code><span class="comment"># 跳跃类贪心问题通用模板</span>
+<span class="keyword">def</span> <span class="function">jump_game_template</span>(nums):
+    n = <span class="function">len</span>(nums)
+    jumps = <span class="number">0</span>          <span class="comment"># 已使用的跳跃次数</span>
+    end = <span class="number">0</span>            <span class="comment"># 当前跳跃能到达的最远边界</span>
+    farthest = <span class="number">0</span>       <span class="comment"># 下一跳能到达的最远位置</span>
+    
+    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(n - <span class="number">1</span>):  <span class="comment"># 注意：不需要遍历到最后一个元素</span>
+        <span class="comment"># 更新最远可达位置</span>
+        farthest = <span class="function">max</span>(farthest, i + nums[i])
+        
+        <span class="comment"># 到达当前边界，必须跳一次</span>
+        <span class="keyword">if</span> i == end:
+            jumps += <span class="number">1</span>
+            end = farthest
+    
+    <span class="keyword">return</span> jumps</code></pre>
+  </div>
+  
+  <script>
+    // 代码行数据
+    const codeLines = [
+      { num: 1, code: '<span class="keyword">class</span> <span class="class">Solution</span>:' },
+      { num: 2, code: '    <span class="keyword">def</span> <span class="function">jump</span>(self, nums: List[<span class="keyword">int</span>]) -> <span class="keyword">int</span>:' },
+      { num: 3, code: '        n = <span class="function">len</span>(nums)' },
+      { num: 4, code: '        <span class="keyword">if</span> n <= <span class="number">1</span>:' },
+      { num: 5, code: '            <span class="keyword">return</span> <span class="number">0</span>' },
+      { num: 6, code: '        ' },
+      { num: 7, code: '        jumps = <span class="number">0</span>          <span class="comment"># 已使用的跳跃次数</span>' },
+      { num: 8, code: '        end = <span class="number">0</span>            <span class="comment"># 当前跳跃能到达的最远边界</span>' },
+      { num: 9, code: '        farthest = <span class="number">0</span>       <span class="comment"># 下一跳能到达的最远位置</span>' },
+      { num: 10, code: '        ' },
+      { num: 11, code: '        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(n - <span class="number">1</span>):' },
+      { num: 12, code: '            <span class="comment"># 更新最远可达位置</span>' },
+      { num: 13, code: '            farthest = <span class="function">max</span>(farthest, i + nums[i])' },
+      { num: 14, code: '            ' },
+      { num: 15, code: '            <span class="comment"># 到达当前边界，必须跳一次</span>' },
+      { num: 16, code: '            <span class="keyword">if</span> i == end:' },
+      { num: 17, code: '                jumps += <span class="number">1</span>' },
+      { num: 18, code: '                end = farthest' },
+      { num: 19, code: '        ' },
+      { num: 20, code: '        <span class="keyword">return</span> jumps' }
+    ];
+    
+    // 步骤与代码行映射
+    const steps = [
+      {
+        title: "初始化变量",
+        desc: "jumps=0, end=0, farthest=0。从位置0开始，当前只能跳到索引0。",
+        line: 7,
+        state: { jumps: "0", end: "0", farthest: "0", pos: "初始化" },
+        highlight: [0]
+      },
+      {
+        title: "i=0: 计算最远可达",
+        desc: "farthest = max(0, 0+2) = 2。从位置0可以跳到索引1或2。",
+        line: 13,
+        state: { jumps: "0", end: "0", farthest: "2", pos: "0" },
+        highlight: [0, 1, 2]
+      },
+      {
+        title: "i=0: 到达边界，跳跃！",
+        desc: "i == end (0 == 0)，必须跳跃。jumps=1，end更新为farthest=2。",
+        line: 17,
+        state: { jumps: "1", end: "2", farthest: "2", pos: "0" },
+        highlight: [0, 1, 2]
+      },
+      {
+        title: "i=1: 计算最远可达",
+        desc: "farthest = max(2, 1+3) = 4。从位置1可以跳到索引4（终点）！",
+        line: 13,
+        state: { jumps: "1", end: "2", farthest: "4", pos: "1" },
+        highlight: [1, 2, 3, 4]
+      },
+      {
+        title: "i=2: 不跳跃",
+        desc: "i=2 == end，但farthest=4，更新end=4，jumps=2。继续扫描...",
+        line: 18,
+        state: { jumps: "2", end: "4", farthest: "4", pos: "2" },
+        highlight: [2, 3, 4]
+      },
+      {
+        title: "i=3: 扫描终点前",
+        desc: "farthest = max(4, 3+1) = 4。位置3只能跳到4。",
+        line: 13,
+        state: { jumps: "2", end: "4", farthest: "4", pos: "3" },
+        highlight: [3, 4]
+      },
+      {
+        title: "返回结果",
+        desc: "循环结束（i只到n-2）。总共需要 2 次跳跃。",
+        line: 20,
+        state: { jumps: "2", end: "4", farthest: "4", pos: "完成" },
+        highlight: [4]
+      }
+    ];
+    
+    // 生成数组可视化
+    const nums = [2, 3, 1, 1, 4];
+    const arrayViz = document.getElementById('arrayViz');
+    nums.forEach((num, idx) => {
+      const cell = document.createElement('div');
+      cell.className = 'array-cell';
+      cell.id = `cell-${idx}`;
+      cell.innerHTML = `<span class="index">${idx}</span><span class="value">${num}</span>`;
+      arrayViz.appendChild(cell);
+    });
+    
+    // 生成代码行
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach(line => {
+      const div = document.createElement('div');
+      div.className = 'code-line';
+      div.dataset.line = line.num;
+      div.innerHTML = `<span class="line-number">${line.num}</span><span class="code-content">${line.code}</span>`;
+      div.addEventListener('click', () => highlightStepByLine(line.num));
+      codeBlock.appendChild(div);
+    });
+    
+    // 生成步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const div = document.createElement('div');
+      div.className = 'viz-step';
+      div.dataset.step = idx;
+      div.innerHTML = `
+        <div class="viz-step-title">${step.title}</div>
+        <div class="viz-step-desc">${step.desc}</div>
+        <div class="state-display">
+          <span class="state-var"><span class="label">jumps:</span> <span class="value">${step.state.jumps}</span></span>
+          <span class="state-var"><span class="label">end:</span> <span class="value">${step.state.end}</span></span>
+          <span class="state-var"><span class="label">farthest:</span> <span class="value">${step.state.farthest}</span></span>
+        </div>
+      `;
+      div.addEventListener('click', () => highlightStep(idx));
+      vizSteps.appendChild(div);
+    });
+    
+    let activeStep = -1;
+    
+    function highlightStep(stepIdx) {
+      activeStep = stepIdx;
+      const step = steps[stepIdx];
+      
+      // 高亮步骤
+      document.querySelectorAll('.viz-step').forEach((el, idx) => {
+        el.classList.toggle('active', idx === stepIdx);
+      });
+      
+      // 高亮代码行
+      document.querySelectorAll('.code-line').forEach(el => {
+        const lineNum = parseInt(el.dataset.line);
+        el.classList.toggle('active', lineNum === step.line);
+      });
+      
+      // 高亮数组
+      document.querySelectorAll('.array-cell').forEach((el, idx) => {
+        el.className = 'array-cell';
+        if (step.highlight && step.highlight.includes(idx)) {
+          el.classList.add('reachable');
+        }
+        if (step.state.pos !== "初始化" && step.state.pos !== "完成") {
+          const pos = parseInt(step.state.pos);
+          if (idx === pos) el.classList.add('current');
+        }
+      });
+    }
+    
+    function highlightStepByLine(lineNum) {
+      const stepIdx = steps.findIndex(s => s.line === lineNum);
+      if (stepIdx !== -1) {
+        highlightStep(stepIdx);
+        // 滚动到对应步骤
+        vizSteps.children[stepIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+    
+    // 默认选中第一步
+    highlightStep(0);
+  </script>
+</body>
+</html>

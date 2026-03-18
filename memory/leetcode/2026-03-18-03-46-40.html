@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #40 - 组合总和 II</title>
+  <style>
+    :root { --primary: #6366f1; --bg: #0f172a; --surface: #1e293b; --text: #f1f5f9; --success: #22c55e; --warning: #f59e0b; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); max-width: 1000px; margin: 0 auto; padding: 40px 20px; line-height: 1.6; }
+    h1 { text-align: center; margin-bottom: 8px; }
+    .subtitle { text-align: center; color: #94a3b8; margin-bottom: 32px; }
+    .section { background: var(--surface); border-radius: 16px; padding: 28px; margin-bottom: 24px; }
+    .section h2 { color: var(--primary); margin-top: 0; display: flex; align-items: center; gap: 8px; }
+    .tag { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-right: 8px; }
+    .tag-medium { background: var(--warning); color: #000; }
+    .tag-method { background: var(--primary); color: #fff; }
+    pre { background: #0d1117; border-radius: 12px; padding: 20px; overflow-x: auto; margin: 0; }
+    .code-line { display: flex; padding: 3px 0; cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; }
+    .code-line:hover { background: rgba(255,255,255,0.05); }
+    .code-line.active { background: rgba(99, 102, 241, 0.25); border-left-color: var(--primary); }
+    .line-number { color: #484f58; min-width: 40px; text-align: right; padding-right: 16px; user-select: none; }
+    .code-content { flex: 1; font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 14px; }
+    .viz-container { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 20px 0; }
+    @media (max-width: 768px) { .viz-container { grid-template-columns: 1fr; } }
+    .viz-steps { max-height: 400px; overflow-y: auto; }
+    .viz-step { padding: 14px; margin: 8px 0; border-radius: 10px; background: #334155; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+    .viz-step:hover { background: #475569; }
+    .viz-step.active { border-color: var(--primary); background: rgba(99, 102, 241, 0.2); }
+    .viz-step-title { font-weight: 600; color: var(--primary); margin-bottom: 4px; }
+    .viz-step-desc { font-size: 14px; color: #cbd5e1; }
+    .state-box { margin-top: 8px; padding: 8px 12px; background: rgba(0,0,0,0.3); border-radius: 6px; font-family: monospace; font-size: 12px; }
+    .problem-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .problem-card { background: var(--bg); border-radius: 12px; padding: 20px; border: 1px solid #475569; transition: all 0.2s; text-decoration: none; color: inherit; display: block; }
+    .problem-card:hover { border-color: var(--primary); transform: translateY(-3px); }
+    .problem-title { font-weight: 600; color: var(--primary); margin-bottom: 8px; }
+    .problem-desc { font-size: 14px; color: #94a3b8; }
+    .complexity-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    .complexity-table th, .complexity-table td { padding: 12px; text-align: left; border-bottom: 1px solid #475569; }
+    .complexity-table th { color: var(--primary); }
+    .keyword { color: #ff7b72; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .comment { color: #8b949e; }
+    .class { color: #ffa657; }
+    .var { color: #79c0ff; }
+    .highlight-box { background: rgba(99, 102, 241, 0.1); border-left: 4px solid var(--primary); padding: 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+    .tree-viz { font-family: monospace; background: #0d1117; padding: 16px; border-radius: 8px; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h1>🎯 LeetCode #40 - 组合总和 II</h1>
+  <p class="subtitle">Combination Sum II | 回溯算法 + 去重技巧</p>
+
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p><span class="tag tag-medium">Medium</span><span class="tag tag-method">Backtracking</span></p>
+    <p>给定一个候选人集合 <code>candidates</code> 和一个目标数 <code>target</code>，找出 <code>candidates</code> 中所有可以使数字和为 <code>target</code> 的组合。</p>
+    <div class="highlight-box">
+      <strong>⚠️ 关键约束：</strong><br>
+      • <code>candidates</code> 中的每个数字在每个组合中只能使用 <strong>一次</strong><br>
+      • <code>candidates</code> 中可能包含 <strong>重复数字</strong><br>
+      • 解集不能包含重复的组合
+    </div>
+    <p><strong>示例：</strong></p>
+    <pre style="background:#0d1117;padding:16px;border-radius:8px;">
+输入: candidates = [10,1,2,7,6,1,5], target = 8
+输出: [[1,1,6], [1,2,5], [1,7], [2,6]]
+
+解释: 
+- 1 + 1 + 6 = 8  (使用两个1，它们是不同的元素)
+- 1 + 2 + 5 = 8
+- 1 + 7 = 8
+- 2 + 6 = 8</pre>
+  </div>
+
+  <div class="section">
+    <h2>🎬 算法执行过程</h2>
+    <p style="color:#94a3b8;margin-bottom:16px;">点击左侧步骤或右侧代码行，查看对应关系</p>
+    <div class="viz-container">
+      <div class="viz-steps" id="vizSteps">
+        <!-- 步骤由JS生成 -->
+      </div>
+      <div class="code-container">
+        <h3 style="margin-top:0;">Python 实现</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+    
+    <div class="highlight-box">
+      <strong>🔑 去重核心思想：</strong><br>
+      先排序，然后在同一层递归中，如果当前数字和前一个数字相同，且前一个数字没有被使用（即在同一层），则跳过。<br><br>
+      <code>if i > start and candidates[i] == candidates[i-1]: continue</code>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <tr>
+        <th>指标</th>
+        <th>复杂度</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>时间复杂度</td>
+        <td>O(2<sup>n</sup> × n)</td>
+        <td>最坏情况下需要遍历所有子集，每个子集需要O(n)时间复制</td>
+      </tr>
+      <tr>
+        <td>空间复杂度</td>
+        <td>O(n)</td>
+        <td>递归栈深度最多为n，存储当前路径</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>🔄 与 LeetCode 39 的对比</h2>
+    <table class="complexity-table">
+      <tr>
+        <th>特性</th>
+        <th>39. 组合总和</th>
+        <th>40. 组合总和 II</th>
+      </tr>
+      <tr>
+        <td>数字可重复使用</td>
+        <td>✅ 无限次</td>
+        <td>❌ 只能一次</td>
+      </tr>
+      <tr>
+        <td>输入是否有重复</td>
+        <td>❌ 无重复</td>
+        <td>✅ 可能有重复</td>
+      </tr>
+      <tr>
+        <td>主要难点</td>
+        <td>控制递归起始位置</td>
+        <td>同一层去重</td>
+      </tr>
+      <tr>
+        <td>去重条件</td>
+        <td>无需去重</td>
+        <td><code>i > start and candidates[i] == candidates[i-1]</code></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>🔗 类似题目推荐</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/combination-sum/" class="problem-card" target="_blank">
+        <div class="problem-title">#39 组合总和 ⭐</div>
+        <div class="problem-desc">数字可无限使用，无重复元素。回溯基础题。</div>
+      </a>
+      <a href="https://leetcode.cn/problems/combination-sum-iii/" class="problem-card" target="_blank">
+        <div class="problem-title">#216 组合总和 III</div>
+        <div class="problem-desc">从1-9中选k个数使和为n。限制组合长度。</div>
+      </a>
+      <a href="https://leetcode.cn/problems/permutations/" class="problem-card" target="_blank">
+        <div class="problem-title">#46 全排列</div>
+        <div class="problem-desc">排列问题，使用used数组标记已选元素。</div>
+      </a>
+      <a href="https://leetcode.cn/problems/permutations-ii/" class="problem-card" target="_blank">
+        <div class="problem-title">#47 全排列 II</div>
+        <div class="problem-desc">有重复元素的全排列，同样需要去重技巧。</div>
+      </a>
+      <a href="https://leetcode.cn/problems/subsets/" class="problem-card" target="_blank">
+        <div class="problem-title">#78 子集</div>
+        <div class="problem-desc">求所有子集，回溯经典入门题。</div>
+      </a>
+      <a href="https://leetcode.cn/problems/subsets-ii/" class="problem-card" target="_blank">
+        <div class="problem-title">#90 子集 II</div>
+        <div class="problem-desc">有重复元素的子集，与本题去重逻辑相同。</div>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    // 代码行数据
+    const codeLines = [
+      {line: 1, content: '<span class="keyword">class</span> <span class="class">Solution</span>:'},
+      {line: 2, content: '    <span class="keyword">def</span> <span class="function">combinationSum2</span>(<span class="var">self</span>, candidates: <span class="function">list</span>[<span class="function">int</span>], target: <span class="function">int</span>) -> <span class="function">list</span>[<span class="function">list</span>[<span class="function">int</span>]]:'},
+      {line: 3, content: '        res = []  <span class="comment"># 存储所有符合条件的组合</span>'},
+      {line: 4, content: '        path = [] <span class="comment"># 存储当前路径</span>'},
+      {line: 5, content: '        candidates.sort() <span class="comment"># 关键：先排序，便于去重</span>'},
+      {line: 6, content: '        n = <span class="function">len</span>(candidates)'},
+      {line: 7, content: '        '},
+      {line: 8, content: '        <span class="keyword">def</span> <span class="function">backtrack</span>(start: <span class="function">int</span>, target: <span class="function">int</span>):'},
+      {line: 9, content: '            <span class="keyword">if</span> target == <span class="number">0</span>:'},
+      {line: 10, content: '                res.append(path[:]) <span class="comment"># 找到解，复制当前路径</span>'},
+      {line: 11, content: '                <span class="keyword">return</span>'},
+      {line: 12, content: '            <span class="keyword">if</span> target < <span class="number">0</span>:'},
+      {line: 13, content: '                <span class="keyword">return</span> <span class="comment"># 剪枝：和已超过目标</span>'},
+      {line: 14, content: '            '},
+      {line: 15, content: '            <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(start, n):'},
+      {line: 16, content: '                <span class="comment"># 🔑 去重核心：同一层不能选相同的数</span>'},
+      {line: 17, content: '                <span class="keyword">if</span> i > start <span class="keyword">and</span> candidates[i] == candidates[i-<span class="number">1</span>]:'},
+      {line: 18, content: '                    <span class="keyword">continue</span> <span class="comment"># 跳过重复元素</span>'},
+      {line: 19, content: '                '},
+      {line: 20, content: '                path.append(candidates[i]) <span class="comment"># 做选择</span>'},
+      {line: 21, content: '                backtrack(i + <span class="number">1</span>, target - candidates[i]) <span class="comment"># 进入下一层</span>'},
+      {line: 22, content: '                path.pop() <span class="comment"># 撤销选择（回溯）</span>'},
+      {line: 23, content: '        '},
+      {line: 24, content: '        backtrack(<span class="number">0</span>, target)'},
+      {line: 25, content: '        <span class="keyword">return</span> res'},
+    ];
+
+    // 步骤数据
+    const steps = [
+      {title: "1️⃣ 初始化与排序", desc: "创建结果数组和路径数组，对候选数组排序", line: 5, state: {candidates: "[1,1,2,5,6,7,10]", target: "8", path: "[]"}},
+      {title: "2️⃣ 开始回溯", desc: "从索引0开始，目标是8", line: 24, state: {start: "0", target: "8", path: "[]"}},
+      {title: "3️⃣ 选择数字1 (i=0)", desc: "第一层，选择第一个1，目标变为7", line: 20, state: {i: "0", selected: "1", target: "7", path: "[1]"}},
+      {title: "4️⃣ 递归进入下一层", desc: "从i=1开始继续选择，目标是7", line: 21, state: {start: "1", target: "7", path: "[1]"}},
+      {title: "5️⃣ 选择数字1 (i=1)", desc: "第二层，选择第二个1，目标变为6", line: 20, state: {i: "1", selected: "1", target: "6", path: "[1,1]"}},
+      {title: "6️⃣ 找到解 [1,1,6]", desc: "选择6后目标变为0，找到一个解", line: 10, state: {path: "[1,1,6]", res: "[[1,1,6]]"}},
+      {title: "7️⃣ 回溯，撤销选择6", desc: "返回上一层，path恢复为[1,1]", line: 22, state: {path: "[1,1]"}},
+      {title: "8️⃣ 选择数字2 (i=2)", desc: "用1,1,2组合，目标变为5，继续寻找...", line: 20, state: {i: "2", path: "[1,1,2]", target: "5"}},
+      {title: "9️⃣ 第一层 i=1 去重判断", desc: "i=1 > start=0，且candidates[1]==candidates[0]，跳过！", line: 17, state: {i: "1", start: "0", "candidates[0]": "1", "candidates[1]": "1", action: "跳过重复"}},
+      {title: "🔟 选择数字2 (i=2)", desc: "第一层直接选2，目标变为6", line: 20, state: {start: "0", i: "2", path: "[2]", target: "6"}},
+      {title: "1️⃣1️⃣ 找到解 [2,6]", desc: "选择6后目标变为0", line: 10, state: {path: "[2,6]", res: "[[1,1,6], [2,6]]"}},
+      {title: "1️⃣2️⃣ 返回最终结果", desc: "遍历完所有可能，返回结果集", line: 25, state: {res: "[[1,1,6], [1,2,5], [1,7], [2,6]]"}},
+    ];
+
+    // 渲染代码
+    const codeBlock = document.getElementById('codeBlock');
+    codeLines.forEach(({line, content}) => {
+      const div = document.createElement('div');
+      div.className = 'code-line';
+      div.dataset.line = line;
+      div.innerHTML = `<span class="line-number">${line}</span><span class="code-content">${content}</span>`;
+      div.addEventListener('click', () => highlightStepByLine(line));
+      codeBlock.appendChild(div);
+    });
+
+    // 渲染步骤
+    const vizSteps = document.getElementById('vizSteps');
+    steps.forEach((step, idx) => {
+      const div = document.createElement('div');
+      div.className = 'viz-step';
+      div.dataset.idx = idx;
+      div.dataset.line = step.line;
+      let stateHtml = '';
+      for (let [k, v] of Object.entries(step.state)) {
+        stateHtml += `<span style="color:#79c0ff">${k}</span>=<span style="color:#a5d6ff">${v}</span> `;
+      }
+      div.innerHTML = `
+        <div class="viz-step-title">${step.title}</div>
+        <div class="viz-step-desc">${step.desc}</div>
+        <div class="state-box">${stateHtml}</div>
+      `;
+      div.addEventListener('click', () => highlightLineByStep(idx));
+      vizSteps.appendChild(div);
+    });
+
+    // 高亮步骤（点击代码行）
+    function highlightStepByLine(line) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      
+      const codeEl = document.querySelector(`.code-line[data-line="${line}"]`);
+      if (codeEl) codeEl.classList.add('active');
+      
+      // 找到对应的步骤
+      const stepIdx = steps.findIndex(s => s.line === line);
+      if (stepIdx !== -1) {
+        const stepEl = document.querySelector(`.viz-step[data-idx="${stepIdx}"]`);
+        if (stepEl) {
+          stepEl.classList.add('active');
+          stepEl.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+        }
+      }
+    }
+
+    // 高亮代码行（点击步骤）
+    function highlightLineByStep(idx) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.viz-step').forEach(el => el.classList.remove('active'));
+      
+      const step = steps[idx];
+      const stepEl = document.querySelector(`.viz-step[data-idx="${idx}"]`);
+      const codeEl = document.querySelector(`.code-line[data-line="${step.line}"]`);
+      
+      if (stepEl) stepEl.classList.add('active');
+      if (codeEl) {
+        codeEl.classList.add('active');
+        codeEl.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+      }
+    }
+
+    // 默认高亮第一步
+    highlightLineByStep(0);
+  </script>
+</body>
+</html>

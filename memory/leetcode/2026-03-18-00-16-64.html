@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode #64 - 最小路径和</title>
+  <style>
+    :root { 
+      --primary: #6366f1; 
+      --secondary: #8b5cf6;
+      --bg: #0f172a; 
+      --surface: #1e293b; 
+      --surface-light: #334155;
+      --text: #f1f5f9; 
+      --text-muted: #94a3b8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --code-bg: #0d1117;
+    }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      max-width: 1100px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.7;
+    }
+    h1 { 
+      font-size: 2.2rem; 
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin-bottom: 32px;
+    }
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 28px; 
+      margin-bottom: 24px; 
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .section h2 { 
+      color: var(--primary); 
+      margin-top: 0;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: 12px;
+    }
+    .badge-medium { background: #f59e0b20; color: #f59e0b; border: 1px solid #f59e0b40; }
+    .badge-tag { background: #6366f120; color: #818cf8; border: 1px solid #6366f140; }
+    pre { 
+      background: var(--code-bg); 
+      border-radius: 12px; 
+      padding: 0;
+      overflow-x: auto;
+      border: 1px solid #30363d;
+    }
+    .code-line { 
+      display: flex; 
+      padding: 4px 20px; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.9rem;
+    }
+    .code-line:hover { 
+      background: rgba(255,255,255,0.05); 
+    }
+    .code-line.active { 
+      background: rgba(99, 102, 241, 0.25); 
+      border-left: 3px solid var(--primary); 
+      margin-left: 0;
+      padding-left: 17px;
+    }
+    .line-number { 
+      color: #484f58; 
+      min-width: 40px; 
+      text-align: right; 
+      padding-right: 16px; 
+      user-select: none;
+      font-size: 0.85rem;
+    }
+    .viz-container { 
+      display: grid; 
+      grid-template-columns: 1fr 1.3fr; 
+      gap: 24px; 
+      margin: 20px 0; 
+    }
+    .viz-steps { 
+      max-height: 480px; 
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+    .viz-steps::-webkit-scrollbar { width: 6px; }
+    .viz-steps::-webkit-scrollbar-thumb { background: var(--surface-light); border-radius: 3px; }
+    .viz-step { 
+      padding: 14px 16px; 
+      margin: 8px 0; 
+      border-radius: 10px; 
+      background: var(--bg); 
+      cursor: pointer; 
+      border: 2px solid transparent; 
+      transition: all 0.2s;
+    }
+    .viz-step:hover { 
+      background: var(--surface-light);
+      transform: translateX(4px);
+    }
+    .viz-step.active { 
+      border-color: var(--primary); 
+      background: rgba(99, 102, 241, 0.15); 
+    }
+    .viz-step h4 { 
+      margin: 0 0 6px 0; 
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+    .viz-step p { 
+      margin: 0; 
+      font-size: 0.85rem; 
+      color: var(--text-muted);
+    }
+    .viz-step .state-preview {
+      margin-top: 10px;
+      padding: 10px;
+      background: var(--code-bg);
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 0.8rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+      gap: 8px;
+    }
+    .viz-step .state-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .viz-step .state-key {
+      color: #8b949e;
+      font-size: 0.7rem;
+    }
+    .viz-step .state-val {
+      color: var(--success);
+      font-weight: bold;
+    }
+    .grid-display {
+      display: grid;
+      gap: 8px;
+      margin: 12px 0;
+      justify-content: start;
+    }
+    .grid-cell {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--surface-light);
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 1rem;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+    }
+    .grid-cell.current {
+      background: var(--primary);
+      color: white;
+      transform: scale(1.1);
+      border-color: #fff;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    }
+    .grid-cell.computed {
+      background: #22c55e30;
+      border-color: var(--success);
+      color: var(--success);
+    }
+    .grid-cell.origin {
+      background: var(--warning);
+      color: #000;
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .problem-card { 
+      background: var(--bg); 
+      border-radius: 12px; 
+      padding: 18px; 
+      border: 1px solid #475569; 
+      transition: all 0.2s; 
+      text-decoration: none; 
+      color: inherit; 
+      display: block; 
+    }
+    .problem-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.2);
+    }
+    .problem-card h4 {
+      margin: 0 0 8px 0;
+      color: var(--primary);
+    }
+    .problem-card p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .keyword { color: #ff7b72; } 
+    .function { color: #d2a8ff; } 
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; } 
+    .comment { color: #8b949e; } 
+    .class { color: #ffa657; }
+    .def { color: #ff7b72; }
+    .return { color: #ff7b72; }
+    .operator { color: #ff7b72; }
+    
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    .complexity-table th,
+    .complexity-table td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--surface-light);
+    }
+    .complexity-table th {
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 0.85rem;
+    }
+    .complexity-table tr:last-child td {
+      border-bottom: none;
+    }
+    .complexity-value {
+      font-family: monospace;
+      color: var(--success);
+      font-weight: bold;
+    }
+    
+    .highlight-box {
+      background: rgba(99, 102, 241, 0.1);
+      border-left: 4px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 12px 12px 0;
+      margin: 16px 0;
+    }
+    .highlight-box p {
+      margin: 0;
+      color: var(--text);
+    }
+    
+    .dp-formula {
+      background: var(--code-bg);
+      padding: 16px 24px;
+      border-radius: 12px;
+      font-family: 'SF Mono', monospace;
+      text-align: center;
+      margin: 16px 0;
+      border: 1px solid #30363d;
+    }
+    .dp-formula code {
+      color: #ffa657;
+      font-size: 1.1rem;
+    }
+    
+    @media (max-width: 768px) {
+      .viz-container { grid-template-columns: 1fr; }
+      .problem-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <h1>LeetCode #64 - 最小路径和 <span class="badge badge-medium">Medium</span></h1>
+  <p class="subtitle">动态规划经典入门题，掌握二维DP的状态转移思路</p>
+  
+  <div class="section">
+    <h2>📋 题目描述</h2>
+    <p>给定一个包含非负整数的 <code>m x n</code> 网格 <code>grid</code>，请找出一条从左上角到右下角的路径，使得路径上的数字总和为最小。</p>
+    <p style="margin-top: 12px; color: var(--text-muted);"><strong>说明：</strong>每次只能向下或者向右移动一步。</p>
+    
+    <div class="highlight-box">
+      <p><strong>示例：</strong></p>
+      <pre style="background: transparent; border: none; margin: 8px 0 0 0; padding: 0;"><code>输入: grid = [[1,3,1],
+              [1,5,1],
+              [4,2,1]]
+输出: 7
+解释: 路径 1→3→1→1→1 的总和最小</code></pre>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>🧠 核心思路</h2>
+    <p>这是一道经典的<strong>二维动态规划</strong>问题。关键在于发现：</p>
+    <ul style="color: var(--text-muted);">
+      <li>到达每个格子的最小路径和 = 当前格子的值 + min(从上方来的最小和, 从左方来的最小和)</li>
+      <li>第一行和第一列只能从一个方向来，需要特殊处理</li>
+    </ul>
+    
+    <div class="dp-formula">
+      <code>dp[i][j] = grid[i][j] + min(dp[i-1][j], dp[i][j-1])</code>
+    </div>
+    
+    <p style="color: var(--text-muted); font-size: 0.9rem;">
+      <span class="badge badge-tag">空间优化</span> 可以原地修改输入数组，空间复杂度优化到 O(1)
+    </p>
+  </div>
+  
+  <div class="section">
+    <h2>🎬 算法执行过程</h2>
+    <p style="color: var(--text-muted); margin-bottom: 16px;">点击步骤或代码行查看对应关系，观察DP表格的填充过程：</p>
+    <div class="viz-container">
+      <div>
+        <div class="viz-steps" id="vizSteps"></div>
+        <div style="margin-top: 16px; padding: 16px; background: var(--bg); border-radius: 10px;">
+          <p style="margin: 0 0 10px 0; font-size: 0.85rem; color: var(--text-muted);">当前DP状态：</p>
+          <div id="gridDisplay" class="grid-display"></div>
+        </div>
+      </div>
+      <div class="code-container">
+        <h3 style="margin-top: 0; color: var(--text-muted); font-size: 0.95rem;">Python 实现（原地修改）</h3>
+        <pre><code id="codeBlock"></code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 复杂度分析</h2>
+    <table class="complexity-table">
+      <tr>
+        <th>维度</th>
+        <th>时间复杂度</th>
+        <th>空间复杂度</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>基础DP</td>
+        <td class="complexity-value">O(m × n)</td>
+        <td class="complexity-value">O(m × n)</td>
+        <td>新建dp数组</td>
+      </tr>
+      <tr>
+        <td>滚动数组优化</td>
+        <td class="complexity-value">O(m × n)</td>
+        <td class="complexity-value">O(n)</td>
+        <td>只保留上一行</td>
+      </tr>
+      <tr>
+        <td>原地修改（推荐）</td>
+        <td class="complexity-value">O(m × n)</td>
+        <td class="complexity-value">O(1)</td>
+        <td>直接修改输入</td>
+      </tr>
+    </table>
+  </div>
+  
+  <div class="section">
+    <h2>🔗 类似题目推荐</h2>
+    <div class="problem-grid">
+      <a href="https://leetcode.cn/problems/unique-paths/" class="problem-card" target="_blank">
+        <h4>🎯 62. 不同路径</h4>
+        <p>同样是网格DP，但计算的是路径数量而非路径和</p>
+      </a>
+      <a href="https://leetcode.cn/problems/unique-paths-ii/" class="problem-card" target="_blank">
+        <h4>🚧 63. 不同路径 II</h4>
+        <p>加入障碍物，需要处理不可达状态</p>
+      </a>
+      <a href="https://leetcode.cn/problems/triangle/" class="problem-card" target="_blank">
+        <h4>🔺 120. 三角形最小路径和</h4>
+        <p>类似的DP思想，但网格形状是三角形</p>
+      </a>
+      <a href="https://leetcode.cn/problems/minimum-falling-path-sum/" class="problem-card" target="_blank">
+        <h4>📉 931. 下降路径最小和</h4>
+        <p>可以从上方三个方向来，状态转移稍有不同</p>
+      </a>
+      <a href="https://leetcode.cn/problems/maximum-sum-of-non-adjacent-elements/" class="problem-card" target="_blank">
+        <h4>🏠 198. 打家劫舍</h4>
+        <p>一维DP经典题，培养DP思维的必修课</p>
+      </a>
+      <a href="https://leetcode.cn/problems/coin-change/" class="problem-card" target="_blank">
+        <h4>💰 322. 零钱兑换</h4>
+        <p>完全背包问题，求最小数量</p>
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // 步骤与代码行映射数据
+    const steps = [
+      {title: "初始化", desc: "获取网格的行列数", line: 2, gridState: [[1,3,1],[1,5,1],[4,2,1]], current: null, vars: {m: 3, n: 3}},
+      {title: "填充第一行", desc: "第一行只能从左边来，累加前缀和", line: 4, gridState: [[1,4,5],[1,5,1],[4,2,1]], current: [0,2], vars: {j: 2, grid[0][2]: 5}},
+      {title: "填充第一列", desc: "第一列只能从上方来，累加前缀和", line: 6, gridState: [[1,4,5],[2,5,1],[6,2,1]], current: [2,0], vars: {i: 2, grid[2][0]: 6}},
+      {title: "DP填表 - (1,1)", desc: "grid[1][1]=5, min(上方2, 左方4)=2, 更新为7", line: 9, gridState: [[1,4,5],[2,7,1],[6,2,1]], current: [1,1], vars: {i:1, j:1, up:2, left:4, new:7}},
+      {title: "DP填表 - (1,2)", desc: "grid[1][2]=1, min(上方5, 左方7)=5, 更新为6", line: 9, gridState: [[1,4,5],[2,7,6],[6,2,1]], current: [1,2], vars: {i:1, j:2, up:5, left:7, new:6}},
+      {title: "DP填表 - (2,1)", desc: "grid[2][1]=2, min(上方7, 左方6)=6, 更新为8", line: 9, gridState: [[1,4,5],[2,7,6],[6,8,1]], current: [2,1], vars: {i:2, j:1, up:7, left:6, new:8}},
+      {title: "DP填表 - (2,2)", desc: "grid[2][2]=1, min(上方6, 左方8)=6, 更新为7", line: 9, gridState: [[1,4,5],[2,7,6],[6,8,7]], current: [2,2], vars: {i:2, j:2, up:6, left:8, new:7}},
+      {title: "返回结果", desc: "右下角的值即为最小路径和", line: 11, gridState: [[1,4,5],[2,7,6],[6,8,7]], current: [2,2], vars: {result: 7}}
+    ];
+    
+    // Python代码
+    const codeLines = [
+      {num: 1, code: '<span class="def">def</span> <span class="function">minPathSum</span>(self, grid: List[List[<span class="keyword">int</span>]]) -> <span class="keyword">int</span>:'},
+      {num: 2, code: '    m, n = <span class="function">len</span>(grid), <span class="function">len</span>(grid[<span class="number">0</span>])'},
+      {num: 3, code: '    <span class="comment"># 初始化第一行</span>'},
+      {num: 4, code: '    <span class="keyword">for</span> j <span class="keyword">in</span> <span class="function">range</span>(<span class="number">1</span>, n): grid[<span class="number">0</span>][j] += grid[<span class="number">0</span>][j<span class="operator">-</span><span class="number">1</span>]'},
+      {num: 5, code: '    <span class="comment"># 初始化第一列</span>'},
+      {num: 6, code: '    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="number">1</span>, m): grid[i][<span class="number">0</span>] += grid[i<span class="operator">-</span><span class="number">1</span>][<span class="number">0</span>]'},
+      {num: 7, code: '    <span class="comment"># 动态规划填表</span>'},
+      {num: 8, code: '    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="number">1</span>, m):'},
+      {num: 9, code: '        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="function">range</span>(<span class="number">1</span>, n):'},
+      {num: 10, code: '            grid[i][j] += <span class="function">min</span>(grid[i<span class="operator">-</span><span class="number">1</span>][j], grid[i][j<span class="operator">-</span><span class="number">1</span>])'},
+      {num: 11, code: '    <span class="keyword">return</span> grid[m<span class="operator">-</span><span class="number">1</span>][n<span class="operator">-</span><span class="number">1</span>]'}
+    ];
+    
+    let activeStep = 0;
+    
+    // 渲染代码
+    function renderCode() {
+      const codeBlock = document.getElementById('codeBlock');
+      codeBlock.innerHTML = codeLines.map(line => 
+        `<div class="code-line ${activeStep >= 0 && steps[activeStep] && steps[activeStep].line === line.num ? 'active' : ''}" data-line="${line.num}">
+          <span class="line-number">${line.num}</span>
+          <span>${line.code}</span>
+        </div>`
+      ).join('');
+      
+      // 添加代码行点击事件
+      document.querySelectorAll('.code-line').forEach(line => {
+        line.addEventListener('click', () => {
+          const lineNum = parseInt(line.dataset.line);
+          const stepIndex = steps.findIndex(s => s.line === lineNum);
+          if (stepIndex !== -1) {
+            setActiveStep(stepIndex);
+          }
+        });
+      });
+    }
+    
+    // 渲染步骤
+    function renderSteps() {
+      const stepsContainer = document.getElementById('vizSteps');
+      stepsContainer.innerHTML = steps.map((step, idx) => 
+        `<div class="viz-step ${idx === activeStep ? 'active' : ''}" data-step="${idx}">
+          <h4>步骤 ${idx + 1}: ${step.title}</h4>
+          <p>${step.desc}</p>
+          ${step.vars ? `<div class="state-preview">${Object.entries(step.vars).map(([k,v]) => 
+            `<div class="state-item"><span class="state-key">${k}</span><span class="state-val">${v}</span></div>`
+          ).join('')}</div>` : ''}
+        </div>`
+      ).join('');
+      
+      // 添加步骤点击事件
+      document.querySelectorAll('.viz-step').forEach(step => {
+        step.addEventListener('click', () => {
+          setActiveStep(parseInt(step.dataset.step));
+        });
+      });
+    }
+    
+    // 渲染网格
+    function renderGrid() {
+      const step = steps[activeStep];
+      const gridDisplay = document.getElementById('gridDisplay');
+      const rows = step.gridState.length;
+      const cols = step.gridState[0].length;
+      
+      gridDisplay.style.gridTemplateColumns = `repeat(${cols}, 48px)`;
+      
+      gridDisplay.innerHTML = step.gridState.map((row, i) => 
+        row.map((val, j) => {
+          let classes = 'grid-cell';
+          if (step.current && step.current[0] === i && step.current[1] === j) {
+            classes += ' current';
+          } else if ((i === 0 && j === 0) || (step.current && (i < step.current[0] || (i === step.current[0] && j < step.current[1])))) {
+            classes += ' computed';
+          }
+          return `<div class="${classes}">${val}</div>`;
+        }).join('')
+      ).join('');
+    }
+    
+    // 设置活动步骤
+    function setActiveStep(idx) {
+      activeStep = idx;
+      renderSteps();
+      renderCode();
+      renderGrid();
+    }
+    
+    // 初始化
+    renderSteps();
+    renderCode();
+    renderGrid();
+  </script>
+</body>
+</html>
