@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeetCode 72. 编辑距离 - 精讲</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style type="text/tailwindcss">
+        @layer base {
+            body {
+                font-family: 'Noto Sans SC', sans-serif;
+                background: #0a0a0a;
+                color: #e5e5e5;
+            }
+            code {
+                font-family: 'JetBrains Mono', monospace;
+            }
+        }
+        @layer components {
+            .gradient-text {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+            .card {
+                background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%);
+                border: 1px solid rgba(102, 126, 234, 0.2);
+                border-radius: 16px;
+                transition: all 0.3s ease;
+            }
+            .card:hover {
+                border-color: rgba(102, 126, 234, 0.5);
+                transform: translateY(-2px);
+                box-shadow: 0 10px 40px rgba(102, 126, 234, 0.2);
+            }
+            .code-block {
+                background: #0d1117;
+                border: 1px solid #30363d;
+                border-radius: 12px;
+                overflow: hidden;
+            }
+            .keyword { color: #ff7b72; }
+            .function { color: #d2a8ff; }
+            .string { color: #a5d6ff; }
+            .comment { color: #8b949e; }
+            .number { color: #79c0ff; }
+            .tab-btn {
+                transition: all 0.3s ease;
+            }
+            .tab-btn.active {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
+            .dp-cell {
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid #30363d;
+                background: #0d1117;
+                transition: all 0.3s ease;
+            }
+            .dp-cell.highlight {
+                background: rgba(102, 126, 234, 0.3);
+                border-color: #667eea;
+                transform: scale(1.1);
+            }
+            .step-indicator {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background: #333;
+                transition: all 0.3s ease;
+            }
+            .step-indicator.active {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+            }
+            .glow-text {
+                text-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-lg border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center font-bold text-lg">72</div>
+                <div>
+                    <h1 class="text-xl font-bold gradient-text">编辑距离</h1>
+                    <p class="text-sm text-gray-400">Edit Distance · Hard</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="px-3 py-1 rounded-full bg-red-500/20 text-red-400 text-sm font-medium">Hard</span>
+                <span class="px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 text-sm font-medium">动态规划</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-24 pb-12 px-6 max-w-7xl mx-auto">
+        <!-- Hero Section -->
+        <section class="mb-12">
+            <div class="card p-8">
+                <h2 class="text-2xl font-bold mb-4 gradient-text">题目描述</h2>
+                <p class="text-gray-300 text-lg leading-relaxed mb-6">
+                    给你两个单词 <code class="bg-gray-800 px-2 py-1 rounded text-purple-400">word1</code> 和 <code class="bg-gray-800 px-2 py-1 rounded text-purple-400">word2</code>，
+                    请返回将 <code class="bg-gray-800 px-2 py-1 rounded">word1</code> 转换成 <code class="bg-gray-800 px-2 py-1 rounded">word2</code> 所使用的<strong class="text-white">最少操作数</strong>。
+                </p>
+                <div class="bg-gray-900/50 rounded-xl p-6 mb-6">
+                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">你可以对一个单词进行如下三种操作：</h3>
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <div class="flex items-center gap-3 bg-gray-800/50 rounded-lg p-4">
+                            <span class="text-2xl">➕</span>
+                            <div>
+                                <div class="font-bold text-green-400">插入一个字符</div>
+                                <div class="text-sm text-gray-500">Insert</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 bg-gray-800/50 rounded-lg p-4">
+                            <span class="text-2xl">➖</span>
+                            <div>
+                                <div class="font-bold text-red-400">删除一个字符</div>
+                                <div class="text-sm text-gray-500">Delete</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 bg-gray-800/50 rounded-lg p-4">
+                            <span class="text-2xl">🔄</span>
+                            <div>
+                                <div class="font-bold text-yellow-400">替换一个字符</div>
+                                <div class="text-sm text-gray-500">Replace</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-gray-900/50 rounded-xl p-4">
+                        <div class="text-sm text-gray-400 mb-2">示例 1</div>
+                        <div class="space-y-2 font-mono text-sm">
+                            <div><span class="text-gray-500">输入:</span> word1 = "<span class="text-green-400">horse</span>", word2 = "<span class="text-blue-400">ros</span>"</div>
+                            <div><span class="text-gray-500">输出:</span> <span class="text-yellow-400 font-bold">3</span></div>
+                            <div class="text-gray-400 mt-2">解释:</div>
+                            <div class="text-xs space-y-1 text-gray-300">
+                                <div>horse → rorse (将 'h' 替换为 'r')</div>
+                                <div>rorse → rose (删除 'r')</div>
+                                <div>rose → ros (删除 'e')</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-900/50 rounded-xl p-4">
+                        <div class="text-sm text-gray-400 mb-2">示例 2</div>
+                        <div class="space-y-2 font-mono text-sm">
+                            <div><span class="text-gray-500">输入:</span> word1 = "<span class="text-green-400">intention</span>", word2 = "<span class="text-blue-400">execution</span>"</div>
+                            <div><span class="text-gray-500">输出:</span> <span class="text-yellow-400 font-bold">5</span></div>
+                            <div class="text-gray-400 mt-2">解释:</div>
+                            <div class="text-xs space-y-1 text-gray-300">
+                                <div>intention → inention (删除 't')</div>
+                                <div>inention → enention (将 'i' 替换为 'e')</div>
+                                <div>enention → exention (将 'n' 替换为 'x')</div>
+                                <div>exention → exection (将 'n' 替换为 'c')</div>
+                                <div>exection → execution (插入 'u')</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Core Idea -->
+        <section class="mb-12">
+            <div class="card p-8">
+                <h2 class="text-2xl font-bold mb-6 gradient-text">🎯 核心思想</h2>
+                <div class="grid lg:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-xl font-bold text-white mb-4">动态规划状态定义</h3>
+                        <div class="bg-gray-900/50 rounded-xl p-6 mb-4">
+                            <p class="text-gray-300 mb-4">
+                                定义 <code class="text-purple-400 font-bold">dp[i][j]</code> 表示：
+                            </p>
+                            <div class="bg-gray-800 rounded-lg p-4 border-l-4 border-purple-500">
+                                <p class="text-white">
+                                    将 <code class="text-green-400">word1[0..i-1]</code> 
+                                    转换为 <code class="text-blue-400">word2[0..j-1]</code> 
+                                    所需的最少操作数
+                                </p>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3">
+                                <span class="w-6 h-6 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-xs font-bold">1</span>
+                                <span class="text-gray-300">最后字符相同：<code class="text-gray-400">dp[i][j] = dp[i-1][j-1]</code></span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="w-6 h-6 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-xs font-bold">2</span>
+                                <span class="text-gray-300">最后字符不同：取三种操作的最小值</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-white mb-4">状态转移方程</h3>
+                        <div class="code-block p-6">
+                            <pre class="text-sm leading-relaxed"><code><span class="keyword">if</span> word1[i-<span class="number">1</span>] == word2[j-<span class="number">1</span>]:
+    <span class="comment"># 字符相同，无需操作</span>
+    dp[i][j] = dp[i-<span class="number">1</span>][j-<span class="number">1</span>]
+<span class="keyword">else</span>:
+    <span class="comment"># 字符不同，取三种操作的最小值</span>
+    dp[i][j] = <span class="number">1</span> + <span class="function">min</span>(
+        dp[i-<span class="number">1</span>][j],      <span class="comment"># 删除 word1[i-1]</span>
+        dp[i][j-<span class="number">1</span>],      <span class="comment"># 在 word1 插入 word2[j-1]</span>
+        dp[i-<span class="number">1</span>][j-<span class="number">1</span>]    <span class="comment"># 替换 word1[i-1] 为 word2[j-1]</span>
+    )</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Visualization -->
+        <section class="mb-12">
+            <div class="card p-8">
+                <h2 class="text-2xl font-bold mb-6 gradient-text">🎬 动态可视化演示</h2>
+                <div class="grid lg:grid-cols-2 gap-8">
+                    <div>
+                        <div class="bg-gray-900/50 rounded-xl p-6 mb-4">
+                            <div class="text-sm text-gray-400 mb-4">示例: word1 = "horse", word2 = "ros"</div>
+                            <div id="dp-table" class="overflow-x-auto">
+                                <table class="border-collapse">
+                                    <tbody id="table-body"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="flex justify-center gap-4">
+                            <button onclick="prevStep()" class="px-6 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition">← 上一步</button>
+                            <button onclick="nextStep()" class="px-6 py-2 bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 rounded-lg transition">下一步 →</button>
+                            <button onclick="resetViz()" class="px-6 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition">重置</button>
+                        </div>
+                        <div class="flex justify-center gap-2 mt-4" id="step-indicators"></div>
+                    </div>
+                    <div>
+                        <div id="explanation" class="bg-gray-900/50 rounded-xl p-6 h-full">
+                            <h3 class="text-lg font-bold text-white mb-4">当前步骤说明</h3>
+                            <div id="step-content" class="text-gray-300">
+                                点击"下一步"开始动态规划填表过程...
+                            </div>
+                            <div id="operation-detail" class="mt-6 p-4 bg-gray-800 rounded-lg hidden">
+                                <div class="text-sm font-bold text-purple-400 mb-2">操作选择</div>
+                                <div id="operation-text" class="text-gray-300"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Code Solutions -->
+        <section class="mb-12">
+            <div class="card p-8">
+                <h2 class="text-2xl font-bold mb-6 gradient-text">💻 代码实现</h2>
+                <div class="flex gap-2 mb-6">
+                    <button onclick="switchTab('python')" id="tab-python" class="tab-btn active px-4 py-2 rounded-lg bg-gray-800 text-gray-300">Python</button>
+                    <button onclick="switchTab('cpp')" id="tab-cpp" class="tab-btn px-4 py-2 rounded-lg bg-gray-800 text-gray-300">C++</button>
+                    <button onclick="switchTab('java')" id="tab-java" class="tab-btn px-4 py-2 rounded-lg bg-gray-800 text-gray-300">Java</button>
+                    <button onclick="switchTab('optimized')" id="tab-optimized" class="tab-btn px-4 py-2 rounded-lg bg-gray-800 text-gray-300">空间优化</button>
+                </div>
+
+                <div id="code-python" class="code-block">
+                    <div class="bg-gray-800 px-4 py-2 text-sm text-gray-400 flex justify-between items-center">
+                        <span>Python3 - 二维DP</span>
+                        <span class="text-xs">Time: O(mn) | Space: O(mn)</span>
+                    </div>
+                    <pre class="p-6 overflow-x-auto text-sm"><code><span class="keyword">class</span> <span class="function">Solution</span>:
+    <span class="keyword">def</span> <span class="function">minDistance</span>(self, word1: <span class="function">str</span>, word2: <span class="function">str</span>) -> <span class="function">int</span>:
+        m, n = <span class="function">len</span>(word1), <span class="function">len</span>(word2)
+        
+        <span class="comment"># dp[i][j] = word1[0:i] 转 word2[0:j] 的最小操作数</span>
+        dp = [[<span class="number">0</span>] * (n + <span class="number">1</span>) <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="function">range</span>(m + <span class="number">1</span>)]
+        
+        <span class="comment"># 初始化边界：一个空串变成另一个串需要插入/删除操作</span>
+        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(m + <span class="number">1</span>):
+            dp[i][<span class="number">0</span>] = i  <span class="comment"># 删除i个字符</span>
+        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="function">range</span>(n + <span class="number">1</span>):
+            dp[<span class="number">0</span>][j] = j  <span class="comment"># 插入j个字符</span>
+        
+        <span class="comment"># 状态转移</span>
+        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="number">1</span>, m + <span class="number">1</span>):
+            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="function">range</span>(<span class="number">1</span>, n + <span class="number">1</span>):
+                <span class="keyword">if</span> word1[i - <span class="number">1</span>] == word2[j - <span class="number">1</span>]:
+                    <span class="comment"># 字符相同，无需操作</span>
+                    dp[i][j] = dp[i - <span class="number">1</span>][j - <span class="number">1</span>]
+                <span class="keyword">else</span>:
+                    <span class="comment"># 字符不同，取三种操作的最小值</span>
+                    dp[i][j] = <span class="number">1</span> + <span class="function">min</span>(
+                        dp[i - <span class="number">1</span>][j],      <span class="comment"># 删除</span>
+                        dp[i][j - <span class="number">1</span>],      <span class="comment"># 插入</span>
+                        dp[i - <span class="number">1</span>][j - <span class="number">1</span>]   <span class="comment"># 替换</span>
+                    )
+        
+        <span class="keyword">return</span> dp[m][n]</code></pre>
+                </div>
+
+                <div id="code-cpp" class="code-block hidden">
+                    <div class="bg-gray-800 px-4 py-2 text-sm text-gray-400 flex justify-between items-center">
+                        <span>C++ - 二维DP</span>
+                        <span class="text-xs">Time: O(mn) | Space: O(mn)</span>
+                    </div>
+                    <pre class="p-6 overflow-x-auto text-sm"><code><span class="keyword">class</span> <span class="function">Solution</span> {
+<span class="keyword">public</span>:
+    <span class="function">int</span> minDistance(string word1, string word2) {
+        <span class="function">int</span> m = word1.size(), n = word2.size();
+        <span class="comment">// dp[i][j] = word1[0:i] 转 word2[0:j] 的最小操作数</span>
+        vector&lt;vector&lt;<span class="function">int</span>&gt;&gt; dp(m + <span class="number">1</span>, vector&lt;<span class="function">int</span>&gt;(n + <span class="number">1</span>, <span class="number">0</span>));
+        
+        <span class="comment">// 初始化边界</span>
+        <span class="keyword">for</span> (<span class="function">int</span> i = <span class="number">0</span>; i &lt;= m; ++i) dp[i][<span class="number">0</span>] = i;
+        <span class="keyword">for</span> (<span class="function">int</span> j = <span class="number">0</span>; j &lt;= n; ++j) dp[<span class="number">0</span>][j] = j;
+        
+        <span class="comment">// 状态转移</span>
+        <span class="keyword">for</span> (<span class="function">int</span> i = <span class="number">1</span>; i &lt;= m; ++i) {
+            <span class="keyword">for</span> (<span class="function">int</span> j = <span class="number">1</span>; j &lt;= n; ++j) {
+                <span class="keyword">if</span> (word1[i - <span class="number">1</span>] == word2[j - <span class="number">1</span>]) {
+                    dp[i][j] = dp[i - <span class="number">1</span>][j - <span class="number">1</span>];
+                } <span class="keyword">else</span> {
+                    dp[i][j] = <span class="number">1</span> + min({dp[i - <span class="number">1</span>][j],     <span class="comment">// 删除</span>
+                                          dp[i][j - <span class="number">1</span>],     <span class="comment">// 插入</span>
+                                          dp[i - <span class="number">1</span>][j - <span class="number">1</span>]}); <span class="comment">// 替换</span>
+                }
+            }
+        }
+        <span class="keyword">return</span> dp[m][n];
+    }
+};</code></pre>
+                </div>
+
+                <div id="code-java" class="code-block hidden">
+                    <div class="bg-gray-800 px-4 py-2 text-sm text-gray-400 flex justify-between items-center">
+                        <span>Java - 二维DP</span>
+                        <span class="text-xs">Time: O(mn) | Space: O(mn)</span>
+                    </div>
+                    <pre class="p-6 overflow-x-auto text-sm"><code><span class="keyword">class</span> <span class="function">Solution</span> {
+    <span class="keyword">public</span> <span class="function">int</span> minDistance(String word1, String word2) {
+        <span class="function">int</span> m = word1.length(), n = word2.length();
+        <span class="function">int</span>[][] dp = <span class="keyword">new</span> <span class="function">int</span>[m + <span class="number">1</span>][n + <span class="number">1</span>];
+        
+        <span class="comment">// 初始化边界</span>
+        <span class="keyword">for</span> (<span class="function">int</span> i = <span class="number">0</span>; i &lt;= m; i++) dp[i][<span class="number">0</span>] = i;
+        <span class="keyword">for</span> (<span class="function">int</span> j = <span class="number">0</span>; j &lt;= n; j++) dp[<span class="number">0</span>][j] = j;
+        
+        <span class="comment">// 状态转移</span>
+        <span class="keyword">for</span> (<span class="function">int</span> i = <span class="number">1</span>; i &lt;= m; i++) {
+            <span class="keyword">for</span> (<span class="function">int</span> j = <span class="number">1</span>; j &lt;= n; j++) {
+                <span class="keyword">if</span> (word1.charAt(i - <span class="number">1</span>) == word2.charAt(j - <span class="number">1</span>)) {
+                    dp[i][j] = dp[i - <span class="number">1</span>][j - <span class="number">1</span>];
+                } <span class="keyword">else</span> {
+                    dp[i][j] = <span class="number">1</span> + Math.min(
+                        dp[i - <span class="number">1</span>][j],      <span class="comment">// 删除</span>
+                        Math.min(
+                            dp[i][j - <span class="number">1</span>],      <span class="comment">// 插入</span>
+                            dp[i - <span class="number">1</span>][j - <span class="number">1</span>]   <span class="comment">// 替换</span>
+                        )
+                    );
+                }
+            }
+        }
+        <span class="keyword">return</span> dp[m][n];
+    }
+}</code></pre>
+                </div>
+
+                <div id="code-optimized" class="code-block hidden">
+                    <div class="bg-gray-800 px-4 py-2 text-sm text-gray-400 flex justify-between items-center">
+                        <span>Python - 滚动数组优化</span>
+                        <span class="text-xs">Time: O(mn) | Space: O(min(m,n)) ⭐</span>
+                    </div>
+                    <pre class="p-6 overflow-x-auto text-sm"><code><span class="keyword">class</span> <span class="function">Solution</span>:
+    <span class="keyword">def</span> <span class="function">minDistance</span>(self, word1: <span class="function">str</span>, word2: <span class="function">str</span>) -> <span class="function">int</span>:
+        <span class="comment"># 确保 word1 是较短的，节省空间</span>
+        <span class="keyword">if</span> <span class="function">len</span>(word1) > <span class="function">len</span>(word2):
+            word1, word2 = word2, word1
+        
+        m, n = <span class="function">len</span>(word1), <span class="function">len</span>(word2)
+        
+        <span class="comment"># 只保留两行：当前行和前一行</span>
+        prev = <span class="function">list</span>(<span class="function">range</span>(m + <span class="number">1</span>))  <span class="comment"># dp[i-1][*]</span>
+        curr = [<span class="number">0</span>] * (m + <span class="number">1</span>)          <span class="comment"># dp[i][*]</span>
+        
+        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="function">range</span>(<span class="number">1</span>, n + <span class="number">1</span>):
+            curr[<span class="number">0</span>] = j  <span class="comment"># 边界：空串转 word2[0:j] 需 j 次插入</span>
+            <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="number">1</span>, m + <span class="number">1</span>):
+                <span class="keyword">if</span> word1[i - <span class="number">1</span>] == word2[j - <span class="number">1</span>]:
+                    curr[i] = prev[i - <span class="number">1</span>]  <span class="comment"># 字符相同</span>
+                <span class="keyword">else</span>:
+                    curr[i] = <span class="number">1</span> + <span class="function">min</span>(
+                        prev[i],      <span class="comment"># 删除 (dp[i-1][j])</span>
+                        curr[i - <span class="number">1</span>],  <span class="comment"># 插入 (dp[i][j-1])</span>
+                        prev[i - <span class="number">1</span>]   <span class="comment"># 替换 (dp[i-1][j-1])</span>
+                    )
+            <span class="comment"># 交换两行</span>
+            prev, curr = curr, prev
+        
+        <span class="keyword">return</span> prev[m]</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Complexity Analysis -->
+        <section class="mb-12">
+            <div class="card p-8">
+                <h2 class="text-2xl font-bold mb-6 gradient-text">📊 复杂度分析</h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-gray-900/50 rounded-xl p-6">
+                        <h3 class="text-lg font-bold text-white mb-4">时间复杂度</h3>
+                        <div class="flex items-center gap-4 mb-4">
+                            <span class="text-3xl font-mono text-purple-400">O(m × n)</span>
+                        </div>
+                        <p class="text-gray-400 text-sm">
+                            需要填充一个 m × n 的二维DP表格，每个状态计算时间为 O(1)。
+                            其中 m = len(word1), n = len(word2)。
+                        </p>
+                    </div>
+                    <div class="bg-gray-900/50 rounded-xl p-6">
+                        <h3 class="text-lg font-bold text-white mb-4">空间复杂度</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-400">二维数组：</span>
+                                <span class="font-mono text-yellow-400">O(m × n)</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-400">滚动数组优化：</span>
+                                <span class="font-mono text-green-400">O(min(m, n)) ⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interview Tips -->
+        <section class="mb-12">
+            <div class="card p-8">
+                <h2 class="text-2xl font-bold mb-6 gradient-text">🎤 面试要点</h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div class="flex gap-4 bg-gray-900/50 rounded-lg p-4">
+                            <span class="text-2xl">💡</span>
+                            <div>
+                                <div class="font-bold text-white">状态定义要清晰</div>
+                                <div class="text-sm text-gray-400">dp[i][j] 明确表示 word1[0:i] → word2[0:j]</div>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 bg-gray-900/50 rounded-lg p-4">
+                            <span class="text-2xl">🔍</span>
+                            <div>
+                                <div class="font-bold text-white">注意边界初始化</div>
+                                <div class="text-sm text-gray-400">空串转换需要插入/删除操作</div>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 bg-gray-900/50 rounded-lg p-4">
+                            <span class="text-2xl">⚡</span>
+                            <div>
+                                <div class="font-bold text-white">可以优化空间</div>
+                                <div class="text-sm text-gray-400">滚动数组将 O(mn) 优化到 O(min(m,n))</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex gap-4 bg-gray-900/50 rounded-lg p-4">
+                            <span class="text-2xl">📝</span>
+                            <div>
+                                <div class="font-bold text-white">理解三种操作</div>
+                                <div class="text-sm text-gray-400">插入、删除、替换的DP转移含义</div>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 bg-gray-900/50 rounded-lg p-4">
+                            <span class="text-2xl">🎯</span>
+                            <div>
+                                <div class="font-bold text-white">经典变形题</div>
+                                <div class="text-sm text-gray-400">583. 两个字符串的删除操作、712. 两个字符串的最小ASCII删除和</div>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 bg-gray-900/50 rounded-lg p-4">
+                            <span class="text-2xl">🔥</span>
+                            <div>
+                                <div class="font-bold text-white">高频考点</div>
+                                <div class="text-sm text-gray-400">字节、腾讯、阿里等大厂常考DP题</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section>
+            <div class="card p-8">
+                <h2 class="text-2xl font-bold mb-6 gradient-text">📝 今日总结</h2>
+                <div class="bg-gray-900/50 rounded-xl p-6">
+                    <p class="text-gray-300 leading-relaxed mb-4">
+                        <strong class="text-white">编辑距离</strong> 是动态规划的经典入门题，也是面试中的高频考点。
+                        核心在于理解状态转移方程：当两个字符相同时直接继承，不同时取三种操作的最小值。
+                    </p>
+                    <div class="grid md:grid-cols-3 gap-4 mt-6">
+                        <div class="text-center p-4 bg-gray-800 rounded-lg">
+                            <div class="text-3xl font-bold text-purple-400">72</div>
+                            <div class="text-sm text-gray-400">题号</div>
+                        </div>
+                        <div class="text-center p-4 bg-gray-800 rounded-lg">
+                            <div class="text-3xl font-bold text-red-400">Hard</div>
+                            <div class="text-sm text-gray-400">难度</div>
+                        </div>
+                        <div class="text-center p-4 bg-gray-800 rounded-lg">
+                            <div class="text-3xl font-bold text-green-400">DP</div>
+                            <div class="text-sm text-gray-400">标签</div>
+                        </div>
+                    </div>
+                    <div class="mt-6 pt-6 border-t border-gray-700 text-center text-gray-500 text-sm">
+                        LeetCode 每日一题 · 2026-04-06
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // DP Table Visualization
+        const word1 = "horse";
+        const word2 = "ros";
+        const m = word1.length, n = word2.length;
+        let currentStep = 0;
+        const totalSteps = (m + 1) * (n + 1);
+        
+        // Precompute DP table
+        const dp = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+        for (let i = 0; i <= m; i++) dp[i][0] = i;
+        for (let j = 0; j <= n; j++) dp[0][j] = j;
+        for (let i = 1; i <= m; i++) {
+            for (let j = 1; j <= n; j++) {
+                if (word1[i - 1] === word2[j - 1]) {
+                    dp[i][j] = dp[i - 1][j - 1];
+                } else {
+                    dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+                }
+            }
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            
+            // Header row
+            const headerRow = document.createElement('tr');
+            headerRow.innerHTML = `<td class="dp-cell bg-gray-800 text-gray-400"></td><td class="dp-cell bg-gray-800 text-gray-400"></td>`;
+            for (let j = 0; j < n; j++) {
+                headerRow.innerHTML += `<td class="dp-cell bg-gray-800 text-blue-400 font-bold">${word2[j]}</td>`;
+            }
+            tbody.appendChild(headerRow);
+            
+            // Data rows
+            for (let i = 0; i <= m; i++) {
+                const row = document.createElement('tr');;
+                if (i === 0) {
+                    row.innerHTML = `<td class="dp-cell bg-gray-800 text-gray-400"></td>`;
+                } else {
+                    row.innerHTML = `<td class="dp-cell bg-gray-800 text-green-400 font-bold">${word1[i - 1]}</td>`;
+                }
+                
+                for (let j = 0; j <= n; j++) {
+                    const cell = document.createElement('td');
+                    cell.className = 'dp-cell';
+                    cell.id = `cell-${i}-${j}`;
+                    cell.textContent = dp[i][j];
+                    row.appendChild(cell);
+                }
+                tbody.appendChild(row);
+            }
+            
+            // Create step indicators
+            const indicators = document.getElementById('step-indicators');
+            indicators.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'step-indicator' + (i === 0 ? ' active' : '');
+                dot.id = `indicator-${i}`;
+                indicators.appendChild(dot);
+            }
+        }
+
+        const explanations = [
+            "初始化边界：空字符串转换为任意字符串需要的操作数",
+            "第一行：空串转为 'r' 需1次，转为 'ro' 需2次，转为 'ros' 需3次",
+            "第一列：'h' 转为空串需1次，'ho' 需2次，以此类推",
+            "比较 'h' 和 'r'，不同，取 min(0,1,1)+1 = 1",
+            "继续填充... 'horse' 转为 'ros' 的最小操作数是 3",
+            "最终结果：dp[5][3] = 3"
+        ];
+
+        function updateStep(step) {
+            // Clear highlights
+            document.querySelectorAll('.dp-cell').forEach(cell => cell.classList.remove('highlight'));
+            
+            // Highlight cells based on step
+            const highlights = [
+                [[0,0], [0,1], [0,2], [0,3], [1,0], [2,0], [3,0], [4,0], [5,0]],
+                [[0,1], [0,2], [0,3]],
+                [[1,0], [2,0], [3,0], [4,0], [5,0]],
+                [[1,1]],
+                [[5,3]],
+                [[5,3]]
+            ];
+            
+            if (highlights[step]) {
+                highlights[step].forEach(([i, j]) => {
+                    const cell = document.getElementById(`cell-${i}-${j}`);
+                    if (cell) cell.classList.add('highlight');
+                });
+            }
+            
+            // Update explanation
+            document.getElementById('step-content').innerHTML = explanations[step] || '演示完成';
+            
+            // Update indicators
+            document.querySelectorAll('.step-indicator').forEach((ind, i) => {
+                ind.classList.toggle('active', i === step);
+            });
+        }
+
+        function nextStep() {
+            if (currentStep < explanations.length - 1) {
+                currentStep++;
+                updateStep(currentStep);
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateStep(currentStep);
+            }
+        }
+
+        function resetViz() {
+            currentStep = 0;
+            updateStep(0);
+        }
+
+        // Tab switching
+        function switchTab(lang) {
+            ['python', 'cpp', 'java', 'optimized'].forEach(l => {
+                document.getElementById(`code-${l}`).classList.add('hidden');
+                document.getElementById(`tab-${l}`).classList.remove('active');
+            });
+            document.getElementById(`code-${lang}`).classList.remove('hidden');
+            document.getElementById(`tab-${lang}`).classList.add('active');
+        }
+
+        // Initialize
+        renderTable();
+        updateStep(0);
+    </script>
+</body>
+</html>
