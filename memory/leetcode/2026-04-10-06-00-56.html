@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeetCode 56. 合并区间 | 交互式精讲</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #818cf8;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --card-hover: #334155;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        header {
+            text-align: center;
+            padding: 40px 0;
+            background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+        header h1 { font-size: 2.5rem; margin-bottom: 10px; }
+        header .meta { color: rgba(255,255,255,0.8); font-size: 1.1rem; }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin: 0 5px;
+        }
+        .badge-medium { background: var(--warning); color: #000; }
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+        .card h2 {
+            color: var(--primary-light);
+            font-size: 1.4rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card h2::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+        .problem-desc {
+            background: rgba(79, 70, 229, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+        .code-block {
+            background: #0d1117;
+            border-radius: 8px;
+            padding: 20px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            margin: 16px 0;
+        }
+        .code-block .keyword { color: #ff7b72; }
+        .code-block .function { color: #d2a8ff; }
+        .code-block .string { color: #a5d6ff; }
+        .code-block .comment { color: #8b949e; }
+        .code-block .number { color: #79c0ff; }
+        .visualizer {
+            background: var(--bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .timeline {
+            position: relative;
+            height: 80px;
+            margin: 20px 0;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+        }
+        .timeline-axis {
+            position: absolute;
+            bottom: 20px;
+            left: 40px;
+            right: 40px;
+            height: 2px;
+            background: var(--border);
+        }
+        .interval {
+            position: absolute;
+            height: 24px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .interval-original { background: var(--primary); }
+        .interval-merged { background: var(--success); }
+        .interval-overlap { background: var(--warning); }
+        .step-container { margin: 20px 0; }
+        .step {
+            display: none;
+            padding: 16px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--primary);
+        }
+        .step.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } }
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+            margin: 5px;
+        }
+        .btn:hover { background: var(--primary-light); transform: scale(1.02); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-secondary { background: var(--card-hover); }
+        .complexity-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .complexity-item {
+            background: rgba(255,255,255,0.05);
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .complexity-item .label { color: var(--text-muted); font-size: 0.9rem; }
+        .complexity-item .value { color: var(--success); font-size: 1.5rem; font-weight: 700; }
+        .hint-box {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.05));
+            border: 1px solid var(--warning);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+        .hint-box h4 { color: var(--warning); margin-bottom: 8px; }
+        ul { margin-left: 20px; margin-top: 10px; }
+        li { margin: 8px 0; }
+        .tab-container { margin-top: 20px; }
+        .tab-buttons { display: flex; gap: 10px; margin-bottom: 16px; }
+        .tab-btn {
+            background: var(--card-hover);
+            color: var(--text);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tab-btn.active { background: var(--primary); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .insight-card {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.05));
+            border-left: 4px solid var(--success);
+            padding: 16px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+        }
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .progress-bar {
+            height: 6px;
+            background: var(--card-hover);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>LeetCode 56. 合并区间</h1>
+            <div class="meta">
+                <span class="badge badge-medium">Medium</span>
+                <span>🕒 2026-04-10 06:00 (Asia/Shanghai)</span>
+                <span>📌 排序 + 贪心算法</span>
+            </div>
+        </header>
+
+        <div class="card">
+            <h2>📝 题目描述</h2>
+            <div class="problem-desc">
+                <p>以数组 <code>intervals</code> 表示若干个区间的集合，其中单个区间为 <code>intervals[i] = [start<sub>i</sub>, end<sub>i</sub>]</code> 。</p>
+                <p style="margin-top: 12px;">请你合并所有重叠的区间，并返回一个不重叠的区间数组，该数组需恰好覆盖输入中的所有区间。</p>
+            </div>
+            <div class="hint-box">
+                <h4>💡 示例</h4>
+                <p><strong>输入：</strong>intervals = [[1,3],[2,6],[8,10],[15,18]]</p>
+                <p><strong>输出：</strong>[[1,6],[8,10],[15,18]]</p>
+                <p style="margin-top: 8px; color: var(--text-muted);">解释：区间 [1,3] 和 [2,6] 重叠, 将它们合并为 [1,6].</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🔍 解题思路</h2>
+            <div class="insight-card">
+                <strong>🎯 核心思想</strong>
+                <p style="margin-top: 8px;">排序是这类区间问题的通用解法。先按起点排序，然后遍历，维护一个当前区间，如果下一个区间与当前区间重叠就合并，不重叠就将当前区间加入结果。</p>
+            </div>
+            <p><strong>为什么先排序？</strong></p>
+            <ul>
+                <li>排序后，所有可能重叠的区间都会相邻</li>
+                <li>只需检查当前区间与下一个区间是否重叠（O(1)判断）</li>
+                <li>无需考虑交叉、跳跃等复杂情况</li>
+            </ul>
+            <div class="hint-box">
+                <h4>🎨 重叠判断条件</h4>
+                <p>区间A [a1, a2] 与 区间B [b1, b2] <strong>重叠</strong> 的条件是：</p>
+                <p style="font-family: monospace; margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 4px;">
+                    a1 <= b2 && b1 <= a2<br>
+                    // 排序后简化为：b1 <= a2 (下一个区间的起点 <= 当前区间的终点)
+                </p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🎬 交互式演示</h2>
+            <p style="color: var(--text-muted); margin-bottom: 16px;">观察区间合并的过程（示例：[1,3],[2,6],[8,10],[15,18]）</p>
+            
+            <div class="visualizer">
+                <div class="timeline" id="visual-timeline">
+                    <div class="timeline-axis"></div>
+                    <!-- Intervals will be rendered here -->
+                </div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress" style="width: 0%"></div>
+            </div>
+
+            <div class="step-container" id="steps">
+                <div class="step active" data-step="0">
+                    <strong>Step 0: 初始化</strong><br>
+                    原始区间：[[1,3], [2,6], [8,10], [15,18]]<br>
+                    按起点排序后：[[1,3], [2,6], [8,10], [15,18]]
+                </div>
+                <div class="step" data-step="1">
+                    <strong>Step 1: 处理 [1,3]</strong><br>
+                    当前区间 current = [1,3]<br>
+                    下一个区间 [2,6] 的起点 2 <= 当前终点 3，<span style="color: var(--warning)">重叠！</span><br>
+                    合并后：current = [1, max(3,6)] = [1,6]
+                </div>
+                <div class="step" data-step="2">
+                    <strong>Step 2: 处理 [2,6] 后</strong><br>
+                    当前区间 current = [1,6]<br>
+                    下一个区间 [8,10] 的起点 8 > 当前终点 6，<span style="color: var(--success)">不重叠</span><br>
+                    将 [1,6] 加入结果，current 更新为 [8,10]
+                </div>
+                <div class="step" data-step="3">
+                    <strong>Step 3: 处理 [8,10]</strong><br>
+                    当前区间 current = [8,10]<br>
+                    下一个区间 [15,18] 的起点 15 > 当前终点 10，<span style="color: var(--success)">不重叠</span><br>
+                    将 [8,10] 加入结果，current 更新为 [15,18]
+                </div>
+                <div class="step" data-step="4">
+                    <strong>Step 4: 完成</strong><br>
+                    遍历结束，将最后的 [15,18] 加入结果<br>
+                    <span style="color: var(--success)">最终结果：[[1,6], [8,10], [15,18]]</span>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn" onclick="prevStep()">⬅️ 上一步</button>
+                <button class="btn" onclick="nextStep()">下一步 ➡️</button>
+                <button class="btn btn-secondary" onclick="resetSteps()">🔄 重置</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>💻 代码实现</h2>
+            <div class="tab-container">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" onclick="switchTab('python')">Python</button>
+                    <button class="tab-btn" onclick="switchTab('java')">Java</button>
+                    <button class="tab-btn" onclick="switchTab('cpp')">C++</button>
+                </div>
+                <div id="python" class="tab-content active">
+                    <div class="code-block">
+<span class="keyword">class</span> <span class="function">Solution</span>:
+    <span class="keyword">def</span> <span class="function">merge</span>(self, intervals: List[List[<span class="keyword">int</span>]]) -> List[List[<span class="keyword">int</span>]]:
+        <span class="comment"># 1. 按区间起点升序排序</span>
+        intervals.sort(key=<span class="keyword">lambda</span> x: x[<span class="number">0</span>])
+        
+        merged = []
+        <span class="keyword">for</span> interval <span class="keyword">in</span> intervals:
+            <span class="comment"># 2. 如果当前区间与merged中最后一个不重叠，直接添加</span>
+            <span class="keyword">if</span> <span class="keyword">not</span> merged <span class="keyword">or</span> merged[-<span class="number">1</span>][<span class="number">1</span>] < interval[<span class="number">0</span>]:
+                merged.append(interval)
+            <span class="keyword">else</span>:
+                <span class="comment"># 3. 重叠，合并区间（更新终点）</span>
+                merged[-<span class="number">1</span>][<span class="number">1</span>] = max(merged[-<span class="number">1</span>][<span class="number">1</span>], interval[<span class="number">1</span>])
+        
+        <span class="keyword">return</span> merged</div>
+                </div>
+                <div id="java" class="tab-content">
+                    <div class="code-block">
+<span class="keyword">class</span> <span class="function">Solution</span> {
+    <span class="keyword">public</span> <span class="keyword">int</span>[][] merge(<span class="keyword">int</span>[][] intervals) {
+        <span class="comment">// 1. 按起点排序</span>
+        Arrays.sort(intervals, (a, b) -> Integer.compare(a[<span class="number">0</span>], b[<span class="number">0</span>]));
+        
+        List<<span class="keyword">int</span>[]> merged = <span class="keyword">new</span> ArrayList<>();
+        
+        <span class="keyword">for</span> (<span class="keyword">int</span>[] interval : intervals) {
+            <span class="comment">// 2. 不重叠则添加</span>
+            <span class="keyword">if</span> (merged.isEmpty() || merged.get(merged.size() - <span class="number">1</span>)[<span class="number">1</span>] < interval[<span class="number">0</span>]) {
+                merged.add(interval);
+            } <span class="keyword">else</span> {
+                <span class="comment">// 3. 重叠则合并</span>
+                <span class="keyword">int</span>[] last = merged.get(merged.size() - <span class="number">1</span>);
+                last[<span class="number">1</span>] = Math.max(last[<span class="number">1</span>], interval[<span class="number">1</span>]);
+            }
+        }
+        
+        <span class="keyword">return</span> merged.toArray(<span class="keyword">new</span> <span class="keyword">int</span>[merged.size()][]);
+    }
+}</div>
+                </div>
+                <div id="cpp" class="tab-content">
+                    <div class="code-block">
+<span class="keyword">class</span> <span class="function">Solution</span> {
+<span class="keyword">public</span>:
+    vector<vector<<span class="keyword">int</span>>> merge(vector<vector<<span class="keyword">int</span>>>& intervals) {
+        <span class="keyword">if</span> (intervals.empty()) <span class="keyword">return</span> {};
+        
+        <span class="comment">// 1. 按起点排序</span>
+        sort(intervals.begin(), intervals.end());
+        
+        vector<vector<<span class="keyword">int</span>>> merged;
+        <span class="keyword">for</span> (<span class="keyword">auto</span>& interval : intervals) {
+            <span class="comment">// 2. 不重叠则添加</span>
+            <span class="keyword">if</span> (merged.empty() || merged.back()[<span class="number">1</span>] < interval[<span class="number">0</span>]) {
+                merged.push_back(interval);
+            } <span class="keyword">else</span> {
+                <span class="comment">// 3. 重叠则合并</span>
+                merged.back()[<span class="number">1</span>] = max(merged.back()[<span class="number">1</span>], interval[<span class="number">1</span>]);
+            }
+        }
+        
+        <span class="keyword">return</span> merged;
+    }
+};</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📊 复杂度分析</h2>
+            <div class="complexity-grid">
+                <div class="complexity-item">
+                    <div class="label">时间复杂度</div>
+                    <div class="value">O(n log n)</div>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 8px;">排序 O(n log n) + 遍历 O(n)</p>
+                </div>
+                <div class="complexity-item">
+                    <div class="label">空间复杂度</div>
+                    <div class="value">O(n)</div>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 8px;">存储合并结果（最坏情况）</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🌟 举一反三</h2>
+            <div class="insight-card">
+                <strong>相关题目推荐</strong>
+            </div>
+            <ul>
+                <li><strong>57. 插入区间</strong> - 在已合并的区间列表中插入新区间</li>
+                <li><strong>435. 无重叠区间</strong> - 需要移除的最小区间数，使剩余不重叠</li>
+                <li><strong>452. 用最少数量的箭引爆气球</strong> - 贪心选点问题</li>
+                <li><strong>253. 会议室 II</strong> - 需要的最小会议室数量（扫描线）</li>
+                <li><strong>1288. 删除被覆盖区间</strong> - 区间覆盖判定</li>
+            </ul>
+            <div class="hint-box" style="margin-top: 16px;">
+                <h4>🎓 解题模板总结</h4>
+                <p>区间问题通用解题框架：</p>
+                <ol style="margin-top: 8px; margin-left: 20px;">
+                    <li><strong>排序</strong> - 按起点（或终点）排序</li>
+                    <li><strong>遍历</strong> - 维护当前区间</li>
+                    <li><strong>判断</strong> - 重叠条件（通常是比较终点与下一个起点）</li>
+                    <li><strong>合并/更新</strong> - 根据题目要求处理</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>⚠️ 常见坑点</h2>
+            <ul>
+                <li><strong>忘记排序</strong> - 这是最关键的一步，未排序的区间无法直接合并</li>
+                <li><strong>重叠条件错误</strong> - 注意是 <code>&lt;=</code> 还是 <code>&lt;</code>，题目要求闭区间时边界相等也算重叠</li>
+                <li><strong>合并时只更新终点</strong> - 起点不需要更新（因为已排序，当前区间起点一定更大或相等）</li>
+                <li><strong>最后一个区间遗漏</strong> - 遍历结束后记得把最后一个区间加入结果</li>
+            </ul>
+        </div>
+
+        <footer>
+            <p>Generated by Kimi Claw ❤️‍🔥 | LeetCode Daily Problem #56</p>
+            <p style="margin-top: 8px;">📅 2026-04-10 06:00 (Asia/Shanghai)</p>
+        </footer>
+    </div>
+
+    <script>
+        let currentStep = 0;
+        const totalSteps = 5;
+        
+        const intervals = [
+            { start: 1, end: 3, row: 0 },
+            { start: 2, end: 6, row: 1 },
+            { start: 8, end: 10, row: 2 },
+            { start: 15, end: 18, row: 3 }
+        ];
+        
+        function renderTimeline(step) {
+            const timeline = document.getElementById('visual-timeline');
+            timeline.innerHTML = '<div class="timeline-axis"></div>';
+            
+            const scale = 25; // pixels per unit
+            const offset = 40;
+            
+            intervals.forEach((interval, idx) => {
+                const el = document.createElement('div');
+                el.className = 'interval interval-original';
+                el.style.left = (offset + interval.start * scale) + 'px';
+                el.style.width = ((interval.end - interval.start) * scale) + 'px';
+                el.style.top = (15 + interval.row * 18) + 'px';
+                el.textContent = `[${interval.start},${interval.end}]`;
+                
+                // Apply step-specific highlighting
+                if (step === 1 && idx <= 1) {
+                    el.className = 'interval interval-overlap';
+                } else if (step === 2 && idx === 0) {
+                    el.className = 'interval interval-merged';
+                    el.style.width = (5 * scale) + 'px';
+                    el.textContent = '[1,6]';
+                } else if (step >= 2 && idx === 0) {
+                    el.className = 'interval interval-merged';
+                    el.style.width = (5 * scale) + 'px';
+                    el.style.left = (offset + 1 * scale) + 'px';
+                    el.textContent = '[1,6]';
+                }
+                
+                timeline.appendChild(el);
+            });
+        }
+        
+        function updateSteps() {
+            document.querySelectorAll('.step').forEach((el, idx) => {
+                el.classList.toggle('active', idx === currentStep);
+            });
+            document.getElementById('progress').style.width = (currentStep / (totalSteps - 1) * 100) + '%';
+            renderTimeline(currentStep);
+        }
+        
+        function nextStep() {
+            if (currentStep < totalSteps - 1) {
+                currentStep++;
+                updateSteps();
+            }
+        }
+        
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateSteps();
+            }
+        }
+        
+        function resetSteps() {
+            currentStep = 0;
+            updateSteps();
+        }
+        
+        function switchTab(lang) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(lang).classList.add('active');
+        }
+        
+        // Initialize
+        renderTimeline(0);
+    </script>
+</body>
+</html>
