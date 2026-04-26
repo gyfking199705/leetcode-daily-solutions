@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeetCode 42. 接雨水 - 精讲</title>
+<style>
+:root{--bg:#0d1117;--card:#161b22;--border:#30363d;--text:#c9d1d9;--muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--warn:#d29922;--danger:#f85149;--code-bg:#1e2530;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;line-height:1.6;padding:20px}
+.container{max-width:880px;margin:0 auto}
+.header{text-align:center;padding:30px 0;border-bottom:1px solid var(--border);margin-bottom:30px}
+.header h1{font-size:2rem;margin-bottom:8px;color:var(--text)}
+.header .meta{color:var(--muted);font-size:.9rem}
+.tag{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.75rem;font-weight:600;margin:0 4px}
+.tag.medium{background:rgba(88,166,255,.15);color:var(--accent)}
+.tag.easy{background:rgba(63,185,80,.15);color:var(--accent2)}
+.tag.hard{background:rgba(248,81,73,.15);color:var(--danger)}
+.tag.topic{background:rgba(210,153,34,.15);color:var(--warn)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px}
+.card h2{font-size:1.2rem;margin-bottom:14px;color:var(--text);display:flex;align-items:center;gap:8px}
+.card h2::before{content:"";display:inline-block;width:4px;height:20px;background:var(--accent);border-radius:2px}
+.problem-desc{font-size:1rem;line-height:1.8}
+.problem-desc code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-family:SFMono-Regular,Consolas,"Liberation Mono",monospace;font-size:.9em}
+.problem-desc pre{background:var(--code-bg);padding:16px;border-radius:8px;overflow-x:auto;margin:12px 0}
+.problem-desc pre code{background:none;padding:0}
+.idea-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:14px}
+.idea-box{background:rgba(88,166,255,.06);border:1px solid var(--border);border-radius:10px;padding:16px}
+.idea-box h4{color:var(--accent);font-size:.9rem;margin-bottom:6px}
+.idea-box p{color:var(--muted);font-size:.85rem;line-height:1.5}
+.steps{margin-top:14px}
+.step{display:flex;gap:14px;margin-bottom:14px;align-items:flex-start}
+.step-num{flex-shrink:0;width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+.step-body{flex:1}
+.step-body h4{font-size:.95rem;margin-bottom:4px;color:var(--text)}
+.step-body p{font-size:.88rem;color:var(--muted);line-height:1.5}
+.code-block{background:var(--code-bg);border-radius:10px;padding:20px;overflow-x:auto;margin-top:14px}
+.code-block pre{margin:0;color:var(--text);font-family:SFMono-Regular,Consolas,"Liberation Mono",monospace;font-size:.9rem;line-height:1.7}
+.code-block .code-comment{color:var(--muted);font-style:italic}
+.code-block .code-keyword{color:#ff7b72}
+.code-block .code-func{color:#d2a8ff}
+.code-block .code-str{color:#a5d6ff}
+.code-block .code-num{color:#79c0ff}
+.complexity{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.complexity-item{background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.2);border-radius:10px;padding:16px;text-align:center}
+.complexity-item.warn{background:rgba(210,153,34,.08);border-color:rgba(210,153,34,.2)}
+.complexity-item h4{font-size:.85rem;color:var(--muted);margin-bottom:6px}
+.complexity-item .val{font-size:1.4rem;font-weight:700;color:var(--accent2)}
+.complexity-item.warn .val{color:var(--warn)}
+.hint-box{background:rgba(210,153,34,.08);border:1px solid rgba(210,153,34,.2);border-radius:10px;padding:16px;margin-top:14px}
+.hint-box h4{color:var(--warn);font-size:.9rem;margin-bottom:6px}
+.hint-box ul{margin-left:18px;color:var(--muted);font-size:.88rem;line-height:1.8}
+.toggle-btn{background:var(--accent);color:#fff;border:none;padding:10px 18px;border-radius:8px;cursor:pointer;font-size:.9rem;margin-top:14px;transition:opacity .2s}
+.toggle-btn:hover{opacity:.85}
+.hidden{display:none}
+.footer{text-align:center;padding:30px 0;color:var(--muted);font-size:.85rem;border-top:1px solid var(--border);margin-top:20px}
+.sol-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.sol-tab{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:8px 14px;cursor:pointer;font-size:.85rem;color:var(--muted);transition:all .2s}
+.sol-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.sol-panel{display:none}
+.sol-panel.active{display:block}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>42. 接雨水</h1>
+    <div class="meta">
+      <span class="tag hard">Hard</span>
+      <span class="tag topic">双指针</span>
+      <span class="tag topic">动态规划</span>
+      <span class="tag topic">单调栈</span>
+      <span class="tag topic">数组</span>
+    </div>
+    <div class="meta" style="margin-top:8px">2026-04-26 第238期 | 预计阅读 8 分钟</div>
+  </div>
+
+  <div class="card">
+    <h2>题目描述</h2>
+    <div class="problem-desc">
+      <p>给定 <code>n</code> 个非负整数，表示每个宽度为 <code>1</code> 的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水。</p>
+      <pre><code>输入: height = [0,1,0,2,1,0,1,3,2,1,2,1]
+输出: 6
+解释: 上面是由数组 [0,1,0,2,1,0,1,3,2,1,2,1] 表示的高度图，
+      在这种情况下，可以接 6 个单位的雨水。</code></pre>
+      <p><strong>约束条件：</strong></p>
+      <ul style="margin-left:20px;color:var(--muted);font-size:.9rem;line-height:1.8">
+        <li><code>n == height.length</code></li>
+        <li><code>1 &lt;= n &lt;= 2 × 10⁴</code></li>
+        <li><code>0 &lt;= height[i] &lt;= 10⁵</code></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>核心思路</h2>
+    <div class="idea-grid">
+      <div class="idea-box">
+        <h4>关键观察</h4>
+        <p>每个位置能接的雨水，取决于「左边最高柱」和「右边最高柱」的较小值。当前柱若低于这个较小值，就能接到差值这么多的水。</p>
+      </div>
+      <div class="idea-box">
+        <h4>暴力思路</h4>
+        <p>对每个位置，分别向左、向右扫描找最大高度。时间 O(n²)，空间 O(1)。直观但面试不可接受。</p>
+      </div>
+      <div class="idea-box">
+        <h4>动态规划</h4>
+        <p>预处理每个位置的左边最大值和右边最大值，存到两个数组。然后一次遍历计算雨水量。时间 O(n)，空间 O(n)。</p>
+      </div>
+      <div class="idea-box">
+        <h4>双指针（最优）</h4>
+        <p>左右指针向中间移动，维护左右两侧的最大高度。哪边矮，哪边先计算（因为矮的那边决定了当前位置的水位）。时间 O(n)，空间 O(1)。</p>
+      </div>
+      <div class="idea-box">
+        <h4>单调栈</h4>
+        <p>维护一个递减栈，遇到更高的柱子时弹出计算凹槽内的雨水。按层计算，时间 O(n)，空间 O(n)。适合理解「凹槽」结构。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>解题步骤（双指针法）</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>初始化双指针与最大值</h4>
+          <p>left = 0, right = n-1，left_max = 0, right_max = 0。left_max 记录 [0..left] 的最大值，right_max 记录 [right..n-1] 的最大值。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>移动较矮的一侧</h4>
+          <p>比较 height[left] 和 height[right]：若左边矮，处理左指针；否则处理右指针。核心逻辑：<strong>矮的那一侧决定了当前位置的水位上限</strong>。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>处理左指针</h4>
+          <p>如果 height[left] &gt;= left_max，更新 left_max = height[left]（当前柱子成为新的左边界）；否则，当前位置能接 left_max - height[left] 的水，加入答案。然后 left++。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>处理右指针（对称）</h4>
+          <p>如果 height[right] &gt;= right_max，更新 right_max = height[right]；否则，当前位置能接 right_max - height[right] 的水，加入答案。然后 right--。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h4>循环终止</h4>
+          <p>当 left &gt; right 时结束，返回累计雨水量。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>代码实现</h2>
+    <div class="sol-tabs">
+      <div class="sol-tab active" onclick="switchTab('two-pointer')">双指针 O(1)空间</div>
+      <div class="sol-tab" onclick="switchTab('dp')">动态规划</div>
+      <div class="sol-tab" onclick="switchTab('stack')">单调栈</div>
+    </div>
+
+    <div id="two-pointer" class="sol-panel active">
+      <div class="code-block">
+<pre><span class="code-keyword">class</span> <span class="code-func">Solution</span>:
+    <span class="code-keyword">def</span> <span class="code-func">trap</span>(self, height: List[<span class="code-keyword">int</span>]) -> <span class="code-keyword">int</span>:
+        <span class="code-keyword">if</span> <span class="code-keyword">not</span> height:
+            <span class="code-keyword">return</span> <span class="code-num">0</span>
+        
+        left, right = <span class="code-num">0</span>, <span class="code-func">len</span>(height) - <span class="code-num">1</span>
+        left_max, right_max = <span class="code-num">0</span>, <span class="code-num">0</span>
+        ans = <span class="code-num">0</span>
+        
+        <span class="code-keyword">while</span> left <= right:
+            <span class="code-keyword">if</span> height[left] < height[right]:
+                <span class="code-comment"># 左边矮，左边决定水位</span>
+                <span class="code-keyword">if</span> height[left] >= left_max:
+                    <span class="code-comment"># 当前柱高于左边界，成为新的左边界</span>
+                    left_max = height[left]
+                <span class="code-keyword">else</span>:
+                    <span class="code-comment"># 可以接水</span>
+                    ans += left_max - height[left]
+                left += <span class="code-num">1</span>
+            <span class="code-keyword">else</span>:
+                <span class="code-comment"># 右边矮（或相等），右边决定水位</span>
+                <span class="code-keyword">if</span> height[right] >= right_max:
+                    <span class="code-comment"># 当前柱高于右边界，成为新的右边界</span>
+                    right_max = height[right]
+                <span class="code-keyword">else</span>:
+                    <span class="code-comment"># 可以接水</span>
+                    ans += right_max - height[right]
+                right -= <span class="code-num">1</span>
+        
+        <span class="code-keyword">return</span> ans</pre>
+      </div>
+    </div>
+
+    <div id="dp" class="sol-panel">
+      <div class="code-block">
+<pre><span class="code-keyword">class</span> <span class="code-func">Solution</span>:
+    <span class="code-keyword">def</span> <span class="code-func">trap</span>(self, height: List[<span class="code-keyword">int</span>]) -> <span class="code-keyword">int</span>:
+        <span class="code-keyword">if</span> <span class="code-keyword">not</span> height:
+            <span class="code-keyword">return</span> <span class="code-num">0</span>
+        
+        n = <span class="code-func">len</span>(height)
+        left_max = [<span class="code-num">0</span>] * n
+        right_max = [<span class="code-num">0</span>] * n
+        
+        <span class="code-comment"># 预处理左边最大</span>
+        left_max[<span class="code-num">0</span>] = height[<span class="code-num">0</span>]
+        <span class="code-keyword">for</span> i <span class="code-keyword">in</span> <span class="code-func">range</span>(<span class="code-num">1</span>, n):
+            left_max[i] = <span class="code-func">max</span>(left_max[i-<span class="code-num">1</span>], height[i])
+        
+        <span class="code-comment"># 预处理右边最大</span>
+        right_max[n<span class="code-num">-1</span>] = height[n<span class="code-num">-1</span>]
+        <span class="code-keyword">for</span> i <span class="code-keyword">in</span> <span class="code-func">range</span>(n<span class="code-num">-2</span>, -<span class="code-num">1</span>, -<span class="code-num">1</span>):
+            right_max[i] = <span class="code-func">max</span>(right_max[i+<span class="code-num">1</span>], height[i])
+        
+        <span class="code-comment"># 计算雨水</span>
+        ans = <span class="code-num">0</span>
+        <span class="code-keyword">for</span> i <span class="code-keyword">in</span> <span class="code-func">range</span>(n):
+            ans += <span class="code-func">min</span>(left_max[i], right_max[i]) - height[i]
+        
+        <span class="code-keyword">return</span> ans</pre>
+      </div>
+    </div>
+
+    <div id="stack" class="sol-panel">
+      <div class="code-block">
+<pre><span class="code-keyword">class</span> <span class="code-func">Solution</span>:
+    <span class="code-keyword">def</span> <span class="code-func">trap</span>(self, height: List[<span class="code-keyword">int</span>]) -> <span class="code-keyword">int</span>:
+        stack = []  <span class="code-comment"># 维护递减栈，存下标</span>
+        ans = <span class="code-num">0</span>
+        
+        <span class="code-keyword">for</span> i, h <span class="code-keyword">in</span> <span class="code-func">enumerate</span>(height):
+            <span class="code-keyword">while</span> stack <span class="code-keyword">and</span> h > height[stack[-<span class="code-num">1</span>]]:
+                <span class="code-comment"># 当前柱子高于栈顶，可以形成凹槽接水</span>
+                top = stack.pop()
+                <span class="code-keyword">if</span> <span class="code-keyword">not</span> stack:
+                    <span class="code-keyword">break</span>  <span class="code-comment"># 只有一侧有边界，无法接水</span>
+                
+                <span class="code-comment"># 凹槽宽度</span>
+                distance = i - stack[-<span class="code-num">1</span>] - <span class="code-num">1</span>
+                <span class="code-comment"># 凹槽高度 = 两侧较矮边界 - 底部高度</span>
+                bounded_height = <span class="code-func">min</span>(h, height[stack[-<span class="code-num">1</span>]]) - height[top]
+                ans += distance * bounded_height
+            
+            stack.append(i)
+        
+        <span class="code-keyword">return</span> ans</pre>
+      </div>
+    </div>
+
+    <button class="toggle-btn" onclick="document.getElementById('java-code').classList.toggle('hidden')">查看 Java 版本</button>
+    <div id="java-code" class="code-block hidden">
+<pre><span class="code-keyword">class</span> <span class="code-func">Solution</span> {
+    <span class="code-keyword">public</span> <span class="code-keyword">int</span> <span class="code-func">trap</span>(<span class="code-keyword">int</span>[] height) {
+        <span class="code-keyword">int</span> left = <span class="code-num">0</span>, right = height.length - <span class="code-num">1</span>;
+        <span class="code-keyword">int</span> leftMax = <span class="code-num">0</span>, rightMax = <span class="code-num">0</span>;
+        <span class="code-keyword">int</span> ans = <span class="code-num">0</span>;
+        
+        <span class="code-keyword">while</span> (left <= right) {
+            <span class="code-keyword">if</span> (height[left] < height[right]) {
+                <span class="code-keyword">if</span> (height[left] >= leftMax) {
+                    leftMax = height[left];
+                } <span class="code-keyword">else</span> {
+                    ans += leftMax - height[left];
+                }
+                left++;
+            } <span class="code-keyword">else</span> {
+                <span class="code-keyword">if</span> (height[right] >= rightMax) {
+                    rightMax = height[right];
+                } <span class="code-keyword">else</span> {
+                    ans += rightMax - height[right];
+                }
+                right--;
+            }
+        }
+        <span class="code-keyword">return</span> ans;
+    }
+}</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>复杂度分析</h2>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:.88rem;color:var(--muted)">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border)">
+            <th style="text-align:left;padding:10px;color:var(--text)">解法</th>
+            <th style="text-align:center;padding:10px;color:var(--text)">时间</th>
+            <th style="text-align:center;padding:10px;color:var(--text)">空间</th>
+            <th style="text-align:left;padding:10px;color:var(--text)">适用场景</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:10px">暴力</td>
+            <td style="text-align:center;padding:10px;color:var(--danger)">O(n²)</td>
+            <td style="text-align:center;padding:10px;color:var(--accent2)">O(1)</td>
+            <td style="padding:10px">仅用于理解，面试不可用</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:10px">动态规划</td>
+            <td style="text-align:center;padding:10px;color:var(--accent2)">O(n)</td>
+            <td style="text-align:center;padding:10px;color:var(--warn)">O(n)</td>
+            <td style="padding:10px">思路清晰，容易写对</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:10px"><strong>双指针（推荐）</strong></td>
+            <td style="text-align:center;padding:10px;color:var(--accent2)"><strong>O(n)</strong></td>
+            <td style="text-align:center;padding:10px;color:var(--accent2)"><strong>O(1)</strong></td>
+            <td style="padding:10px"><strong>面试最优解，空间最优</strong></td>
+          </tr>
+          <tr>
+            <td style="padding:10px">单调栈</td>
+            <td style="text-align:center;padding:10px;color:var(--accent2)">O(n)</td>
+            <td style="text-align:center;padding:10px;color:var(--warn)">O(n)</td>
+            <td style="padding:10px">适合理解凹槽结构，扩展性好</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>关键洞察与易错点</h2>
+    <div class="hint-box">
+      <h4>常见错误</h4>
+      <ul>
+        <li>双指针法中，<code>height[left] < height[right]</code> 用 <code>&lt;=</code> 也可以，但逻辑要对称。关键是「矮的一侧决定水位」。</li>
+        <li>单调栈法容易忘记 <code>if not stack: break</code>，弹出后栈空说明只有单侧边界，无法形成凹槽。</li>
+        <li>DP 法中忘记取 <code>min(left_max, right_max)</code>，误用 max 导致水溢出。</li>
+        <li>边界情况：数组长度小于 3 时无法接水，应直接返回 0。</li>
+      </ul>
+    </div>
+    <div class="hint-box" style="background:rgba(88,166,255,.08);border-color:rgba(88,166,255,.2)">
+      <h4 style="color:var(--accent)">面试追问</h4>
+      <ul>
+        <li><strong>为什么双指针法正确？</strong> → 当 height[left] &lt; height[right] 时，left 位置的水位由 left_max 决定（因为 right 侧存在比 left 更高的柱子，right_max 必然 ≥ height[right] &gt; height[left]，所以 min(left_max, right_max) = left_max）。</li>
+        <li><strong>能否接彩色雨水？</strong> → 按层/按柱都可以，本质一样。</li>
+        <li><strong>扩展：接雨水 II（407题）</strong> → 三维版本，需要用优先队列（最小堆）从边界向内部推进，时间 O(mn log(mn))。</li>
+        <li><strong>扩展：柱状图中最大的矩形（84题）</strong> → 本题是找凹槽，84题是找凸峰，都用单调栈，但处理逻辑相反（84用递增栈找左右第一个更矮的）。</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>思路可视化</h2>
+    <div class="problem-desc">
+      <p>以 <code>height = [0,1,0,2,1,0,1,3,2,1,2,1]</code> 为例，双指针法执行过程：</p>
+      <pre><code>初始:  left=0, right=11, left_max=0, right_max=0
+
+索引:  0  1  2  3  4  5  6  7  8  9  10 11
+高度: [0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1]
+       L                       R
+
+第1步: h[0]=0 < h[11]=1，处理左边。0>=0 更新 left_max=0，left=1
+第2步: h[1]=1 < h[11]=1（相等走else），处理右边。1>=0 更新 right_max=1，right=10
+第3步: h[1]=1 > h[10]=2? 否，1<2，处理左边。1>=0 更新 left_max=1，left=2
+第4步: h[2]=0 < h[10]=2，处理左边。0<1，接水 += 1-0 = 1，left=3  (累计=1)
+第5步: h[3]=2 > h[10]=2? 否，相等走else，处理右边。2>=1 更新 right_max=2，right=9
+第6步: h[3]=2 > h[9]=1，处理右边。1<2，接水 += 2-1 = 1，right=8  (累计=2)
+第7步: h[3]=2 == h[8]=2，处理右边。2>=2 更新 right_max=2，right=7
+第8步: h[3]=2 < h[7]=3，处理左边。2>=1 更新 left_max=2，left=4
+第9步: h[4]=1 < h[7]=3，处理左边。1<2，接水 += 2-1 = 1，left=5  (累计=3)
+第10步: h[5]=0 < h[7]=3，处理左边。0<2，接水 += 2-0 = 2，left=6  (累计=5)
+第11步: h[6]=1 < h[7]=3，处理左边。1<2，接水 += 2-1 = 1，left=7  (累计=6)
+第12步: h[7]=3 == h[7]=3，处理右边。3>=2 更新 right_max=3，right=6 → left>right 结束
+
+最终答案: 6</code></pre>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>LeetCode 每日精讲 · 第238期 · 2026-04-26</p>
+    <p style="margin-top:6px;font-size:.75rem">Generated by OpenClaw | 模板版本 v2.0</p>
+  </div>
+</div>
+
+<script>
+function switchTab(id) {
+  document.querySelectorAll('.sol-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.sol-panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+</script>
+</body>
+</html>
