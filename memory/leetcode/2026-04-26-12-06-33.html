@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeetCode 33. 搜索旋转排序数组 - 精讲</title>
+<style>
+:root{--bg:#0d1117;--card:#161b22;--border:#30363d;--text:#c9d1d9;--muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--warn:#d29922;--danger:#f85149;--code-bg:#1e2530;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;line-height:1.6;padding:20px}
+.container{max-width:880px;margin:0 auto}
+.header{text-align:center;padding:30px 0;border-bottom:1px solid var(--border);margin-bottom:30px}
+.header h1{font-size:2rem;margin-bottom:8px;color:var(--text)}
+.header .meta{color:var(--muted);font-size:.9rem}
+.tag{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.75rem;font-weight:600;margin:0 4px}
+.tag.medium{background:rgba(88,166,255,.15);color:var(--accent)}
+.tag.easy{background:rgba(63,185,80,.15);color:var(--accent2)}
+.tag.hard{background:rgba(248,81,73,.15);color:var(--danger)}
+.tag.topic{background:rgba(210,153,34,.15);color:var(--warn)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px}
+.card h2{font-size:1.2rem;margin-bottom:14px;color:var(--text);display:flex;align-items:center;gap:8px}
+.card h2::before{content:"";display:inline-block;width:4px;height:20px;background:var(--accent);border-radius:2px}
+.problem-desc{font-size:1rem;line-height:1.8}
+.problem-desc code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-family:SFMono-Regular,Consolas,"Liberation Mono",monospace;font-size:.9em}
+.problem-desc pre{background:var(--code-bg);padding:16px;border-radius:8px;overflow-x:auto;margin:12px 0}
+.problem-desc pre code{background:none;padding:0}
+.idea-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:14px}
+.idea-box{background:rgba(88,166,255,.06);border:1px solid var(--border);border-radius:10px;padding:16px}
+.idea-box h4{color:var(--accent);font-size:.9rem;margin-bottom:6px}
+.idea-box p{color:var(--muted);font-size:.85rem;line-height:1.5}
+.steps{margin-top:14px}
+.step{display:flex;gap:14px;margin-bottom:14px;align-items:flex-start}
+.step-num{flex-shrink:0;width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+.step-body{flex:1}
+.step-body h4{font-size:.95rem;margin-bottom:4px;color:var(--text)}
+.step-body p{font-size:.88rem;color:var(--muted);line-height:1.5}
+.code-block{background:var(--code-bg);border-radius:10px;padding:20px;overflow-x:auto;margin-top:14px}
+.code-block pre{margin:0;color:var(--text);font-family:SFMono-Regular,Consolas,"Liberation Mono",monospace;font-size:.9rem;line-height:1.7}
+.code-block .code-comment{color:var(--muted);font-style:italic}
+.code-block .code-keyword{color:#ff7b72}
+.code-block .code-func{color:#d2a8ff}
+.code-block .code-str{color:#a5d6ff}
+.code-block .code-num{color:#79c0ff}
+.complexity{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.complexity-item{background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.2);border-radius:10px;padding:16px;text-align:center}
+.complexity-item.warn{background:rgba(210,153,34,.08);border-color:rgba(210,153,34,.2)}
+.complexity-item h4{font-size:.85rem;color:var(--muted);margin-bottom:6px}
+.complexity-item .val{font-size:1.4rem;font-weight:700;color:var(--accent2)}
+.complexity-item.warn .val{color:var(--warn)}
+.hint-box{background:rgba(210,153,34,.08);border:1px solid rgba(210,153,34,.2);border-radius:10px;padding:16px;margin-top:14px}
+.hint-box h4{color:var(--warn);font-size:.9rem;margin-bottom:6px}
+.hint-box ul{margin-left:18px;color:var(--muted);font-size:.88rem;line-height:1.8}
+.toggle-btn{background:var(--accent);color:#fff;border:none;padding:10px 18px;border-radius:8px;cursor:pointer;font-size:.9rem;margin-top:14px;transition:opacity .2s}
+.toggle-btn:hover{opacity:.85}
+.hidden{display:none}
+.footer{text-align:center;padding:30px 0;color:var(--muted);font-size:.85rem;border-top:1px solid var(--border);margin-top:20px}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>33. 搜索旋转排序数组</h1>
+    <div class="meta">
+      <span class="tag medium">Medium</span>
+      <span class="tag topic">二分查找</span>
+      <span class="tag topic">数组</span>
+      <span class="tag topic">旋转数组</span>
+    </div>
+    <div class="meta" style="margin-top:8px">2026-04-26 第237期 | 预计阅读 6 分钟</div>
+  </div>
+
+  <div class="card">
+    <h2>题目描述</h2>
+    <div class="problem-desc">
+      <p>整数数组 <code>nums</code> 按升序排列，数组中的值 <strong>互不相同</strong>。</p>
+      <p>在传递给函数之前，<code>nums</code> 在预先未知的某个下标 <code>k</code>（<code>0 <= k < nums.length</code>）上进行了 <strong>旋转</strong>，使数组变为 <code>[nums[k], nums[k+1], ..., nums[n-1], nums[0], nums[1], ..., nums[k-1]]</code>（下标 <strong>从 0 开始</strong> 计数）。</p>
+      <p>例如，<code>[0,1,2,4,5,6,7]</code> 在下标 <code>3</code> 处经旋转后可能变为 <code>[4,5,6,7,0,1,2]</code>。</p>
+      <p>给你 <strong>旋转后</strong> 的数组 <code>nums</code> 和一个整数 <code>target</code>，如果 <code>nums</code> 中存在这个目标值 <code>target</code>，则返回它的下标，否则返回 <code>-1</code>。</p>
+      <p>你必须设计一个时间复杂度为 <code>O(log n)</code> 的算法解决此问题。</p>
+      <pre><code>输入: nums = [4,5,6,7,0,1,2], target = 0
+输出: 4
+
+输入: nums = [4,5,6,7,0,1,2], target = 3
+输出: -1
+
+输入: nums = [1], target = 0
+输出: -1</code></pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>核心思路</h2>
+    <div class="idea-grid">
+      <div class="idea-box">
+        <h4>旋转数组性质</h4>
+        <p>旋转后数组被分成两段升序区间。以旋转点为界，左半段和右半段各自保持升序。</p>
+      </div>
+      <div class="idea-box">
+        <h4>二分变形</h4>
+        <p>常规二分要求全局有序，这里局部有序。关键：判断哪一半是有序的，再判断 target 是否在其中。</p>
+      </div>
+      <div class="idea-box">
+        <h4>有序段判定</h4>
+        <p>通过比较 nums[mid] 和 nums[right]（或 nums[left]）即可确定哪一半是升序的。</p>
+      </div>
+      <div class="idea-box">
+        <h4>O(log n) 强制要求</h4>
+        <p>题目硬性要求对数时间，排除线性扫描。二分是唯一选择，必须处理旋转带来的无序。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>解题步骤</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>初始化左右指针</h4>
+          <p>left = 0, right = nums.length - 1，标准二分框架。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>循环条件与中间值</h4>
+          <p>while (left <= right)，取 mid = left + (right - left) / 2。如果 nums[mid] == target，直接返回 mid。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>判断哪一半有序</h4>
+          <p>比较 nums[mid] 和 nums[right]：<br>
+          • 若 nums[mid] < nums[right]，则右半段 [mid, right] 是升序的<br>
+          • 若 nums[mid] > nums[right]，则左半段 [left, mid] 是升序的<br>
+          （由于元素互不相同，不存在相等的情况）</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>在有序段中判断 target 位置</h4>
+          <p>若右半段有序：判断 target 是否在 (nums[mid], nums[right]] 范围内，是则 left = mid + 1，否则 right = mid - 1。<br>
+          若左半段有序：判断 target 是否在 [nums[left], nums[mid]) 范围内，是则 right = mid - 1，否则 left = mid + 1。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h4>循环结束未找到</h4>
+          <p>返回 -1。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>代码实现</h2>
+    <div class="code-block">
+<pre><span class="code-keyword">class</span> <span class="code-func">Solution</span>:
+    <span class="code-keyword">def</span> <span class="code-func">search</span>(self, nums: List[<span class="code-keyword">int</span>], target: <span class="code-keyword">int</span>) -> <span class="code-keyword">int</span>:
+        left, right = <span class="code-num">0</span>, <span class="code-func">len</span>(nums) - <span class="code-num">1</span>
+        
+        <span class="code-keyword">while</span> left <= right:
+            mid = left + (right - left) // <span class="code-num">2</span>
+            
+            <span class="code-comment"># 直接命中</span>
+            <span class="code-keyword">if</span> nums[mid] == target:
+                <span class="code-keyword">return</span> mid
+            
+            <span class="code-comment"># 判断哪一半是有序的</span>
+            <span class="code-keyword">if</span> nums[mid] < nums[right]:
+                <span class="code-comment"># 右半段 [mid, right] 有序</span>
+                <span class="code-keyword">if</span> nums[mid] < target <= nums[right]:
+                    <span class="code-comment"># target 在右半段，收缩左边界</span>
+                    left = mid + <span class="code-num">1</span>
+                <span class="code-keyword">else</span>:
+                    <span class="code-comment"># target 不在右半段，去左半段找</span>
+                    right = mid - <span class="code-num">1</span>
+            <span class="code-keyword">else</span>:
+                <span class="code-comment"># 左半段 [left, mid] 有序（题目保证元素不同，不会出现等于）</span>
+                <span class="code-keyword">if</span> nums[left] <= target < nums[mid]:
+                    <span class="code-comment"># target 在左半段，收缩右边界</span>
+                    right = mid - <span class="code-num">1</span>
+                <span class="code-keyword">else</span>:
+                    <span class="code-comment"># target 不在左半段，去右半段找</span>
+                    left = mid + <span class="code-num">1</span>
+        
+        <span class="code-keyword">return</span> -<span class="code-num">1</span></pre>
+    </div>
+    <button class="toggle-btn" onclick="document.getElementById('java-code').classList.toggle('hidden')">查看 Java 版本</button>
+    <div id="java-code" class="code-block hidden">
+<pre><span class="code-keyword">class</span> <span class="code-func">Solution</span> {
+    <span class="code-keyword">public</span> <span class="code-keyword">int</span> <span class="code-func">search</span>(<span class="code-keyword">int</span>[] nums, <span class="code-keyword">int</span> target) {
+        <span class="code-keyword">int</span> left = <span class="code-num">0</span>, right = nums.length - <span class="code-num">1</span>;
+        <span class="code-keyword">while</span> (left <= right) {
+            <span class="code-keyword">int</span> mid = left + (right - left) / <span class="code-num">2</span>;
+            <span class="code-keyword">if</span> (nums[mid] == target) <span class="code-keyword">return</span> mid;
+            
+            <span class="code-keyword">if</span> (nums[mid] < nums[right]) {
+                <span class="code-comment">// 右半段有序</span>
+                <span class="code-keyword">if</span> (nums[mid] < target && target <= nums[right]) {
+                    left = mid + <span class="code-num">1</span>;
+                } <span class="code-keyword">else</span> {
+                    right = mid - <span class="code-num">1</span>;
+                }
+            } <span class="code-keyword">else</span> {
+                <span class="code-comment">// 左半段有序</span>
+                <span class="code-keyword">if</span> (nums[left] <= target && target < nums[mid]) {
+                    right = mid - <span class="code-num">1</span>;
+                } <span class="code-keyword">else</span> {
+                    left = mid + <span class="code-num">1</span>;
+                }
+            }
+        }
+        <span class="code-keyword">return</span> -<span class="code-num">1</span>;
+    }
+}</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>复杂度分析</h2>
+    <div class="complexity">
+      <div class="complexity-item">
+        <h4>时间复杂度</h4>
+        <div class="val">O(log n)</div>
+        <p style="font-size:.8rem;color:var(--muted);margin-top:4px">标准的二分查找，每次排除一半元素</p>
+      </div>
+      <div class="complexity-item">
+        <h4>空间复杂度</h4>
+        <div class="val">O(1)</div>
+        <p style="font-size:.8rem;color:var(--muted);margin-top:4px">仅使用常数个指针变量</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>关键洞察与易错点</h2>
+    <div class="hint-box">
+      <h4>常见错误</h4>
+      <ul>
+        <li>使用 nums[mid] 和 nums[left] 比较判断有序段也可以，但边界处理容易出错。推荐和 nums[right] 比较，直觉更顺。</li>
+        <li>边界条件写成 <code>nums[mid] <= target <= nums[right]</code> 时漏掉等号，导致遗漏 target 恰好等于边界值的情况。</li>
+        <li>旋转数组可能存在完全未旋转的情况（k=0），即原数组本身完全有序，算法必须兼容。</li>
+        <li>数组只有一个元素时，要正确处理。</li>
+      </ul>
+    </div>
+    <div class="hint-box" style="background:rgba(88,166,255,.08);border-color:rgba(88,166,255,.2)">
+      <h4 style="color:var(--accent)">面试追问</h4>
+      <ul>
+        <li><strong>如果数组中存在重复元素？</strong> → 退化到 O(n)，最坏情况无法判断哪半有序（如 [1,0,1,1,1]）。</li>
+        <li><strong>如何找到旋转点（最小元素）？</strong> → 同样是二分变形，比较 nums[mid] 和 nums[right]，找最小值下标。</li>
+        <li><strong>旋转数组的其他变种？</strong> → 81题（含重复元素）、153题（找最小值）、154题（含重复找最小值）。</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>思路可视化</h2>
+    <div class="problem-desc">
+      <p>以 <code>nums = [4,5,6,7,0,1,2], target = 0</code> 为例：</p>
+      <pre><code>初始: [4, 5, 6, 7, 0, 1, 2]
+       l           m           r
+
+第1轮: mid=3, nums[3]=7
+       7 > nums[6]=2 → 左半段 [4,5,6,7] 有序
+       target=0 不在 [4,7) 内 → 去右半段
+       left = 4
+
+       [4, 5, 6, 7, 0, 1, 2]
+                    l  m     r  (mid=5, nums[5]=1)
+
+第2轮: mid=5, nums[5]=1
+       1 < nums[6]=2 → 右半段 [1,2] 有序
+       target=0 不在 (1,2] 内 → 去左半段
+       right = 4
+
+       [4, 5, 6, 7, 0, 1, 2]
+                    l=m=r
+
+第3轮: mid=4, nums[4]=0 == target ✓
+       返回 4</code></pre>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>LeetCode 每日精讲 · 第237期 · 2026-04-26</p>
+    <p style="margin-top:6px;font-size:.75rem">Generated by OpenClaw | 模板版本 v2.0</p>
+  </div>
+</div>
+</body>
+</html>
