@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeetCode 精讲 #2 - 两数相加</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #111118;
+            --bg-card: #16161f;
+            --bg-code: #1a1a25;
+            --border-color: rgba(255,255,255,0.06);
+            --text-primary: #e8e8ec;
+            --text-secondary: #7a7a8a;
+            --text-muted: #555560;
+            --accent-green: #2dd4a8;
+            --accent-green-dim: rgba(45,212,168,0.12);
+            --accent-blue: #60a5fa;
+            --accent-blue-dim: rgba(96,165,250,0.12);
+            --accent-orange: #fb923c;
+            --accent-red: #f87171;
+            --accent-purple: #a78bfa;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            padding: 3rem 0 2rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--accent-green-dim);
+            color: var(--accent-green);
+            padding: 0.4rem 1rem;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+        }
+
+        .badge .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .header .meta {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .header .tags {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .tag {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .section-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .section-title .icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+        }
+
+        .section-title .icon.green { background: var(--accent-green-dim); color: var(--accent-green); }
+        .section-title .icon.blue { background: var(--accent-blue-dim); color: var(--accent-blue); }
+
+        .insight-box {
+            background: linear-gradient(135deg, rgba(45,212,168,0.08), rgba(96,165,250,0.05));
+            border: 1px solid rgba(45,212,168,0.15);
+            border-radius: 10px;
+            padding: 1.25rem;
+            margin: 1rem 0;
+        }
+
+        .insight-box .label {
+            color: var(--accent-green);
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.03em;
+        }
+
+        .problem-card {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            padding: 1.5rem;
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+
+        .problem-card .example {
+            background: var(--bg-code);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+        }
+
+        .complexity-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .complexity-card {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            padding: 1.25rem;
+            text-align: center;
+        }
+
+        .complexity-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-green);
+            margin-bottom: 0.25rem;
+        }
+
+        .complexity-card .label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .code-block {
+            background: var(--bg-code);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1.25rem;
+            background: rgba(255,255,255,0.02);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .code-header .lang {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .code-header .copy-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .code-header .copy-btn:hover {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .code-block pre {
+            padding: 1.25rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            line-height: 1.7;
+        }
+
+        .code-block code {
+            color: var(--text-primary);
+        }
+
+        .keyword { color: #ff7b72; }
+        .string { color: #a5d6ff; }
+        .number { color: #79c0ff; }
+        .function { color: #d2a8ff; }
+        .comment { color: #8b949e; }
+        .type { color: #ffa657; }
+
+        .flow-step {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+            align-items: flex-start;
+        }
+
+        .flow-step .step-num {
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            border-radius: 50%;
+            background: var(--accent-blue-dim);
+            color: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .flow-step .step-content {
+            flex: 1;
+            padding-top: 0.15rem;
+        }
+
+        .visualization {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            margin: 1rem 0;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .node {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .node-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
+            font-weight: 600;
+        }
+
+        .arrow {
+            color: var(--text-muted);
+        }
+
+        .pitfall-item {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .pitfall-icon {
+            width: 22px;
+            height: 22px;
+            min-width: 22px;
+            border-radius: 50%;
+            background: rgba(248,113,113,0.15);
+            color: var(--accent-red);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
+        .variant-card {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .variant-card .v-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+            color: var(--accent-purple);
+        }
+
+        .variant-card .v-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="badge">
+            <span class="dot"></span>
+            LeetCode 每日精讲
+        </div>
+        <h1>#2 两数相加</h1>
+        <p class="meta">2026年4月28日 · 链表模拟 · Medium</p>
+        <div class="tags">
+            <span class="tag">链表</span>
+            <span class="tag">模拟</span>
+            <span class="tag">面试高频</span>
+            <span class="tag">微软/字节/Google</span>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">
+            <span class="icon blue">📋</span>
+            题目
+        </div>
+        <div class="problem-card">
+            给你两个非空的链表，表示两个非负的整数。它们每位数字都是按照<strong>逆序</strong>的方式存储的，并且每个节点只能存储<strong>一位</strong>数字。
+            <br><br>
+            请你将两个数相加，并以相同形式返回一个表示和的链表。
+            <br><br>
+            你可以假设除了数字 0 之外，这两个数都不会以 0 开头。
+            <div class="example">
+                <div style="margin-bottom:0.5rem;color:var(--text-primary);font-weight:500;">示例 1：</div>
+                输入：l1 = [2,4,3], l2 = [5,6,4]<br>
+                输出：[7,0,8]<br>
+                解释：342 + 465 = 807<br><br>
+                <div style="margin-bottom:0.5rem;color:var(--text-primary);font-weight:500;">示例 2：</div>
+                输入：l1 = [9,9,9,9,9,9,9], l2 = [9,9,9,9]<br>
+                输出：[8,9,9,9,0,0,0,1]<br>
+                解释：9999999 + 9999 = 10009998
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">
+            <span class="icon green">💡</span>
+            核心洞察
+        </div>
+        <div class="insight-box">
+            <div class="label">关键观察</div>
+            链表数字是<strong>逆序</strong>存储的，这意味着<strong>低位在链表头部</strong>。恰好与人类竖式加法从低位到高位计算的方向一致——天然适合模拟加法。
+        </div>
+        <div class="insight-box">
+            <div class="label">一句话解法</div>
+            同时遍历两条链表，逐位相加并处理进位。若链表长度不等，缺失的位视为 0。最后若还有进位，在末尾追加新节点。
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">
+            <span class="icon blue">🔢</span>
+            图解过程
+        </div>
+        <div class="visualization">
+            <div style="margin-bottom:1rem;color:var(--text-secondary);">示例：342 + 465 = 807</div>
+            <div class="node">
+                <span class="node-box" style="color:var(--accent-green);">2</span>
+                <span class="arrow">→</span>
+                <span class="node-box">4</span>
+                <span class="arrow">→</span>
+                <span class="node-box">3</span>
+            </div>
+            <div style="margin:0.5rem 0;color:var(--text-muted);">+</div>
+            <div class="node">
+                <span class="node-box" style="color:var(--accent-blue);">5</span>
+                <span class="arrow">→</span>
+                <span class="node-box">6</span>
+                <span class="arrow">→</span>
+                <span class="node-box">4</span>
+            </div>
+            <div style="margin:1rem 0;color:var(--text-muted);">━━━━━━━━━━━━</div>
+            <div class="node">
+                <span class="node-box" style="color:var(--accent-green);">7</span>
+                <span class="arrow">→</span>
+                <span class="node-box" style="border-color:var(--accent-orange);">0</span>
+                <span class="arrow">→</span>
+                <span class="node-box" style="color:var(--accent-blue);">8</span>
+            </div>
+            <div style="margin-top:1rem;font-size:0.8rem;color:var(--text-muted);">
+                2+5=7 · 4+6=10(写0进1) · 3+4+1=8
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">
+            <span class="icon green">📝</span>
+            解题思路
+        </div>
+        <div class="flow-step">
+            <span class="step-num">1</span>
+            <div class="step-content">
+                <strong>初始化</strong>：创建哑节点 dummy 作为结果链表的头，用 curr 指针指向当前处理位置，carry 记录进位值。
+            </div>
+        </div>
+        <div class="flow-step">
+            <span class="step-num">2</span>
+            <div class="step-content">
+                <strong>逐位相加</strong>：while 循环直到两条链表都为空。每次取 l1 和 l2 当前位的值（若为空则取0），求和 sum = val1 + val2 + carry。
+            </div>
+        </div>
+        <div class="flow-step">
+            <span class="step-num">3</span>
+            <div class="step-content">
+                <strong>处理进位</strong>：当前位结果 = sum % 10，新进位 = sum // 10。创建新节点接到结果链表末尾。
+            </div>
+        </div>
+        <div class="flow-step">
+            <span class="step-num">4</span>
+            <div class="step-content">
+                <strong>收尾检查</strong>：循环结束后若 carry > 0，追加一个值为 1 的新节点（最高位进位）。
+            </div>
+        </div>
+        <div class="flow-step">
+            <span class="step-num">5</span>
+            <div class="step-content">
+                <strong>返回结果</strong>：返回 dummy.next（跳过哑节点）。
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">
+            <span class="icon blue">💻</span>
+            代码实现
+        </div>
+        <div class="code-block">
+            <div class="code-header">
+                <span class="lang">Python3</span>
+                <button class="copy-btn" onclick="copyCode(this)">复制</button>
+            </div>
+            <pre><code><span class="type">class</span> <span class="function">ListNode</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, val=<span class="number">0</span>, next=<span class="keyword">None</span>):
+        self.val = val
+        self.next = next
+
+<span class="type">class</span> <span class="function">Solution</span>:
+    <span class="keyword">def</span> <span class="function">addTwoNumbers</span>(self, l1: ListNode, l2: ListNode) -> ListNode:
+        <span class="comment"># 哑节点：简化头节点的边界处理</span>
+        dummy = ListNode(<span class="number">0</span>)
+        curr = dummy
+        carry = <span class="number">0</span>
+
+        <span class="keyword">while</span> l1 <span class="keyword">or</span> l2 <span class="keyword">or</span> carry:
+            val1 = l1.val <span class="keyword">if</span> l1 <span class="keyword">else</span> <span class="number">0</span>
+            val2 = l2.val <span class="keyword">if</span> l2 <span class="keyword">else</span> <span class="number">0</span>
+
+            total = val1 + val2 + carry
+            carry = total // <span class="number">10</span>
+            digit = total % <span class="number">10</span>
+
+            <span class="comment"># 尾插法构建结果链表</span>
+            curr.next = ListNode(digit)
+            curr = curr.next
+
+            <span class="comment"># 移动指针（若链表已空则保持 None）</span>
+            <span class="keyword">if</span> l1: l1 = l1.next
+            <span class="keyword">if</span> l2: l2 = l2.next
+
+        <span class="keyword">return</span> dummy.next</code></pre>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">
+            <span class="icon green">⏱️</span>
+            复杂度分析
+        </div>
+        <div class="complexity-grid">
+            <div class="complexity-card">
+                <div class="value">O(n)</div>
+                <div class="label">时间复杂度</div>
+            </div>
+            <div class="complexity-card">
+                <div class="value">O(1)</div>
+                <div class="label">空间复杂度*</div>
+            </div>
+        </div>
+        <p style="margin-top:1rem;font-size:0.85rem;color:var(--text-secondary);">
+            * 不计输出链表所需空间。只使用常数个额外指针，是 O(1) 额外空间。
+            <br>n = max(len(l1), len(l2))，即较长链表的长度。
+        </p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">
+            <span class="icon blue">🎯</span>
+            高频追问
+        </div>
+        <div class="variant-card">
+            <div class="v-title">Q1: 如果数字是正序存储的呢？</div>
+            <div class="v-desc">解法一：先翻转两条链表，然后本题解法，最后翻转结果。解法二：用栈分别压入两条链表的值，出栈时相加（此时就是从低位到高位），用头插法构建结果链表。前者翻转 3 次，后者用 O(n) 栈空间。</div>
+        </div>
+        <div class="variant-card">
+            <div class="v-title">Q2: 链表长度差很多时如何优化？</div>
+            <div class="v-desc">无法优化渐进复杂度。但可以提前计算长度，让较短的链表高位补零后再同步遍历，避免每次判断 l1/l2 是否为 None 的分支预测开销（常数级优化）。</div>
+        </div>
+        <div class="variant-card">
+            <div class="v-title">Q3: 如果链表节点值范围很大怎么办？</div>
+            <div class="v-desc">题目限定一位数字。若节点存多位，则每次取节点值参与计算，处理进位时注意进位可能超过一位数，需要拆分后创建多个节点或修改当前节点值。</div>
+        </div>
+        <div class="variant-card">
+            <div class="v-title">Q4: 不允许修改输入链表如何解？</div>
+            <div class="v-desc">上面的解法本身就不修改输入链表，只读取 l1/l2 的值并移动指针。如果要求连指针移动都不做，就只能用递归或栈先将值读出再计算。</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">
+            <span class="icon green">⚠️</span>
+            常见坑点
+        </div>
+        <div class="pitfall-item">
+            <span class="pitfall-icon">✕</span>
+            <div><strong>忘记最后 carry > 0 的收尾</strong>：999 + 1 = 1000，结果比输入多一位，循环结束后必须检查进位。</div>
+        </div>
+        <div class="pitfall-item">
+            <span class="pitfall-icon">✕</span>
+            <div><strong>循环条件只写 l1 or l2</strong>：当两条链表同时为空但还有进位时（如 [5] + [5]），会遗漏最后的 1。</div>
+        </div>
+        <div class="pitfall-item">
+            <span class="pitfall-icon">✕</span>
+            <div><strong>链表长度不等时越界访问</strong>：必须先判空再取 val，或用三目运算符给缺位补 0。</div>
+        </div>
+        <div class="pitfall-item">
+            <span class="pitfall-icon">✕</span>
+            <div><strong>返回 dummy 而非 dummy.next</strong>：哑节点本身不存储有效数据，结果从 dummy.next 开始。</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">
+            <span class="icon blue">🔗</span>
+            关联题目
+        </div>
+        <div class="variant-card">
+            <div class="v-title">#445. 两数相加 II（正序版本）</div>
+            <div class="v-desc">数字是正序存储的，需要翻转链表或用栈解决。建议先掌握本题再挑战。</div>
+        </div>
+        <div class="variant-card">
+            <div class="v-title">#21. 合并两个有序链表</div>
+            <div class="v-desc">同样是双链表同步遍历，核心模式相似。本题是链表题的基础练手。</div>
+        </div>
+        <div class="variant-card">
+            <div class="v-title">#369. 给单链表加一</div>
+            <div class="v-desc">本题退化版：只有一条链表，且只加 1。同样要注意最高位进位。</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Generated by Kimi Claw · 2026-04-28 · 保持每日精讲</p>
+    </div>
+
+    <script>
+        function copyCode(btn) {
+            const code = btn.closest('.code-block').querySelector('code').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = '已复制!';
+                setTimeout(() => btn.textContent = '复制', 2000);
+            });
+        }
+    </script>
+</body>
+</html>
