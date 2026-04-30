@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeetCode 5 - 最长回文子串 | 精讲报告</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --bg-secondary: #161b22;
+            --border: #30363d;
+            --text: #c9d1d9;
+            --text-secondary: #8b949e;
+            --accent: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-red: #f85149;
+            --accent-yellow: #d29922;
+            --accent-purple: #a371f7;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', sans-serif;
+            line-height: 1.6;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        header {
+            text-align: center;
+            padding: 40px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 40px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        .badge.medium { background: rgba(210,153,34,0.15); color: var(--accent-yellow); border: 1px solid rgba(210,153,34,0.3); }
+        h1 { font-size: 32px; margin-bottom: 12px; }
+        .subtitle { color: var(--text-secondary); font-size: 16px; }
+        .meta { display: flex; justify-content: center; gap: 24px; margin-top: 20px; font-size: 14px; color: var(--text-secondary); }
+        .meta span { display: flex; align-items: center; gap: 6px; }
+
+        .section { margin-bottom: 40px; }
+        .section-title {
+            font-size: 22px;
+            color: var(--accent);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title .icon { font-size: 20px; }
+
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .card h3 { color: var(--accent-purple); margin-bottom: 12px; font-size: 18px; }
+        .card p { color: var(--text-secondary); margin-bottom: 12px; }
+        .card p:last-child { margin-bottom: 0; }
+
+        .code-block {
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px 20px;
+            overflow-x: auto;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+            font-size: 14px;
+            line-height: 1.7;
+            margin: 12px 0;
+        }
+        .code-block .keyword { color: #ff7b72; }
+        .code-block .string { color: #a5d6ff; }
+        .code-block .comment { color: #8b949e; font-style: italic; }
+        .code-block .function { color: #d2a8ff; }
+        .code-block .number { color: #79c0ff; }
+
+        .complexity-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+        .complexity-table th, .complexity-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        .complexity-table th { color: var(--accent); font-weight: 600; background: rgba(88,166,255,0.05); }
+        .complexity-table tr:hover { background: rgba(255,255,255,0.02); }
+
+        .highlight-box {
+            background: rgba(88,166,255,0.08);
+            border-left: 4px solid var(--accent);
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+        }
+        .highlight-box.green {
+            background: rgba(63,185,80,0.08);
+            border-left-color: var(--accent-green);
+        }
+        .highlight-box.yellow {
+            background: rgba(210,153,34,0.08);
+            border-left-color: var(--accent-yellow);
+        }
+
+        .method-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .method-tab {
+            padding: 8px 18px;
+            border-radius: 6px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .method-tab:hover { border-color: var(--accent); color: var(--accent); }
+        .method-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+        .method-content { display: none; }
+        .method-content.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        .visualizer {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 20px 0;
+        }
+        .string-display {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .char-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s;
+            border: 2px solid var(--border);
+            background: var(--bg);
+        }
+        .char-box.center { border-color: var(--accent); background: rgba(88,166,255,0.15); color: var(--accent); }
+        .char-box.expand { border-color: var(--accent-green); background: rgba(63,185,80,0.15); color: var(--accent-green); }
+        .char-box.in-palindrome { border-color: var(--accent-purple); background: rgba(163,113,247,0.15); color: var(--accent-purple); }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 16px 0;
+        }
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .btn:hover { border-color: var(--accent); color: var(--accent); }
+        .btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .btn.primary:hover { background: #79b8ff; }
+
+        .step-info {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 12px;
+            min-height: 20px;
+        }
+
+        .interview-points {
+            display: grid;
+            gap: 12px;
+        }
+        .point {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 14px 16px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        .point-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .point-text { font-size: 14px; color: var(--text-secondary); }
+
+        .footer {
+            text-align: center;
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            margin-top: 40px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        .footer .emoji { font-size: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="badge medium">Medium</div>
+            <h1>5. 最长回文子串</h1>
+            <p class="subtitle">Longest Palindromic Substring</p>
+            <div class="meta">
+                <span>📅 2026-04-27 18:06</span>
+                <span>🏷️ 字符串 / 双指针 / 动态规划</span>
+                <span>⭐ 高频指数: ★★★★★</span>
+            </div>
+        </header>
+
+        <div class="section">
+            <h2 class="section-title"><span class="icon">📋</span>题目描述</h2>
+            <div class="card">
+                <p>给你一个字符串 <code>s</code>，找到 <code>s</code> 中最长的回文子串。</p>
+                <p><strong>回文串</strong>：正读和反读都相同的字符串。例如 "aba"、"racecar"。</p>
+                <p><strong>子串</strong>：连续的字符序列，与"子序列"不同。</p>
+                <div class="highlight-box">
+                    <strong>示例 1：</strong><br>
+                    输入: s = "babad"<br>
+                    输出: "bab"（或 "aba"，两者长度相同）<br><br>
+                    <strong>示例 2：</strong><br>
+                    输入: s = "cbbd"<br>
+                    输出: "bb"
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title"><span class="icon">💡</span>核心观察</h2>
+            <div class="card">
+                <h3>回文串的对称性</h3>
+                <p>回文串的核心特征是<strong>中心对称</strong>。对于一个回文串，存在一个"中心"（单个字符或两个字符之间的间隙），从中心向两侧扩展时，对应的字符始终相等。</p>
+                <div class="highlight-box green">
+                    <strong>关键洞察：</strong>如果已知一个子串是回文的，那么在其两侧添加相同的字符，新子串仍然是回文的。<br><br>
+                    例如："aba" 是回文 → "cabac" 也是回文（两侧都加 'c'）
+                </div>
+                <p>这个观察直接导向<strong>中心扩展法</strong>：遍历每个可能的中心，向两边扩展，记录最长的回文串。</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title"><span class="icon">🔧</span>解法详解</h2>
+            <div class="method-tabs">
+                <div class="method-tab active" onclick="showMethod('center')">中心扩展法</div>
+                <div class="method-tab" onclick="showMethod('dp')">动态规划</div>
+                <div class="method-tab" onclick="showMethod('manacher')">Manacher算法</div>
+            </div>
+
+            <div id="center" class="method-content active">
+                <div class="card">
+                    <h3>中心扩展法（面试推荐）</h3>
+                    <p><strong>思路：</strong>回文串的中心可能是单个字符（奇数长度如 "aba"）或两个字符之间（偶数长度如 "abba"）。遍历每个位置作为中心，向两侧扩展直到不再回文。</p>
+                    <div class="visualizer">
+                        <div style="text-align:center; margin-bottom:12px; color:var(--text-secondary); font-size:14px;">输入: "babad"</div>
+                        <div class="string-display" id="center-viz">
+                            <div class="char-box">b</div>
+                            <div class="char-box">a</div>
+                            <div class="char-box">b</div>
+                            <div class="char-box">a</div>
+                            <div class="char-box">d</div>
+                        </div>
+                        <div class="controls">
+                            <button class="btn" onclick="prevCenterStep()">⬅ 上一步</button>
+                            <button class="btn primary" onclick="nextCenterStep()">下一步 ➡</button>
+                        </div>
+                        <div class="step-info" id="center-step">点击"下一步"开始演示中心扩展过程</div>
+                    </div>
+                    <div class="code-block">
+<span class="keyword">def</span> <span class="function">longestPalindrome</span>(self, s: <span class="keyword">str</span>) -> <span class="keyword">str</span>:
+    <span class="keyword">if</span> <span class="keyword">not</span> s <span class="keyword">or</span> len(s) < <span class="number">1</span>:
+        <span class="keyword">return</span> <span class="string">""</span>
+    
+    start, end = <span class="number">0</span>, <span class="number">0</span>
+    
+    <span class="keyword">for</span> i <span class="keyword">in</span> range(len(s)):
+        <span class="comment"># 奇数长度回文（中心是单个字符）</span>
+        len1 = self.expandAroundCenter(s, i, i)
+        <span class="comment"># 偶数长度回文（中心是两个字符之间）</span>
+        len2 = self.expandAroundCenter(s, i, i + <span class="number">1</span>)
+        
+        max_len = max(len1, len2)
+        <span class="keyword">if</span> max_len > end - start:
+            <span class="comment"># 计算起始和结束位置</span>
+            start = i - (max_len - <span class="number">1</span>) // <span class="number">2</span>
+            end = i + max_len // <span class="number">2</span>
+    
+    <span class="keyword">return</span> s[start:end + <span class="number">1</span>]
+
+<span class="keyword">def</span> <span class="function">expandAroundCenter</span>(self, s, left, right):
+    <span class="keyword">while</span> left >= <span class="number">0</span> <span class="keyword">and</span> right < len(s) <span class="keyword">and</span> s[left] == s[right]:
+        left -= <span class="number">1</span>
+        right += <span class="number">1</span>
+    <span class="keyword">return</span> right - left - <span class="number">1</span>  <span class="comment"># 实际长度</span></div>
+                    <table class="complexity-table">
+                        <tr><th>复杂度</th><th>值</th><th>说明</th></tr>
+                        <tr><td>时间</td><td>O(n²)</td><td>共 2n-1 个中心，每个最多扩展 n 次</td></tr>
+                        <tr><td>空间</td><td>O(1)</td><td>仅使用常数额外空间</td></tr>
+                    </table>
+                    <div class="highlight-box yellow">
+                        <strong>面试要点：</strong>这是面试中最推荐的解法。思路直观，代码简洁，空间复杂度最优。注意奇偶中心的处理技巧。
+                    </div>
+                </div>
+            </div>
+
+            <div id="dp" class="method-content">
+                <div class="card">
+                    <h3>动态规划</h3>
+                    <p><strong>思路：</strong>定义 <code>dp[i][j]</code> 表示子串 <code>s[i:j+1]</code> 是否为回文串。利用"如果两端相等且内部是回文，则整体是回文"的状态转移。</p>
+                    <div class="highlight-box">
+                        <strong>状态转移：</strong><br>
+                        dp[i][j] = (s[i] == s[j]) <span class="keyword">and</span> (j - i < <span class="number">3</span> <span class="keyword">or</span> dp[i+<span class="number">1</span>][j-<span class="number">1</span>])<br><br>
+                        <span class="comment"># j-i<3 表示长度≤3，此时只要两端相等必是回文</span>
+                    </div>
+                    <div class="code-block">
+<span class="keyword">def</span> <span class="function">longestPalindrome</span>(self, s: <span class="keyword">str</span>) -> <span class="keyword">str</span>:
+    n = len(s)
+    <span class="keyword">if</span> n < <span class="number">2</span>:
+        <span class="keyword">return</span> s
+    
+    dp = [[<span class="keyword">False</span>] * n <span class="keyword">for</span> _ <span class="keyword">in</span> range(n)]
+    start, max_len = <span class="number">0</span>, <span class="number">1</span>
+    
+    <span class="comment"># 单个字符都是回文</span>
+    <span class="keyword">for</span> i <span class="keyword">in</span> range(n):
+        dp[i][i] = <span class="keyword">True</span>
+    
+    <span class="comment"># 按长度从小到大填表</span>
+    <span class="keyword">for</span> length <span class="keyword">in</span> range(<span class="number">2</span>, n + <span class="number">1</span>):
+        <span class="keyword">for</span> i <span class="keyword">in</span> range(n - length + <span class="number">1</span>):
+            j = i + length - <span class="number">1</span>
+            
+            <span class="keyword">if</span> s[i] == s[j]:
+                <span class="keyword">if</span> length <= <span class="number">3</span>:
+                    dp[i][j] = <span class="keyword">True</span>
+                <span class="keyword">else</span>:
+                    dp[i][j] = dp[i + <span class="number">1</span>][j - <span class="number">1</span>]
+            
+            <span class="keyword">if</span> dp[i][j] <span class="keyword">and</span> length > max_len:
+                start = i
+                max_len = length
+    
+    <span class="keyword">return</span> s[start:start + max_len]</div>
+                    <table class="complexity-table">
+                        <tr><th>复杂度</th><th>值</th><th>说明</th></tr>
+                        <tr><td>时间</td><td>O(n²)</td><td>双重循环填表</td></tr>
+                        <tr><td>空间</td><td>O(n²)</td><td>二维DP数组</td></tr>
+                    </table>
+                    <div class="highlight-box yellow">
+                        <strong>面试要点：</strong>DP解法展示了对子问题分解的理解。注意填表顺序（按长度从小到大），确保计算 dp[i][j] 时 dp[i+1][j-1] 已经计算过。
+                    </div>
+                </div>
+            </div>
+
+            <div id="manacher" class="method-content">
+                <div class="card">
+                    <h3>Manacher算法（线性时间最优解）</h3>
+                    <p><strong>思路：</strong>通过在字符间插入特殊字符（如 #），统一处理奇偶长度，然后利用回文串的对称性质，避免重复计算。</p>
+                    <div class="highlight-box green">
+                        <strong>核心优化：</strong>维护当前最右回文串的右边界 <code>right</code> 和中心 <code>center</code>。对于位置 i，如果 i 在 right 左侧，则其关于 center 对称的位置 j 的信息可以直接利用（取边界限制）。
+                    </div>
+                    <div class="code-block">
+<span class="keyword">def</span> <span class="function">longestPalindrome</span>(self, s: <span class="keyword">str</span>) -> <span class="keyword">str</span>:
+    <span class="comment"># 预处理：插入 # 统一奇偶</span>
+    t = <span class="string">'#'</span> + <span class="string">'#'</span>.join(s) + <span class="string">'#'</span>
+    n = len(t)
+    p = [<span class="number">0</span>] * n  <span class="comment"># p[i] = 以i为中心的回文半径</span>
+    
+    center = right = <span class="number">0</span>
+    
+    <span class="keyword">for</span> i <span class="keyword">in</span> range(n):
+        <span class="comment"># 利用对称位置信息</span>
+        <span class="keyword">if</span> i < right:
+            mirror = <span class="number">2</span> * center - i
+            p[i] = min(right - i, p[mirror])
+        
+        <span class="comment"># 尝试扩展</span>
+        <span class="keyword">while</span> i + p[i] + <span class="number">1</span> < n <span class="keyword">and</span> i - p[i] - <span class="number">1</span> >= <span class="number">0</span> <span class="keyword">and</span> \
+              t[i + p[i] + <span class="number">1</span>] == t[i - p[i] - <span class="number">1</span>]:
+            p[i] += <span class="number">1</span>
+        
+        <span class="comment"># 更新最右边界</span>
+        <span class="keyword">if</span> i + p[i] > right:
+            center, right = i, i + p[i]
+    
+    <span class="comment"># 找到最大半径</span>
+    max_len, center_idx = max((v, i) <span class="keyword">for</span> i, v <span class="keyword">in</span> enumerate(p))
+    start = (center_idx - max_len) // <span class="number">2</span>
+    <span class="keyword">return</span> s[start:start + max_len]</div>
+                    <table class="complexity-table">
+                        <tr><th>复杂度</th><th>值</th><th>说明</th></tr>
+                        <tr><td>时间</td><td>O(n)</td><td>线性时间，每个字符最多被访问常数次</td></tr>
+                        <tr><td>空间</td><td>O(n)</td><td>预处理后的字符串和半径数组</td></tr>
+                    </table>
+                    <div class="highlight-box yellow">
+                        <strong>面试要点：</strong>Manacher是"加分项"。面试中先写中心扩展，提到Manacher是线性最优解即可。除非明确要求最优复杂度，否则不需要现场写出完整Manacher。
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title"><span class="icon">🎯</span>面试连环追问</h2>
+            <div class="interview-points">
+                <div class="point">
+                    <div class="point-num">1</div>
+                    <div class="point-text"><strong>如果要求输出所有最长回文子串？</strong><br>中心扩展时，若发现与当前max_len相等的回文，加入结果集。注意去重。</div>
+                </div>
+                <div class="point">
+                    <div class="point-num">2</div>
+                    <div class="point-text"><strong>回文子串的个数？</strong><br>DP解法中统计所有 dp[i][j]=True 的个数，或中心扩展时每个中心扩展次数之和。</div>
+                </div>
+                <div class="point">
+                    <div class="point-num">3</div>
+                    <div class="point-text"><strong>最长回文子序列（不连续）？</strong><br>变成经典DP：dp[i][j] = dp[i+1][j-1]+2（若s[i]==s[j]）否则 max(dp[i+1][j], dp[i][j-1])。</div>
+                </div>
+                <div class="point">
+                    <div class="point-num">4</div>
+                    <div class="point-text"><strong>在流式输入中实时找最长回文？</strong><br>EERTREE（回文树）数据结构，每个字符O(1)均摊时间维护所有回文后缀。</div>
+                </div>
+                <div class="point">
+                    <div class="point-num">5</div>
+                    <div class="point-text"><strong>空间优化到O(1)怎么做？</strong><br>中心扩展天然O(1)。DP能否优化？不行，因为需要子问题信息。Manacher需要O(n)。</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title"><span class="icon">📊</span>复杂度对比总结</h2>
+            <table class="complexity-table">
+                <tr><th>方法</th><th>时间</th><th>空间</th><th>面试推荐度</th></tr>
+                <tr><td>中心扩展</td><td>O(n²)</td><td>O(1)</td><td>⭐⭐⭐⭐⭐ 首选</td></tr>
+                <tr><td>动态规划</td><td>O(n²)</td><td>O(n²)</td><td>⭐⭐⭐⭐ 展示DP思维</td></tr>
+                <tr><td>Manacher</td><td>O(n)</td><td>O(n)</td><td>⭐⭐⭐ 加分项</td></tr>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title"><span class="icon">🔗</span>相关题目</h2>
+            <div class="card">
+                <p>📌 <strong>125. 验证回文串</strong> — 基础版，双指针从两端向中间</p>
+                <p>📌 <strong>9. 回文数</strong> — 数字版本，注意不转字符串的数学解法</p>
+                <p>📌 <strong>647. 回文子串</strong> — 统计所有回文子串个数，本题变体</p>
+                <p>📌 <strong>516. 最长回文子序列</strong> — "子序列"版，不连续，经典DP</p>
+                <p>📌 <strong>214. 最短回文串</strong> — KMP或字符串哈希，高难度</p>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="emoji">🎯</div>
+            <p>LeetCode 每日精讲 · 第 242 期</p>
+            <p style="margin-top:8px; font-size:12px;">生成时间: 2026-04-27 18:06 (Asia/Shanghai)</p>
+        </footer>
+    </div>
+
+    <script>
+        function showMethod(id) {
+            document.querySelectorAll('.method-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.method-tab').forEach(el => el.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // 中心扩展可视化
+        const centerSteps = [
+            { msg: "中心位置 i=0 ('b')，奇数扩展 → 只有 'b' 本身", highlight: [0], type: 'center' },
+            { msg: "中心位置 i=0 和 i=1 之间，偶数扩展 → 不相等", highlight: [0,1], type: 'center' },
+            { msg: "中心位置 i=1 ('a')，奇数扩展 → 'a' 本身", highlight: [1], type: 'center' },
+            { msg: "中心位置 i=1 和 i=2 之间，偶数扩展 → s[1]=a, s[2]=b 不相等", highlight: [1,2], type: 'center' },
+            { msg: "中心位置 i=2 ('b')，奇数扩展 → 检查 s[1]=a vs s[3]=a ✓，得到 'bab'", highlight: [1,2,3], type: 'expand' },
+            { msg: "继续扩展：s[0]=b vs s[4]=d ✗，停止。当前最长: 'bab'", highlight: [1,2,3], type: 'in-palindrome' },
+            { msg: "中心位置 i=2 和 i=3 之间，偶数扩展 → s[2]=b, s[3]=a 不相等", highlight: [2,3], type: 'center' },
+            { msg: "中心位置 i=3 ('a')，奇数扩展 → 检查 s[2]=b vs s[4]=d ✗，只有 'a'", highlight: [3], type: 'center' },
+            { msg: "中心位置 i=3 和 i=4 之间，偶数扩展 → s[3]=a, s[4]=d 不相等", highlight: [3,4], type: 'center' },
+            { msg: "中心位置 i=4 ('d')，奇数扩展 → 只有 'd'", highlight: [4], type: 'center' },
+            { msg: "遍历结束！最长回文子串: 'bab'（或 'aba'）", highlight: [1,2,3], type: 'in-palindrome' },
+        ];
+        let centerStepIdx = -1;
+
+        function updateCenterViz() {
+            const boxes = document.querySelectorAll('#center-viz .char-box');
+            const step = centerSteps[centerStepIdx];
+            boxes.forEach((box, i) => {
+                box.className = 'char-box';
+                if (step.highlight.includes(i)) {
+                    box.classList.add(step.type);
+                }
+            });
+            document.getElementById('center-step').textContent = `步骤 ${centerStepIdx + 1}/${centerSteps.length}: ${step.msg}`;
+        }
+
+        function nextCenterStep() {
+            if (centerStepIdx < centerSteps.length - 1) {
+                centerStepIdx++;
+                updateCenterViz();
+            }
+        }
+
+        function prevCenterStep() {
+            if (centerStepIdx > 0) {
+                centerStepIdx--;
+                updateCenterViz();
+            }
+        }
+    </script>
+</body>
+</html>
