@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeetCode 11 - 盛最多水的容器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            line-height: 1.7;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        .header {
+            text-align: center;
+            padding: 40px 0;
+            border-bottom: 1px solid #1e1e2e;
+            margin-bottom: 40px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin: 4px;
+        }
+        .badge-medium {
+            background: #f59e0b20;
+            color: #f59e0b;
+            border: 1px solid #f59e0b40;
+        }
+        .badge-tag {
+            background: #3b82f620;
+            color: #3b82f6;
+            border: 1px solid #3b82f640;
+        }
+        h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin: 20px 0 10px;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle {
+            color: #64748b;
+            font-size: 1.1em;
+        }
+        .section {
+            background: #12121f;
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+            border: 1px solid #1e1e2e;
+        }
+        .section-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(180deg, #3b82f6, #8b5cf6);
+            border-radius: 2px;
+        }
+        .code-block {
+            background: #0d0d15;
+            border-radius: 12px;
+            padding: 24px;
+            overflow-x: auto;
+            border: 1px solid #1e1e2e;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+        .code-block .keyword {
+            color: #c678dd;
+        }
+        .code-block .function {
+            color: #61afef;
+        }
+        .code-block .string {
+            color: #98c379;
+        }
+        .code-block .comment {
+            color: #5c6370;
+            font-style: italic;
+        }
+        .code-block .number {
+            color: #d19a66;
+        }
+        .highlight-box {
+            background: #1e3a5f;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            border-radius: 0 12px 12px 0;
+            margin: 20px 0;
+        }
+        .formula {
+            background: #0d0d15;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2em;
+            color: #61afef;
+            border: 1px solid #1e1e2e;
+            margin: 20px 0;
+        }
+        .insight {
+            background: #1e1e2e;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 16px 0;
+        }
+        .insight-title {
+            color: #f59e0b;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .complexity {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .complexity-card {
+            background: #0d0d15;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #1e1e2e;
+        }
+        .complexity-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #10b981;
+        }
+        .complexity-label {
+            color: #64748b;
+            margin-top: 8px;
+        }
+        .visualization {
+            background: #0d0d15;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 20px 0;
+        }
+        .bar-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 8px;
+            height: 200px;
+            padding: 20px;
+        }
+        .bar {
+            width: 40px;
+            background: linear-gradient(180deg, #3b82f6, #1d4ed8);
+            border-radius: 4px 4px 0 0;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .bar.active {
+            background: linear-gradient(180deg, #f59e0b, #d97706);
+        }
+        .bar.pointer-left::after,
+        .bar.pointer-right::after {
+            content: '';
+            position: absolute;
+            bottom: -16px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+        }
+        .bar.pointer-left::after {
+            border-bottom: 10px solid #ef4444;
+        }
+        .bar.pointer-right::after {
+            border-bottom: 10px solid #10b981;
+        }
+        .bar-label {
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #64748b;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 40px;
+        }
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        .step-info {
+            text-align: center;
+            margin: 20px 0;
+            padding: 16px;
+            background: #1e1e2e;
+            border-radius: 8px;
+        }
+        .related-problems {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .problem-card {
+            background: #0d0d15;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #1e1e2e;
+            transition: all 0.2s;
+        }
+        .problem-card:hover {
+            border-color: #3b82f6;
+        }
+        .problem-number {
+            color: #3b82f6;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+        .proof-step {
+            padding: 16px;
+            margin: 12px 0;
+            background: #0d0d15;
+            border-radius: 8px;
+            border-left: 3px solid #8b5cf6;
+        }
+        .footer {
+            text-align: center;
+            padding: 40px 0;
+            color: #475569;
+            font-size: 0.9em;
+        }
+        .area-display {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #f59e0b;
+            margin: 8px 0;
+        }
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            .complexity {
+                grid-template-columns: 1fr;
+            }
+            .bar {
+                width: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <span class="badge badge-medium">Medium</span>
+            <span class="badge badge-tag">双指针</span>
+            <span class="badge badge-tag">贪心</span>
+            <h1>11. 盛最多水的容器</h1>
+            <p class="subtitle">Container With Most Water · 高频面试题</p>
+        </div>
+
+        <div class="section">
+            <div class="section-title">题目描述</div>
+            <p>给定一个长度为 <code>n</code> 的整数数组 <code>height</code>。有 <code>n</code> 条垂线，第 <code>i</code> 条线的两个端点是 <code>(i, 0)</code> 和 <code>(i, height[i])</code>。</p>
+            <p style="margin-top: 12px">找出其中的两条线，使得它们与 x 轴共同构成的容器可以容纳最多的水。返回容器可以储存的最大水量。</p>
+            <div class="highlight-box">
+                <strong>注意：</strong>你不能倾斜容器。
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">核心思路</div>
+            <div class="formula">
+                面积 = 底边宽度 × 最小高度 = (right − left) × min(height[left], height[right])
+            </div>
+            
+            <div class="insight">
+                <div class="insight-title">关键观察 🔑</div>
+                <p>双指针从数组两端向中间移动。底边宽度逐渐减小，那<strong>为什么要移动较短的那一侧？</strong></p>
+            </div>
+
+            <div class="proof-step">
+                <strong>1.</strong> 假设 <code>height[left] < height[right]</code>，此时面积由 <code>height[left]</code> 决定（短板效应）。
+            </div>
+            <div class="proof-step">
+                <strong>2.</strong> 如果固定 <code>left</code>，无论 <code>right</code> 怎么向左移动，底边宽度只会变小，而高度最大就是 <code>height[left]</code>。
+            </div>
+            <div class="proof-step">
+                <strong>3.</strong> 因此以 <code>left</code> 为边界的所有可能中，当前面积已经是最大的了。<code>left</code> 不可能再参与构成更大的面积。
+            </div>
+            <div class="proof-step">
+                <strong>4.</strong> 所以可以安全地丢弃 <code>left</code>（<code>left++</code>），继续搜索更大的可能性。
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">交互式演示</div>
+            <div class="visualization">
+                <div class="bar-container" id="barContainer"></div>
+                <div class="step-info">
+                    <div>当前指针: <span style="color:#ef4444">左指针(L)</span> · <span style="color:#10b981">右指针(R)</span></div>
+                    <div class="area-display" id="areaDisplay">面积: 0</div>
+                    <div id="stepDescription">点击「下一步」开始演示双指针算法</div>
+                </div>
+                <div class="controls">
+                    <button class="btn btn-primary" onclick="resetDemo()">重置</button>
+                    <button class="btn btn-primary" onclick="nextStep()">下一步</button>
+                    <button class="btn btn-primary" onclick="autoPlay()">自动播放</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">代码实现 (Python)</div>
+            <div class="code-block">
+<span class="keyword">class</span> <span class="function">Solution</span>:
+    <span class="keyword">def</span> <span class="function">maxArea</span>(<span class="keyword">self</span>, height: List[<span class="keyword">int</span>]) -> <span class="keyword">int</span>:
+        left, right = <span class="number">0</span>, <span class="keyword">len</span>(height) - <span class="number">1</span>
+        max_area = <span class="number">0</span>
+        
+        <span class="keyword">while</span> left < right:
+            <span class="comment"># 计算当前面积</span>
+            width = right - left
+            h = <span class="function">min</span>(height[left], height[right])
+            max_area = <span class="function">max</span>(max_area, width * h)
+            
+            <span class="comment"># 移动较短的一侧</span>
+            <span class="keyword">if</span> height[left] < height[right]:
+                left += <span class="number">1</span>
+            <span class="keyword">else</span>:
+                right -= <span class="number">1</span>
+        
+        <span class="keyword">return</span> max_area
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">复杂度分析</div>
+            <div class="complexity">
+                <div class="complexity-card">
+                    <div class="complexity-value">O(n)</div>
+                    <div class="complexity-label">时间复杂度</div>
+                    <div style="color:#64748b; margin-top:8px; font-size:0.9em">每个元素最多被访问一次</div>
+                </div>
+                <div class="complexity-card">
+                    <div class="complexity-value">O(1)</div>
+                    <div class="complexity-label">空间复杂度</div>
+                    <div style="color:#64748b; margin-top:8px; font-size:0.9em">只使用两个指针</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">面试要点</div>
+            <div class="insight">
+                <div class="insight-title">必会问题</div>
+                <ul style="margin-left: 20px; margin-top: 8px; color: #94a3b8">
+                    <li>为什么移动短板而不是长板？—— 给出正确性证明</li>
+                    <li>暴力解法是什么？—— 双重循环 O(n²)</li>
+                    <li>边界情况？—— n=2 直接返回 min(h[0], h[1])</li>
+                    <li>如果要求返回具体的索引对？—— 记录最大面积时的 left/right</li>
+                </ul>
+            </div>
+            <div class="insight">
+                <div class="insight-title">常见变形</div>
+                <ul style="margin-left: 20px; margin-top: 8px; color: #94a3b8">
+                    <li>如果数组中有负数高度？—— 取绝对值或题目不允许</li>
+                    <li>如果要求最多修改一根柱子的高度？—— 动态规划扩展</li>
+                    <li>三维版本？—— LeetCode 1866/面试极少考</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">相关题目</div>
+            <div class="related-problems">
+                <div class="problem-card">
+                    <div class="problem-number">42</div>
+                    <div style="color:#94a3b8; margin-top:4px">接雨水</div>
+                    <div style="color:#64748b; font-size:0.85em; margin-top:4px">双指针 · Hard</div>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-number">15</div>
+                    <div style="color:#94a3b8; margin-top:4px">三数之和</div>
+                    <div style="color:#64748b; font-size:0.85em; margin-top:4px">双指针 · Medium</div>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-number">167</div>
+                    <div style="color:#94a3b8; margin-top:4px">两数之和 II</div>
+                    <div style="color:#64748b; font-size:0.85em; margin-top:4px">双指针 · Medium</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>第 241 期 LeetCode 精讲 · 2026-04-27</p>
+            <p style="margin-top: 8px">由 OpenClaw 自动生成</p>
+        </div>
+    </div>
+
+    <script>
+        const heights = [1, 8, 6, 2, 5, 4, 8, 3, 7];
+        let left = 0, right = heights.length - 1;
+        let maxArea = 0;
+        let isRunning = false;
+        let autoPlayInterval = null;
+
+        function renderBars() {
+            const container = document.getElementById('barContainer');
+            container.innerHTML = '';
+            
+            heights.forEach((h, i) => {
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.style.height = `${h * 20}px`;
+                if (i === left) bar.classList.add('pointer-left');
+                if (i === right) bar.classList.add('pointer-right');
+                if (i >= left && i <= right && left !== right) bar.classList.add('active');
+                
+                const label = document.createElement('div');
+                label.className = 'bar-label';
+                label.textContent = h;
+                bar.appendChild(label);
+                
+                container.appendChild(bar);
+            });
+
+            const width = right - left;
+            const minH = Math.min(heights[left], heights[right]);
+            const area = width * minH;
+            maxArea = Math.max(maxArea, area);
+            
+            document.getElementById('areaDisplay').textContent = 
+                `当前面积: ${area} = ${width} × ${minH} | 最大面积: ${maxArea}`;
+            document.getElementById('stepDescription').innerHTML = 
+                `L=${left}(高${heights[left]}) R=${right}(高${heights[right]}) | ` +
+                `${heights[left] < heights[right] ? 'left 较短，移动 left →' : 'right 较短或相等，移动 right ←'}`;
+        }
+
+        function nextStep() {
+            if (left >= right) {
+                document.getElementById('stepDescription').innerHTML = 
+                    `<span style="color:#10b981">算法结束！最大面积: ${maxArea}</span>`;
+                stopAutoPlay();
+                return;
+            }
+            
+            if (heights[left] < heights[right]) {
+                left++;
+            } else {
+                right--;
+            }
+            renderBars();
+        }
+
+        function resetDemo() {
+            left = 0;
+            right = heights.length - 1;
+            maxArea = 0;
+            stopAutoPlay();
+            renderBars();
+            document.getElementById('stepDescription').textContent = '点击「下一步」开始演示';
+        }
+
+        function autoPlay() {
+            if (autoPlayInterval) {
+                stopAutoPlay();
+                return;
+            }
+            autoPlayInterval = setInterval(() => {
+                if (left >= right) {
+                    stopAutoPlay();
+                    return;
+                }
+                nextStep();
+            }, 800);
+        }
+
+        function stopAutoPlay() {
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+            }
+        }
+
+        // 初始化
+        renderBars();
+    </script>
+</body>
+</html>
