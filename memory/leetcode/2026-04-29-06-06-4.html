@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeetCode #4 - 寻找两个正序数组的中位数 | 每日精讲</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif;
+            background: #0a0a0f;
+            color: #e8e8ec;
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 30px 20px; }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 40px 0;
+            border-bottom: 1px solid #2a2a3a;
+            margin-bottom: 30px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
+            color: white;
+        }
+        .title {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 0%, #a0a0b0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+        }
+        .subtitle {
+            color: #888;
+            font-size: 15px;
+        }
+        
+        /* Cards */
+        .card {
+            background: linear-gradient(145deg, #12121a 0%, #1a1a25 100%);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid #2a2a3a;
+        }
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Problem Statement */
+        .difficulty-hard { color: #ff4757; }
+        .problem-text {
+            font-size: 15px;
+            color: #c0c0d0;
+            line-height: 1.8;
+        }
+        .example {
+            background: #0d0d14;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px 0;
+            border-left: 3px solid #667eea;
+        }
+        .example-title {
+            font-size: 13px;
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .code-block {
+            background: #0a0a10;
+            border-radius: 10px;
+            padding: 16px;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            border: 1px solid #252530;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            background: #1a1a25;
+            border: 1px solid #2a2a3a;
+            color: #888;
+            transition: all 0.2s;
+        }
+        .tab:hover { background: #252530; }
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        /* Algorithm Visualization */
+        .viz-container {
+            background: #0d0d14;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+        }
+        .array-row {
+            display: flex;
+            gap: 8px;
+            margin: 12px 0;
+            align-items: center;
+        }
+        .array-label {
+            width: 40px;
+            font-size: 12px;
+            color: #888;
+        }
+        .array-cells {
+            display: flex;
+            gap: 4px;
+        }
+        .cell {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            background: #1a1a25;
+            border: 1px solid #2a2a3a;
+            transition: all 0.3s;
+        }
+        .cell.highlight { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+        .cell.partition {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-color: #f5576c;
+        }
+        .cell.selected {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-color: #4facfe;
+        }
+        .pointer {
+            width: 40px;
+            text-align: center;
+            font-size: 16px;
+            color: #ffd700;
+            margin-top: 4px;
+        }
+        .viz-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-secondary {
+            background: #1a1a25;
+            color: #888;
+            border: 1px solid #2a2a3a;
+        }
+        .btn-secondary:hover { background: #252530; }
+        .step-text {
+            margin-top: 16px;
+            padding: 12px;
+            background: #1a1a25;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #b0b0c0;
+        }
+        
+        /* Solution Code */
+        .solution-code {
+            background: #0a0a10;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #252530;
+        }
+        .solution-header {
+            background: #12121a;
+            padding: 12px 16px;
+            border-bottom: 1px solid #252530;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .solution-lang { font-size: 13px; color: #888; }
+        .complexity-badge {
+            display: flex;
+            gap: 12px;
+            font-size: 12px;
+        }
+        .complexity-item {
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: #1a1a25;
+        }
+        .complexity-item.time { color: #4ade80; }
+        .complexity-item.space { color: #60a5fa; }
+        pre {
+            padding: 20px;
+            overflow-x: auto;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        code {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            color: #e8e8ec;
+        }
+        .comment { color: #6a737d; }
+        .keyword { color: #ff7b72; }
+        .function { color: #d2a8ff; }
+        .number { color: #79c0ff; }
+        .string { color: #a5d6ff; }
+        
+        /* Key Insights */
+        .insight-list {
+            list-style: none;
+        }
+        .insight-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #252530;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        .insight-list li:last-child { border-bottom: none; }
+        .insight-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+        
+        /* Interview Q&A */
+        .qa-item {
+            margin-bottom: 16px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #0d0d14;
+        }
+        .qa-question {
+            padding: 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .qa-question:hover { background: #1a1a25; }
+        .qa-toggle {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #252530;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+        .qa-item.expanded .qa-toggle { transform: rotate(180deg); }
+        .qa-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s;
+        }
+        .qa-item.expanded .qa-answer { max-height: 500px; }
+        .qa-answer-inner {
+            padding: 0 16px 16px;
+            color: #a0a0b0;
+            font-size: 14px;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-size: 13px;
+            border-top: 1px solid #2a2a3a;
+            margin-top: 30px;
+        }
+        
+        /* Progress */
+        .progress-bar {
+            height: 4px;
+            background: #252530;
+            border-radius: 2px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <span class="badge">📅 2026-04-29 · 第246期</span>
+            <h1 class="title">LeetCode #4</h1>
+            <p class="subtitle">寻找两个正序数组的中位数 · Median of Two Sorted Arrays</p>
+        </header>
+
+        <!-- 题目描述 -->
+        <div class="card">
+            <h2 class="card-title"><span>📝</span> 题目描述</h2>
+            <div class="problem-text">
+                <p>给定两个大小分别为 <code>m</code> 和 <code>n</code> 的正序（从小到大）数组 <code>nums1</code> 和 <code>nums2</code>。请你找出并返回这两个正序数组的 <strong>中位数</strong>。</p>
+                <br>
+                <p>算法的时间复杂度应该为 <code>O(log (m+n))</code>。</p>
+            </div>
+            <div class="example">
+                <div class="example-title">示例 1</div>
+                <div class="code-block">输入：nums1 = [1,3], nums2 = [2]
+输出：2.00000
+解释：合并数组 = [1,2,3] ，中位数 2</div>
+            </div>
+            <div class="example">
+                <div class="example-title">示例 2</div>
+                <div class="code-block">输入：nums1 = [1,2], nums2 = [3,4]
+输出：2.50000
+解释：合并数组 = [1,2,3,4] ，中位数 (2 + 3) / 2 = 2.5</div>
+            </div>
+        </div>
+
+        <!-- 核心思路 -->
+        <div class="card">
+            <h2 class="card-title"><span>💡</span> 核心思路</h2>
+            <ul class="insight-list">
+                <li>
+                    <span class="insight-icon">1</span>
+                    <div>
+                        <strong>问题转化：找第k小元素</strong>
+                        <p style="color: #888; margin-top: 4px;">中位数 = 合并后数组的中间元素。奇数长度找第 (m+n)/2+1 个，偶数长度找第 (m+n)/2 和 (m+n)/2+1 的平均值。</p>
+                    </div>
+                </li>
+                <li>
+                    <span class="insight-icon">2</span>
+                    <div>
+                        <strong>二分排除法</strong>
+                        <p style="color: #888; margin-top: 4px;">要找到第k小的元素，比较 nums1[k/2-1] 和 nums2[k/2-1]，较小的那一半不可能包含第k小元素，可以排除。</p>
+                    </div>
+                </li>
+                <li>
+                    <span class="insight-icon">3</span>
+                    <div>
+                        <strong>递归缩小问题规模</strong>
+                        <p style="color: #888; margin-top: 4px;">每次排除 k/2 个元素，k 减半，时间复杂度 O(log(m+n))。</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- 算法可视化 -->
+        <div class="card">
+            <h2 class="card-title"><span>🎬</span> 算法可视化</h2>
+            <div class="tabs">
+                <div class="tab active" onclick="showTab('viz1')">二分排除过程</div>
+                <div class="tab" onclick="showTab('viz2')">边界情况</div>
+            </div>
+            
+            <div id="viz1" class="tab-content active">
+                <div class="viz-container">
+                    <div class="array-row">
+                        <span class="array-label">nums1</span>
+                        <div class="array-cells" id="arr1">
+                            <div class="cell">1</div>
+                            <div class="cell">3</div>
+                            <div class="cell">5</div>
+                            <div class="cell">7</div>
+                            <div class="cell">9</div>
+                        </div>
+                    </div>
+                    <div class="array-row">
+                        <span class="array-label">nums2</span>
+                        <div class="array-cells" id="arr2">
+                            <div class="cell">2</div>
+                            <div class="cell">4</div>
+                            <div class="cell">6</div>
+                            <div class="cell">8</div>
+                            <div class="cell">10</div>
+                        </div>
+                    </div>
+                    <div class="step-text" id="stepText">
+                        <strong>目标：</strong>找第 5 小的元素（中位数位置）<br>
+                        比较 nums1[2]=3 和 nums2[2]=4，3更小，排除 nums1 的前半部分
+                    </div>
+                    <div class="viz-controls">
+                        <button class="btn btn-primary" onclick="nextStep()">下一步 →</button>
+                        <button class="btn btn-secondary" onclick="resetViz()">重置</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="viz2" class="tab-content">
+                <div class="viz-container">
+                    <p style="margin-bottom: 16px; color: #888;">特殊边界情况处理：</p>
+                    <div class="example">
+                        <div class="example-title">情况1：一个数组为空</div>
+                        <p style="font-size: 14px;">直接返回另一个数组的中位数</p>
+                    </div>
+                    <div class="example">
+                        <div class="example-title">情况2：k=1</div>
+                        <p style="font-size: 14px;">返回两个数组首元素的较小值</p>
+                    </div>
+                    <div class="example">
+                        <div class="example-title">情况3：索引越界</div>
+                        <p style="font-size: 14px;">当某个数组长度小于 k/2 时，取该数组最后一个元素进行比较</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 代码实现 -->
+        <div class="card">
+            <h2 class="card-title"><span>💻</span> 代码实现</h2>
+            <div class="tabs">
+                <div class="tab active" onclick="showTab('code1')">Python</div>
+                <div class="tab" onclick="showTab('code2')">Java</div>
+                <div class="tab" onclick="showTab('code3')">C++</div>
+            </div>
+            
+            <div id="code1" class="tab-content active">
+                <div class="solution-code">
+                    <div class="solution-header">
+                        <span class="solution-lang">Python3</span>
+                        <div class="complexity-badge">
+                            <span class="complexity-item time">⏱️ O(log(m+n))</span>
+                            <span class="complexity-item space">💾 O(log(m+n))</span>
+                        </div>
+                    </div>
+                    <pre><code><span class="keyword">class</span> <span class="function">Solution</span>:
+    <span class="keyword">def</span> <span class="function">findMedianSortedArrays</span>(self, nums1: List[<span class="keyword">int</span>], nums2: List[<span class="keyword">int</span>]) -> <span class="keyword">float</span>:
+        total = len(nums1) + len(nums2)
+        
+        <span class="comment"># 奇数：找第 (total//2 + 1) 个</span>
+        <span class="comment"># 偶数：找第 total//2 和 total//2 + 1 个的平均值</span>
+        <span class="keyword">if</span> total % <span class="number">2</span> == <span class="number">1</span>:
+            <span class="keyword">return</span> self.getKth(nums1, nums2, total // <span class="number">2</span> + <span class="number">1</span>)
+        <span class="keyword">else</span>:
+            left = self.getKth(nums1, nums2, total // <span class="number">2</span>)
+            right = self.getKth(nums1, nums2, total // <span class="number">2</span> + <span class="number">1</span>)
+            <span class="keyword">return</span> (left + right) / <span class="number">2</span>
+    
+    <span class="keyword">def</span> <span class="function">getKth</span>(self, nums1, nums2, k):
+        <span class="comment"># 确保 nums1 是较短的数组，减少边界情况</span>
+        <span class="keyword">if</span> len(nums1) > len(nums2):
+            <span class="keyword">return</span> self.getKth(nums2, nums1, k)
+        
+        <span class="comment"># 边界情况</span>
+        <span class="keyword">if</span> len(nums1) == <span class="number">0</span>:
+            <span class="keyword">return</span> nums2[k - <span class="number">1</span>]
+        <span class="keyword">if</span> k == <span class="number">1</span>:
+            <span class="keyword">return</span> min(nums1[<span class="number">0</span>], nums2[<span class="number">0</span>])
+        
+        <span class="comment"># 比较第 k//2 个元素，排除较小的一半</span>
+        i = min(k // <span class="number">2</span>, len(nums1))
+        j = min(k // <span class="number">2</span>, len(nums2))
+        
+        <span class="keyword">if</span> nums1[i - <span class="number">1</span>] < nums2[j - <span class="number">1</span>]:
+            <span class="comment"># nums1 的前 i 个元素不可能包含第 k 小</span>
+            <span class="keyword">return</span> self.getKth(nums1[i:], nums2, k - i)
+        <span class="keyword">else</span>:
+            <span class="comment"># nums2 的前 j 个元素不可能包含第 k 小</span>
+            <span class="keyword">return</span> self.getKth(nums1, nums2[j:], k - j)</code></pre>
+                </div>
+            </div>
+            
+            <div id="code2" class="tab-content">
+                <div class="solution-code">
+                    <div class="solution-header">
+                        <span class="solution-lang">Java</span>
+                        <div class="complexity-badge">
+                            <span class="complexity-item time">⏱️ O(log(m+n))</span>
+                            <span class="complexity-item space">💾 O(1)</span>
+                        </div>
+                    </div>
+                    <pre><code><span class="keyword">class</span> <span class="function">Solution</span> {
+    <span class="keyword">public</span> <span class="keyword">double</span> <span class="function">findMedianSortedArrays</span>(<span class="keyword">int</span>[] nums1, <span class="keyword">int</span>[] nums2) {
+        <span class="keyword">int</span> m = nums1.length, n = nums2.length;
+        <span class="keyword">int</span> total = m + n;
+        
+        <span class="keyword">if</span> (total % <span class="number">2</span> == <span class="number">1</span>) {
+            <span class="keyword">return</span> getKth(nums1, <span class="number">0</span>, nums2, <span class="number">0</span>, total / <span class="number">2</span> + <span class="number">1</span>);
+        } <span class="keyword">else</span> {
+            <span class="keyword">int</span> left = getKth(nums1, <span class="number">0</span>, nums2, <span class="number">0</span>, total / <span class="number">2</span>);
+            <span class="keyword">int</span> right = getKth(nums1, <span class="number">0</span>, nums2, <span class="number">0</span>, total / <span class="number">2</span> + <span class="number">1</span>);
+            <span class="keyword">return</span> ((<span class="keyword">double</span>) left + right) / <span class="number">2</span>;
+        }
+    }
+    
+    <span class="comment">// 找第 k 小的元素（k 从 1 开始）</span>
+    <span class="keyword">private</span> <span class="keyword">int</span> <span class="function">getKth</span>(<span class="keyword">int</span>[] nums1, <span class="keyword">int</span> i, <span class="keyword">int</span>[] nums2, <span class="keyword">int</span> j, <span class="keyword">int</span> k) {
+        <span class="keyword">if</span> (i >= nums1.length) <span class="keyword">return</span> nums2[j + k - <span class="number">1</span>];
+        <span class="keyword">if</span> (j >= nums2.length) <span class="keyword">return</span> nums1[i + k - <span class="number">1</span>];
+        <span class="keyword">if</span> (k == <span class="number">1</span>) <span class="keyword">return</span> Math.min(nums1[i], nums2[j]);
+        
+        <span class="keyword">int</span> mid1 = Math.min(k / <span class="number">2</span>, nums1.length - i);
+        <span class="keyword">int</span> mid2 = Math.min(k / <span class="number">2</span>, nums2.length - j);
+        
+        <span class="keyword">if</span> (nums1[i + mid1 - <span class="number">1</span>] < nums2[j + mid2 - <span class="number">1</span>]) {
+            <span class="keyword">return</span> getKth(nums1, i + mid1, nums2, j, k - mid1);
+        } <span class="keyword">else</span> {
+            <span class="keyword">return</span> getKth(nums1, i, nums2, j + mid2, k - mid2);
+        }
+    }
+}</code></pre>
+                </div>
+            </div>
+            
+            <div id="code3" class="tab-content">
+                <div class="solution-code">
+                    <div class="solution-header">
+                        <span class="solution-lang">C++</span>
+                        <div class="complexity-badge">
+                            <span class="complexity-item time">⏱️ O(log(m+n))</span>
+                            <span class="complexity-item space">💾 O(1)</span>
+                        </div>
+                    </div>
+                    <pre><code><span class="keyword">class</span> <span class="function">Solution</span> {
+<span class="keyword">public</span>:
+    <span class="keyword">double</span> <span class="function">findMedianSortedArrays</span>(vector<<span class="keyword">int</span>>& nums1, vector<<span class="keyword">int</span>>& nums2) {
+        <span class="keyword">int</span> m = nums1.size(), n = nums2.size();
+        <span class="keyword">int</span> total = m + n;
+        
+        <span class="keyword">if</span> (total % <span class="number">2</span> == <span class="number">1</span>) {
+            <span class="keyword">return</span> getKth(nums1, <span class="number">0</span>, nums2, <span class="number">0</span>, total / <span class="number">2</span> + <span class="number">1</span>);
+        } <span class="keyword">else</span> {
+            <span class="keyword">int</span> left = getKth(nums1, <span class="number">0</span>, nums2, <span class="number">0</span>, total / <span class="number">2</span>);
+            <span class="keyword">int</span> right = getKth(nums1, <span class="number">0</span>, nums2, <span class="number">0</span>, total / <span class="number">2</span> + <span class="number">1</span>);
+            <span class="keyword">return</span> (left + right) / <span class="number">2.0</span>;
+        }
+    }
+    
+<span class="keyword">private</span>:
+    <span class="keyword">int</span> <span class="function">getKth</span>(vector<<span class="keyword">int</span>>& nums1, <span class="keyword">int</span> i, 
+               vector<<span class="keyword">int</span>>& nums2, <span class="keyword">int</span> j, <span class="keyword">int</span> k) {
+        <span class="keyword">if</span> (i >= nums1.size()) <span class="keyword">return</span> nums2[j + k - <span class="number">1</span>];
+        <span class="keyword">if</span> (j >= nums2.size()) <span class="keyword">return</span> nums1[i + k - <span class="number">1</span>];
+        <span class="keyword">if</span> (k == <span class="number">1</span>) <span class="keyword">return</span> min(nums1[i], nums2[j]);
+        
+        <span class="keyword">int</span> mid1 = min(k / <span class="number">2</span>, (<span class="keyword">int</span>)nums1.size() - i);
+        <span class="keyword">int</span> mid2 = min(k / <span class="number">2</span>, (<span class="keyword">int</span>)nums2.size() - j);
+        
+        <span class="keyword">if</span> (nums1[i + mid1 - <span class="number">1</span>] < nums2[j + mid2 - <span class="number">1</span>]) {
+            <span class="keyword">return</span> getKth(nums1, i + mid1, nums2, j, k - mid1);
+        } <span class="keyword">else</span> {
+            <span class="keyword">return</span> getKth(nums1, i, nums2, j + mid2, k - mid2);
+        }
+    }
+};</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- 面试追问 -->
+        <div class="card">
+            <h2 class="card-title"><span>🎯</span> 面试连环追问</h2>
+            
+            <div class="qa-item" onclick="toggleQa(this)">
+                <div class="qa-question">
+                    Q1：为什么时间复杂度要求是 O(log(m+n))？
+                    <span class="qa-toggle">▼</span>
+                </div>
+                <div class="qa-answer">
+                    <div class="qa-answer-inner">
+                        这提示我们需要使用二分查找。如果直接合并数组是 O(m+n)，如果用二分查找找到第k小元素则是 O(log(m+n))。这是对算法选择的重要提示。
+                    </div>
+                </div>
+            </div>
+            
+            <div class="qa-item" onclick="toggleQa(this)">
+                <div class="qa-question">
+                    Q2：如何证明每次排除 k/2 个元素是正确的？
+                    <span class="qa-toggle">▼</span>
+                </div>
+                <div class="qa-answer">
+                    <div class="qa-answer-inner">
+                        假设 nums1[k/2-1] <= nums2[k/2-1]，那么 nums1 的前 k/2 个元素最多是第 k/2 小，不可能成为第 k 小。同时 nums1[k/2-1] 及之前的元素最多有 k/2-1 个比它小，即使加上 nums2 中所有比它小的，也最多 k-1 个，所以第 k 小一定在后面。
+                    </div>
+                </div>
+            </div>
+            
+            <div class="qa-item" onclick="toggleQa(this)">
+                <div class="qa-question">
+                    Q3：能否用迭代代替递归？
+                    <span class="qa-toggle">▼</span>
+                </div>
+                <div class="qa-answer">
+                    <div class="qa-answer-inner">
+                        可以。递归深度是 O(log(m+n))，一般不会栈溢出，但也可以用迭代实现。思路是用循环代替递归，维护两个指针和当前要找的 k 值，直到 k=1 或一个数组被排除完。
+                    </div>
+                </div>
+            </div>
+            
+            <div class="qa-item" onclick="toggleQa(this)">
+                <div class="qa-question">
+                    Q4：如果要求 O(log(min(m,n))) 的解法？
+                    <span class="qa-toggle">▼</span>
+                </div>
+                <div class="qa-answer">
+                    <div class="qa-answer-inner">
+                        另一种解法是在较短的数组上做二分。将 nums1 分成两部分，根据 nums1 的分割点确定 nums2 的分割点，使得左边元素总数等于右边（或差1），然后检查边界条件是否满足。如果不满足就调整分割点。这是更优的解法，面试中作为加分项。
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 复杂度分析 -->
+        <div class="card">
+            <h2 class="card-title"><span>📊</span> 复杂度分析</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="example">
+                    <div class="example-title">时间复杂度</div>
+                    <p style="font-size: 14px;">每次递归 k 减半，最多递归 O(log(m+n)) 次，所以时间复杂度为 <strong>O(log(m+n))</strong></p>
+                </div>
+                <div class="example">
+                    <div class="example-title">空间复杂度</div>
+                    <p style="font-size: 14px;">递归栈深度为 O(log(m+n))。若用迭代可优化至 <strong>O(1)</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>LeetCode 每日精讲 · 2026-04-29 06:06</p>
+            <p style="margin-top: 8px; opacity: 0.6;">编号 #4 · 难度 Hard · 算法：二分查找</p>
+        </footer>
+    </div>
+
+    <script>
+        let currentStep = 0;
+        const steps = [
+            {
+                text: "<strong>目标：</strong>找第 5 小的元素（中位数位置）<br>比较 nums1[2]=3 和 nums2[2]=4，3更小，排除 nums1 的前半部分",
+                highlight1: [0, 1],
+                highlight2: []
+            },
+            {
+                text: "<strong>第一步后：</strong>排除了 nums1 的前 2 个元素，还需找第 3 小的<br>现在比较 nums1[1]=5 和 nums2[1]=2",
+                highlight1: [2, 3, 4],
+                highlight2: [0]
+            },
+            {
+                text: "<strong>第二步：</strong>2 更小，排除 nums2 的前 1 个元素，还需找第 2 小的<br>比较 nums1[0]=5 和 nums2[0]=4",
+                highlight1: [2, 3, 4],
+                highlight2: [1]
+            },
+            {
+                text: "<strong>第三步：</strong>4 更小，排除 nums2 的前 1 个，还需找第 1 小的<br>直接返回 min(5, 6) = 5",
+                highlight1: [2],
+                highlight2: [2]
+            }
+        ];
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateViz();
+            }
+        }
+
+        function resetViz() {
+            currentStep = 0;
+            updateViz();
+        }
+
+        function updateViz() {
+            document.getElementById('stepText').innerHTML = steps[currentStep].text;
+            
+            const cells1 = document.querySelectorAll('#arr1 .cell');
+            const cells2 = document.querySelectorAll('#arr2 .cell');
+            
+            cells1.forEach((c, i) => {
+                c.className = 'cell';
+                if (steps[currentStep].highlight1.includes(i)) c.classList.add('highlight');
+            });
+            cells2.forEach((c, i) => {
+                c.className = 'cell';
+                if (steps[currentStep].highlight2.includes(i)) c.classList.add('highlight');
+            });
+        }
+
+        function toggleQa(item) {
+            item.classList.toggle('expanded');
+        }
+    </script>
+</body>
+</html>
